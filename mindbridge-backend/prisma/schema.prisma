@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Neon Connection String
+}
+model User {
+  id             String      @id @default(uuid())
+  email          String      @unique
+  password       String
+  name           String
+  studentId      String?     
+  profileImage   String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  onboarding     Onboarding?
+  moodLogs       MoodLog[]
+  journalEntries Journal[]
+}
+model Onboarding {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  primaryGoals    String[] 
+  currentMood     String
+  sleepPattern    String
+  stressLevel     Int      // 1-10
+  crisisHistory   Boolean  @default(false)
+  completedAt     DateTime @default(now())
+}
+model MoodLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score     Int      // 1-10 (1 = Terrible, 10 = Excellent)
+  emotions  String[] // e.g., ["Anxious", "Tired"]
+  note      String?
+  createdAt DateTime @default(now())
+}
+model Journal {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
+  content   String
+  createdAt DateTime @default(now())
+}

@@ -14,8 +14,8 @@ const InitialLayout = () => {
     const inAuthGroup = segments[0] === '(auth)';
     
     if (!userToken && !inAuthGroup) {
-      // Redirect to login
-      router.replace('/(auth)/login');
+      // Redirect to welcome screen
+      router.replace('/(auth)/welcome');
     } else if (userToken && inAuthGroup) {
       // Redirect to dashboard
       router.replace('/(tabs)/dashboard');

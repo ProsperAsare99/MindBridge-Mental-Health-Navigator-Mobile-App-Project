@@ -10,8 +10,11 @@ export default function WelcomeScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Animated.View entering={FadeIn.duration(1000).delay(300)} style={styles.iconContainer}>
-          {/* Soft elegant orb for minimal visual branding */}
-          <View style={styles.orb} />
+          <Image 
+            source={require('../../assets/images/logo.png')} 
+            style={styles.logo} 
+            resizeMode="contain"
+          />
         </Animated.View>
 
         <View style={styles.textContainer}>

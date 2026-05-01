@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, SafeAreaView, Dimensions, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { theme } from '../../src/theme/colors';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
@@ -10,7 +10,11 @@ export default function WelcomeScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Animated.View entering={FadeIn.duration(1000).delay(300)} style={styles.iconContainer}>
-          <View style={styles.orb} />
+          <Image
+            source={require('../../assets/images/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </Animated.View>
 
         <View style={styles.textContainer}>
@@ -61,9 +65,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   logo: {
-    width: 250,
-    height: 100,
-    marginLeft: -20, // Align with the left padding visually
+    width: 220,
+    height: 90,
   },
   textContainer: {
     flex: 1,

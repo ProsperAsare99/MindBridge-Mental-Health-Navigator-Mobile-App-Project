@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, SafeAreaView, Dimensions, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, Dimensions, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { theme } from '../../src/theme/colors';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
@@ -64,17 +64,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginTop: 20,
   },
-  orb: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: theme.colors.primary,
-    opacity: 0.9,
-    shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
+  logo: {
+    width: 250,
+    height: 100,
+    marginLeft: -20, // Align with the left padding visually
   },
   textContainer: {
     flex: 1,

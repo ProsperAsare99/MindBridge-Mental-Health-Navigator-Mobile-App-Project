@@ -1,4 +1,6 @@
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
+import { AuthRequest } from '../middleware/auth.middleware.js';
+
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
@@ -36,6 +38,22 @@ export const login = async (req: Request, res: Response) => {
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
     res.status(200).json({ user: { id: user.id, name: user.name, email: user.email }, token });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const getMe = async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({ user: { id: user.id, name: user.name, email: user.email, studentId: user.studentId } });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }

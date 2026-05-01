@@ -1,15 +1,36 @@
-import { View, Text, TouchableOpacity, SafeAreaView, StyleSheet, Image } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Dimensions,
+  StatusBar,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { theme } from '../../src/theme/colors';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+
+const { width } = Dimensions.get('window');
+const PRIMARY = '#8B5CF6';
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Animated.View entering={FadeIn.duration(1000).delay(300)} style={styles.iconContainer}>
+    <View style={styles.root}>
+      <StatusBar barStyle="light-content" />
+
+      {/* Subtle aurora glows */}
+      <View style={styles.glowTop} />
+      <View style={styles.glowBottom} />
+
+      <View style={[styles.content, { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 40 }]}>
+
+        {/* Logo */}
+        <Animated.View entering={FadeIn.duration(1000)} style={styles.logoContainer}>
           <Image
             source={require('../../assets/images/logo.png')}
             style={styles.logo}
@@ -17,101 +38,188 @@ export default function WelcomeScreen() {
           />
         </Animated.View>
 
-        <View style={styles.textContainer}>
-          <Animated.Text entering={FadeInDown.delay(400).duration(800).springify()} style={styles.title}>
-            MindBridge
-          </Animated.Text>
-          <Animated.Text entering={FadeInDown.delay(600).duration(800).springify()} style={styles.subtitle}>
-            Your personal compass for mental clarity and emotional resilience.
-          </Animated.Text>
-        </View>
+        {/* Headline & subtitle */}
+        <Animated.View entering={FadeInDown.delay(300).duration(800).springify()} style={styles.textBlock}>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>🧭  Ghana's Wellness Navigator</Text>
+          </View>
+          <Text style={styles.headline}>
+            Your Mind,{'\n'}
+            <Text style={styles.headlineAccent}>Understood.</Text>
+          </Text>
+          <Text style={styles.subtitle}>
+            Personalised mental health guidance built for every Ghanaian student — private, precise, and empathetic.
+          </Text>
+        </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(800).duration(800).springify()} style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={styles.primaryButton}
+        {/* CTAs */}
+        <Animated.View entering={FadeInDown.delay(500).duration(800).springify()} style={styles.ctaContainer}>
+          <TouchableOpacity
             onPress={() => router.push('/(auth)/register')}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
+            style={styles.primaryWrapper}
           >
-            <Text style={styles.primaryButtonText}>Begin Journey</Text>
+            <LinearGradient
+              colors={[PRIMARY, '#6D28D9']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.primaryBtn}
+            >
+              <Text style={styles.primaryBtnText}>Begin Your Journey</Text>
+            </LinearGradient>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.secondaryButton}
+          <TouchableOpacity
             onPress={() => router.push('/(auth)/login')}
-            activeOpacity={0.6}
+            activeOpacity={0.7}
+            style={styles.ghostBtn}
           >
-            <Text style={styles.secondaryButtonText}>I already have an account</Text>
+            <Text style={styles.ghostBtnText}>
+              Already have an account?{'  '}
+              <Text style={styles.ghostBtnAccent}>Sign In</Text>
+            </Text>
           </TouchableOpacity>
         </Animated.View>
+
+        {/* Footer line */}
+        <Animated.Text entering={FadeIn.delay(800).duration(600)} style={styles.footerText}>
+          © 2026 MindBridge · Ghanaian Excellence
+        </Animated.Text>
+
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: '#050505',
+  },
+  glowTop: {
+    position: 'absolute',
+    top: -120,
+    right: -80,
+    width: 320,
+    height: 320,
+    borderRadius: 160,
+    backgroundColor: PRIMARY,
+    opacity: 0.08,
+  },
+  glowBottom: {
+    position: 'absolute',
+    bottom: -80,
+    left: -60,
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    backgroundColor: '#6D28D9',
+    opacity: 0.07,
   },
   content: {
     flex: 1,
-    justifyContent: 'space-between',
     paddingHorizontal: 28,
-    paddingTop: 80,
-    paddingBottom: 40,
+    justifyContent: 'space-between',
   },
-  iconContainer: {
-    alignItems: 'flex-start',
-    marginTop: 20,
+
+  // Logo
+  logoContainer: {
+    alignItems: 'center',
   },
   logo: {
-    width: 220,
-    height: 90,
+    width: width * 0.6,
+    height: 80,
   },
-  textContainer: {
+
+  // Text
+  textBlock: {
     flex: 1,
     justifyContent: 'center',
-    marginTop: -20, // Visual balance push up slightly
+    paddingVertical: 16,
   },
-  title: {
-    fontSize: 44,
-    fontWeight: '800',
-    color: theme.colors.text.primary,
-    letterSpacing: -1.2,
-    marginBottom: 16,
+  badge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(139,92,246,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(139,92,246,0.25)',
+    borderRadius: 100,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    marginBottom: 24,
+  },
+  badgeText: {
+    color: PRIMARY,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  headline: {
+    fontSize: 52,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: -2,
+    lineHeight: 60,
+    marginBottom: 20,
+  },
+  headlineAccent: {
+    color: PRIMARY,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
+    color: '#71717A',
+    lineHeight: 26,
     fontWeight: '400',
-    color: theme.colors.text.secondary,
-    lineHeight: 28,
-    letterSpacing: -0.2,
-    paddingRight: 40,
+    paddingRight: 24,
   },
-  buttonContainer: {
-    gap: 16,
+
+  // Buttons
+  ctaContainer: {
+    gap: 14,
+    marginBottom: 24,
   },
-  primaryButton: {
-    backgroundColor: theme.colors.primary,
+  primaryWrapper: {
+    borderRadius: 32,
+    overflow: 'hidden',
+    shadowColor: PRIMARY,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  primaryBtn: {
     height: 64,
-    borderRadius: 32, // Apple-style pill button
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 32,
   },
-  primaryButtonText: {
+  primaryBtnText: {
     color: '#FFFFFF',
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '700',
     letterSpacing: -0.3,
   },
-  secondaryButton: {
-    height: 60,
+  ghostBtn: {
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  secondaryButtonText: {
-    color: theme.colors.text.secondary,
-    fontSize: 16,
+  ghostBtnText: {
+    color: '#52525B',
+    fontSize: 15,
     fontWeight: '500',
-  }
+  },
+  ghostBtnAccent: {
+    color: PRIMARY,
+    fontWeight: '700',
+  },
+
+  // Footer
+  footerText: {
+    textAlign: 'center',
+    color: 'rgba(255,255,255,0.15)',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
 });

@@ -1,14 +1,73 @@
-import { View, Text, Button } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { useState, useContext } from 'react';
+import { AuthContext } from '../../src/context/AuthContext';
 import { theme } from '../../src/theme/colors';
 import { useRouter } from 'expo-router';
+import api from '../../src/services/api';
 
 export default function RegisterScreen() {
+  const { signIn } = useContext(AuthContext);
   const router = useRouter();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (!name || !email || !password) return Alert.alert('Error', 'Please fill in all fields');
+    setLoading(true);
+    try {
+      const response = await api.post('/auth/register', { name, email, password });
+      await signIn(response.data.token);
+    } catch (error: any) {
+      Alert.alert('Registration Failed', error.response?.data?.error || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
-      <Text style={{ color: theme.colors.text.primary, fontSize: 24, marginBottom: 20 }}>Register</Text>
-      <Button title="Go to Onboarding" onPress={() => router.push('/(auth)/onboarding')} color={theme.colors.primary} />
+    <View style={{ flex: 1, justifyContent: 'center', padding: theme.spacing.screen, backgroundColor: theme.colors.background }}>
+      <Text style={{ color: theme.colors.text.primary, fontSize: 32, fontWeight: 'bold', marginBottom: 30, textAlign: 'center' }}>Create Account</Text>
+      
+      <TextInput
+        style={{ backgroundColor: theme.colors.surface, color: theme.colors.text.primary, padding: 15, borderRadius: theme.borderRadius.sm, marginBottom: 15 }}
+        placeholder="Full Name"
+        placeholderTextColor={theme.colors.text.secondary}
+        value={name}
+        onChangeText={setName}
+      />
+      
+      <TextInput
+        style={{ backgroundColor: theme.colors.surface, color: theme.colors.text.primary, padding: 15, borderRadius: theme.borderRadius.sm, marginBottom: 15 }}
+        placeholder="Email"
+        placeholderTextColor={theme.colors.text.secondary}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        value={email}
+        onChangeText={setEmail}
+      />
+      
+      <TextInput
+        style={{ backgroundColor: theme.colors.surface, color: theme.colors.text.primary, padding: 15, borderRadius: theme.borderRadius.sm, marginBottom: 25 }}
+        placeholder="Password"
+        placeholderTextColor={theme.colors.text.secondary}
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      
+      <TouchableOpacity 
+        style={{ backgroundColor: theme.colors.primary, padding: 15, borderRadius: theme.borderRadius.sm, alignItems: 'center', marginBottom: 15 }}
+        onPress={handleRegister}
+        disabled={loading}
+      >
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Sign Up</Text>}
+      </TouchableOpacity>
+      
+      <TouchableOpacity onPress={() => router.push('/(auth)/login')} style={{ alignItems: 'center' }}>
+        <Text style={{ color: theme.colors.text.secondary }}>Already have an account? <Text style={{ color: theme.colors.primary }}>Log In</Text></Text>
+      </TouchableOpacity>
     </View>
   );
 }

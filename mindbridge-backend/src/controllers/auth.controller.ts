@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { AuthRequest } from '../middleware/auth.middleware.js';
+import type { AuthRequest } from '../middleware/auth.middleware.js';
 
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';

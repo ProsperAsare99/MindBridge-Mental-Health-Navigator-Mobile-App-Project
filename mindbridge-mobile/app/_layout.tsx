@@ -1,4 +1,4 @@
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect, useContext } from 'react';
 import { AuthProvider, AuthContext } from '../src/context/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
@@ -12,12 +12,10 @@ const InitialLayout = () => {
   useEffect(() => {
     if (isLoading) return;
     const inAuthGroup = segments[0] === '(auth)';
-    
+
     if (!userToken && !inAuthGroup) {
-      // Redirect to welcome screen
       router.replace('/(auth)/welcome');
     } else if (userToken && inAuthGroup) {
-      // Redirect to dashboard
       router.replace('/(tabs)/dashboard');
     }
   }, [userToken, isLoading]);
@@ -30,7 +28,12 @@ const InitialLayout = () => {
     );
   }
 
-  return <Slot />; // Renders the matched route
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(tabs)" />
+    </Stack>
+  );
 };
 
 export default function RootLayout() {

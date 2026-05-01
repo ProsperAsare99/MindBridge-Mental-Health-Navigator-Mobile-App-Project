@@ -1,0 +1,12 @@
+{
+  "name": "mindbridge-workspace",
+  "version": "1.0.0",
+  "scripts": {
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:mobile\"",
+    "dev:backend": "cd mindbridge-backend && npm run dev",
+    "dev:mobile": "cd mindbridge-mobile && npx expo start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

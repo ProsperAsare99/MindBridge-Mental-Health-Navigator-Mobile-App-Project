@@ -1,10 +1,11 @@
-import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState, useContext } from 'react';
 import { AuthContext } from '../../src/context/AuthContext';
 import { theme } from '../../src/theme/colors';
 import { useRouter } from 'expo-router';
 import api from '../../src/services/api';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RegisterScreen() {
   const { signIn } = useContext(AuthContext);

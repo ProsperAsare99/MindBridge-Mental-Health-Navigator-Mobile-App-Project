@@ -29,7 +29,6 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.content}>
-        
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <Text style={styles.backButtonText}>← Back</Text>
@@ -40,7 +39,7 @@ export default function LoginScreen() {
           <Text style={styles.title}>Welcome back</Text>
           <Text style={styles.subtitle}>Sign in to continue your journey.</Text>
         </Animated.View>
-        
+
         <Animated.View entering={FadeInDown.duration(600).delay(200).springify()} style={styles.formContainer}>
           <TextInput
             style={styles.input}
@@ -51,7 +50,6 @@ export default function LoginScreen() {
             value={email}
             onChangeText={setEmail}
           />
-          
           <TextInput
             style={styles.input}
             placeholder="Password"
@@ -60,14 +58,15 @@ export default function LoginScreen() {
             value={password}
             onChangeText={setPassword}
           />
-          
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.primaryButton}
             onPress={handleLogin}
             disabled={loading}
             activeOpacity={0.8}
           >
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryButtonText}>Sign In</Text>}
+            {loading
+              ? <ActivityIndicator color={theme.colors.background} />
+              : <Text style={styles.primaryButtonText}>Sign In</Text>}
           </TouchableOpacity>
         </Animated.View>
       </KeyboardAvoidingView>
@@ -88,9 +87,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 40,
   },
-  backButton: {
-    paddingVertical: 10,
-  },
+  backButton: { paddingVertical: 10 },
   backButtonText: {
     color: theme.colors.text.secondary,
     fontSize: 16,
@@ -111,29 +108,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '400',
   },
-  formContainer: {
-    gap: 16,
-  },
+  formContainer: { gap: 16 },
   input: {
     backgroundColor: theme.colors.surface,
     color: theme.colors.text.primary,
     paddingHorizontal: 24,
     height: 64,
-    borderRadius: 32, // Pill shape
+    borderRadius: theme.borderRadius.xl,
     fontSize: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(95,168,211,0.15)',
   },
   primaryButton: {
     backgroundColor: theme.colors.primary,
     height: 64,
-    borderRadius: 32, // Pill shape
+    borderRadius: theme.borderRadius.xl,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 8,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+    color: theme.colors.background,
+    fontWeight: '700',
     fontSize: 17,
     letterSpacing: -0.3,
-  }
+  },
 });

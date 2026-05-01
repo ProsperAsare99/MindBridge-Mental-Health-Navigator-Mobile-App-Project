@@ -1,4 +1,4 @@
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import type { AuthRequest } from '../middleware/auth.middleware.js';
 
 import bcrypt from 'bcrypt';
@@ -9,52 +9,57 @@ const prisma = new PrismaClient();
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, password, name, studentId } = req.body;
-    
+    const { email, password, name, studentId } = req.body as {
+      email: string;
+      password: string;
+      name: string;
+      studentId?: string;
+    };
+
     const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) return res.status(400).json({ error: "Email already exists" });
+    if (existingUser) return res.status(400).json({ error: 'Email already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { email, password: hashedPassword, name, studentId }
+      data: { email, password: hashedPassword, name, ...(studentId ? { studentId } : {}) },
     });
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '7d' });
     res.status(201).json({ user: { id: user.id, name: user.name, email: user.email }, token });
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
-    
+    const { email, password } = req.body as { email: string; password: string };
+
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
     res.status(200).json({ user: { id: user.id, name: user.name, email: user.email }, token });
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
 export const getMe = async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.userId) return res.status(401).json({ error: 'Unauthorized' });
+
     const user = await prisma.user.findUnique({
-      where: { id: req.userId }
+      where: { id: req.userId }, // now guaranteed to be string, not string | undefined
     });
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
     res.status(200).json({ user: { id: user.id, name: user.name, email: user.email, studentId: user.studentId } });
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Server error' });
   }
 };

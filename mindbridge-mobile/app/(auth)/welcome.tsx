@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  Image,
   Dimensions,
   StatusBar,
   Animated,
@@ -20,17 +21,31 @@ const { width } = Dimensions.get('window');
 
 // ─── Soft Luxury Palette ──────────────────────────────────────────────────────
 const P = {
-  bg:           '#060D18',
-  accent:       '#5BA4CF',
-  accentLight:  '#7BBEDD',
-  accentGlow:   'rgba(91,164,207,0.2)',
-  pearl:        '#EAF2F8',
-  pearlMid:     'rgba(234,242,248,0.55)',
-  pearlLow:     'rgba(234,242,248,0.22)',
-  pearlGhost:   'rgba(234,242,248,0.08)',
-  border:       'rgba(91,164,207,0.18)',
-  success:      '#7EC8A4',
-  warm:         '#C5A97A',
+  // Backgrounds — Palette 2 (dark teal family)
+  bg:           '#0e3447',
+  surface:      '#124559',
+  surfaceUp:    '#1a5a72',
+
+  // Primary accent — Pearl Aqua (Palette 1)
+  accent:       '#99e1d9',
+  accentLight:  '#b8ece6',
+  accentDim:    'rgba(153,225,217,0.15)',
+  accentBorder: 'rgba(153,225,217,0.25)',
+  accentGlow:   'rgba(153,225,217,0.18)',
+
+  // Text — warm Beige / Cornsilk
+  pearl:        '#eff6e0',
+  pearlWarm:    '#fffae3',
+  pearlMid:     'rgba(239,246,224,0.55)',
+  pearlLow:     'rgba(239,246,224,0.28)',
+  pearlGhost:   'rgba(239,246,224,0.10)',
+
+  // Slide accents + neutrals
+  border:       'rgba(153,225,217,0.18)',
+  pink:         '#f7567c',
+  success:      '#aec3b0',
+  warm:         '#fffae3',
+  grey:         '#598392',
 };
 
 // ─── Slide data ───────────────────────────────────────────────────────────────
@@ -40,7 +55,7 @@ const SLIDES = [
     overline: 'MENTAL HEALTH · GHANA',
     headline: 'Your Mind,\nUnderstood.',
     body: 'Private, evidence-based support designed for every Ghanaian student.',
-    accentColor: P.accent,
+    accentColor: '#99e1d9',         // Pearl Aqua
     IllustrationComponent: MindIllustration,
   },
   {
@@ -48,7 +63,7 @@ const SLIDES = [
     overline: 'AI-POWERED CARE',
     headline: 'Guidance\nOn Your Terms.',
     body: 'Personalised check-ins, mood tracking, and coping tools — always available.',
-    accentColor: P.success,
+    accentColor: '#aec3b0',         // Ash Grey-Green
     IllustrationComponent: GuideIllustration,
   },
   {
@@ -56,25 +71,25 @@ const SLIDES = [
     overline: 'FULLY CONFIDENTIAL',
     headline: 'A Safe Space,\nOnly Yours.',
     body: 'Your data stays private. Talk openly, without fear or judgment.',
-    accentColor: P.warm,
+    accentColor: '#f7567c',         // Bubblegum Pink
     IllustrationComponent: SafeIllustration,
   },
 ];
 
 // ─── Illustrations ────────────────────────────────────────────────────────────
 function MindIllustration({ color }: { color: string }) {
-  const pulse = useRef(new Animated.Value(1)).current;
+  const pulse       = useRef(new Animated.Value(1)).current;
   const ringOpacity = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
         Animated.parallel([
-          Animated.timing(pulse, { toValue: 1.06, duration: 2800, useNativeDriver: true }),
-          Animated.timing(ringOpacity, { toValue: 0.7, duration: 2800, useNativeDriver: true }),
+          Animated.timing(pulse,       { toValue: 1.06, duration: 2800, useNativeDriver: true }),
+          Animated.timing(ringOpacity, { toValue: 0.7,  duration: 2800, useNativeDriver: true }),
         ]),
         Animated.parallel([
-          Animated.timing(pulse, { toValue: 1, duration: 2800, useNativeDriver: true }),
+          Animated.timing(pulse,       { toValue: 1,   duration: 2800, useNativeDriver: true }),
           Animated.timing(ringOpacity, { toValue: 0.3, duration: 2800, useNativeDriver: true }),
         ]),
       ])
@@ -83,43 +98,24 @@ function MindIllustration({ color }: { color: string }) {
 
   return (
     <View style={styles.illustrationWrap}>
-      {/* Outer glow ring */}
-      <Animated.View style={[styles.glowRing, { borderColor: color, opacity: ringOpacity, transform: [{ scale: pulse }] }]} />
-      <Animated.View style={[styles.glowRingInner, { borderColor: color, transform: [{ scale: pulse }] }]} />
+      {/* Outer pulsing glow rings */}
+      <Animated.View style={[
+        styles.glowRing,
+        { borderColor: color, opacity: ringOpacity, transform: [{ scale: pulse }] },
+      ]} />
+      <Animated.View style={[
+        styles.glowRingInner,
+        { borderColor: color, opacity: ringOpacity, transform: [{ scale: pulse }] },
+      ]} />
 
-      <Svg width={160} height={160} viewBox="0 0 160 160">
-        <Defs>
-          <RadialGradient id="mindGrad" cx="50%" cy="50%" r="50%">
-            <Stop offset="0%" stopColor={color} stopOpacity="0.25" />
-            <Stop offset="100%" stopColor={color} stopOpacity="0" />
-          </RadialGradient>
-        </Defs>
-        {/* Center glow */}
-        <Circle cx="80" cy="80" r="80" fill="url(#mindGrad)" />
-        {/* Brain outline - abstract */}
-        <Path
-          d="M80 38 C95 38 108 48 112 62 C118 60 126 65 126 75 C126 83 120 88 114 89 C116 96 112 104 106 108 C108 116 102 124 94 124 C90 128 85 130 80 130 C75 130 70 128 66 124 C58 124 52 116 54 108 C48 104 44 96 46 89 C40 88 34 83 34 75 C34 65 42 60 48 62 C52 48 65 38 80 38Z"
-          stroke={color}
-          strokeWidth="1.5"
-          fill="none"
-          strokeOpacity="0.8"
+      {/* Circular logo */}
+      <View style={[styles.logoCircle, { shadowColor: color }]}>
+        <Image
+          source={require('../../assets/images/logo.png')}
+          style={styles.logoImage}
+          resizeMode="cover"
         />
-        {/* Neural connections */}
-        <Line x1="80" y1="38" x2="80" y2="60" stroke={color} strokeWidth="1" strokeOpacity="0.4" />
-        <Line x1="60" y1="80" x2="100" y2="80" stroke={color} strokeWidth="1" strokeOpacity="0.4" />
-        <Line x1="65" y1="65" x2="95" y2="95" stroke={color} strokeWidth="1" strokeOpacity="0.3" />
-        <Line x1="95" y1="65" x2="65" y2="95" stroke={color} strokeWidth="1" strokeOpacity="0.3" />
-        {/* Nodes */}
-        {[
-          [80, 60], [60, 80], [100, 80], [80, 100],
-          [65, 65], [95, 65], [65, 95], [95, 95],
-        ].map(([cx, cy], i) => (
-          <Circle key={i} cx={cx} cy={cy} r="4" fill={color} fillOpacity="0.7" />
-        ))}
-        {/* Center node */}
-        <Circle cx="80" cy="80" r="6" fill={color} fillOpacity="1" />
-        <Circle cx="80" cy="80" r="10" fill={color} fillOpacity="0.2" />
-      </Svg>
+      </View>
     </View>
   );
 }
@@ -421,6 +417,22 @@ const styles = StyleSheet.create({
     borderRadius: 87.5,
     borderWidth: 1,
     opacity: 0.4,
+  },
+  logoCircle: {
+    width: 148,
+    height: 148,
+    borderRadius: 74,
+    overflow: 'hidden',
+    backgroundColor: '#0C1825',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  logoImage: {
+    width: 148,
+    height: 148,
+    borderRadius: 74,
   },
 
   // ── Copy ──

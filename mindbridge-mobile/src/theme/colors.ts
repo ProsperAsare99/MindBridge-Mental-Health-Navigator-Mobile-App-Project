@@ -1,35 +1,47 @@
 export const theme = {
   colors: {
-    // Core backgrounds — Yale Blue family
-    background: '#0d2b3e',        // Deep midnight blue
-    surface: '#1b4965',           // Yale Blue — elevated cards
-    surfaceHighlight: '#1e5575',  // Slightly lighter for hover/pressed
-
-    // Primary accent — Fresh Sky teal
-    primary: '#5fa8d3',           // Fresh Sky
-    primaryLight: '#62b6cb',      // Pacific Blue
-    primaryGradient: ['#5fa8d3', '#1b4965'],
-
-    // Semantic colours
-    success: '#99e1d9',           // Pearl Aqua
-    danger: '#e27396',            // Petal Rouge
-    warning: '#fffae3',           // Cornsilk
-
-    // Text hierarchy
+    // ─── Primary Brand Colors (High Contrast) ──────────────────
+    plum: '#5D4D63',               // Slightly darker Plum for better text visibility
+    plumLight: '#8E7E96',          
+    sage: '#95A391',               // Darker Sage for clearer accents
+    mauve: '#BCA8C0',              // Darker Mauve for visible borders
+    
+    // ─── Backgrounds ──────────────────────────────────────────
+    background: '#E8E4F3',         // Soft Lavender
+    backgroundSecondary: '#F5F0E8', // Warm Beige
+    surface: '#FFFDF7',            // Cream (for cards/inputs)
+    
+    // ─── Standardized Text ────────────────────────────────────
     text: {
-      primary: '#cae9ff',         // Pale Sky — headlines
-      secondary: '#62b6cb',       // Pacific Blue — body
-      tertiary: '#5fa8d3',        // Fresh Sky — hints
-      disabled: '#1b4965',        // Yale Blue — disabled
-      onPrimary: '#0d2b3e',       // Dark text on light surfaces
+      primary: '#5D4D63',          // Standard high-visibility Plum
+      secondary: '#7A6B81',        // Medium visibility
+      tertiary: '#95A391',         // Sage for special accents
+      onPrimary: '#FFFDF7',        // Cream text on dark buttons
+      disabled: '#BCA8C0',         
     },
 
-    // Additional palette colours
-    frozen: '#bee9e8',            // Frozen Water — subtle highlights
-    petalRouge: '#e27396',        // Warm accent
-    palesky: '#cae9ff',           // Pale Sky
-    pearAqua: '#99e1d9',          // Pearl Aqua
-    taupeGrey: '#5d576b',         // Taupe Grey — muted neutral
+    // ─── Multi-Palette Accents (Refined for Visibility) ────────
+    accents: {
+      powderBlue: '#D1E3EB',       // Slightly deeper for visibility
+      blushPink: '#EBD8D8',
+      softMint: '#D8EBE0',
+      sand: '#EBDED1',
+      terracotta: '#D9C2BC',
+      dustyRose: '#C9B1B8',
+      softGray: '#D1D5D9',
+      gentlePeach: '#EBDCCF',
+      slate: '#5D6D7E',
+      eucalyptus: '#CBD9D4',
+      softLilac: '#D8D1EB',
+      paleCoral: '#EBCFB8',
+      forestGreen: '#5D7365',
+    },
+
+    semantic: {
+      success: '#95A391',
+      danger: '#D9C2BC',
+      warning: '#EBCFB8',
+    }
   },
   spacing: {
     xs: 4,

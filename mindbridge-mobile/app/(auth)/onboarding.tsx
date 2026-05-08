@@ -243,7 +243,7 @@ export default function OnboardingScreen() {
               </TouchableOpacity>
             ))}
           </View>
-        </Animated.View>
+        </Reanimated.View>
       </View>
 
       {/* Footer Navigation */}

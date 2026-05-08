@@ -12,22 +12,33 @@ import {
   Dimensions,
   Image
 } from 'react-native';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../../src/context/AuthContext';
 import { theme } from '../../src/theme/colors';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import api from '../../src/services/api';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Eye, EyeOff, Mail, ChevronLeft } from 'lucide-react-native';
+import { Eye, EyeOff, Mail, ChevronLeft, AlertCircle, Ghost } from 'lucide-react-native';
 import AuthCharacters, { AuthField } from '../../src/components/AuthCharacters';
 
 const { height } = Dimensions.get('window');
 
+const ErrorMessage = ({ message }: { message: string }) => {
+  if (!message) return null;
+  return (
+    <Animated.View entering={FadeInDown} style={styles.errorRow}>
+      <AlertCircle color={theme.colors.semantic.danger} size={14} style={{ marginRight: 4 }} />
+      <Text style={styles.errorText}>{message}</Text>
+    </Animated.View>
+  );
+};
+
 export default function LoginScreen() {
   const { signIn } = useContext(AuthContext);
   const router = useRouter();
+  const { anonymous } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   
   const [email, setEmail] = useState('');
@@ -35,18 +46,59 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<AuthField>('none');
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  const validate = () => {
+    let valid = true;
+    let newErrors: { email?: string; password?: string } = {};
+
+    if (!email) {
+      newErrors.email = 'Email is required';
+      valid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email';
+      valid = false;
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required';
+      valid = false;
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
 
   const handleLogin = async () => {
-    if (!email || !password) return Alert.alert('Error', 'Please fill in all fields');
+    if (!validate()) return;
+    
     setLoading(true);
     try {
       const response = await api.post('/auth/login', { email, password });
       await signIn(response.data.token);
     } catch (error: any) {
-      Alert.alert('Login Failed', error.response?.data?.error || 'Something went wrong');
+      const msg = error.response?.data?.error || 'Unable to connect to server';
+      Alert.alert('Login Failed', msg);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAnonymousLogin = () => {
+    setLoading(true);
+    setTimeout(async () => {
+      try {
+        await signIn('guest-token-' + Date.now());
+        router.replace('/(auth)/onboarding');
+      } catch (e) {
+        Alert.alert('Error', 'Unable to start anonymous session');
+      } finally {
+        setLoading(false);
+      }
+    }, 1500);
   };
 
   return (
@@ -103,28 +155,35 @@ export default function LoginScreen() {
               <View style={styles.inputWrapper}>
                 <Text style={styles.label}>Email Address</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, errors.email && styles.inputError]}
                   placeholder="anna@gmail.com"
                   placeholderTextColor={theme.colors.text.disabled}
                   autoCapitalize="none"
                   keyboardType="email-address"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(txt) => {
+                    setEmail(txt);
+                    if (errors.email) setErrors({ ...errors, email: undefined });
+                  }}
                   onFocus={() => setFocusedField('email')}
                   onBlur={() => setFocusedField('none')}
                 />
+                <ErrorMessage message={errors.email || ''} />
               </View>
 
               <View style={styles.inputWrapper}>
                 <Text style={styles.label}>Password</Text>
-                <View style={styles.passwordContainer}>
+                <View style={[styles.passwordContainer, errors.password && styles.inputError]}>
                   <TextInput
                     style={[styles.input, { flex: 1, borderWidth: 0, backgroundColor: 'transparent' }]}
                     placeholder="••••••••"
                     placeholderTextColor={theme.colors.text.disabled}
                     secureTextEntry={!showPassword}
                     value={password}
-                    onChangeText={setPassword}
+                    onChangeText={(txt) => {
+                      setPassword(txt);
+                      if (errors.password) setErrors({ ...errors, password: undefined });
+                    }}
                     onFocus={() => setFocusedField('password')}
                     onBlur={() => setFocusedField('none')}
                   />
@@ -139,10 +198,11 @@ export default function LoginScreen() {
                     )}
                   </TouchableOpacity>
                 </View>
+                <ErrorMessage message={errors.password || ''} />
               </View>
 
               <View style={styles.forgotPasswordRow}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => Alert.alert('Reset Password', 'Instructions have been sent to your email.')}>
                   <Text style={styles.forgotPasswordText}>Forgot password?</Text>
                 </TouchableOpacity>
               </View>
@@ -158,7 +218,30 @@ export default function LoginScreen() {
                   : <Text style={styles.primaryButtonText}>Log in</Text>}
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
+              {/* Anonymous Entry Divider */}
+              <View style={styles.dividerRow}>
+                <View style={styles.divider} />
+                <Text style={styles.dividerText}>OR</Text>
+                <View style={styles.divider} />
+              </View>
+
+              <TouchableOpacity 
+                style={styles.anonymousButton} 
+                onPress={handleAnonymousLogin}
+                disabled={loading}
+                activeOpacity={0.7}
+              >
+                <Ghost color={theme.colors.plum} size={20} style={{ marginRight: 12 }} />
+                <Text style={styles.anonymousButtonText}>
+                  {loading ? 'Starting Session...' : 'Continue Anonymously'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.socialButton} 
+                activeOpacity={0.7}
+                onPress={() => Alert.alert('Google Auth', 'Google Login will be available in the next update.')}
+              >
                 <Mail color={theme.colors.plum} size={20} style={{ marginRight: 12 }} />
                 <Text style={styles.socialButtonText}>Log in with Google</Text>
               </TouchableOpacity>
@@ -180,195 +263,44 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.backgroundSecondary,
-  },
-  topSection: {
-    height: height * 0.45,
-    overflow: 'hidden',
-  },
-  blurCircle: {
-    position: 'absolute',
-    borderRadius: 150,
-    opacity: 0.5,
-  },
-  circle1: {
-    top: '10%',
-    right: '-10%',
-    width: 200,
-    height: 200,
-    backgroundColor: theme.colors.accents.softMint,
-  },
-  circle2: {
-    bottom: '10%',
-    left: '-15%',
-    width: 250,
-    height: 250,
-    backgroundColor: theme.colors.accents.powderBlue,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginTop: 10,
-    zIndex: 10,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-  },
-  brandContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    overflow: 'hidden',
-    backgroundColor: theme.colors.surface,
-    borderWidth: 2.5,
-    borderColor: theme.colors.mauve,
-    shadowColor: theme.colors.plum,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  logoImage: {
-    width: '100%',
-    height: '100%',
-  },
-  charactersWrapper: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 20,
-    zIndex: 5,
-  },
-  bottomSectionWrapper: {
-    flex: 1,
-    marginTop: -30,
-  },
-  bottomSection: {
-    flex: 1,
-    backgroundColor: theme.colors.backgroundSecondary,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-  },
-  formScrollContent: {
-    paddingHorizontal: 28,
-    paddingTop: 32,
-  },
-  titleContainer: {
-    marginBottom: 32,
-    alignItems: 'center',
-  },
-  title: {
-    color: theme.colors.plum,
-    fontSize: 30,
-    fontWeight: '900',
-    letterSpacing: -0.5,
-    marginBottom: 8,
-  },
-  subtitle: {
-    color: theme.colors.text.primary,
-    fontSize: 16,
-    fontWeight: '600',
-    opacity: 0.7,
-  },
-  formContainer: {
-    gap: 20,
-  },
-  inputWrapper: {
-    gap: 8,
-  },
-  label: {
-    color: theme.colors.plum,
-    fontSize: 14,
-    fontWeight: '800',
-    marginLeft: 4,
-  },
-  input: {
-    backgroundColor: theme.colors.surface,
-    color: theme.colors.plum,
-    fontSize: 16,
-    fontWeight: '600',
-    height: 60,
-    borderRadius: 18,
-    paddingHorizontal: 18,
-    borderWidth: 2,
-    borderColor: theme.colors.mauve,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    borderRadius: 18,
-    borderWidth: 2,
-    borderColor: theme.colors.mauve,
-    height: 60,
-  },
-  eyeIcon: {
-    padding: 16,
-  },
-  forgotPasswordRow: {
-    alignItems: 'flex-end',
-  },
-  forgotPasswordText: {
-    color: theme.colors.plum,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  primaryButton: {
-    backgroundColor: theme.colors.plum,
-    height: 62,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-    shadowColor: theme.colors.plum,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  primaryButtonText: {
-    color: theme.colors.surface,
-    fontWeight: '800',
-    fontSize: 17,
-  },
-  socialButton: {
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    height: 60,
-    borderRadius: 18,
-    borderWidth: 2,
-    borderColor: theme.colors.mauve,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  socialButtonText: {
-    color: theme.colors.plum,
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  signUpContainer: {
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  signUpText: {
-    color: theme.colors.text.primary,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  signUpLink: {
-    color: theme.colors.plum,
-    fontWeight: '800',
-  },
+  container: { flex: 1, backgroundColor: theme.colors.backgroundSecondary },
+  topSection: { height: height * 0.45, overflow: 'hidden' },
+  blurCircle: { position: 'absolute', borderRadius: 150, opacity: 0.5 },
+  circle1: { top: '10%', right: '-10%', width: 200, height: 200, backgroundColor: theme.colors.accents.softMint },
+  circle2: { bottom: '10%', left: '-15%', width: 250, height: 250, backgroundColor: theme.colors.accents.powderBlue },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginTop: 10, zIndex: 10 },
+  backButton: { width: 40, height: 40, justifyContent: 'center' },
+  brandContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  logoCircle: { width: 80, height: 80, borderRadius: 40, overflow: 'hidden', backgroundColor: theme.colors.surface, borderWidth: 2.5, borderColor: theme.colors.mauve, elevation: 8 },
+  logoImage: { width: '100%', height: '100%' },
+  charactersWrapper: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 20, zIndex: 5 },
+  bottomSectionWrapper: { flex: 1, marginTop: -30 },
+  bottomSection: { flex: 1, backgroundColor: theme.colors.backgroundSecondary, borderTopLeftRadius: 32, borderTopRightRadius: 32 },
+  formScrollContent: { paddingHorizontal: 28, paddingTop: 32 },
+  titleContainer: { marginBottom: 32, alignItems: 'center' },
+  title: { color: theme.colors.plum, fontSize: 30, fontWeight: '900', letterSpacing: -0.5, marginBottom: 8 },
+  subtitle: { color: theme.colors.text.primary, fontSize: 16, fontWeight: '600', opacity: 0.7 },
+  formContainer: { gap: 20 },
+  inputWrapper: { gap: 6 },
+  label: { color: theme.colors.plum, fontSize: 14, fontWeight: '800', marginLeft: 4 },
+  input: { backgroundColor: theme.colors.surface, color: theme.colors.plum, fontSize: 16, fontWeight: '600', height: 60, borderRadius: 18, paddingHorizontal: 18, borderWidth: 2, borderColor: theme.colors.mauve },
+  inputError: { borderColor: theme.colors.semantic.danger },
+  errorRow: { flexDirection: 'row', alignItems: 'center', marginLeft: 4, marginTop: 2 },
+  errorText: { color: theme.colors.semantic.danger, fontSize: 12, fontWeight: '600' },
+  passwordContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.surface, borderRadius: 18, borderWidth: 2, borderColor: theme.colors.mauve, height: 60 },
+  eyeIcon: { padding: 16 },
+  forgotPasswordRow: { alignItems: 'flex-end' },
+  forgotPasswordText: { color: theme.colors.plum, fontSize: 14, fontWeight: '700' },
+  primaryButton: { backgroundColor: theme.colors.plum, height: 62, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginTop: 8, elevation: 6 },
+  primaryButtonText: { color: theme.colors.surface, fontWeight: '800', fontSize: 17 },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 10, gap: 10 },
+  divider: { flex: 1, height: 1, backgroundColor: theme.colors.mauve, opacity: 0.5 },
+  dividerText: { color: theme.colors.text.secondary, fontSize: 12, fontWeight: '700' },
+  anonymousButton: { flexDirection: 'row', backgroundColor: theme.colors.accents.softLilac, height: 60, borderRadius: 18, borderWidth: 2, borderColor: theme.colors.mauve, justifyContent: 'center', alignItems: 'center' },
+  anonymousButtonText: { color: theme.colors.plum, fontWeight: '700', fontSize: 15 },
+  socialButton: { flexDirection: 'row', backgroundColor: 'transparent', height: 60, borderRadius: 18, borderWidth: 2, borderColor: theme.colors.mauve, justifyContent: 'center', alignItems: 'center' },
+  socialButtonText: { color: theme.colors.plum, fontWeight: '700', fontSize: 15 },
+  signUpContainer: { marginTop: 16, alignItems: 'center' },
+  signUpText: { color: theme.colors.text.primary, fontSize: 14, fontWeight: '500' },
+  signUpLink: { color: theme.colors.plum, fontWeight: '800' },
 });

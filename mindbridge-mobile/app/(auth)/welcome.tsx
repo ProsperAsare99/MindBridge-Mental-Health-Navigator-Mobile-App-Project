@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line, Path, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { theme } from '../../src/theme/colors';
+import { Ghost, UserSecret } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -35,7 +36,7 @@ const SLIDES = [
     overline: 'AI-POWERED CARE',
     headline: 'Guidance\nOn Your Terms.',
     body: 'Personalised check-ins, mood tracking, and coping tools — always available.',
-    accentColor: theme.colors.slate,
+    accentColor: theme.colors.accents.slate,
     IllustrationComponent: GuideIllustration,
   },
   {
@@ -43,7 +44,7 @@ const SLIDES = [
     overline: 'FULLY CONFIDENTIAL',
     headline: 'A Safe Space,\nOnly Yours.',
     body: 'Your data stays private. Talk openly, without fear or judgment.',
-    accentColor: theme.colors.forestGreen,
+    accentColor: theme.colors.accents.forestGreen,
     IllustrationComponent: SafeIllustration,
   },
 ];
@@ -70,7 +71,6 @@ function MindIllustration({ color }: { color: string }) {
 
   return (
     <View style={styles.illustrationWrap}>
-      {/* Sharper, more visible rings */}
       <Animated.View style={[styles.glowRing, { borderColor: color, opacity: ringOpacity, transform: [{ scale: pulse }] }]} />
       <Animated.View style={[styles.glowRingInner, { borderColor: theme.colors.plum, opacity: 0.3, transform: [{ scale: pulse }] }]} />
       <View style={[styles.logoCircle, { shadowColor: color }]}>
@@ -95,11 +95,12 @@ function GuideIllustration({ color }: { color: string }) {
     <View style={styles.illustrationWrap}>
       <Animated.View style={{ transform: [{ translateY: float }] }}>
         <Svg width={160} height={160} viewBox="0 0 160 160">
-          <Circle cx="80" cy="80" r="70" fill={color} fillOpacity="0.05" />
-          <Path d="M56 40 Q56 34 62 34 L98 34 Q104 34 104 40 L104 120 Q104 126 98 126 L62 126 Q56 126 56 120Z" stroke={color} strokeWidth="2.5" fill="none" />
-          <Line x1="66" y1="58" x2="94" y2="58" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
-          <Line x1="66" y1="70" x2="88" y2="70" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
-          <Line x1="66" y1="82" x2="94" y2="82" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+          <Circle cx="80" cy="80" r="70" fill={color} fillOpacity="0.1" />
+          <Path d="M56 40 Q56 34 62 34 L98 34 Q104 34 104 40 L104 120 Q104 126 98 126 L62 126 Q56 126 56 120Z" stroke={color} strokeWidth="3" fill="none" />
+          <Line x1="66" y1="58" x2="94" y2="58" stroke={color} strokeWidth="3" strokeLinecap="round" />
+          <Line x1="66" y1="74" x2="88" y2="74" stroke={color} strokeWidth="3" strokeOpacity="0.7" strokeLinecap="round" />
+          <Line x1="66" y1="90" x2="94" y2="90" stroke={color} strokeWidth="3" strokeLinecap="round" />
+          <Circle cx="80" cy="110" r="5" stroke={color} strokeWidth="2" fill="none" />
         </Svg>
       </Animated.View>
     </View>
@@ -121,9 +122,10 @@ function SafeIllustration({ color }: { color: string }) {
     <View style={styles.illustrationWrap}>
       <Animated.View style={{ transform: [{ scale }] }}>
         <Svg width={160} height={160} viewBox="0 0 160 160">
-          <Circle cx="80" cy="80" r="70" fill={color} fillOpacity="0.05" />
-          <Path d="M80 30 L110 44 L110 78 C110 100 96 116 80 124 C64 116 50 100 50 78 L50 44Z" stroke={color} strokeWidth="2.5" fill="none" />
-          <Path d="M68 80 L68 100 L92 100 L92 80Z" stroke={color} strokeWidth="2" fill="none" />
+          <Circle cx="80" cy="80" r="70" fill={color} fillOpacity="0.1" />
+          <Path d="M80 30 L115 45 L115 80 C115 105 98 125 80 135 C62 125 45 105 45 80 L45 45 Z" stroke={color} strokeWidth="3" fill="none" />
+          <Path d="M70 85 L70 105 L90 105 L90 85 Z" stroke={color} strokeWidth="2.5" fill="none" />
+          <Path d="M74 85 L74 78 Q74 70 80 70 Q86 70 86 78 L86 85" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" />
         </Svg>
       </Animated.View>
     </View>
@@ -155,7 +157,6 @@ export default function WelcomeScreen() {
     <View style={styles.root}>
       <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
 
-      {/* Simplified background orbs - reduced size and moved further away to prevent "blurring" content */}
       <View style={[styles.bgOrb, { backgroundColor: theme.colors.accents.eucalyptus, top: -180, right: -150 }]} />
       <View style={[styles.bgOrb, { backgroundColor: theme.colors.accents.gentlePeach, bottom: -120, left: -100, width: 300, height: 300 }]} />
 
@@ -209,6 +210,17 @@ export default function WelcomeScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
+          {/* Anonymous/Guest Option */}
+          {activeSlide === SLIDES.length - 1 && (
+            <TouchableOpacity 
+              onPress={() => router.push('/(auth)/login?anonymous=true')} 
+              activeOpacity={0.7} 
+              style={styles.guestBtn}
+            >
+              <Text style={styles.guestBtnText}>Explore Anonymously</Text>
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity onPress={() => router.push('/(auth)/login')} activeOpacity={0.65} style={styles.signInRow}>
             <Text style={styles.signInText}>
               I already have an account{'  '}
@@ -229,7 +241,7 @@ const styles = StyleSheet.create({
     width: 400,
     height: 400,
     borderRadius: 200,
-    opacity: 0.1, // Fixed low opacity to prevent "blurring" foreground
+    opacity: 0.1,
   },
   slideArea: { flex: 1 },
   slide: { width, flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
@@ -247,10 +259,22 @@ const styles = StyleSheet.create({
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: theme.colors.mauve, opacity: 0.5 },
   dotActive: { width: 22, height: 6, borderRadius: 3, opacity: 1 },
   ctaSection: { paddingHorizontal: 28, paddingBottom: 8 },
-  primaryWrap: { borderRadius: 18, overflow: 'hidden', marginBottom: 14 },
+  primaryWrap: { borderRadius: 18, overflow: 'hidden', marginBottom: 10 },
   primaryBtn: { height: 62, alignItems: 'center', justifyContent: 'center', borderRadius: 18 },
   primaryBtnOutline: { borderWidth: 2, borderColor: theme.colors.mauve },
   primaryLabel: { fontSize: 17, fontWeight: '700', letterSpacing: -0.2 },
+  guestBtn: {
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  guestBtnText: {
+    color: theme.colors.text.secondary,
+    fontSize: 15,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
   signInRow: { height: 46, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   signInText: { fontSize: 15, color: theme.colors.text.primary, fontWeight: '600' },
   signInAccent: { color: theme.colors.plum, fontWeight: '800' },

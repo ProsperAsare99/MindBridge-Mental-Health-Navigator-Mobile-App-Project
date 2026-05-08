@@ -17,7 +17,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line, Path, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { theme } from '../../src/theme/colors';
-import { Ghost, UserSecret } from 'lucide-react-native';
+import { Ghost } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -217,6 +217,7 @@ export default function WelcomeScreen() {
               activeOpacity={0.7} 
               style={styles.guestBtn}
             >
+              <Ghost color={theme.colors.plum} size={20} style={{ marginRight: 8 }} />
               <Text style={styles.guestBtnText}>Explore Anonymously</Text>
             </TouchableOpacity>
           )}
@@ -264,16 +265,20 @@ const styles = StyleSheet.create({
   primaryBtnOutline: { borderWidth: 2, borderColor: theme.colors.mauve },
   primaryLabel: { fontSize: 17, fontWeight: '700', letterSpacing: -0.2 },
   guestBtn: {
-    height: 50,
+    height: 62,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
+    backgroundColor: 'rgba(123, 97, 255, 0.08)',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: 'rgba(123, 97, 255, 0.15)',
   },
   guestBtnText: {
-    color: theme.colors.text.secondary,
-    fontSize: 15,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
+    color: theme.colors.plum,
+    fontSize: 16,
+    fontWeight: '700',
   },
   signInRow: { height: 46, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   signInText: { fontSize: 15, color: theme.colors.text.primary, fontWeight: '600' },

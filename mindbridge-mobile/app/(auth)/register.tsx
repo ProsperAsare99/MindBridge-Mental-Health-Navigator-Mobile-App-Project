@@ -1,12 +1,12 @@
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  Alert, 
-  ActivityIndicator, 
-  StyleSheet, 
-  KeyboardAvoidingView, 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  StyleSheet,
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
   Dimensions,
@@ -96,7 +96,7 @@ const SelectGroup = ({ label, options, selectedValue, onSelect }: { label: strin
     <Text style={styles.label}>{label}</Text>
     <View style={styles.chipContainer}>
       {options.map((opt) => (
-        <TouchableOpacity 
+        <TouchableOpacity
           key={opt}
           style={[styles.chip, selectedValue === opt && styles.chipActive]}
           onPress={() => onSelect(opt)}
@@ -112,16 +112,16 @@ const SelectGroup = ({ label, options, selectedValue, onSelect }: { label: strin
 const InstitutionPicker = ({ value, onSelect, error }: { value: string; onSelect: (val: string) => void; error?: string }) => {
   const [visible, setVisible] = useState(false);
   const [search, setSearch] = useState('');
-  
-  const filtered = GHANA_INSTITUTIONS.filter(i => 
+
+  const filtered = GHANA_INSTITUTIONS.filter(i =>
     i.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <View style={styles.inputWrapper}>
       <Text style={styles.label}>Institution / University</Text>
-      <TouchableOpacity 
-        style={[styles.input, styles.pickerTrigger, error && styles.inputError]} 
+      <TouchableOpacity
+        style={[styles.input, styles.pickerTrigger, error && styles.inputError]}
         onPress={() => setVisible(true)}
       >
         <Text style={[styles.pickerValue, !value && { color: theme.colors.text.disabled }]}>
@@ -143,7 +143,7 @@ const InstitutionPicker = ({ value, onSelect, error }: { value: string; onSelect
 
             <View style={styles.searchContainer}>
               <Search color={theme.colors.plum} size={20} style={styles.searchIcon} />
-              <TextInput 
+              <TextInput
                 style={styles.searchInput}
                 placeholder="Search institution..."
                 placeholderTextColor={theme.colors.text.disabled}
@@ -152,13 +152,13 @@ const InstitutionPicker = ({ value, onSelect, error }: { value: string; onSelect
               />
             </View>
 
-            <FlatList 
+            <FlatList
               data={filtered}
               keyExtractor={item => item}
               contentContainerStyle={styles.listContent}
               renderItem={({ item }) => (
-                <TouchableOpacity 
-                  style={[styles.listItem, value === item && styles.listItemActive]} 
+                <TouchableOpacity
+                  style={[styles.listItem, value === item && styles.listItemActive]}
                   onPress={() => {
                     onSelect(item);
                     setVisible(false);
@@ -180,7 +180,7 @@ export default function RegisterScreen() {
   const { signIn } = useContext(AuthContext);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  
+
   // Basic Info
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
@@ -188,13 +188,13 @@ export default function RegisterScreen() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   // Academic Info
   const [institution, setInstitution] = useState('');
   const [faculty, setFaculty] = useState('');
   const [level, setLevel] = useState('Level 100');
   const [status, setStatus] = useState('Full-time');
-  
+
   // Mental Health Info
   const [stressSource, setStressSource] = useState('Academics');
   const [supportType, setSupportType] = useState('Self-help');
@@ -212,14 +212,14 @@ export default function RegisterScreen() {
     if (!username) { newErrors.username = 'Username is required'; valid = false; }
     if (!email) { newErrors.email = 'Email is required'; valid = false; }
     else if (!/\S+@\S+\.\S+/.test(email)) { newErrors.email = 'Enter a valid email'; valid = false; }
-    
+
     if (!phoneNumber) { newErrors.phoneNumber = 'Phone number is required'; valid = false; }
-    
+
     if (!password) { newErrors.password = 'Password is required'; valid = false; }
     else if (password.length < 6) { newErrors.password = 'Min 6 characters'; valid = false; }
-    
+
     if (password !== confirmPassword) { newErrors.confirmPassword = 'Passwords do not match'; valid = false; }
-    
+
     if (!institution) { newErrors.institution = 'Please select your institution'; valid = false; }
 
     setErrors(newErrors);
@@ -250,8 +250,8 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient 
-        colors={[theme.colors.background, theme.colors.accents.softLilac]} 
+      <LinearGradient
+        colors={[theme.colors.background, theme.colors.accents.softLilac]}
         style={[styles.topSection, { paddingTop: insets.top }]}
       >
         <View style={[styles.blurCircle, styles.circle1]} />
@@ -274,12 +274,12 @@ export default function RegisterScreen() {
         </View>
       </LinearGradient>
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.bottomSectionWrapper}
       >
         <View style={styles.bottomSection}>
-          <ScrollView 
+          <ScrollView
             contentContainerStyle={[styles.formScrollContent, { paddingBottom: insets.bottom + 40 }]}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
@@ -290,7 +290,7 @@ export default function RegisterScreen() {
             </Reanimated.View>
 
             <Reanimated.View entering={FadeInDown.duration(600).delay(200).springify()} style={styles.formContainer}>
-              
+
               <FormSection title="Account Information" icon={User}>
                 <View style={styles.inputWrapper}>
                   <Text style={styles.label}>Full Name (Optional)</Text>
@@ -313,7 +313,7 @@ export default function RegisterScreen() {
                     placeholderTextColor={theme.colors.text.disabled}
                     autoCapitalize="none"
                     value={username}
-                    onChangeText={(txt) => { setUsername(txt); if (errors.username) setErrors({...errors, username: undefined}); }}
+                    onChangeText={(txt) => { setUsername(txt); if (errors.username) setErrors({ ...errors, username: undefined }); }}
                   />
                   <ErrorMessage message={errors.username} />
                 </View>
@@ -327,7 +327,7 @@ export default function RegisterScreen() {
                     autoCapitalize="none"
                     keyboardType="email-address"
                     value={email}
-                    onChangeText={(txt) => { setEmail(txt); if (errors.email) setErrors({...errors, email: undefined}); }}
+                    onChangeText={(txt) => { setEmail(txt); if (errors.email) setErrors({ ...errors, email: undefined }); }}
                     onFocus={() => setFocusedField('email')}
                     onBlur={() => setFocusedField('none')}
                   />
@@ -342,7 +342,7 @@ export default function RegisterScreen() {
                     placeholderTextColor={theme.colors.text.disabled}
                     keyboardType="phone-pad"
                     value={phoneNumber}
-                    onChangeText={(txt) => { setPhoneNumber(txt); if (errors.phoneNumber) setErrors({...errors, phoneNumber: undefined}); }}
+                    onChangeText={(txt) => { setPhoneNumber(txt); if (errors.phoneNumber) setErrors({ ...errors, phoneNumber: undefined }); }}
                     onFocus={() => setFocusedField('none')}
                     onBlur={() => setFocusedField('none')}
                   />
@@ -358,7 +358,7 @@ export default function RegisterScreen() {
                       placeholderTextColor={theme.colors.text.disabled}
                       secureTextEntry={!showPassword}
                       value={password}
-                      onChangeText={(txt) => { setPassword(txt); if (errors.password) setErrors({...errors, password: undefined}); }}
+                      onChangeText={(txt) => { setPassword(txt); if (errors.password) setErrors({ ...errors, password: undefined }); }}
                       onFocus={() => setFocusedField('password')}
                       onBlur={() => setFocusedField('none')}
                     />
@@ -377,16 +377,16 @@ export default function RegisterScreen() {
                     placeholderTextColor={theme.colors.text.disabled}
                     secureTextEntry={!showPassword}
                     value={confirmPassword}
-                    onChangeText={(txt) => { setConfirmPassword(txt); if (errors.confirmPassword) setErrors({...errors, confirmPassword: undefined}); }}
+                    onChangeText={(txt) => { setConfirmPassword(txt); if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined }); }}
                   />
                   <ErrorMessage message={errors.confirmPassword} />
                 </View>
               </FormSection>
 
               <FormSection title="Academic Context" icon={GraduationCap}>
-                <InstitutionPicker 
-                  value={institution} 
-                  onSelect={setInstitution} 
+                <InstitutionPicker
+                  value={institution}
+                  onSelect={setInstitution}
                   error={errors.institution}
                 />
 
@@ -401,14 +401,14 @@ export default function RegisterScreen() {
                   />
                 </View>
 
-                <SelectGroup 
+                <SelectGroup
                   label="Level / Year of Study"
                   options={['Level 100', 'Level 200', 'Level 300', 'Level 400', 'Postgrad']}
                   selectedValue={level}
                   onSelect={setLevel}
                 />
 
-                <SelectGroup 
+                <SelectGroup
                   label="Student Status"
                   options={['Full-time', 'Part-time']}
                   selectedValue={status}
@@ -417,21 +417,21 @@ export default function RegisterScreen() {
               </FormSection>
 
               <FormSection title="Support Preferences" icon={Heart}>
-                <SelectGroup 
+                <SelectGroup
                   label="Primary Source of Stress"
                   options={['Academics', 'Financial', 'Relationships', 'Social', 'Other']}
                   selectedValue={stressSource}
                   onSelect={setStressSource}
                 />
 
-                <SelectGroup 
+                <SelectGroup
                   label="Preferred Support Type"
                   options={['Self-help', 'Mood tracking', 'Chat', 'Crisis', 'All']}
                   selectedValue={supportType}
                   onSelect={setSupportType}
                 />
 
-                <SelectGroup 
+                <SelectGroup
                   label="Daily Reminder Preference"
                   options={['Yes', 'No']}
                   selectedValue={reminders}
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: theme.colors.plum, borderColor: theme.colors.plum },
   chipText: { fontSize: 14, color: theme.colors.plum, fontWeight: '600' },
   chipTextActive: { color: theme.colors.surface },
-  
+
   // Picker Styles
   pickerTrigger: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   pickerValue: { fontSize: 16, fontWeight: '600', color: theme.colors.plum },

@@ -156,12 +156,14 @@ export default function DashboardScreen() {
               subtitle="Your private 24/7 safe space" 
               icon={Bot} 
               color={theme.colors.accents.softLilac} 
+              onPress={() => router.push('/(tabs)/ai-guide')}
             />
             <ActionCard 
               title="Crisis Support" 
               subtitle="Immediate help and helplines" 
               icon={ShieldAlert} 
-              color={theme.colors.accents.peach} 
+              color={theme.colors.accents.gentlePeach} 
+              onPress={() => router.push('/(tabs)/crisis')}
             />
           </View>
 
@@ -179,24 +181,28 @@ export default function DashboardScreen() {
               subtitle="Write down your thoughts" 
               icon={BookOpen} 
               color={theme.colors.accents.powderBlue} 
+              onPress={() => router.push('/(tabs)/journal')}
             />
             <ActionCard 
               title="Assessments" 
               subtitle="Check your mental well-being" 
               icon={ClipboardList} 
               color={theme.colors.accents.slate} 
+              onPress={() => router.push('/(tabs)/assessments')}
             />
             <ActionCard 
               title="Resources" 
               subtitle="Articles, audio, and more" 
               icon={Library} 
               color={theme.colors.accents.forestGreen} 
+              onPress={() => router.push('/(tabs)/resources')}
             />
             <ActionCard 
               title="Support Community" 
               subtitle="Connect with peers" 
               icon={Users} 
               color={theme.colors.plum} 
+              onPress={() => router.push('/(tabs)/community')}
             />
             <ActionCard 
               title="Profile" 
@@ -210,6 +216,7 @@ export default function DashboardScreen() {
               subtitle="App preferences" 
               icon={Settings} 
               color={theme.colors.text.secondary} 
+              onPress={() => router.push('/(tabs)/settings')}
             />
           </View>
 

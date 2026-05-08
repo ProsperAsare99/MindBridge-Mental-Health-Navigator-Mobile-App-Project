@@ -1,8 +1,11 @@
 import { Tabs } from 'expo-router';
 import { theme } from '../../src/theme/colors';
-import { LayoutDashboard, Leaf, User } from 'lucide-react-native';
+import { LayoutDashboard, Leaf, User, Compass } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+  
   return (
     <Tabs screenOptions={{
       tabBarActiveTintColor: theme.colors.plum,
@@ -12,8 +15,8 @@ export default function TabLayout() {
         borderTopColor: theme.colors.accents.softLilac,
         elevation: 0,
         shadowOpacity: 0,
-        height: 60,
-        paddingBottom: 8,
+        height: 60 + insets.bottom,
+        paddingBottom: 8 + insets.bottom,
         paddingTop: 8
       },
       headerStyle: { backgroundColor: theme.colors.surface },
@@ -33,6 +36,13 @@ export default function TabLayout() {
         options={{ 
           title: 'Mood Garden',
           tabBarIcon: ({ color }) => <Leaf color={color} size={24} />
+        }} 
+      />
+      <Tabs.Screen 
+        name="tools" 
+        options={{ 
+          title: 'Explore',
+          tabBarIcon: ({ color }) => <Compass color={color} size={24} />
         }} 
       />
       <Tabs.Screen 

@@ -185,6 +185,7 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
@@ -212,6 +213,8 @@ export default function RegisterScreen() {
     if (!email) { newErrors.email = 'Email is required'; valid = false; }
     else if (!/\S+@\S+\.\S+/.test(email)) { newErrors.email = 'Enter a valid email'; valid = false; }
     
+    if (!phoneNumber) { newErrors.phoneNumber = 'Phone number is required'; valid = false; }
+    
     if (!password) { newErrors.password = 'Password is required'; valid = false; }
     else if (password.length < 6) { newErrors.password = 'Min 6 characters'; valid = false; }
     
@@ -230,7 +233,7 @@ export default function RegisterScreen() {
     setLoading(true);
     try {
       const payload = {
-        name, username, email, password,
+        name, username, email, phoneNumber, password,
         academic: { institution, faculty, level, status },
         preferences: { stressSource, supportType, reminders: reminders === 'Yes' }
       };
@@ -329,6 +332,21 @@ export default function RegisterScreen() {
                     onBlur={() => setFocusedField('none')}
                   />
                   <ErrorMessage message={errors.email} />
+                </View>
+
+                <View style={styles.inputWrapper}>
+                  <Text style={styles.label}>Phone Number</Text>
+                  <TextInput
+                    style={[styles.input, errors.phoneNumber && styles.inputError]}
+                    placeholder="+233 55 123 4567"
+                    placeholderTextColor={theme.colors.text.disabled}
+                    keyboardType="phone-pad"
+                    value={phoneNumber}
+                    onChangeText={(txt) => { setPhoneNumber(txt); if (errors.phoneNumber) setErrors({...errors, phoneNumber: undefined}); }}
+                    onFocus={() => setFocusedField('none')}
+                    onBlur={() => setFocusedField('none')}
+                  />
+                  <ErrorMessage message={errors.phoneNumber} />
                 </View>
 
                 <View style={styles.inputWrapper}>

@@ -50,7 +50,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     title: "Let's get to know you! 🌟",
     subtitle: "What should we call you?",
     whyWeAsk: "We'll use this to make our conversations feel personal",
-    required: true,
+    required: false,
   },
   {
     id: 'q2',

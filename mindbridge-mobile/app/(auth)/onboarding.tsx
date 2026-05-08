@@ -176,7 +176,7 @@ export default function OnboardingScreen() {
       setTimeout(() => setCurrentStep(currentStep + 1), 300);
     } else {
       // Final Step
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/dashboard');
     }
   };
 
@@ -256,7 +256,7 @@ export default function OnboardingScreen() {
         )}
         <View style={{ flex: 1 }} />
         {currentStep === ONBOARDING_STEPS.length - 1 && (
-           <TouchableOpacity onPress={() => router.replace('/(tabs)')} style={styles.skipBtn}>
+           <TouchableOpacity onPress={() => router.replace('/(tabs)/dashboard')} style={styles.skipBtn}>
             <Text style={styles.skipBtnText}>Skip Onboarding</Text>
           </TouchableOpacity>
         )}

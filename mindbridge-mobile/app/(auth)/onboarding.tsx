@@ -478,8 +478,9 @@ export default function OnboardingScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
       <LinearGradient 
-        colors={[theme.colors.background, theme.colors.accents.softLilac]} 
-        style={styles.background} 
+        colors={['rgba(123, 97, 255, 0.12)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        locations={[0, 0.3, 1]}
+        style={StyleSheet.absoluteFillObject} 
       />
 
       {/* Header with Back and Progress */}
@@ -556,8 +557,8 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: 20, marginBottom: 20 },
   headerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 15 },
   backBtn: { padding: 4 },
-  progressTrack: { height: 6, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 3, overflow: 'hidden' },
-  progressBar: { height: '100%', backgroundColor: theme.colors.plum, borderRadius: 3 },
+  progressTrack: { height: 8, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 4, overflow: 'hidden' },
+  progressBar: { height: '100%', backgroundColor: theme.colors.plum, borderRadius: 4 },
   progressText: { fontSize: 14, fontWeight: '700', color: theme.colors.plum, opacity: 0.8 },
   content: { flex: 1, paddingHorizontal: 24 },
   
@@ -566,16 +567,16 @@ const styles = StyleSheet.create({
   stepContainer: { flex: 1, paddingTop: 10 },
   
   // Shared
-  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: theme.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: 24, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 8 },
-  title: { fontSize: 26, fontWeight: '800', color: theme.colors.plum, marginBottom: 12, textAlign: 'center' },
-  subtitle: { fontSize: 16, color: theme.colors.text.secondary, textAlign: 'center', lineHeight: 24, marginBottom: 30 },
+  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: theme.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: 24, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 },
+  title: { fontSize: 30, fontWeight: '800', color: theme.colors.text.primary, marginBottom: 12, textAlign: 'center', letterSpacing: -0.5 },
+  subtitle: { fontSize: 16, color: theme.colors.text.secondary, textAlign: 'center', lineHeight: 24, marginBottom: 32 },
   
   // Privacy
   privacyText: { fontSize: 15, color: theme.colors.text.primary, lineHeight: 28, textAlign: 'center', paddingHorizontal: 10 },
   
   // Options
-  optionBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.surface, paddingHorizontal: 20, paddingVertical: 16, borderRadius: 16, borderWidth: 2, borderColor: 'transparent', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 },
-  optionBtnActive: { backgroundColor: theme.colors.accents.softLilac, borderColor: theme.colors.plum },
+  optionBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.surface, paddingHorizontal: 20, paddingVertical: 18, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2 },
+  optionBtnActive: { backgroundColor: 'rgba(123, 97, 255, 0.05)', borderColor: 'rgba(123, 97, 255, 0.15)' },
   optionLabel: { flex: 1, fontSize: 16, fontWeight: '600', color: theme.colors.text.primary },
   optionLabelActive: { color: theme.colors.plum, fontWeight: '700' },
   
@@ -584,11 +585,11 @@ const styles = StyleSheet.create({
   checkboxActive: { backgroundColor: theme.colors.plum },
   
   // Input
-  textInput: { backgroundColor: theme.colors.surface, borderRadius: 16, paddingHorizontal: 20, paddingVertical: 18, fontSize: 18, color: theme.colors.text.primary, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)' },
+  textInput: { backgroundColor: theme.colors.surface, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 18, fontSize: 18, color: theme.colors.text.primary, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' },
   
   // Sliders
-  sliderItem: { marginBottom: 24, backgroundColor: theme.colors.surface, padding: 16, borderRadius: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 },
-  sliderLabel: { fontSize: 16, fontWeight: '600', color: theme.colors.plum, marginBottom: 16 },
+  sliderItem: { marginBottom: 24, backgroundColor: theme.colors.surface, padding: 20, borderRadius: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' },
+  sliderLabel: { fontSize: 16, fontWeight: '600', color: theme.colors.text.primary, marginBottom: 16 },
   sliderContainer: { position: 'relative', width: '100%', height: 40, justifyContent: 'center' },
   sliderTrack: { position: 'absolute', top: 19, left: 10, right: 10, height: 2, backgroundColor: theme.colors.accents.softLilac },
   sliderDot: { width: 34, height: 34, borderRadius: 17, backgroundColor: theme.colors.surface, borderWidth: 2, borderColor: theme.colors.accents.softLilac, alignItems: 'center', justifyContent: 'center' },
@@ -602,7 +603,7 @@ const styles = StyleSheet.create({
 
   // Summary
   summaryGreeting: { fontSize: 22, fontWeight: '700', color: theme.colors.text.primary, marginBottom: 24 },
-  summaryBox: { backgroundColor: theme.colors.surface, padding: 20, borderRadius: 16, width: '100%', marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 3 },
+  summaryBox: { backgroundColor: theme.colors.surface, padding: 24, borderRadius: 24, width: '100%', marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 3, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' },
   summaryBoxTitle: { fontSize: 16, fontWeight: '700', color: theme.colors.plum, marginBottom: 12 },
   summaryItem: { fontSize: 15, color: theme.colors.text.secondary, marginBottom: 8, lineHeight: 22 },
   summaryFooterBox: { width: '100%', paddingHorizontal: 10, marginTop: 10 },

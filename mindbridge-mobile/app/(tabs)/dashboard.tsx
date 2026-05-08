@@ -12,6 +12,7 @@ import {
 import { AuthContext } from '../../src/context/AuthContext';
 import { theme } from '../../src/theme/colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp, FadeInRight } from 'react-native-reanimated';
 import { 
@@ -24,7 +25,15 @@ import {
   ArrowRight,
   TrendingUp,
   Moon,
-  Wind
+  Wind,
+  BookOpen,
+  ClipboardList,
+  Library,
+  ShieldAlert,
+  Users,
+  User,
+  Settings,
+  Bot
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
@@ -60,6 +69,7 @@ const ActionCard = ({ title, subtitle, icon: Icon, color, onPress }: { title: st
 export default function DashboardScreen() {
   const { signOut, userToken } = useContext(AuthContext);
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   
   // Mocking the personalization data that would come from the registration/onboarding
   // In a real app, this would be pulled from the user's profile state
@@ -135,34 +145,71 @@ export default function DashboardScreen() {
 
           {/* Personalized Sections */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Your Navigator</Text>
+            <Text style={styles.sectionTitle}>MindBridge Navigator</Text>
             <TouchableOpacity><Text style={styles.viewAll}>View All</Text></TouchableOpacity>
           </View>
 
-          <View style={styles.actionsGrid}>
+          {/* AI and Crisis Support (Prominent) */}
+          <View style={{ gap: 16, marginBottom: 16 }}>
             <ActionCard 
-              title="Mood Garden" 
-              subtitle={`You're feeling ${userData.moodToday} today`} 
-              icon={Wind} 
-              color={theme.colors.accents.eucalyptus} 
-            />
-            <ActionCard 
-              title="Academic Support" 
-              subtitle="Coping with exam pressure" 
-              icon={Brain} 
-              color={theme.colors.accents.powderBlue} 
-            />
-            <ActionCard 
-              title="Chat with Al" 
-              subtitle="Your private safe space" 
-              icon={MessageCircle} 
+              title="Personalized AI Guide" 
+              subtitle="Your private 24/7 safe space" 
+              icon={Bot} 
               color={theme.colors.accents.softLilac} 
             />
             <ActionCard 
-              title="Sleep Tools" 
-              subtitle="Personalized for tonight" 
-              icon={Moon} 
+              title="Crisis Support" 
+              subtitle="Immediate help and helplines" 
+              icon={ShieldAlert} 
               color={theme.colors.accents.peach} 
+            />
+          </View>
+
+          {/* Main Grid for other tools */}
+          <View style={styles.actionsGrid}>
+            <ActionCard 
+              title="Mood Tracker" 
+              subtitle="Log your daily feelings" 
+              icon={Wind} 
+              color={theme.colors.accents.eucalyptus} 
+              onPress={() => router.push('/(tabs)/garden')}
+            />
+            <ActionCard 
+              title="Unified Journal" 
+              subtitle="Write down your thoughts" 
+              icon={BookOpen} 
+              color={theme.colors.accents.powderBlue} 
+            />
+            <ActionCard 
+              title="Assessments" 
+              subtitle="Check your mental well-being" 
+              icon={ClipboardList} 
+              color={theme.colors.accents.slate} 
+            />
+            <ActionCard 
+              title="Resources" 
+              subtitle="Articles, audio, and more" 
+              icon={Library} 
+              color={theme.colors.accents.forestGreen} 
+            />
+            <ActionCard 
+              title="Support Community" 
+              subtitle="Connect with peers" 
+              icon={Users} 
+              color={theme.colors.plum} 
+            />
+            <ActionCard 
+              title="Profile" 
+              subtitle="Your personal details" 
+              icon={User} 
+              color={theme.colors.accents.gentlePeach} 
+              onPress={() => router.push('/(tabs)/profile')}
+            />
+            <ActionCard 
+              title="Settings" 
+              subtitle="App preferences" 
+              icon={Settings} 
+              color={theme.colors.text.secondary} 
             />
           </View>
 

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,8 @@ import {
   Dimensions,
   Image,
   StatusBar,
-  Pressable
+  Pressable,
+  Platform
 } from 'react-native';
 import { AuthContext } from '../../src/context/AuthContext';
 import { theme } from '../../src/theme/colors';
@@ -32,7 +33,8 @@ import {
   Settings,
   Bot,
   Wind,
-  ChevronRight
+  ChevronRight,
+  Quote
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
@@ -42,6 +44,55 @@ const springConfig = {
   damping: 15,
   stiffness: 150,
   mass: 0.8,
+};
+
+// ─── Quote Slideshow Component ──────────────────────────────────────────────
+
+const QUOTES = [
+  { text: "What mental health needs is more sunlight, more candor, and more unashamed conversation.", author: "Glenn Close" },
+  { text: "There is hope, even when your brain tells you there isn’t.", author: "John Green" },
+  { text: "You don’t have to control your thoughts. You just have to stop letting them control you.", author: "Dan Millman" },
+  { text: "Deep breathing is our nervous system’s love language.", author: "Dr. Lauren Fogel Mersy" },
+  { text: "Healing takes time, and asking for help is a courageous step.", author: "Mariska Hargitay" },
+  { text: "Self-care is how you take your power back.", author: "Lalah Delia" },
+  { text: "Your present circumstances don't determine where you can go; they merely determine where you start.", author: "Nido Qubein" },
+  { text: "Courage doesn't always roar. Sometimes courage is the little voice at the end of the day saying I'll try again tomorrow.", author: "Mary Anne Radmacher" },
+  { text: "You alone are enough. You have nothing to prove to anybody.", author: "Maya Angelou" },
+  { text: "The only journey is the journey within.", author: "Rainer Maria Rilke" },
+  { text: "Not until we are lost do we begin to understand ourselves.", author: "Henry David Thoreau" },
+  { text: "It is during our darkest moments that we must focus to see the light.", author: "Aristotle" }
+];
+
+const QuoteSlideshow = () => {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % QUOTES.length);
+    }, 7000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const quote = QUOTES[index];
+
+  return (
+    <Animated.View entering={FadeInUp.delay(50).springify().damping(14)} style={styles.quoteCardContainer}>
+      <LinearGradient 
+        colors={[theme.colors.plum, '#4A3E4F']} 
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.quoteCard}
+      >
+        <View style={styles.quoteMarkContainer}>
+          <Text style={styles.largeQuoteMark}>“</Text>
+        </View>
+        <Animated.View key={index} entering={FadeIn.duration(1000)}>
+          <Text style={styles.quoteText}>{quote.text}</Text>
+          <Text style={styles.quoteAuthor}>{quote.author}</Text>
+        </Animated.View>
+      </LinearGradient>
+    </Animated.View>
+  );
 };
 
 // ─── Apple-Inspired Widget Component ─────────────────────────────────────────
@@ -163,6 +214,11 @@ export default function DashboardScreen() {
             <Image source={require('../../assets/images/logo.png')} style={styles.avatar} />
           </TouchableOpacity>
         </Animated.View>
+
+        {/* Daily Reflection Slideshow */}
+        <View style={styles.section}>
+          <QuoteSlideshow />
+        </View>
 
         {/* AI Guide Hero Widget */}
         <View style={styles.section}>
@@ -301,6 +357,51 @@ const styles = StyleSheet.create({
   avatar: {
     width: '100%',
     height: '100%'
+  },
+  quoteCardContainer: {
+    shadowColor: theme.colors.plum,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  quoteCard: {
+    borderRadius: 24,
+    padding: 28,
+    paddingTop: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 180, 
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  quoteMarkContainer: {
+    position: 'absolute',
+    top: -20,
+    left: 20,
+    opacity: 0.15,
+  },
+  largeQuoteMark: {
+    fontSize: 120,
+    color: '#FFFFFF',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  quoteText: {
+    fontSize: 19,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    lineHeight: 28,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    marginBottom: 16,
+    letterSpacing: 0.3,
+  },
+  quoteAuthor: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
   },
   section: {
     marginBottom: 32,

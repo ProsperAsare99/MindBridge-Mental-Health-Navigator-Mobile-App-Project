@@ -111,7 +111,7 @@ export default function JournalScreen() {
             {entries.map((entry, index) => (
               <Animated.View 
                 key={entry.id}
-                entering={FadeInUp.delay(index * 150).springify().damping(14)}
+                entering={FadeInUp.delay(index * 150).duration(500)}
                 style={styles.entryCard}
               >
                 <View style={styles.entryHeader}>
@@ -131,7 +131,7 @@ export default function JournalScreen() {
         </ScrollView>
       ) : (
         <Animated.View 
-          entering={SlideInDown.springify().damping(16)} 
+          entering={SlideInDown.duration(500)} 
           exiting={SlideOutDown}
           style={[styles.composerContainer, { paddingTop: insets.top + 10, paddingBottom: insets.bottom + 10 }]}
         >

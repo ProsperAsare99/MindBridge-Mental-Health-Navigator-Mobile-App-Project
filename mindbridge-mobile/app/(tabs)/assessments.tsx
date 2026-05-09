@@ -74,7 +74,7 @@ const RECENT_RESULTS = [
 
 const AssessmentCard = ({ assessment, delay }: any) => {
   return (
-    <Animated.View entering={FadeInUp.delay(delay).springify().damping(14)}>
+    <Animated.View entering={FadeInUp.delay(delay).duration(500)}>
       <TouchableOpacity style={styles.assessmentCard} activeOpacity={0.8}>
         <View style={[styles.assessmentIconWrap, { backgroundColor: assessment.color + '20' }]}>
           <assessment.icon color={assessment.color} size={28} />
@@ -131,7 +131,7 @@ export default function AssessmentsScreen() {
           </ScrollView>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(500).springify().damping(14)} style={styles.section}>
+        <Animated.View entering={FadeInUp.delay(500).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Recent Results</Text>
           <View style={styles.resultsContainer}>
             {RECENT_RESULTS.map((result, index) => (
@@ -157,7 +157,7 @@ export default function AssessmentsScreen() {
           </View>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(700).springify().damping(14)} style={styles.educationalCard}>
+        <Animated.View entering={FadeInUp.delay(700).duration(500)} style={styles.educationalCard}>
           <View style={styles.eduIconWrap}>
             <Info color={theme.colors.plum} size={20} />
           </View>

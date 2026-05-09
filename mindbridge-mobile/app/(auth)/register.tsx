@@ -287,7 +287,7 @@ export default function RegisterScreen() {
             </View>
           </Animated.View>
 
-          <Animated.View entering={FadeInUp.duration(800).springify().damping(14)} style={styles.formContainer}>
+          <Animated.View entering={FadeInUp.duration(800).duration(500)} style={styles.formContainer}>
             <View style={styles.titleContainer}>
               <Text style={styles.title}>Join MindBridge</Text>
               <Text style={styles.subtitle}>Let's personalize your experience.</Text>

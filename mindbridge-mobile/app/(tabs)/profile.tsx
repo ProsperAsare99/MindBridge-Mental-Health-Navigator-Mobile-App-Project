@@ -59,7 +59,7 @@ const ProfileListItem = ({ icon: Icon, title, color, isLast = false, onPress, de
 };
 
 const ProfileListGroup = ({ children, delay }: any) => (
-  <Animated.View entering={FadeInUp.delay(delay).springify().damping(14)} style={styles.listGroup}>
+  <Animated.View entering={FadeInUp.delay(delay).duration(500)} style={styles.listGroup}>
     {children}
   </Animated.View>
 );
@@ -84,7 +84,7 @@ export default function ProfileScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeInUp.duration(600).springify().damping(14)} style={styles.headerProfile}>
+        <Animated.View entering={FadeInUp.duration(600).duration(500)} style={styles.headerProfile}>
           <View style={styles.avatarContainer}>
             <Image 
               source={require('../../assets/images/logo.png')} 
@@ -100,7 +100,7 @@ export default function ProfileScreen() {
         </Animated.View>
 
         {/* Onboarding Resume Banner */}
-        <Animated.View entering={FadeInUp.delay(50).springify().damping(14)} style={styles.resumeBanner}>
+        <Animated.View entering={FadeInUp.delay(50).duration(500)} style={styles.resumeBanner}>
           <View style={styles.resumeBannerIcon}>
             <ClipboardEdit color={theme.colors.plum} size={24} />
           </View>

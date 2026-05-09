@@ -44,7 +44,7 @@ const MoodCard = ({ mood, isSelected, onPress, delay }: any) => {
   const handlePressOut = () => { scale.value = withSpring(1, springConfig); };
 
   return (
-    <Animated.View entering={FadeInUp.delay(delay).springify().damping(14)}>
+    <Animated.View entering={FadeInUp.delay(delay).duration(500)}>
       <Pressable
         onPress={onPress}
         onPressIn={handlePressIn}
@@ -127,10 +127,10 @@ export default function GardenScreen() {
               colors={[theme.colors.accents.eucalyptus + '20', 'transparent']}
               style={styles.successGlow}
             />
-            <Animated.View entering={FadeInUp.delay(300).springify()}>
+            <Animated.View entering={FadeInUp.delay(300).duration(500)}>
               <Leaf color={theme.colors.accents.eucalyptus} size={64} />
             </Animated.View>
-            <Animated.View entering={FadeInUp.delay(500).springify()}>
+            <Animated.View entering={FadeInUp.delay(500).duration(500)}>
               <Text style={styles.successTitle}>Seed Planted!</Text>
               <Text style={styles.successSubtitle}>Your garden is growing beautifully. Take a deep breath and have a wonderful day.</Text>
             </Animated.View>

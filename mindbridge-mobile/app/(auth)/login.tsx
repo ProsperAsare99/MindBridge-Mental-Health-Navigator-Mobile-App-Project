@@ -145,7 +145,7 @@ export default function LoginScreen() {
           </Animated.View>
 
           {/* Form */}
-          <Animated.View entering={FadeInUp.duration(800).springify().damping(14)} style={styles.formContainer}>
+          <Animated.View entering={FadeInUp.duration(800).duration(500)} style={styles.formContainer}>
             <View style={styles.titleContainer}>
               <Text style={styles.title}>Welcome back</Text>
               <Text style={styles.subtitle}>Sign in to your account.</Text>

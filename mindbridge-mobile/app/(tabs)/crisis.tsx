@@ -89,7 +89,7 @@ export default function CrisisSupportScreen() {
           <Text style={styles.sectionTitle}>Immediate Help</Text>
           
           {EMERGENCY_CONTACTS.map((contact, index) => (
-            <Animated.View key={contact.id} entering={FadeInUp.delay(200 + (index * 100)).springify().damping(14)}>
+            <Animated.View key={contact.id} entering={FadeInUp.delay(200 + (index * 100)).duration(500)}>
               <TouchableOpacity 
                 style={[
                   styles.contactCard, 
@@ -113,7 +113,7 @@ export default function CrisisSupportScreen() {
           ))}
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(600).springify().damping(14)} style={styles.section}>
+        <Animated.View entering={FadeInUp.delay(600).duration(500)} style={styles.section}>
           <View style={styles.safetyHeader}>
             <Text style={styles.sectionTitle}>My Safety Plan</Text>
             <TouchableOpacity>
@@ -138,7 +138,7 @@ export default function CrisisSupportScreen() {
           </View>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(800).springify().damping(14)} style={styles.locationCard}>
+        <Animated.View entering={FadeInUp.delay(800).duration(500)} style={styles.locationCard}>
           <View style={styles.locationIconWrap}>
             <MapPin color={theme.colors.plum} size={24} />
           </View>

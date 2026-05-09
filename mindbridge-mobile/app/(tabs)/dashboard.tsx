@@ -75,7 +75,7 @@ const QuoteSlideshow = () => {
   const quote = QUOTES[index];
 
   return (
-    <Animated.View entering={FadeInUp.delay(50).springify().damping(14)} style={styles.quoteCardContainer}>
+    <Animated.View entering={FadeInUp.delay(50).duration(500)} style={styles.quoteCardContainer}>
       <LinearGradient 
         colors={[theme.colors.plum, '#4A3E4F']} 
         start={{ x: 0, y: 0 }}
@@ -123,7 +123,7 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
 
   if (size === 'list') {
     return (
-      <Animated.View entering={FadeInUp.delay(delay).springify().damping(14)}>
+      <Animated.View entering={FadeInUp.delay(delay).duration(500)}>
         <Pressable
           onPress={onPress}
           onPressIn={handlePressIn}
@@ -147,7 +147,7 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
   const isWide = size === 'wide';
 
   return (
-    <Animated.View entering={FadeInUp.delay(delay).springify().damping(14)} style={isWide ? { width: '100%' } : { width: (width - 48 - 16) / 2 }}>
+    <Animated.View entering={FadeInUp.delay(delay).duration(500)} style={isWide ? { width: '100%' } : { width: (width - 48 - 16) / 2 }}>
       <Pressable
         onPress={onPress}
         onPressIn={handlePressIn}

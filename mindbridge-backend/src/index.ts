@@ -2,6 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
+import journalRoutes from './routes/journal.routes.js';
+import communityRoutes from './routes/community.routes.js';
+import moodRoutes from './routes/mood.routes.js';
+import resourcesRoutes from './routes/resources.routes.js';
 
 dotenv.config();
 
@@ -23,6 +27,10 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/journal', journalRoutes);
+app.use('/api/community', communityRoutes);
+app.use('/api/mood', moodRoutes);
+app.use('/api/resources', resourcesRoutes);
 
 app.get('/', (req, res) => {
   res.send('MindBridge API is running');

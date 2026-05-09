@@ -9,6 +9,8 @@ import {
   Animated,
   StatusBar,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { FadeInUp, FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import Reanimated from 'react-native-reanimated';
@@ -274,7 +276,6 @@ export default function OnboardingScreen() {
 
   const handleSelectSingle = (value: string) => {
     setAnswers({ ...answers, [step.id]: value });
-    setTimeout(() => handleNext(), 300);
   };
 
   const handleSelectMultiple = (value: string) => {
@@ -297,13 +298,15 @@ export default function OnboardingScreen() {
     });
   };
 
-  const isStepValid = () => {
-    if (!step.required) return true;
-    if (step.type === 'text') return answers[step.id]?.length >= 2;
+  const hasValidAnswer = () => {
+    if (step.type === 'text') return (answers[step.id]?.trim()?.length || 0) >= 2;
     if (step.type === 'single-choice') return !!answers[step.id];
-    if (step.type === 'multiple-choice') return answers[step.id]?.length > 0;
-    return true; // Privacy and summary
+    if (step.type === 'multiple-choice') return (answers[step.id]?.length || 0) > 0;
+    if (step.type === 'sliders') return answers.stressors && Object.keys(answers.stressors).length > 0;
+    return true;
   };
+
+  const isNextEnabled = hasValidAnswer();
 
   const renderContent = () => {
     switch (step.type) {
@@ -357,7 +360,7 @@ export default function OnboardingScreen() {
             <Text style={styles.title}>{titleWithContext}</Text>
             <Text style={styles.subtitle}>{step.subtitle}</Text>
             
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 20 }}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 100 }}>
               {step.options?.map((opt) => {
                 const isSelected = step.type === 'multiple-choice' 
                   ? (answers[step.id] || []).includes(opt.value)
@@ -405,7 +408,7 @@ export default function OnboardingScreen() {
             <Text style={styles.title}>{step.title}</Text>
             <Text style={styles.subtitle}>{step.subtitle}</Text>
             
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
               {step.sliderQuestions?.map((q) => (
                 <View key={q.key} style={styles.sliderItem}>
                   <Text style={styles.sliderLabel}>{q.label}</Text>
@@ -475,7 +478,10 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <StatusBar barStyle="dark-content" />
       <LinearGradient 
         colors={['rgba(123, 97, 255, 0.12)', theme.colors.background, theme.colors.backgroundSecondary]} 
@@ -529,25 +535,30 @@ export default function OnboardingScreen() {
 
       {/* Footer for non-privacy and non-summary steps */}
       {isQuestionStep && (
-        <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
-          <View style={{ flex: 1 }} />
-          {!step.required ? (
-            <TouchableOpacity onPress={handleNext} style={styles.skipBtn}>
-              <Text style={styles.skipText}>Skip</Text>
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) + 10 }]}>
+          <View style={styles.leftFooterActions}>
+            <TouchableOpacity onPress={handleBack} style={styles.backFooterBtn}>
+              <ChevronLeft color={theme.colors.plum} size={24} />
             </TouchableOpacity>
-          ) : (
-            <TouchableOpacity 
-              onPress={handleNext} 
-              style={[styles.nextBtn, !isStepValid() && styles.nextBtnDisabled]}
-              disabled={!isStepValid()}
-            >
-              <Text style={styles.nextBtnText}>Next</Text>
-              <ChevronRight color={theme.colors.surface} size={20} />
-            </TouchableOpacity>
-          )}
+            
+            {!step.required && (
+              <TouchableOpacity onPress={handleNext} style={styles.skipBtn}>
+                <Text style={styles.skipText}>Skip</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          <TouchableOpacity 
+            onPress={handleNext} 
+            style={[styles.nextBtn, !isNextEnabled && styles.nextBtnDisabled]}
+            disabled={!isNextEnabled}
+          >
+            <Text style={styles.nextBtnText}>Next</Text>
+            <ChevronRight color={theme.colors.surface} size={20} />
+          </TouchableOpacity>
         </View>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -609,10 +620,12 @@ const styles = StyleSheet.create({
   summaryFooterBox: { width: '100%', paddingHorizontal: 10, marginTop: 10 },
 
   // Footer
-  footer: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, paddingTop: 10 },
-  skipBtn: { paddingVertical: 12, paddingHorizontal: 20 },
-  skipText: { fontSize: 16, fontWeight: '600', color: theme.colors.text.disabled },
-  nextBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.plum, paddingVertical: 14, paddingHorizontal: 24, borderRadius: 30 },
+  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, justifyContent: 'space-between', backgroundColor: theme.colors.surface, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)', shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 8, zIndex: 100 },
+  leftFooterActions: { flexDirection: 'row', alignItems: 'center' },
+  skipBtn: { paddingVertical: 12, paddingHorizontal: 16, borderWidth: 1.5, borderColor: theme.colors.plumLight, borderRadius: 30, marginLeft: 12 },
+  skipText: { fontSize: 15, fontWeight: '700', color: theme.colors.plumLight },
+  backFooterBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(123, 97, 255, 0.08)', alignItems: 'center', justifyContent: 'center' },
+  nextBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.plum, paddingVertical: 14, paddingHorizontal: 20, borderRadius: 30 },
   nextBtnDisabled: { opacity: 0.5 },
   nextBtnText: { fontSize: 16, fontWeight: '700', color: theme.colors.surface, marginRight: 8 },
   

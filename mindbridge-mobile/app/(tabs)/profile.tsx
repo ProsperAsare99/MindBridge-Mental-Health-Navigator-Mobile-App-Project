@@ -22,7 +22,8 @@ import {
   LogOut,
   ChevronRight,
   GraduationCap,
-  Heart
+  Heart,
+  Sparkles
 } from 'lucide-react-native';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useRouter } from 'expo-router';
@@ -95,6 +96,23 @@ export default function ProfileScreen() {
           
           <TouchableOpacity style={styles.editBtn}>
             <Text style={styles.editBtnText}>Edit Profile</Text>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Onboarding Resume Banner */}
+        <Animated.View entering={FadeInUp.delay(50).springify().damping(14)} style={styles.resumeBanner}>
+          <View style={styles.resumeBannerIcon}>
+            <Sparkles color={theme.colors.plum} size={24} />
+          </View>
+          <View style={styles.resumeBannerContent}>
+            <Text style={styles.resumeBannerTitle}>Complete Setup</Text>
+            <Text style={styles.resumeBannerSubtitle}>Finish onboarding for personalized support.</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.resumeBannerBtn}
+            onPress={() => router.push('/(auth)/onboarding')}
+          >
+            <Text style={styles.resumeBannerBtnText}>Resume</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -183,6 +201,56 @@ const styles = StyleSheet.create({
   editBtnText: {
     color: theme.colors.plum,
     fontWeight: '800',
+    fontSize: 14,
+  },
+  resumeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(123, 97, 255, 0.08)',
+    borderRadius: 24,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(123, 97, 255, 0.15)',
+  },
+  resumeBannerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: theme.colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: theme.colors.plum,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    marginRight: 16,
+  },
+  resumeBannerContent: {
+    flex: 1,
+  },
+  resumeBannerTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    marginBottom: 4,
+  },
+  resumeBannerSubtitle: {
+    fontSize: 13,
+    color: theme.colors.text.secondary,
+    lineHeight: 18,
+  },
+  resumeBannerBtn: {
+    backgroundColor: theme.colors.plum,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginLeft: 12,
+  },
+  resumeBannerBtnText: {
+    color: theme.colors.surface,
+    fontWeight: '700',
     fontSize: 14,
   },
   listGroup: {

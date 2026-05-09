@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -9,7 +9,8 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
-  Dimensions
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
 import { theme } from '../../src/theme/colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,26 +25,9 @@ import {
   Sun,
   CloudRain
 } from 'lucide-react-native';
+import api from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
-
-// Mock Data for Journal Entries
-const INITIAL_ENTRIES = [
-  {
-    id: '1',
-    date: 'Today, 8:45 AM',
-    title: 'Morning Reflection',
-    content: 'Woke up feeling surprisingly refreshed. The new breathing exercises before bed seem to be helping. I want to carry this calm energy into my study session later.',
-    mood: 'calm',
-  },
-  {
-    id: '2',
-    date: 'Yesterday, 9:20 PM',
-    title: 'Exam Anxiety',
-    content: 'Feeling overwhelmed by the amount of reading left for my finals. Need to remember to take it one step at a time. I am capable.',
-    mood: 'anxious',
-  }
-];
 
 const getMoodIcon = (mood: string) => {
   switch(mood) {
@@ -55,26 +39,53 @@ const getMoodIcon = (mood: string) => {
 
 export default function JournalScreen() {
   const insets = useSafeAreaInsets();
-  const [entries, setEntries] = useState(INITIAL_ENTRIES);
+  const [entries, setEntries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isWriting, setIsWriting] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
 
-  const handleSave = () => {
+  const fetchEntries = async () => {
+    try {
+      const response = await api.get('/journal');
+      setEntries(response.data);
+    } catch (error) {
+      console.error('Error fetching journal entries:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEntries();
+  }, []);
+
+  const handleSave = async () => {
     if (!newContent.trim()) return;
     
-    const newEntry = {
-      id: Date.now().toString(),
-      date: 'Just now',
-      title: newTitle.trim() || 'Untitled Entry',
-      content: newContent.trim(),
-      mood: 'calm'
-    };
+    try {
+      const response = await api.post('/journal', {
+        title: newTitle.trim() || 'Untitled Entry',
+        content: newContent.trim(),
+      });
+      
+      setEntries([response.data, ...entries]);
+      setIsWriting(false);
+      setNewTitle('');
+      setNewContent('');
+    } catch (error) {
+      console.error('Error saving journal entry:', error);
+    }
+  };
 
-    setEntries([newEntry, ...entries]);
-    setIsWriting(false);
-    setNewTitle('');
-    setNewContent('');
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    return `${Math.floor(diffInHours / 24)}d ago`;
   };
 
   return (
@@ -107,27 +118,38 @@ export default function JournalScreen() {
             </View>
           </Animated.View>
 
-          <View style={styles.entriesList}>
-            {entries.map((entry, index) => (
-              <Animated.View 
-                key={entry.id}
-                entering={FadeInUp.delay(index * 150).duration(500)}
-                style={styles.entryCard}
-              >
-                <View style={styles.entryHeader}>
-                  <View style={styles.dateRow}>
-                    <Calendar color={theme.colors.text.tertiary} size={14} />
-                    <Text style={styles.dateText}>{entry.date}</Text>
+          {loading ? (
+            <ActivityIndicator size="large" color={theme.colors.plum} style={{ marginTop: 40 }} />
+          ) : entries.length === 0 ? (
+            <View style={{ padding: 24, alignItems: 'center', marginTop: 40 }}>
+              <BookOpen color={theme.colors.text.disabled} size={48} style={{ marginBottom: 16 }} />
+              <Text style={{ color: theme.colors.text.secondary, textAlign: 'center' }}>
+                Your journal is empty. Tap the + button to capture your thoughts.
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.entriesList}>
+              {entries.map((entry, index) => (
+                <Animated.View 
+                  key={entry.id}
+                  entering={FadeInUp.delay(index * 50).duration(500)}
+                  style={styles.entryCard}
+                >
+                  <View style={styles.entryHeader}>
+                    <View style={styles.dateRow}>
+                      <Calendar color={theme.colors.text.tertiary} size={14} />
+                      <Text style={styles.dateText}>{formatDate(entry.createdAt)}</Text>
+                    </View>
+                    <View style={styles.moodBadge}>
+                      {getMoodIcon(entry.mood || 'calm')}
+                    </View>
                   </View>
-                  <View style={styles.moodBadge}>
-                    {getMoodIcon(entry.mood)}
-                  </View>
-                </View>
-                <Text style={styles.entryTitle}>{entry.title}</Text>
-                <Text style={styles.entryContent} numberOfLines={4}>{entry.content}</Text>
-              </Animated.View>
-            ))}
-          </View>
+                  <Text style={styles.entryTitle}>{entry.title}</Text>
+                  <Text style={styles.entryContent} numberOfLines={4}>{entry.content}</Text>
+                </Animated.View>
+              ))}
+            </View>
+          )}
         </ScrollView>
       ) : (
         <Animated.View 

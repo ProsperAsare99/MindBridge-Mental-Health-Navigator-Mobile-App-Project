@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export const getMoodLogs = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).userId;
     const logs = await prisma.moodLog.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -20,7 +20,7 @@ export const getMoodLogs = async (req: Request, res: Response) => {
 
 export const createMoodLog = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).userId;
     const { score, emotions, note } = req.body;
     
     if (score === undefined || !emotions) {

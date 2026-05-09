@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export const getEntries = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).userId;
     const entries = await prisma.journal.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -19,7 +19,7 @@ export const getEntries = async (req: Request, res: Response) => {
 
 export const createEntry = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = (req as any).userId;
     const { title, content } = req.body;
     
     if (!content) {

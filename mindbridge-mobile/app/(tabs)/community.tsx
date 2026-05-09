@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -6,7 +6,8 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Dimensions,
-  StatusBar
+  StatusBar,
+  ActivityIndicator
 } from 'react-native';
 import { theme } from '../../src/theme/colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,6 +20,7 @@ import {
   MoreHorizontal,
   PenSquare
 } from 'lucide-react-native';
+import api from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -28,29 +30,44 @@ const GROUPS = [
   { id: '3', title: 'Meditation Group', members: '850', color: theme.colors.accents.softMint },
 ];
 
-const FEED = [
-  { 
-    id: 'p1', 
-    avatarColor: theme.colors.accents.powderBlue, 
-    time: '2h ago', 
-    group: 'Anxiety Support',
-    content: 'Just had my first presentation of the semester. I was terrified, but remembering the breathing exercises helped me get through it.',
-    hugs: 24,
-    replies: 5
-  },
-  { 
-    id: 'p2', 
-    avatarColor: theme.colors.accents.terracotta, 
-    time: '4h ago', 
-    group: 'Final Year Stress',
-    content: 'Is anyone else feeling completely overwhelmed by their thesis? I feel like I am so far behind everyone else.',
-    hugs: 56,
-    replies: 12
-  },
-];
-
 export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
+  const [feed, setFeed] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchFeed = async () => {
+    try {
+      const response = await api.get('/community');
+      setFeed(response.data);
+    } catch (error) {
+      console.error('Error fetching community feed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeed();
+  }, []);
+
+  const handleHug = async (postId: string) => {
+    try {
+      await api.post(`/community/${postId}/hug`);
+      setFeed(feed.map(p => p.id === postId ? { ...p, hugs: p.hugs + 1 } : p));
+    } catch (error) {
+      console.error('Error sending hug:', error);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    return `${Math.floor(diffInHours / 24)}d ago`;
+  };
 
   return (
     <View style={styles.container}>
@@ -65,7 +82,7 @@ export default function CommunityScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
+        <Animated.View entering={FadeIn.duration(500)} style={styles.header}>
           <View style={styles.headerIconContainer}>
             <Users color={theme.colors.accents.gentlePeach} size={32} />
           </View>
@@ -74,7 +91,7 @@ export default function CommunityScreen() {
         </Animated.View>
 
         {/* My Groups */}
-        <Animated.View entering={FadeInUp.delay(100).duration(600)}>
+        <Animated.View entering={FadeInUp.delay(50).duration(500)}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Support Groups</Text>
             <TouchableOpacity><Text style={styles.seeAllText}>Explore</Text></TouchableOpacity>
@@ -87,7 +104,7 @@ export default function CommunityScreen() {
             decelerationRate="fast"
           >
             {GROUPS.map((group, index) => (
-              <Animated.View key={group.id} entering={FadeInUp.delay(150 + (index * 50)).duration(600)}>
+              <Animated.View key={group.id} entering={FadeInUp.delay(100 + (index * 50)).duration(500)}>
                 <TouchableOpacity style={[styles.groupCard, { backgroundColor: group.color + '15', borderColor: group.color + '30' }]} activeOpacity={0.8}>
                   <View style={[styles.groupIconWrap, { backgroundColor: group.color }]}>
                     <Users color={theme.colors.surface} size={20} />
@@ -101,46 +118,54 @@ export default function CommunityScreen() {
         </Animated.View>
 
         {/* Discussion Feed */}
-        <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.section}>
+        <Animated.View entering={FadeInUp.delay(150).duration(500)} style={styles.section}>
           <Text style={[styles.sectionTitle, { paddingHorizontal: 24, marginBottom: 16 }]}>Recent Discussions</Text>
           
-          <View style={styles.feedContainer}>
-            {FEED.map((post, index) => (
-              <Animated.View key={post.id} entering={FadeInUp.delay(300 + (index * 100)).duration(600)} style={styles.postCard}>
-                <View style={styles.postHeader}>
-                  <View style={styles.postAuthorInfo}>
-                    <View style={[styles.postAvatar, { backgroundColor: post.avatarColor }]} />
-                    <View>
-                      <Text style={styles.postGroup}>{post.group}</Text>
-                      <Text style={styles.postTime}>{post.time} • Anonymous</Text>
+          {loading ? (
+            <ActivityIndicator size="large" color={theme.colors.plum} style={{ marginTop: 40 }} />
+          ) : feed.length === 0 ? (
+             <View style={{ padding: 24, alignItems: 'center' }}>
+                <Text style={{ color: theme.colors.text.secondary }}>No discussions yet. Be the first to share!</Text>
+             </View>
+          ) : (
+            <View style={styles.feedContainer}>
+              {feed.map((post, index) => (
+                <Animated.View key={post.id} entering={FadeInUp.delay(200 + (index * 50)).duration(500)} style={styles.postCard}>
+                  <View style={styles.postHeader}>
+                    <View style={styles.postAuthorInfo}>
+                      <View style={[styles.postAvatar, { backgroundColor: theme.colors.accents.powderBlue }]} />
+                      <View>
+                        <Text style={styles.postGroup}>{post.group}</Text>
+                        <Text style={styles.postTime}>{formatDate(post.createdAt)} • Anonymous</Text>
+                      </View>
                     </View>
+                    <TouchableOpacity style={styles.moreBtn}>
+                      <MoreHorizontal color={theme.colors.text.tertiary} size={20} />
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity style={styles.moreBtn}>
-                    <MoreHorizontal color={theme.colors.text.tertiary} size={20} />
-                  </TouchableOpacity>
-                </View>
-                
-                <Text style={styles.postContent}>{post.content}</Text>
-                
-                <View style={styles.postFooter}>
-                  <TouchableOpacity style={styles.actionBtn}>
-                    <Heart color={theme.colors.text.secondary} size={20} />
-                    <Text style={styles.actionText}>Send Hug ({post.hugs})</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.actionBtn}>
-                    <MessageCircle color={theme.colors.text.secondary} size={20} />
-                    <Text style={styles.actionText}>{post.replies}</Text>
-                  </TouchableOpacity>
-                </View>
-              </Animated.View>
-            ))}
-          </View>
+                  
+                  <Text style={styles.postContent}>{post.content}</Text>
+                  
+                  <View style={styles.postFooter}>
+                    <TouchableOpacity style={styles.actionBtn} onPress={() => handleHug(post.id)}>
+                      <Heart color={post.hugs > 0 ? theme.colors.accents.dustyRose : theme.colors.text.secondary} fill={post.hugs > 0 ? theme.colors.accents.dustyRose : 'transparent'} size={20} />
+                      <Text style={styles.actionText}>Send Hug ({post.hugs})</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.actionBtn}>
+                      <MessageCircle color={theme.colors.text.secondary} size={20} />
+                      <Text style={styles.actionText}>Reply</Text>
+                    </TouchableOpacity>
+                  </View>
+                </Animated.View>
+              ))}
+            </View>
+          )}
         </Animated.View>
 
       </ScrollView>
 
       {/* FAB */}
-      <Animated.View entering={FadeInUp.delay(600).duration(600)} style={[styles.fabContainer, { bottom: insets.bottom + 20 }]}>
+      <Animated.View entering={FadeInUp.delay(400).duration(500)} style={[styles.fabContainer, { bottom: insets.bottom + 20 }]}>
         <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
           <PenSquare color={theme.colors.surface} size={24} />
           <Text style={styles.fabText}>Share Thought</Text>

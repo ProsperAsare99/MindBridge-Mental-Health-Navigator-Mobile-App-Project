@@ -2,10 +2,11 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect, useContext } from 'react';
 import { AuthProvider, AuthContext } from '../src/context/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
-import { theme } from '../src/theme/colors';
+import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 
 const InitialLayout = () => {
   const { userToken, isLoading } = useContext(AuthContext);
+  const theme = useTheme();
   const segments = useSegments();
   const router = useRouter();
 
@@ -23,7 +24,7 @@ const InitialLayout = () => {
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', backgroundColor: theme.colors.background }}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.plum} />
       </View>
     );
   }
@@ -40,8 +41,10 @@ const InitialLayout = () => {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <InitialLayout />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <InitialLayout />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

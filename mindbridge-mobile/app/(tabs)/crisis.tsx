@@ -8,7 +8,7 @@ import {
   Linking,
   StatusBar
 } from 'react-native';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,7 +22,7 @@ import {
   ShieldCheck
 } from 'lucide-react-native';
 
-const EMERGENCY_CONTACTS = [
+const getEmergencyContacts = (theme: any) => [
   {
     id: 'national',
     title: 'National Emergency',
@@ -59,6 +59,9 @@ const SAFETY_PLAN = [
 
 export default function CrisisSupportScreen() {
   const insets = useSafeAreaInsets();
+  const themeContext = useTheme();
+  const styles = createStyles(themeContext);
+  const EMERGENCY_CONTACTS = getEmergencyContacts(themeContext);
 
   const handleCall = (number: string) => {
     Linking.openURL(`tel:${number.replace(/\s+/g, '')}`);
@@ -66,9 +69,12 @@ export default function CrisisSupportScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={themeContext.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={['rgba(239, 68, 68, 0.05)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        colors={themeContext.isDark 
+          ? ['rgba(239, 68, 68, 0.1)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+          : ['rgba(239, 68, 68, 0.05)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+        } 
         locations={[0, 0.2, 1]}
         style={StyleSheet.absoluteFillObject} 
       />
@@ -79,7 +85,7 @@ export default function CrisisSupportScreen() {
       >
         <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
           <View style={styles.headerIconContainer}>
-            <ShieldAlert color={theme.colors.semantic.danger} size={36} />
+            <ShieldAlert color={themeContext.colors.semantic.danger} size={36} />
           </View>
           <Text style={styles.title}>Crisis Support</Text>
           <Text style={styles.subtitle}>You are not alone. If you are experiencing a mental health emergency, please reach out immediately.</Text>
@@ -98,15 +104,15 @@ export default function CrisisSupportScreen() {
                 onPress={() => handleCall(contact.number)}
                 activeOpacity={0.8}
               >
-                <View style={[styles.contactIconWrap, { backgroundColor: contact.primary ? 'rgba(255,255,255,0.2)' : contact.color + '15' }]}>
-                  <contact.icon color={contact.primary ? theme.colors.surface : contact.color} size={24} />
+                <View style={[styles.contactIconWrap, { backgroundColor: contact.primary ? 'rgba(255,255,255,0.2)' : contact.color + (themeContext.isDark ? '25' : '15') }]}>
+                  <contact.icon color={contact.primary ? themeContext.colors.onPrimary || '#FFF' : contact.color} size={24} />
                 </View>
                 <View style={styles.contactInfo}>
-                  <Text style={[styles.contactTitle, contact.primary && { color: theme.colors.surface }]}>{contact.title}</Text>
+                  <Text style={[styles.contactTitle, contact.primary && { color: themeContext.colors.onPrimary || '#FFF' }]}>{contact.title}</Text>
                   <Text style={[styles.contactDesc, contact.primary && { color: 'rgba(255,255,255,0.8)' }]}>{contact.description}</Text>
                 </View>
                 <View style={styles.callAction}>
-                  <Text style={[styles.contactNumber, contact.primary && { color: theme.colors.surface }]}>{contact.number}</Text>
+                  <Text style={[styles.contactNumber, contact.primary && { color: themeContext.colors.onPrimary || '#FFF' }]}>{contact.number}</Text>
                 </View>
               </TouchableOpacity>
             </Animated.View>
@@ -123,7 +129,7 @@ export default function CrisisSupportScreen() {
           
           <View style={styles.safetyCard}>
             <View style={styles.safetyBanner}>
-              <ShieldCheck color={theme.colors.accents.eucalyptus} size={20} />
+              <ShieldCheck color={themeContext.colors.accents.eucalyptus} size={20} />
               <Text style={styles.safetyBannerText}>Steps to stay safe right now</Text>
             </View>
             
@@ -140,13 +146,13 @@ export default function CrisisSupportScreen() {
 
         <Animated.View entering={FadeInUp.delay(800).duration(500)} style={styles.locationCard}>
           <View style={styles.locationIconWrap}>
-            <MapPin color={theme.colors.plum} size={24} />
+            <MapPin color={themeContext.colors.plum} size={24} />
           </View>
           <View style={styles.locationInfo}>
             <Text style={styles.locationTitle}>Find Nearest Hospital</Text>
             <Text style={styles.locationDesc}>Locate an emergency room near you.</Text>
           </View>
-          <ChevronRight color={theme.colors.text.disabled} size={20} />
+          <ChevronRight color={themeContext.colors.text.disabled} size={20} />
         </Animated.View>
 
       </ScrollView>
@@ -154,7 +160,7 @@ export default function CrisisSupportScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
@@ -171,13 +177,13 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: theme.isDark ? 'rgba(239, 68, 68, 0.2)' : 'rgba(239, 68, 68, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
     shadowColor: theme.colors.semantic.danger,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
+    shadowOpacity: theme.isDark ? 0.3 : 0.15,
     shadowRadius: 16,
     elevation: 8,
   },
@@ -215,17 +221,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: theme.isDark ? 0.2 : 0.04,
     shadowRadius: 12,
     elevation: 3,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   contactCardPrimary: {
     backgroundColor: theme.colors.semantic.danger,
     borderColor: theme.colors.semantic.danger,
     shadowColor: theme.colors.semantic.danger,
-    shadowOpacity: 0.2,
+    shadowOpacity: theme.isDark ? 0.4 : 0.2,
     shadowRadius: 16,
     elevation: 8,
   },
@@ -277,16 +283,16 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: theme.isDark ? 0.2 : 0.04,
     shadowRadius: 12,
     elevation: 3,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   safetyBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(52, 199, 89, 0.1)',
+    backgroundColor: theme.isDark ? 'rgba(52, 199, 89, 0.15)' : 'rgba(52, 199, 89, 0.1)',
     padding: 12,
     borderRadius: 16,
     marginBottom: 20,
@@ -306,7 +312,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: 'rgba(123, 97, 255, 0.1)',
+    backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -331,18 +337,18 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: theme.isDark ? 0.2 : 0.04,
     shadowRadius: 12,
     elevation: 3,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
     marginBottom: 20,
   },
   locationIconWrap: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(123, 97, 255, 0.1)',
+    backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,

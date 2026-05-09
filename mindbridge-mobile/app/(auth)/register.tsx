@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { useState, useContext } from 'react';
 import { AuthContext } from '../../src/context/AuthContext';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useRouter } from 'expo-router';
 import api from '../../src/services/api';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
@@ -71,8 +71,9 @@ const GHANA_INSTITUTIONS = [
 
 // ─── Custom Components ───────────────────────────────────────────────────────
 
-const ErrorMessage = ({ message }: { message: string | undefined }) => {
+const ErrorMessage = ({ message, theme }: { message: string | undefined, theme: any }) => {
   if (!message) return null;
+  const styles = createStyles(theme);
   return (
     <Animated.View entering={FadeInUp.duration(300)} style={styles.errorRow}>
       <AlertCircle color={theme.colors.semantic.danger} size={14} style={{ marginRight: 4 }} />
@@ -81,41 +82,48 @@ const ErrorMessage = ({ message }: { message: string | undefined }) => {
   );
 };
 
-const FormSection = ({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) => (
-  <View style={styles.sectionContainer}>
-    <View style={styles.sectionHeader}>
-      <View style={styles.sectionIconWrap}>
-        <Icon color={theme.colors.plum} size={20} />
+const FormSection = ({ title, icon: Icon, theme, children }: { title: string; icon: any; theme: any; children: React.ReactNode }) => {
+  const styles = createStyles(theme);
+  return (
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionIconWrap}>
+          <Icon color={theme.colors.plum} size={20} />
+        </View>
+        <Text style={styles.sectionTitle}>{title}</Text>
       </View>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <View style={styles.sectionCard}>
+        {children}
+      </View>
     </View>
-    <View style={styles.sectionCard}>
-      {children}
-    </View>
-  </View>
-);
+  );
+};
 
-const SelectGroup = ({ label, options, selectedValue, onSelect }: { label: string; options: string[]; selectedValue: string; onSelect: (val: string) => void }) => (
-  <View style={styles.inputWrapper}>
-    <Text style={styles.label}>{label}</Text>
-    <View style={styles.chipContainer}>
-      {options.map((opt) => (
-        <TouchableOpacity
-          key={opt}
-          style={[styles.chip, selectedValue === opt && styles.chipActive]}
-          onPress={() => onSelect(opt)}
-        >
-          <Text style={[styles.chipText, selectedValue === opt && styles.chipTextActive]}>{opt}</Text>
-        </TouchableOpacity>
-      ))}
+const SelectGroup = ({ label, options, selectedValue, onSelect, theme }: { label: string; options: string[]; selectedValue: string; onSelect: (val: string) => void; theme: any }) => {
+  const styles = createStyles(theme);
+  return (
+    <View style={styles.inputWrapper}>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.chipContainer}>
+        {options.map((opt) => (
+          <TouchableOpacity
+            key={opt}
+            style={[styles.chip, selectedValue === opt && styles.chipActive]}
+            onPress={() => onSelect(opt)}
+          >
+            <Text style={[styles.chipText, selectedValue === opt && styles.chipTextActive]}>{opt}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 // Searchable Dropdown Modal
-const InstitutionPicker = ({ value, onSelect, error }: { value: string; onSelect: (val: string) => void; error?: string }) => {
+const InstitutionPicker = ({ value, onSelect, error, theme }: { value: string; onSelect: (val: string) => void; error?: string; theme: any }) => {
   const [visible, setVisible] = useState(false);
   const [search, setSearch] = useState('');
+  const styles = createStyles(theme);
 
   const filtered = GHANA_INSTITUTIONS.filter(i =>
     i.toLowerCase().includes(search.toLowerCase())
@@ -133,7 +141,7 @@ const InstitutionPicker = ({ value, onSelect, error }: { value: string; onSelect
         </Text>
         <ChevronLeft color={theme.colors.plum} size={20} style={{ transform: [{ rotate: '-90deg' }] }} />
       </TouchableOpacity>
-      <ErrorMessage message={error} />
+      <ErrorMessage message={error} theme={theme} />
 
       <Modal visible={visible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
@@ -184,6 +192,8 @@ export default function RegisterScreen() {
   const { signIn } = useContext(AuthContext);
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const themeContext = useTheme();
+  const styles = createStyles(themeContext);
 
   // Basic Info
   const [name, setName] = useState('');
@@ -254,9 +264,12 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={themeContext.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={['rgba(123, 97, 255, 0.12)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        colors={themeContext.isDark 
+          ? ['rgba(123, 97, 255, 0.15)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+          : ['rgba(123, 97, 255, 0.12)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+        } 
         locations={[0, 0.3, 1]}
         style={StyleSheet.absoluteFillObject}
       />
@@ -273,7 +286,7 @@ export default function RegisterScreen() {
           {/* Header */}
           <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-              <ChevronLeft color={theme.colors.plum} size={32} />
+              <ChevronLeft color={themeContext.colors.plum} size={32} />
             </TouchableOpacity>
           </Animated.View>
 
@@ -293,13 +306,13 @@ export default function RegisterScreen() {
               <Text style={styles.subtitle}>Let's personalize your experience.</Text>
             </View>
 
-            <FormSection title="Account Details" icon={User}>
+            <FormSection title="Account Details" icon={User} theme={themeContext}>
               <View style={styles.inputWrapper}>
                 <Text style={styles.label}>Full Name (Optional)</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Prosper Shaibu Asare"
-                  placeholderTextColor={theme.colors.text.disabled}
+                  placeholderTextColor={themeContext.colors.text.disabled}
                   value={name}
                   onChangeText={setName}
                   onFocus={() => setFocusedField('name')}
@@ -312,12 +325,12 @@ export default function RegisterScreen() {
                 <TextInput
                   style={[styles.input, errors.username && styles.inputError]}
                   placeholder="asare09"
-                  placeholderTextColor={theme.colors.text.disabled}
+                  placeholderTextColor={themeContext.colors.text.disabled}
                   autoCapitalize="none"
                   value={username}
                   onChangeText={(txt) => { setUsername(txt); if (errors.username) setErrors({ ...errors, username: undefined }); }}
                 />
-                <ErrorMessage message={errors.username} />
+                <ErrorMessage message={errors.username} theme={themeContext} />
               </View>
 
               <View style={styles.inputWrapper}>
@@ -325,7 +338,7 @@ export default function RegisterScreen() {
                 <TextInput
                   style={[styles.input, errors.email && styles.inputError]}
                   placeholder="anna@example.com"
-                  placeholderTextColor={theme.colors.text.disabled}
+                  placeholderTextColor={themeContext.colors.text.disabled}
                   autoCapitalize="none"
                   keyboardType="email-address"
                   value={email}
@@ -333,7 +346,7 @@ export default function RegisterScreen() {
                   onFocus={() => setFocusedField('email')}
                   onBlur={() => setFocusedField('none')}
                 />
-                <ErrorMessage message={errors.email} />
+                <ErrorMessage message={errors.email} theme={themeContext} />
               </View>
 
               <View style={styles.inputWrapper}>
@@ -341,14 +354,14 @@ export default function RegisterScreen() {
                 <TextInput
                   style={[styles.input, errors.phoneNumber && styles.inputError]}
                   placeholder="+233 55 123 4567"
-                  placeholderTextColor={theme.colors.text.disabled}
+                  placeholderTextColor={themeContext.colors.text.disabled}
                   keyboardType="phone-pad"
                   value={phoneNumber}
                   onChangeText={(txt) => { setPhoneNumber(txt); if (errors.phoneNumber) setErrors({ ...errors, phoneNumber: undefined }); }}
                   onFocus={() => setFocusedField('none')}
                   onBlur={() => setFocusedField('none')}
                 />
-                <ErrorMessage message={errors.phoneNumber} />
+                <ErrorMessage message={errors.phoneNumber} theme={themeContext} />
               </View>
 
               <View style={styles.inputWrapper}>
@@ -357,7 +370,7 @@ export default function RegisterScreen() {
                   <TextInput
                     style={styles.passwordInput}
                     placeholder="••••••••"
-                    placeholderTextColor={theme.colors.text.disabled}
+                    placeholderTextColor={themeContext.colors.text.disabled}
                     secureTextEntry={!showPassword}
                     value={password}
                     onChangeText={(txt) => { setPassword(txt); if (errors.password) setErrors({ ...errors, password: undefined }); }}
@@ -365,10 +378,10 @@ export default function RegisterScreen() {
                     onBlur={() => setFocusedField('none')}
                   />
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                    {showPassword ? <EyeOff color={theme.colors.text.disabled} size={22} /> : <Eye color={theme.colors.text.disabled} size={22} />}
+                    {showPassword ? <EyeOff color={themeContext.colors.text.disabled} size={22} /> : <Eye color={themeContext.colors.text.disabled} size={22} />}
                   </TouchableOpacity>
                 </View>
-                <ErrorMessage message={errors.password} />
+                <ErrorMessage message={errors.password} theme={themeContext} />
               </View>
 
               <View style={styles.inputWrapper}>
@@ -376,20 +389,21 @@ export default function RegisterScreen() {
                 <TextInput
                   style={[styles.input, errors.confirmPassword && styles.inputError]}
                   placeholder="••••••••"
-                  placeholderTextColor={theme.colors.text.disabled}
+                  placeholderTextColor={themeContext.colors.text.disabled}
                   secureTextEntry={!showPassword}
                   value={confirmPassword}
                   onChangeText={(txt) => { setConfirmPassword(txt); if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined }); }}
                 />
-                <ErrorMessage message={errors.confirmPassword} />
+                <ErrorMessage message={errors.confirmPassword} theme={themeContext} />
               </View>
             </FormSection>
 
-            <FormSection title="Academic Context" icon={GraduationCap}>
+            <FormSection title="Academic Context" icon={GraduationCap} theme={themeContext}>
               <InstitutionPicker
                 value={institution}
                 onSelect={setInstitution}
                 error={errors.institution}
+                theme={themeContext}
               />
 
               <View style={styles.inputWrapper}>
@@ -397,7 +411,7 @@ export default function RegisterScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="e.g. Computer Science"
-                  placeholderTextColor={theme.colors.text.disabled}
+                  placeholderTextColor={themeContext.colors.text.disabled}
                   value={faculty}
                   onChangeText={setFaculty}
                 />
@@ -408,6 +422,7 @@ export default function RegisterScreen() {
                 options={['Level 100', 'Level 200', 'Level 300', 'Level 400', 'Postgrad']}
                 selectedValue={level}
                 onSelect={setLevel}
+                theme={themeContext}
               />
 
               <SelectGroup
@@ -415,15 +430,17 @@ export default function RegisterScreen() {
                 options={['Full-time', 'Part-time']}
                 selectedValue={status}
                 onSelect={setStatus}
+                theme={themeContext}
               />
             </FormSection>
 
-            <FormSection title="Support Preferences" icon={Heart}>
+            <FormSection title="Support Preferences" icon={Heart} theme={themeContext}>
               <SelectGroup
                 label="Primary Source of Stress"
                 options={['Academics', 'Financial', 'Relationships', 'Social', 'Other']}
                 selectedValue={stressSource}
                 onSelect={setStressSource}
+                theme={themeContext}
               />
 
               <SelectGroup
@@ -431,6 +448,7 @@ export default function RegisterScreen() {
                 options={['Self-help', 'Mood tracking', 'Chat', 'Crisis', 'All']}
                 selectedValue={supportType}
                 onSelect={setSupportType}
+                theme={themeContext}
               />
 
               <SelectGroup
@@ -438,11 +456,12 @@ export default function RegisterScreen() {
                 options={['Yes', 'No']}
                 selectedValue={reminders}
                 onSelect={setReminders}
+                theme={themeContext}
               />
             </FormSection>
 
             <View style={styles.personalizationNote}>
-              <Heart color={theme.colors.plum} size={20} style={{ opacity: 0.7 }} />
+              <Heart color={themeContext.colors.plum} size={20} style={{ opacity: 0.7 }} />
               <Text style={styles.personalizationText}>
                 This information helps us shape a supportive experience tailored just for you.
               </Text>
@@ -455,7 +474,7 @@ export default function RegisterScreen() {
               activeOpacity={0.8}
             >
               {loading ? (
-                <ActivityIndicator color={theme.colors.surface} />
+                <ActivityIndicator color={themeContext.colors.onPrimary || '#FFF'} />
               ) : (
                 <Text style={styles.primaryButtonText}>Create Account</Text>
               )}
@@ -471,7 +490,7 @@ export default function RegisterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.backgroundSecondary },
   scrollContent: { paddingHorizontal: 24, minHeight: height },
   header: { marginTop: 10, marginBottom: 20 },
@@ -492,7 +511,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface, 
     shadowColor: theme.colors.plum, 
     shadowOffset: { width: 0, height: 8 }, 
-    shadowOpacity: 0.1, 
+    shadowOpacity: theme.isDark ? 0.3 : 0.1, 
     shadowRadius: 16, 
     elevation: 8 
   },
@@ -506,26 +525,26 @@ const styles = StyleSheet.create({
   
   sectionContainer: { gap: 20 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
-  sectionIconWrap: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(123, 97, 255, 0.1)', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  sectionIconWrap: { width: 36, height: 36, borderRadius: 12, backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.1)', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   sectionTitle: { fontSize: 20, fontWeight: '800', color: theme.colors.text.primary, letterSpacing: -0.5 },
-  sectionCard: { backgroundColor: theme.colors.surface, borderRadius: 24, padding: 20, gap: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' },
+  sectionCard: { backgroundColor: theme.colors.surface, borderRadius: 24, padding: 20, gap: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.2 : 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' },
   
   inputWrapper: { gap: 8 },
   label: { color: theme.colors.text.primary, fontSize: 13, fontWeight: '700', marginLeft: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
-  input: { backgroundColor: theme.colors.background, color: theme.colors.text.primary, fontSize: 16, fontWeight: '600', height: 60, borderRadius: 16, paddingHorizontal: 20, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)' },
+  input: { backgroundColor: theme.colors.background, color: theme.colors.text.primary, fontSize: 16, fontWeight: '600', height: 60, borderRadius: 16, paddingHorizontal: 20, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
   inputError: { borderColor: theme.colors.semantic.danger, borderWidth: 2 },
   errorRow: { flexDirection: 'row', alignItems: 'center', marginLeft: 4, marginTop: 4 },
   errorText: { color: theme.colors.semantic.danger, fontSize: 13, fontWeight: '600' },
   
-  passwordContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.background, borderRadius: 16, height: 60, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)' },
+  passwordContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.background, borderRadius: 16, height: 60, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
   passwordInput: { flex: 1, height: '100%', paddingHorizontal: 20, fontSize: 16, color: theme.colors.text.primary, fontWeight: '600' },
   eyeIcon: { padding: 16 },
   
   chipContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  chip: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16, backgroundColor: theme.colors.background, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)' },
+  chip: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16, backgroundColor: theme.colors.background, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
   chipActive: { backgroundColor: theme.colors.plum, borderColor: theme.colors.plum },
   chipText: { fontSize: 15, color: theme.colors.text.secondary, fontWeight: '600' },
-  chipTextActive: { color: theme.colors.surface },
+  chipTextActive: { color: theme.colors.onPrimary || '#FFF' },
 
   // Picker Styles
   pickerTrigger: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
@@ -539,16 +558,16 @@ const styles = StyleSheet.create({
   searchIcon: { marginRight: 10 },
   searchInput: { flex: 1, height: 56, color: theme.colors.text.primary, fontWeight: '600', fontSize: 16 },
   listContent: { paddingBottom: 40 },
-  listItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 18, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(0,0,0,0.1)' },
-  listItemActive: { backgroundColor: 'rgba(123, 97, 255, 0.05)', borderRadius: 16, paddingHorizontal: 16, marginVertical: 4, borderBottomWidth: 0 },
+  listItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 18, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)' },
+  listItemActive: { backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.05)', borderRadius: 16, paddingHorizontal: 16, marginVertical: 4, borderBottomWidth: 0 },
   listItemText: { fontSize: 16, color: theme.colors.text.primary, fontWeight: '500', flex: 1 },
   listItemTextActive: { color: theme.colors.plum, fontWeight: '700' },
 
-  personalizationNote: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(123, 97, 255, 0.05)', padding: 16, borderRadius: 20, marginTop: 8, gap: 16, borderWidth: 1, borderColor: 'rgba(123, 97, 255, 0.1)' },
+  personalizationNote: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.05)', padding: 16, borderRadius: 20, marginTop: 8, gap: 16, borderWidth: 1, borderColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.1)' },
   personalizationText: { flex: 1, fontSize: 14, color: theme.colors.plum, fontWeight: '600', lineHeight: 20 },
   
-  primaryButton: { backgroundColor: theme.colors.plum, height: 60, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginTop: 16, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 16, elevation: 6 },
-  primaryButtonText: { color: theme.colors.surface, fontWeight: '800', fontSize: 17, letterSpacing: 0.2 },
+  primaryButton: { backgroundColor: theme.colors.plum, height: 60, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginTop: 16, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 8 }, shadowOpacity: theme.isDark ? 0.4 : 0.2, shadowRadius: 16, elevation: 6 },
+  primaryButtonText: { color: theme.colors.onPrimary || '#FFF', fontWeight: '800', fontSize: 17, letterSpacing: 0.2 },
   signUpContainer: { marginTop: 16, alignItems: 'center', marginBottom: 20 },
   signUpText: { color: theme.colors.text.secondary, fontSize: 15, fontWeight: '500' },
   signUpLink: { color: theme.colors.plum, fontWeight: '800' },

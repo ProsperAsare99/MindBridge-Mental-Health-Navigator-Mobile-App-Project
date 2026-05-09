@@ -11,7 +11,7 @@ import {
   Dimensions,
   StatusBar
 } from 'react-native';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -41,6 +41,9 @@ const INITIAL_MESSAGES = [
 
 export default function AIGuideScreen() {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const styles = createStyles(theme);
+  
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
 
@@ -74,9 +77,12 @@ export default function AIGuideScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={['rgba(46, 64, 87, 0.05)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        colors={theme.isDark 
+          ? ['rgba(46, 64, 87, 0.15)', theme.colors.background, theme.colors.backgroundSecondary]
+          : ['rgba(46, 64, 87, 0.05)', theme.colors.background, theme.colors.backgroundSecondary]
+        } 
         locations={[0, 0.2, 1]}
         style={StyleSheet.absoluteFillObject} 
       />
@@ -84,7 +90,7 @@ export default function AIGuideScreen() {
       <Animated.View entering={FadeIn.duration(600)} style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <View style={styles.headerLeft}>
           <View style={styles.avatarWrap}>
-            <Bot color={theme.colors.surface} size={24} />
+            <Bot color={theme.colors.onPrimary || '#FFF'} size={24} />
           </View>
           <View>
             <Text style={styles.headerTitle}>MindBridge Guide</Text>
@@ -115,7 +121,7 @@ export default function AIGuideScreen() {
             >
               {msg.isAi && (
                 <View style={[styles.messageAvatar, { backgroundColor: theme.colors.plumLight }]}>
-                  <Bot color={theme.colors.surface} size={16} />
+                  <Bot color={theme.colors.onPrimary || '#FFF'} size={16} />
                 </View>
               )}
               <View style={[
@@ -168,7 +174,7 @@ export default function AIGuideScreen() {
               onPress={handleSend}
               disabled={!input.trim()}
             >
-              <Send color={theme.colors.surface} size={20} />
+              <Send color={theme.colors.onPrimary || '#FFF'} size={20} />
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -177,7 +183,7 @@ export default function AIGuideScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
@@ -192,8 +198,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderBottomColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    backgroundColor: theme.isDark ? 'rgba(36,36,36,0.8)' : 'rgba(255,255,255,0.8)',
   },
   headerLeft: {
     flexDirection: 'row',
@@ -259,11 +265,11 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: theme.isDark ? 0.2 : 0.03,
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   bubbleUser: {
     backgroundColor: theme.colors.plum,
@@ -277,14 +283,14 @@ const styles = StyleSheet.create({
     color: theme.colors.text.primary,
   },
   textUser: {
-    color: theme.colors.surface,
+    color: theme.colors.onPrimary || '#FFF',
   },
   inputArea: {
     backgroundColor: theme.colors.surface,
     paddingTop: 16,
     paddingHorizontal: 24,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0,0,0,0.05)',
+    borderTopColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
   },
   promptsScroll: {
     marginBottom: 16,
@@ -299,7 +305,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.03)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
   },
   promptText: {
     fontSize: 14,
@@ -314,7 +320,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.03)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
   },
   textInput: {
     flex: 1,

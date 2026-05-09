@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { useState, useContext } from 'react';
 import { AuthContext } from '../../src/context/AuthContext';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import api from '../../src/services/api';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
@@ -26,8 +26,9 @@ import AuthCharacters, { AuthField } from '../../src/components/AuthCharacters';
 
 const { height, width } = Dimensions.get('window');
 
-const ErrorMessage = ({ message }: { message: string }) => {
+const ErrorMessage = ({ message, theme }: { message: string, theme: any }) => {
   if (!message) return null;
+  const styles = createStyles(theme);
   return (
     <Animated.View entering={FadeInUp.duration(300)} style={styles.errorRow}>
       <AlertCircle color={theme.colors.semantic.danger} size={14} style={{ marginRight: 4 }} />
@@ -41,6 +42,8 @@ export default function LoginScreen() {
   const router = useRouter();
   const { anonymous } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
+  const themeContext = useTheme();
+  const styles = createStyles(themeContext);
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -104,9 +107,12 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={themeContext.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={['rgba(123, 97, 255, 0.12)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        colors={themeContext.isDark 
+          ? ['rgba(123, 97, 255, 0.15)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+          : ['rgba(123, 97, 255, 0.12)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+        } 
         locations={[0, 0.3, 1]}
         style={StyleSheet.absoluteFillObject}
       />
@@ -123,7 +129,7 @@ export default function LoginScreen() {
           {/* Header */}
           <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-              <ChevronLeft color={theme.colors.plum} size={32} />
+              <ChevronLeft color={themeContext.colors.plum} size={32} />
             </TouchableOpacity>
           </Animated.View>
 
@@ -157,7 +163,7 @@ export default function LoginScreen() {
                 <TextInput
                   style={[styles.input, errors.email && styles.inputError]}
                   placeholder="anna@example.com"
-                  placeholderTextColor={theme.colors.text.disabled}
+                  placeholderTextColor={themeContext.colors.text.disabled}
                   autoCapitalize="none"
                   keyboardType="email-address"
                   value={email}
@@ -168,7 +174,7 @@ export default function LoginScreen() {
                   onFocus={() => setFocusedField('email')}
                   onBlur={() => setFocusedField('none')}
                 />
-                <ErrorMessage message={errors.email || ''} />
+                <ErrorMessage message={errors.email || ''} theme={themeContext} />
               </View>
 
               <View style={styles.inputWrapper}>
@@ -177,7 +183,7 @@ export default function LoginScreen() {
                   <TextInput
                     style={styles.passwordInput}
                     placeholder="••••••••"
-                    placeholderTextColor={theme.colors.text.disabled}
+                    placeholderTextColor={themeContext.colors.text.disabled}
                     secureTextEntry={!showPassword}
                     value={password}
                     onChangeText={(txt) => {
@@ -192,13 +198,13 @@ export default function LoginScreen() {
                     style={styles.eyeIcon}
                   >
                     {showPassword ? (
-                      <EyeOff color={theme.colors.text.disabled} size={22} />
+                      <EyeOff color={themeContext.colors.text.disabled} size={22} />
                     ) : (
-                      <Eye color={theme.colors.text.disabled} size={22} />
+                      <Eye color={themeContext.colors.text.disabled} size={22} />
                     )}
                   </TouchableOpacity>
                 </View>
-                <ErrorMessage message={errors.password || ''} />
+                <ErrorMessage message={errors.password || ''} theme={themeContext} />
               </View>
 
               <TouchableOpacity style={styles.forgotPasswordBtn} onPress={() => Alert.alert('Reset Password', 'Instructions have been sent to your email.')}>
@@ -213,7 +219,7 @@ export default function LoginScreen() {
               activeOpacity={0.8}
             >
               {loading
-                ? <ActivityIndicator color={theme.colors.surface} />
+                ? <ActivityIndicator color={themeContext.colors.onPrimary || '#FFF'} />
                 : <Text style={styles.primaryButtonText}>Log In</Text>}
             </TouchableOpacity>
 
@@ -229,7 +235,7 @@ export default function LoginScreen() {
               disabled={loading}
               activeOpacity={0.7}
             >
-              <Ghost color={theme.colors.plum} size={20} style={{ marginRight: 12 }} />
+              <Ghost color={themeContext.colors.plum} size={20} style={{ marginRight: 12 }} />
               <Text style={styles.anonymousButtonText}>
                 {loading ? 'Starting Session...' : 'Continue Anonymously'}
               </Text>
@@ -250,7 +256,7 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: theme.colors.backgroundSecondary 
@@ -284,7 +290,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface, 
     shadowColor: theme.colors.plum, 
     shadowOffset: { width: 0, height: 8 }, 
-    shadowOpacity: 0.1, 
+    shadowOpacity: theme.isDark ? 0.3 : 0.1, 
     shadowRadius: 16, 
     elevation: 8 
   },
@@ -335,11 +341,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: theme.isDark ? 0.2 : 0.04,
     shadowRadius: 12,
     elevation: 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   passwordContainer: { 
     flexDirection: 'row', 
@@ -349,11 +355,11 @@ const styles = StyleSheet.create({
     height: 60,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: theme.isDark ? 0.2 : 0.04,
     shadowRadius: 12,
     elevation: 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   passwordInput: {
     flex: 1,
@@ -380,21 +386,21 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     shadowColor: theme.colors.plum,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
+    shadowOpacity: theme.isDark ? 0.4 : 0.2,
     shadowRadius: 16,
     elevation: 6,
   },
-  primaryButtonText: { color: theme.colors.surface, fontWeight: '800', fontSize: 17, letterSpacing: 0.2 },
+  primaryButtonText: { color: theme.colors.onPrimary || '#FFF', fontWeight: '800', fontSize: 17, letterSpacing: 0.2 },
   dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 24, gap: 12 },
-  divider: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: 'rgba(0,0,0,0.1)' },
+  divider: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)' },
   dividerText: { color: theme.colors.text.secondary, fontSize: 13, fontWeight: '700' },
   anonymousButton: { 
     flexDirection: 'row', 
-    backgroundColor: 'rgba(123, 97, 255, 0.08)', 
+    backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.08)', 
     height: 60, 
     borderRadius: 20, 
     borderWidth: 1.5, 
-    borderColor: 'rgba(123, 97, 255, 0.15)', 
+    borderColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.15)', 
     justifyContent: 'center', 
     alignItems: 'center' 
   },

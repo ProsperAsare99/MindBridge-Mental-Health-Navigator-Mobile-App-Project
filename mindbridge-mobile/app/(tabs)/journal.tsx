@@ -12,7 +12,7 @@ import {
   Dimensions,
   ActivityIndicator
 } from 'react-native';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,21 +29,24 @@ import api from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
 
-const getMoodIcon = (mood: string) => {
-  switch(mood) {
-    case 'calm': return <Wind color={theme.colors.accents.eucalyptus} size={16} />;
-    case 'anxious': return <CloudRain color={theme.colors.accents.powderBlue} size={16} />;
-    default: return <Sun color={theme.colors.accents.gentlePeach} size={16} />;
-  }
-};
-
 export default function JournalScreen() {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const styles = createStyles(theme);
+  
   const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isWriting, setIsWriting] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
+
+  const getMoodIcon = (mood: string) => {
+    switch(mood) {
+      case 'calm': return <Wind color={theme.colors.accents.eucalyptus} size={16} />;
+      case 'anxious': return <CloudRain color={theme.colors.accents.powderBlue} size={16} />;
+      default: return <Sun color={theme.colors.accents.gentlePeach} size={16} />;
+    }
+  };
 
   const fetchEntries = async () => {
     try {
@@ -90,9 +93,12 @@ export default function JournalScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={['rgba(123, 97, 255, 0.08)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        colors={theme.isDark 
+          ? ['rgba(123, 97, 255, 0.15)', theme.colors.background, theme.colors.backgroundSecondary]
+          : ['rgba(123, 97, 255, 0.08)', theme.colors.background, theme.colors.backgroundSecondary]
+        } 
         locations={[0, 0.2, 1]}
         style={StyleSheet.absoluteFillObject}
       />
@@ -113,7 +119,7 @@ export default function JournalScreen() {
                 style={styles.newBtn}
                 onPress={() => setIsWriting(true)}
               >
-                <Plus color={theme.colors.surface} size={24} />
+                <Plus color={theme.colors.onPrimary || '#FFF'} size={24} />
               </TouchableOpacity>
             </View>
           </Animated.View>
@@ -196,7 +202,7 @@ export default function JournalScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: theme.colors.backgroundSecondary, 
@@ -233,7 +239,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     shadowColor: theme.colors.plum,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: theme.isDark ? 0.5 : 0.3,
     shadowRadius: 8,
     elevation: 6,
   },
@@ -246,11 +252,11 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: theme.isDark ? 0.2 : 0.04,
     shadowRadius: 12,
     elevation: 3,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   entryHeader: {
     flexDirection: 'row',
@@ -302,7 +308,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
+    borderBottomColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)',
   },
   iconBtn: {
     width: 40,
@@ -318,7 +324,7 @@ const styles = StyleSheet.create({
   saveBtn: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: 'rgba(123, 97, 255, 0.1)',
+    backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.2)' : 'rgba(123, 97, 255, 0.1)',
     borderRadius: 16,
   },
   saveBtnDisabled: {

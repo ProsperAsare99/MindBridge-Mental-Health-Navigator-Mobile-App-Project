@@ -9,7 +9,7 @@ import {
   StatusBar,
   ActivityIndicator
 } from 'react-native';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -24,16 +24,19 @@ import api from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
 
-const GROUPS = [
-  { id: '1', title: 'Final Year Stress', members: '1.2k', color: theme.colors.accents.powderBlue },
-  { id: '2', title: 'Anxiety Support', members: '3.4k', color: theme.colors.accents.gentlePeach },
-  { id: '3', title: 'Meditation Group', members: '850', color: theme.colors.accents.softMint },
-];
-
 export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const styles = createStyles(theme);
+  
   const [feed, setFeed] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const GROUPS = [
+    { id: '1', title: 'Final Year Stress', members: '1.2k', color: theme.colors.accents.powderBlue },
+    { id: '2', title: 'Anxiety Support', members: '3.4k', color: theme.colors.accents.gentlePeach },
+    { id: '3', title: 'Meditation Group', members: '850', color: theme.colors.accents.softMint },
+  ];
 
   const fetchFeed = async () => {
     try {
@@ -71,9 +74,12 @@ export default function CommunityScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={['rgba(216, 164, 143, 0.05)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        colors={theme.isDark 
+          ? ['rgba(216, 164, 143, 0.15)', theme.colors.background, theme.colors.backgroundSecondary]
+          : ['rgba(216, 164, 143, 0.05)', theme.colors.background, theme.colors.backgroundSecondary]
+        } 
         locations={[0, 0.2, 1]}
         style={StyleSheet.absoluteFillObject} 
       />
@@ -105,9 +111,9 @@ export default function CommunityScreen() {
           >
             {GROUPS.map((group, index) => (
               <Animated.View key={group.id} entering={FadeInUp.delay(100 + (index * 50)).duration(500)}>
-                <TouchableOpacity style={[styles.groupCard, { backgroundColor: group.color + '15', borderColor: group.color + '30' }]} activeOpacity={0.8}>
+                <TouchableOpacity style={[styles.groupCard, { backgroundColor: group.color + (theme.isDark ? '25' : '15'), borderColor: group.color + (theme.isDark ? '40' : '30') }]} activeOpacity={0.8}>
                   <View style={[styles.groupIconWrap, { backgroundColor: group.color }]}>
-                    <Users color={theme.colors.surface} size={20} />
+                    <Users color={theme.colors.onPrimary || '#FFF'} size={20} />
                   </View>
                   <Text style={styles.groupTitle} numberOfLines={2}>{group.title}</Text>
                   <Text style={styles.groupMembers}>{group.members} members</Text>
@@ -167,7 +173,7 @@ export default function CommunityScreen() {
       {/* FAB */}
       <Animated.View entering={FadeInUp.delay(400).duration(500)} style={[styles.fabContainer, { bottom: insets.bottom + 20 }]}>
         <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
-          <PenSquare color={theme.colors.surface} size={24} />
+          <PenSquare color={theme.colors.onPrimary || '#FFF'} size={24} />
           <Text style={styles.fabText}>Share Thought</Text>
         </TouchableOpacity>
       </Animated.View>
@@ -175,7 +181,7 @@ export default function CommunityScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
@@ -197,7 +203,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: theme.colors.accents.gentlePeach,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
+    shadowOpacity: theme.isDark ? 0.3 : 0.15,
     shadowRadius: 16,
     elevation: 8,
   },
@@ -274,11 +280,11 @@ const styles = StyleSheet.create({
     padding: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
+    shadowOpacity: theme.isDark ? 0.2 : 0.03,
     shadowRadius: 12,
     elevation: 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   postHeader: {
     flexDirection: 'row',
@@ -319,7 +325,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0,0,0,0.05)',
+    borderTopColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     paddingTop: 16,
     gap: 24,
   },
@@ -346,7 +352,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     shadowColor: theme.colors.plum,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
+    shadowOpacity: theme.isDark ? 0.5 : 0.3,
     shadowRadius: 16,
     elevation: 8,
     gap: 8,
@@ -354,6 +360,6 @@ const styles = StyleSheet.create({
   fabText: {
     fontSize: 16,
     fontWeight: '700',
-    color: theme.colors.surface,
+    color: theme.colors.onPrimary || '#FFF',
   }
 });

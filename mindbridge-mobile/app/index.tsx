@@ -2,10 +2,11 @@ import { Redirect } from 'expo-router';
 import { useContext } from 'react';
 import { AuthContext } from '../src/context/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
-import { theme } from '../src/theme/colors';
+import { useTheme } from '../src/context/ThemeContext';
 
 export default function Index() {
   const { userToken, isLoading } = useContext(AuthContext);
+  const theme = useTheme();
 
   if (isLoading) {
     return (

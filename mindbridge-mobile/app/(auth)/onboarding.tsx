@@ -17,7 +17,7 @@ import Reanimated from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { 
   ChevronRight, ChevronLeft, ShieldCheck, User, Sparkles, CheckCircle2,
   Info
@@ -210,7 +210,8 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   }
 ];
 
-const DiscreteSlider = ({ value, onValueChange }: { value: number, onValueChange: (val: number) => void }) => {
+const DiscreteSlider = ({ value, onValueChange, theme }: { value: number, onValueChange: (val: number) => void, theme: any }) => {
+  const styles = createStyles(theme);
   return (
     <View style={styles.sliderContainer}>
       <View style={styles.sliderTrack} />
@@ -235,6 +236,8 @@ const DiscreteSlider = ({ value, onValueChange }: { value: number, onValueChange
 export default function OnboardingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const themeContext = useTheme();
+  const styles = createStyles(themeContext);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({
     stressors: {}
@@ -314,7 +317,7 @@ export default function OnboardingScreen() {
         return (
           <View style={styles.centerContent}>
             <View style={styles.iconCircle}>
-              <ShieldCheck color={theme.colors.plum} size={40} strokeWidth={1.5} />
+              <ShieldCheck color={themeContext.colors.plum} size={40} strokeWidth={1.5} />
             </View>
             <Text style={styles.title}>{step.title}</Text>
             <Text style={styles.privacyText}>{step.subtitle}</Text>
@@ -335,14 +338,14 @@ export default function OnboardingScreen() {
             <TextInput
               style={styles.textInput}
               placeholder="Your name"
-              placeholderTextColor={theme.colors.text.disabled}
+              placeholderTextColor={themeContext.colors.text.disabled}
               value={answers[step.id] || ''}
               onChangeText={(text) => setAnswers({ ...answers, [step.id]: text })}
               autoFocus
             />
             {step.whyWeAsk && (
               <View style={styles.whyWeAskBox}>
-                <Info color={theme.colors.plum} size={16} />
+                <Info color={themeContext.colors.plum} size={16} />
                 <Text style={styles.whyWeAskText}>{step.whyWeAsk}</Text>
               </View>
             )}
@@ -378,7 +381,7 @@ export default function OnboardingScreen() {
                   >
                     {step.type === 'multiple-choice' && (
                       <View style={[styles.checkbox, isSelected && styles.checkboxActive]}>
-                        {isSelected && <CheckCircle2 color={theme.colors.surface} size={16} />}
+                        {isSelected && <CheckCircle2 color={themeContext.colors.surface} size={16} />}
                       </View>
                     )}
                     <Text style={[
@@ -395,7 +398,7 @@ export default function OnboardingScreen() {
 
             {step.whyWeAsk && (
               <View style={styles.whyWeAskBox}>
-                <Info color={theme.colors.plum} size={16} />
+                <Info color={themeContext.colors.plum} size={16} />
                 <Text style={styles.whyWeAskText}>{step.whyWeAsk}</Text>
               </View>
             )}
@@ -414,7 +417,8 @@ export default function OnboardingScreen() {
                   <Text style={styles.sliderLabel}>{q.label}</Text>
                   <DiscreteSlider 
                     value={answers.stressors?.[q.key] || 0} 
-                    onValueChange={(val) => handleSliderChange(q.key, val)} 
+                    onValueChange={(val) => handleSliderChange(q.key, val)}
+                    theme={themeContext}
                   />
                 </View>
               ))}
@@ -422,7 +426,7 @@ export default function OnboardingScreen() {
 
             {step.whyWeAsk && (
               <View style={styles.whyWeAskBox}>
-                <Info color={theme.colors.plum} size={16} />
+                <Info color={themeContext.colors.plum} size={16} />
                 <Text style={styles.whyWeAskText}>{step.whyWeAsk}</Text>
               </View>
             )}
@@ -441,7 +445,7 @@ export default function OnboardingScreen() {
         return (
           <View style={styles.centerContent}>
             <View style={styles.iconCircle}>
-              <User color={theme.colors.plum} size={40} strokeWidth={1.5} />
+              <User color={themeContext.colors.plum} size={40} strokeWidth={1.5} />
             </View>
             <Text style={styles.title}>{step.title}</Text>
             <Text style={styles.summaryGreeting}>Hey {name}!</Text>
@@ -482,9 +486,12 @@ export default function OnboardingScreen() {
       style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={themeContext.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={['rgba(123, 97, 255, 0.12)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        colors={themeContext.isDark 
+          ? ['rgba(123, 97, 255, 0.15)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+          : ['rgba(123, 97, 255, 0.12)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+        } 
         locations={[0, 0.3, 1]}
         style={StyleSheet.absoluteFillObject} 
       />
@@ -494,7 +501,7 @@ export default function OnboardingScreen() {
         <View style={styles.headerTop}>
           {currentStepIndex > 0 ? (
             <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
-              <ChevronLeft color={theme.colors.plum} size={28} />
+              <ChevronLeft color={themeContext.colors.plum} size={28} />
             </TouchableOpacity>
           ) : <View style={{ width: 28 }} />}
           
@@ -538,7 +545,7 @@ export default function OnboardingScreen() {
         <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) + 10 }]}>
           <View style={styles.leftFooterActions}>
             <TouchableOpacity onPress={handleBack} style={styles.backFooterBtn}>
-              <ChevronLeft color={theme.colors.plum} size={24} />
+              <ChevronLeft color={themeContext.colors.plum} size={24} />
             </TouchableOpacity>
             
             {!step.required && (
@@ -554,7 +561,7 @@ export default function OnboardingScreen() {
             disabled={!isNextEnabled}
           >
             <Text style={styles.nextBtnText}>Next</Text>
-            <ChevronRight color={theme.colors.surface} size={20} />
+            <ChevronRight color={themeContext.colors.onPrimary || '#FFF'} size={20} />
           </TouchableOpacity>
         </View>
       )}
@@ -562,13 +569,13 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   background: { ...StyleSheet.absoluteFillObject },
   header: { paddingHorizontal: 20, marginBottom: 20 },
   headerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 15 },
   backBtn: { padding: 4 },
-  progressTrack: { height: 8, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 4, overflow: 'hidden' },
+  progressTrack: { height: 8, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', borderRadius: 4, overflow: 'hidden' },
   progressBar: { height: '100%', backgroundColor: theme.colors.plum, borderRadius: 4 },
   progressText: { fontSize: 14, fontWeight: '700', color: theme.colors.plum, opacity: 0.8 },
   content: { flex: 1, paddingHorizontal: 24 },
@@ -578,7 +585,7 @@ const styles = StyleSheet.create({
   stepContainer: { flex: 1, paddingTop: 10 },
   
   // Shared
-  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: theme.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: 24, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 },
+  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: theme.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: 24, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 8 }, shadowOpacity: theme.isDark ? 0.3 : 0.1, shadowRadius: 16, elevation: 8 },
   title: { fontSize: 30, fontWeight: '800', color: theme.colors.text.primary, marginBottom: 12, textAlign: 'center', letterSpacing: -0.5 },
   subtitle: { fontSize: 16, color: theme.colors.text.secondary, textAlign: 'center', lineHeight: 24, marginBottom: 32 },
   
@@ -586,8 +593,8 @@ const styles = StyleSheet.create({
   privacyText: { fontSize: 15, color: theme.colors.text.primary, lineHeight: 28, textAlign: 'center', paddingHorizontal: 10 },
   
   // Options
-  optionBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.surface, paddingHorizontal: 20, paddingVertical: 18, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2 },
-  optionBtnActive: { backgroundColor: 'rgba(123, 97, 255, 0.05)', borderColor: 'rgba(123, 97, 255, 0.15)' },
+  optionBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.surface, paddingHorizontal: 20, paddingVertical: 18, borderRadius: 20, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.2 : 0.04, shadowRadius: 12, elevation: 2 },
+  optionBtnActive: { backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.05)', borderColor: theme.isDark ? 'rgba(140, 160, 185, 0.3)' : 'rgba(123, 97, 255, 0.15)' },
   optionLabel: { flex: 1, fontSize: 16, fontWeight: '600', color: theme.colors.text.primary },
   optionLabelActive: { color: theme.colors.plum, fontWeight: '700' },
   
@@ -596,40 +603,40 @@ const styles = StyleSheet.create({
   checkboxActive: { backgroundColor: theme.colors.plum },
   
   // Input
-  textInput: { backgroundColor: theme.colors.surface, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 18, fontSize: 18, color: theme.colors.text.primary, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' },
+  textInput: { backgroundColor: theme.colors.surface, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 18, fontSize: 18, color: theme.colors.text.primary, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.2 : 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' },
   
   // Sliders
-  sliderItem: { marginBottom: 24, backgroundColor: theme.colors.surface, padding: 20, borderRadius: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' },
+  sliderItem: { marginBottom: 24, backgroundColor: theme.colors.surface, padding: 20, borderRadius: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.2 : 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' },
   sliderLabel: { fontSize: 16, fontWeight: '600', color: theme.colors.text.primary, marginBottom: 16 },
   sliderContainer: { position: 'relative', width: '100%', height: 40, justifyContent: 'center' },
   sliderTrack: { position: 'absolute', top: 19, left: 10, right: 10, height: 2, backgroundColor: theme.colors.accents.softLilac },
   sliderDot: { width: 34, height: 34, borderRadius: 17, backgroundColor: theme.colors.surface, borderWidth: 2, borderColor: theme.colors.accents.softLilac, alignItems: 'center', justifyContent: 'center' },
   sliderDotActive: { backgroundColor: theme.colors.plum, borderColor: theme.colors.plum },
   sliderDotText: { fontSize: 13, fontWeight: '700', color: theme.colors.text.secondary },
-  sliderDotTextActive: { color: theme.colors.surface },
+  sliderDotTextActive: { color: theme.colors.onPrimary || '#FFF' },
 
   // Why We Ask
-  whyWeAskBox: { flexDirection: 'row', backgroundColor: 'rgba(123, 97, 255, 0.1)', padding: 16, borderRadius: 12, marginTop: 24, alignItems: 'center' },
+  whyWeAskBox: { flexDirection: 'row', backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.1)', padding: 16, borderRadius: 12, marginTop: 24, alignItems: 'center' },
   whyWeAskText: { flex: 1, fontSize: 14, color: theme.colors.plum, marginLeft: 12, fontWeight: '500', lineHeight: 20 },
 
   // Summary
   summaryGreeting: { fontSize: 22, fontWeight: '700', color: theme.colors.text.primary, marginBottom: 24 },
-  summaryBox: { backgroundColor: theme.colors.surface, padding: 24, borderRadius: 24, width: '100%', marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 3, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' },
+  summaryBox: { backgroundColor: theme.colors.surface, padding: 24, borderRadius: 24, width: '100%', marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.2 : 0.04, shadowRadius: 12, elevation: 3, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' },
   summaryBoxTitle: { fontSize: 16, fontWeight: '700', color: theme.colors.plum, marginBottom: 12 },
   summaryItem: { fontSize: 15, color: theme.colors.text.secondary, marginBottom: 8, lineHeight: 22 },
   summaryFooterBox: { width: '100%', paddingHorizontal: 10, marginTop: 10 },
 
   // Footer
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, justifyContent: 'space-between', backgroundColor: theme.colors.surface, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)', shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 8, zIndex: 100 },
+  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, justifyContent: 'space-between', backgroundColor: theme.colors.surface, borderTopWidth: 1, borderTopColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: theme.isDark ? 0.3 : 0.05, shadowRadius: 12, elevation: 8, zIndex: 100 },
   leftFooterActions: { flexDirection: 'row', alignItems: 'center' },
   skipBtn: { paddingVertical: 12, paddingHorizontal: 16, borderWidth: 1.5, borderColor: theme.colors.plumLight, borderRadius: 30, marginLeft: 12 },
   skipText: { fontSize: 15, fontWeight: '700', color: theme.colors.plumLight },
-  backFooterBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(123, 97, 255, 0.08)', alignItems: 'center', justifyContent: 'center' },
+  backFooterBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.08)', alignItems: 'center', justifyContent: 'center' },
   nextBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.plum, paddingVertical: 14, paddingHorizontal: 20, borderRadius: 30 },
   nextBtnDisabled: { opacity: 0.5 },
-  nextBtnText: { fontSize: 16, fontWeight: '700', color: theme.colors.surface, marginRight: 8 },
+  nextBtnText: { fontSize: 16, fontWeight: '700', color: theme.colors.onPrimary || '#FFF', marginRight: 8 },
   
   // Primary Action
-  primaryBtn: { backgroundColor: theme.colors.plum, paddingVertical: 16, paddingHorizontal: 40, borderRadius: 30, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
-  primaryBtnText: { color: theme.colors.surface, fontSize: 18, fontWeight: '700' },
+  primaryBtn: { backgroundColor: theme.colors.plum, paddingVertical: 16, paddingHorizontal: 40, borderRadius: 30, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.4 : 0.3, shadowRadius: 8, elevation: 6 },
+  primaryBtnText: { color: theme.colors.onPrimary || '#FFF', fontSize: 18, fontWeight: '700' },
 });

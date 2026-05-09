@@ -1,63 +1,116 @@
+export const lightColors = {
+  // ─── Primary Brand Colors ─
+  plum: '#2E4057',
+  plumLight: '#6B7A8F',
+  sage: '#6A8A82',
+  mauve: '#967D87',
+  
+  // ─── Backgrounds ──────────────────
+  background: '#F4F6F8',
+  backgroundSecondary: '#EAEEF2',
+  surface: '#FFFFFF',
+  
+  // ─── Standardized Text ────────────────────
+  text: {
+    primary: '#1A242F',
+    secondary: '#556475',
+    tertiary: '#8795A1',
+    onPrimary: '#FFFFFF',
+    disabled: '#CBD2D9',
+  },
+
+  // ─── Multi-Palette Accents ─────
+  accents: {
+    powderBlue: '#7EA8BE',
+    blushPink: '#C49799',
+    softMint: '#A3C4BC',
+    sand: '#D6C7A1',
+    terracotta: '#B86B5A',
+    dustyRose: '#A8828D',
+    softGray: '#B0BEC5',
+    gentlePeach: '#D8A48F',
+    slate: '#5C6B73',
+    eucalyptus: '#5F8D7B',
+    softLilac: '#9B9EBD',
+    paleCoral: '#CB8A77',
+    forestGreen: '#3B5249',
+  },
+
+  semantic: {
+    success: '#5F8D7B',
+    danger: '#B86B5A',
+    warning: '#D6C7A1',
+  }
+};
+
+export const darkColors = {
+  // ─── Primary Brand Colors (Adjusted for Dark Mode) ─
+  plum: '#8CA0B9', // Lighter slate for contrast against dark
+  plumLight: '#4A5B70',
+  sage: '#8AA69F',
+  mauve: '#B39EAA',
+  
+  // ─── Backgrounds ──────────────────
+  background: '#121212', // Deep true dark
+  backgroundSecondary: '#1E1E1E', // Slightly elevated dark
+  surface: '#262626', // Card surfaces
+  
+  // ─── Standardized Text ────────────────────
+  text: {
+    primary: '#F0F0F0',
+    secondary: '#A8A8A8',
+    tertiary: '#737373',
+    onPrimary: '#121212',
+    disabled: '#4A4A4A',
+  },
+
+  // ─── Multi-Palette Accents (Slightly more vibrant for dark contrast) ─────
+  accents: {
+    powderBlue: '#8CB8CF',
+    blushPink: '#D6A8AA',
+    softMint: '#B4D6CE',
+    sand: '#E8D9B2',
+    terracotta: '#D17A66',
+    dustyRose: '#BA939E',
+    softGray: '#C1CED6',
+    gentlePeach: '#EDB49D',
+    slate: '#748690',
+    eucalyptus: '#6CA18C',
+    softLilac: '#AFB2D1',
+    paleCoral: '#DE9985',
+    forestGreen: '#4A665A',
+  },
+
+  semantic: {
+    success: '#6CA18C',
+    danger: '#D17A66',
+    warning: '#E8D9B2',
+  }
+};
+
+// Structural tokens remain constant
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+  screen: 24,
+};
+
+export const borderRadius = {
+  xs: 8,
+  sm: 12,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  pill: 100,
+};
+
+// Legacy export to prevent app crash during refactor
 export const theme = {
-  colors: {
-    // ─── Primary Brand Colors (Colorblind Safe & High Contrast) ─
-    plum: '#2E4057',               // Deep Slate Navy (Premium, highly visible)
-    plumLight: '#6B7A8F',          // Soft Slate Blue
-    sage: '#6A8A82',               // Muted Teal/Sage
-    mauve: '#967D87',              // Dusty Orchid
-    
-    // ─── Backgrounds (Cool, Premium Neutrals) ──────────────────
-    background: '#F4F6F8',         // Premium cool off-white
-    backgroundSecondary: '#EAEEF2', // Slightly deeper gray-white
-    surface: '#FFFFFF',            // Pure white for crisp cards
-    
-    // ─── Standardized Text (High Contrast) ────────────────────
-    text: {
-      primary: '#1A242F',          // Near black slate
-      secondary: '#556475',        // Highly readable gray
-      tertiary: '#8795A1',         // Muted gray
-      onPrimary: '#FFFFFF',        // White on dark buttons
-      disabled: '#CBD2D9',         
-    },
-
-    // ─── Multi-Palette Accents (Okabe-Ito Inspired Luxury) ─────
-    accents: {
-      powderBlue: '#7EA8BE',       // Soft Sky Blue
-      blushPink: '#C49799',        // Muted Rose
-      softMint: '#A3C4BC',         // Soft Mint
-      sand: '#D6C7A1',             // Soft Gold/Ochre
-      terracotta: '#B86B5A',       // Muted Brick (Accessible Red/Vermillion)
-      dustyRose: '#A8828D',        // Dusty Rose
-      softGray: '#B0BEC5',         // Soft Gray
-      gentlePeach: '#D8A48F',      // Soft Orange
-      slate: '#5C6B73',            // Slate Gray
-      eucalyptus: '#5F8D7B',       // Accessible Bluish-Green
-      softLilac: '#9B9EBD',        // Soft Lilac
-      paleCoral: '#CB8A77',        // Pale Coral
-      forestGreen: '#3B5249',      // Deep Forest Green
-    },
-
-    semantic: {
-      success: '#5F8D7B',          // Eucalyptus Green
-      danger: '#B86B5A',           // Brick Red
-      warning: '#D6C7A1',          // Soft Gold
-    }
-  },
-  spacing: {
-    xs: 4,
-    sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
-    xxl: 48,
-    screen: 24,
-  },
-  borderRadius: {
-    xs: 8,
-    sm: 12,
-    md: 16,
-    lg: 24,
-    xl: 32,
-    pill: 100,
-  },
+  colors: lightColors,
+  spacing,
+  borderRadius
 };

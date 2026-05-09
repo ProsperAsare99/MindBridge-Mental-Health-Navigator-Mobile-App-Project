@@ -15,42 +15,14 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Line, Path, Defs, RadialGradient, Stop } from 'react-native-svg';
-import { theme } from '../../src/theme/colors';
+import Svg, { Circle, Line, Path } from 'react-native-svg';
+import { useTheme } from '../../src/context/ThemeContext';
 import { Ghost } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
-// ─── Multi-Palette Data ──────────────────────────────────────────────────────
-const SLIDES = [
-  {
-    key: 'mind',
-    overline: 'MENTAL HEALTH · GHANA',
-    headline: 'Your Mind,\nUnderstood.',
-    body: 'Private, evidence-based support designed for every Ghanaian student.',
-    accentColor: theme.colors.plum,
-    IllustrationComponent: MindIllustration,
-  },
-  {
-    key: 'guide',
-    overline: 'AI-POWERED CARE',
-    headline: 'Guidance\nOn Your Terms.',
-    body: 'Personalised check-ins, mood tracking, and coping tools — always available.',
-    accentColor: theme.colors.accents.slate,
-    IllustrationComponent: GuideIllustration,
-  },
-  {
-    key: 'safe',
-    overline: 'FULLY CONFIDENTIAL',
-    headline: 'A Safe Space,\nOnly Yours.',
-    body: 'Your data stays private. Talk openly, without fear or judgment.',
-    accentColor: theme.colors.accents.forestGreen,
-    IllustrationComponent: SafeIllustration,
-  },
-];
-
 // ─── Illustrations ────────────────────────────────────────────────────────────
-function MindIllustration({ color }: { color: string }) {
+function MindIllustration({ color, theme }: { color: string, theme: any }) {
   const pulse = useRef(new Animated.Value(1)).current;
   const ringOpacity = useRef(new Animated.Value(0.4)).current;
 
@@ -70,11 +42,11 @@ function MindIllustration({ color }: { color: string }) {
   }, []);
 
   return (
-    <View style={styles.illustrationWrap}>
-      <Animated.View style={[styles.glowRing, { borderColor: color, opacity: ringOpacity, transform: [{ scale: pulse }] }]} />
-      <Animated.View style={[styles.glowRingInner, { borderColor: theme.colors.plum, opacity: 0.3, transform: [{ scale: pulse }] }]} />
-      <View style={[styles.logoCircle, { shadowColor: color }]}>
-        <Image source={require('../../assets/images/logo.png')} style={styles.logoImage} resizeMode="cover" />
+    <View style={{ width: 220, height: 220, alignItems: 'center', justifyContent: 'center' }}>
+      <Animated.View style={[{ position: 'absolute', width: 200, height: 200, borderRadius: 100, borderWidth: 2, borderColor: color, opacity: ringOpacity, transform: [{ scale: pulse }] }]} />
+      <Animated.View style={[{ position: 'absolute', width: 175, height: 175, borderRadius: 87.5, borderWidth: 1.5, borderColor: theme.colors.plum, opacity: 0.3, transform: [{ scale: pulse }] }]} />
+      <View style={[{ width: 148, height: 148, borderRadius: 74, overflow: 'hidden', backgroundColor: theme.colors.surface, shadowColor: color, shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.3 : 0.1, shadowRadius: 10, elevation: 8 }]}>
+        <Image source={require('../../assets/images/logo.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
       </View>
     </View>
   );
@@ -92,7 +64,7 @@ function GuideIllustration({ color }: { color: string }) {
   }, []);
 
   return (
-    <View style={styles.illustrationWrap}>
+    <View style={{ width: 220, height: 220, alignItems: 'center', justifyContent: 'center' }}>
       <Animated.View style={{ transform: [{ translateY: float }] }}>
         <Svg width={160} height={160} viewBox="0 0 160 160">
           <Circle cx="80" cy="80" r="70" fill={color} fillOpacity="0.1" />
@@ -119,7 +91,7 @@ function SafeIllustration({ color }: { color: string }) {
   }, []);
 
   return (
-    <View style={styles.illustrationWrap}>
+    <View style={{ width: 220, height: 220, alignItems: 'center', justifyContent: 'center' }}>
       <Animated.View style={{ transform: [{ scale }] }}>
         <Svg width={160} height={160} viewBox="0 0 160 160">
           <Circle cx="80" cy="80" r="70" fill={color} fillOpacity="0.1" />
@@ -137,6 +109,36 @@ export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
   const [activeSlide, setActiveSlide] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
+  
+  const theme = useTheme();
+  const styles = createStyles(theme);
+
+  const SLIDES = [
+    {
+      key: 'mind',
+      overline: 'MENTAL HEALTH · GHANA',
+      headline: 'Your Mind,\nUnderstood.',
+      body: 'Private, evidence-based support designed for every Ghanaian student.',
+      accentColor: theme.colors.plum,
+      IllustrationComponent: MindIllustration,
+    },
+    {
+      key: 'guide',
+      overline: 'AI-POWERED CARE',
+      headline: 'Guidance\nOn Your Terms.',
+      body: 'Personalised check-ins, mood tracking, and coping tools — always available.',
+      accentColor: theme.colors.accents.slate,
+      IllustrationComponent: GuideIllustration,
+    },
+    {
+      key: 'safe',
+      overline: 'FULLY CONFIDENTIAL',
+      headline: 'A Safe Space,\nOnly Yours.',
+      body: 'Your data stays private. Talk openly, without fear or judgment.',
+      accentColor: theme.colors.accents.forestGreen,
+      IllustrationComponent: SafeIllustration,
+    },
+  ];
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const idx = Math.round(e.nativeEvent.contentOffset.x / width);
@@ -155,7 +157,7 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} translucent backgroundColor="transparent" />
 
       <View style={[styles.bgOrb, { backgroundColor: theme.colors.accents.eucalyptus, top: -180, right: -150 }]} />
       <View style={[styles.bgOrb, { backgroundColor: theme.colors.accents.gentlePeach, bottom: -120, left: -100, width: 300, height: 300 }]} />
@@ -175,7 +177,7 @@ export default function WelcomeScreen() {
               return (
                 <View key={s.key} style={styles.slide}>
                   <View style={styles.illustrationContainer}>
-                    <Illustration color={s.accentColor} />
+                    <Illustration color={s.accentColor} theme={theme} />
                   </View>
                   <View style={styles.copyBlock}>
                     <Text style={[styles.overline, { color: s.accentColor }]}>{s.overline}</Text>
@@ -198,13 +200,13 @@ export default function WelcomeScreen() {
           <TouchableOpacity onPress={goNext} activeOpacity={0.9} style={styles.primaryWrap}>
             <LinearGradient
               colors={activeSlide < SLIDES.length - 1
-                ? [theme.colors.surface, '#EAE5DE']
-                : [theme.colors.plum, '#4A3E4F']}
+                ? [theme.colors.surface, theme.isDark ? theme.colors.backgroundSecondary : '#EAE5DE']
+                : [theme.colors.plum, theme.isDark ? '#3D4C5D' : '#4A3E4F']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={[styles.primaryBtn, activeSlide < SLIDES.length - 1 && styles.primaryBtnOutline]}
             >
-              <Text style={[styles.primaryLabel, activeSlide < SLIDES.length - 1 ? { color: theme.colors.plum } : { color: theme.colors.surface }]}>
+              <Text style={[styles.primaryLabel, activeSlide < SLIDES.length - 1 ? { color: theme.colors.plum } : { color: theme.colors.onPrimary || '#FFF' }]}>
                 {activeSlide < SLIDES.length - 1 ? 'Continue' : 'Get Started'}
               </Text>
             </LinearGradient>
@@ -234,7 +236,7 @@ export default function WelcomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   root: { flex: 1, backgroundColor: theme.colors.background },
   layout: { flex: 1, justifyContent: 'space-between' },
   bgOrb: {
@@ -242,16 +244,11 @@ const styles = StyleSheet.create({
     width: 400,
     height: 400,
     borderRadius: 200,
-    opacity: 0.1,
+    opacity: theme.isDark ? 0.05 : 0.1,
   },
   slideArea: { flex: 1 },
   slide: { width, flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
   illustrationContainer: { marginBottom: 40, alignItems: 'center' },
-  illustrationWrap: { width: 220, height: 220, alignItems: 'center', justifyContent: 'center' },
-  glowRing: { position: 'absolute', width: 200, height: 200, borderRadius: 100, borderWidth: 2 },
-  glowRingInner: { position: 'absolute', width: 175, height: 175, borderRadius: 87.5, borderWidth: 1.5 },
-  logoCircle: { width: 148, height: 148, borderRadius: 74, overflow: 'hidden', backgroundColor: theme.colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 8 },
-  logoImage: { width: '100%', height: '100%' },
   copyBlock: { alignItems: 'center', width: '100%' },
   overline: { fontSize: 11, fontWeight: '800', letterSpacing: 2.5, marginBottom: 16, textTransform: 'uppercase' },
   headline: { fontSize: 40, fontWeight: '900', color: theme.colors.plum, letterSpacing: -1.4, lineHeight: 46, textAlign: 'center', marginBottom: 16 },
@@ -270,10 +267,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
-    backgroundColor: 'rgba(123, 97, 255, 0.08)',
+    backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.08)',
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: 'rgba(123, 97, 255, 0.15)',
+    borderColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.15)',
   },
   guestBtnText: {
     color: theme.colors.plum,

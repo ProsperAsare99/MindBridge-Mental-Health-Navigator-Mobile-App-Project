@@ -12,7 +12,7 @@ import {
   Platform
 } from 'react-native';
 import { AuthContext } from '../../src/context/AuthContext';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -64,6 +64,8 @@ const QUOTES = [
 
 const QuoteSlideshow = () => {
   const [index, setIndex] = useState(0);
+  const theme = useTheme();
+  const styles = createStyles(theme);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -77,7 +79,7 @@ const QuoteSlideshow = () => {
   return (
     <Animated.View entering={FadeInUp.delay(50).duration(500)} style={styles.quoteCardContainer}>
       <LinearGradient 
-        colors={[theme.colors.plum, '#4A3E4F']} 
+        colors={[theme.colors.plum, theme.isDark ? '#2E3A4A' : '#4A3E4F']} 
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.quoteCard}
@@ -108,6 +110,8 @@ type WidgetProps = {
 
 const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'square', delay = 0 }: WidgetProps) => {
   const scale = useSharedValue(1);
+  const theme = useTheme();
+  const styles = createStyles(theme);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }]
@@ -130,7 +134,7 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
           onPressOut={handlePressOut}
         >
           <Animated.View style={[styles.listWidget, animatedStyle]}>
-            <View style={[styles.listIconWrap, { backgroundColor: color + '15' }]}>
+            <View style={[styles.listIconWrap, { backgroundColor: color + (theme.isDark ? '30' : '15') }]}>
               <Icon color={color} size={22} />
             </View>
             <View style={styles.listTextWrap}>
@@ -154,11 +158,11 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
         onPressOut={handlePressOut}
       >
         <Animated.View style={[styles.widget, isWide ? styles.widgetWide : styles.widgetSquare, animatedStyle]}>
-          <LinearGradient colors={[color + '10', color + '03']} style={StyleSheet.absoluteFillObject} />
+          <LinearGradient colors={[color + (theme.isDark ? '20' : '10'), color + '03']} style={StyleSheet.absoluteFillObject} />
 
           <View style={isWide ? styles.wideContent : styles.squareContent}>
             <View style={[styles.widgetIconWrap, { backgroundColor: color }]}>
-              <Icon color={theme.colors.surface} size={isWide ? 24 : 28} />
+              <Icon color={theme.colors.onPrimary || '#FFF'} size={isWide ? 24 : 28} />
             </View>
             <View style={isWide ? styles.wideTextWrap : {}}>
               <Text style={[styles.widgetTitle, isWide && { fontSize: 18 }]}>{title}</Text>
@@ -177,6 +181,8 @@ export default function DashboardScreen() {
   const { signOut, userToken } = useContext(AuthContext);
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const theme = useTheme();
+  const styles = createStyles(theme);
 
   const isGuest = userToken?.startsWith('guest-token');
   const userData = {
@@ -193,7 +199,7 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
       <LinearGradient
         colors={[theme.colors.background, theme.colors.backgroundSecondary, theme.colors.backgroundSecondary]}
         locations={[0, 0.4, 1]}
@@ -312,7 +318,7 @@ export default function DashboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
@@ -349,7 +355,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: theme.isDark ? 0.3 : 0.1,
     shadowRadius: 8,
     elevation: 4
   },
@@ -360,7 +366,7 @@ const styles = StyleSheet.create({
   quoteCardContainer: {
     shadowColor: theme.colors.plum,
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
+    shadowOpacity: theme.isDark ? 0.4 : 0.25,
     shadowRadius: 16,
     elevation: 8,
   },
@@ -424,11 +430,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
+    shadowOpacity: theme.isDark ? 0.2 : 0.06,
     shadowRadius: 16,
     elevation: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)'
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)'
   },
   widgetSquare: {
     aspectRatio: 1,
@@ -474,7 +480,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: theme.isDark ? 0.2 : 0.04,
     shadowRadius: 12,
     elevation: 3,
   },
@@ -508,7 +514,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     marginLeft: 72, // Aligns with text
   }
 });

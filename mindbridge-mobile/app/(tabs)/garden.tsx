@@ -9,7 +9,7 @@ import {
   Pressable,
   StatusBar
 } from 'react-native';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { 
   FadeInUp, 
@@ -25,7 +25,7 @@ const { width } = Dimensions.get('window');
 
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
 
-const MOODS = [
+const getMoods = (theme: any) => [
   { id: 'joy', label: 'Joyful', icon: Sun, color: theme.colors.accents.gentlePeach, bg: theme.colors.accents.gentlePeach + '15' },
   { id: 'calm', label: 'Calm', icon: Leaf, color: theme.colors.accents.eucalyptus, bg: theme.colors.accents.eucalyptus + '15' },
   { id: 'anxious', label: 'Anxious', icon: Wind, color: theme.colors.accents.softLilac, bg: theme.colors.accents.softLilac + '20' },
@@ -33,8 +33,9 @@ const MOODS = [
   { id: 'stressed', label: 'Stressed', icon: CloudLightning, color: theme.colors.accents.slate, bg: theme.colors.accents.slate + '15' },
 ];
 
-const MoodCard = ({ mood, isSelected, onPress, delay }: any) => {
+const MoodCard = ({ mood, isSelected, onPress, delay, theme }: any) => {
   const scale = useSharedValue(1);
+  const styles = createStyles(theme);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }]
@@ -59,7 +60,7 @@ const MoodCard = ({ mood, isSelected, onPress, delay }: any) => {
             borderWidth: 2, 
             shadowColor: mood.color, 
             shadowOffset: { width: 0, height: 8 }, 
-            shadowOpacity: 0.2, 
+            shadowOpacity: theme.isDark ? 0.3 : 0.2, 
             shadowRadius: 16, 
             elevation: 8 
           }
@@ -79,8 +80,11 @@ const MoodCard = ({ mood, isSelected, onPress, delay }: any) => {
 
 export default function GardenScreen() {
   const insets = useSafeAreaInsets();
+  const themeContext = useTheme();
+  const styles = createStyles(themeContext);
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [isPlanted, setIsPlanted] = useState(false);
+  const MOODS = getMoods(themeContext);
 
   const handlePlant = () => {
     if (!selectedMood) return;
@@ -93,9 +97,12 @@ export default function GardenScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={themeContext.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={['rgba(123, 97, 255, 0.12)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        colors={themeContext.isDark 
+          ? ['rgba(123, 97, 255, 0.15)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+          : ['rgba(123, 97, 255, 0.12)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+        } 
         locations={[0, 0.3, 1]}
         style={StyleSheet.absoluteFillObject} 
       />
@@ -103,7 +110,7 @@ export default function GardenScreen() {
       <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInUp.duration(800)} style={styles.header}>
           <View style={styles.iconContainer}>
-            <Flower2 color={theme.colors.accents.eucalyptus} size={32} />
+            <Flower2 color={themeContext.colors.accents.eucalyptus} size={32} />
           </View>
           <Text style={styles.title}>Mood Garden</Text>
           <Text style={styles.subtitle}>How is your inner garden growing today? Plant a seed to reflect your feelings.</Text>
@@ -118,17 +125,18 @@ export default function GardenScreen() {
                 isSelected={selectedMood === mood.id}
                 onPress={() => setSelectedMood(mood.id)}
                 delay={200 + (index * 100)}
+                theme={themeContext}
               />
             ))}
           </View>
         ) : (
           <Animated.View entering={FadeIn.duration(800)} style={styles.successState}>
             <LinearGradient
-              colors={[theme.colors.accents.eucalyptus + '20', 'transparent']}
+              colors={[themeContext.colors.accents.eucalyptus + '20', 'transparent']}
               style={styles.successGlow}
             />
             <Animated.View entering={FadeInUp.delay(300).duration(500)}>
-              <Leaf color={theme.colors.accents.eucalyptus} size={64} />
+              <Leaf color={themeContext.colors.accents.eucalyptus} size={64} />
             </Animated.View>
             <Animated.View entering={FadeInUp.delay(500).duration(500)}>
               <Text style={styles.successTitle}>Seed Planted!</Text>
@@ -139,7 +147,7 @@ export default function GardenScreen() {
       </ScrollView>
 
       {!isPlanted && (
-        <Animated.View entering={FadeInUp.delay(800).duration(800)} style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
+        <Animated.View entering={FadeInUp.delay(800).duration(800)} style={[styles.footer, { paddingBottom: insets.bottom + 20, backgroundColor: themeContext.colors.surface }]}>
           <TouchableOpacity 
             style={[styles.plantBtn, !selectedMood && styles.plantBtnDisabled]}
             disabled={!selectedMood}
@@ -154,7 +162,7 @@ export default function GardenScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
@@ -177,7 +185,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: theme.colors.accents.eucalyptus,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: theme.isDark ? 0.3 : 0.1,
     shadowRadius: 12,
     elevation: 4,
   },
@@ -212,7 +220,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
+    shadowOpacity: theme.isDark ? 0.2 : 0.03,
     shadowRadius: 12,
   },
   moodIcon: {
@@ -235,7 +243,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: theme.isDark ? 0.3 : 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -247,7 +255,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 20,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0,0,0,0.05)',
+    borderTopColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
   },
   plantBtn: {
     backgroundColor: theme.colors.plum,
@@ -257,7 +265,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     shadowColor: theme.colors.plum,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
+    shadowOpacity: theme.isDark ? 0.4 : 0.2,
     shadowRadius: 16,
     elevation: 6,
   },
@@ -266,7 +274,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0,
   },
   plantBtnText: {
-    color: theme.colors.surface,
+    color: theme.colors.onPrimary || '#FFF',
     fontSize: 17,
     fontWeight: '800',
     letterSpacing: 0.2,

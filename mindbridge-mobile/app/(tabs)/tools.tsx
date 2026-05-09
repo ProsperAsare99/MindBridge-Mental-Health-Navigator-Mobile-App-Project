@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   StatusBar,
 } from 'react-native';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
@@ -24,7 +24,7 @@ import {
   ChevronRight,
 } from 'lucide-react-native';
 
-const TOOL_GROUPS = [
+const getToolGroups = (theme: any) => [
   {
     title: 'Daily Growth',
     items: [
@@ -58,12 +58,15 @@ const TOOL_GROUPS = [
 export default function ToolsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const themeContext = useTheme();
+  const styles = createStyles(themeContext);
+  const TOOL_GROUPS = getToolGroups(themeContext);
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={themeContext.isDark ? "light-content" : "dark-content"} />
       <LinearGradient
-        colors={[theme.colors.background, theme.colors.backgroundSecondary, theme.colors.backgroundSecondary]}
+        colors={[themeContext.colors.background, themeContext.colors.backgroundSecondary, themeContext.colors.backgroundSecondary]}
         locations={[0, 0.4, 1]}
         style={StyleSheet.absoluteFillObject}
       />
@@ -91,14 +94,14 @@ export default function ToolsScreen() {
                     style={styles.listItem}
                     onPress={() => router.push(`/(tabs)/${page.id}` as any)}
                   >
-                    <View style={[styles.iconWrap, { backgroundColor: page.color + '15' }]}>
+                    <View style={[styles.iconWrap, { backgroundColor: page.color + (themeContext.isDark ? '25' : '15') }]}>
                       <page.icon color={page.color} size={22} />
                     </View>
                     <View style={styles.textWrap}>
                       <Text style={styles.itemTitle}>{page.title}</Text>
                       <Text style={styles.itemSubtitle}>{page.subtitle}</Text>
                     </View>
-                    <ChevronRight color={theme.colors.text.disabled} size={20} />
+                    <ChevronRight color={themeContext.colors.text.disabled} size={20} />
                   </TouchableOpacity>
                   {index < group.items.length - 1 && <View style={styles.divider} />}
                 </View>
@@ -112,7 +115,7 @@ export default function ToolsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
@@ -154,11 +157,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: theme.isDark ? 0.2 : 0.03,
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   listItem: {
     flexDirection: 'row',
@@ -190,7 +193,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     marginLeft: 76,
   }
 });

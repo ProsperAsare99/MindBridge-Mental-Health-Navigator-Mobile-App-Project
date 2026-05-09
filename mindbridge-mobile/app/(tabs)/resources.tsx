@@ -9,7 +9,7 @@ import {
   StatusBar,
   ActivityIndicator
 } from 'react-native';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -27,15 +27,18 @@ import api from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
 
-const COPING_TOOLS = [
-  { id: 'breath', title: 'Box Breathing', subtitle: 'Calm your nervous system', icon: Wind, color: theme.colors.accents.softMint },
-  { id: 'ground', title: '5-4-3-2-1 Method', subtitle: 'Instant grounding technique', icon: Play, color: theme.colors.accents.dustyRose },
-];
-
 export default function ResourcesScreen() {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const styles = createStyles(theme);
+  
   const [resources, setResources] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const COPING_TOOLS = [
+    { id: 'breath', title: 'Box Breathing', subtitle: 'Calm your nervous system', icon: Wind, color: theme.colors.accents.softMint },
+    { id: 'ground', title: '5-4-3-2-1 Method', subtitle: 'Instant grounding technique', icon: Play, color: theme.colors.accents.dustyRose },
+  ];
 
   useEffect(() => {
     const loadData = async () => {
@@ -63,9 +66,12 @@ export default function ResourcesScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={['rgba(59, 82, 73, 0.05)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        colors={theme.isDark 
+          ? ['rgba(59, 82, 73, 0.15)', theme.colors.background, theme.colors.backgroundSecondary]
+          : ['rgba(59, 82, 73, 0.05)', theme.colors.background, theme.colors.backgroundSecondary]
+        } 
         locations={[0, 0.2, 1]}
         style={StyleSheet.absoluteFillObject} 
       />
@@ -98,9 +104,9 @@ export default function ResourcesScreen() {
             >
               {audio.map((guide: any, index: number) => (
                 <Animated.View key={guide.id} entering={FadeInUp.delay(100 + (index * 50)).duration(500)}>
-                  <TouchableOpacity style={[styles.audioCard, { backgroundColor: (guide.color || theme.colors.plum) + '15', borderColor: (guide.color || theme.colors.plum) + '30' }]} activeOpacity={0.8}>
+                  <TouchableOpacity style={[styles.audioCard, { backgroundColor: (guide.color || theme.colors.plum) + (theme.isDark ? '25' : '15'), borderColor: (guide.color || theme.colors.plum) + (theme.isDark ? '40' : '30') }]} activeOpacity={0.8}>
                     <View style={[styles.audioIconWrap, { backgroundColor: guide.color || theme.colors.plum }]}>
-                      <Headphones color={theme.colors.surface} size={20} />
+                      <Headphones color={theme.colors.onPrimary || '#FFF'} size={20} />
                     </View>
                     <Text style={styles.audioTitle} numberOfLines={2}>{guide.title}</Text>
                     <Text style={styles.audioDuration}>{guide.duration || 'Listen'}</Text>
@@ -128,7 +134,7 @@ export default function ResourcesScreen() {
               {videos.map((video: any, index: number) => (
                 <Animated.View key={video.id} entering={FadeInUp.delay(200 + (index * 50)).duration(500)}>
                   <TouchableOpacity style={styles.videoCard} activeOpacity={0.8}>
-                    <View style={[styles.videoThumbnail, { backgroundColor: (video.color || theme.colors.accents.slate) + '20' }]}>
+                    <View style={[styles.videoThumbnail, { backgroundColor: (video.color || theme.colors.accents.slate) + (theme.isDark ? '30' : '20') }]}>
                       <PlayCircle color={video.color || theme.colors.accents.slate} size={32} />
                       <View style={styles.videoDurationBadge}>
                         <Text style={styles.videoDurationText}>{video.duration || 'Watch'}</Text>
@@ -151,7 +157,7 @@ export default function ResourcesScreen() {
           <View style={styles.toolsGrid}>
             {COPING_TOOLS.map((tool) => (
               <TouchableOpacity key={tool.id} style={styles.toolCard} activeOpacity={0.8}>
-                <View style={[styles.toolIconWrap, { backgroundColor: tool.color + '20' }]}>
+                <View style={[styles.toolIconWrap, { backgroundColor: tool.color + (theme.isDark ? '30' : '20') }]}>
                   <tool.icon color={theme.colors.text.primary} size={24} />
                 </View>
                 <View style={styles.toolInfo}>
@@ -223,7 +229,7 @@ export default function ResourcesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
@@ -245,7 +251,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: theme.colors.accents.forestGreen,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
+    shadowOpacity: theme.isDark ? 0.3 : 0.15,
     shadowRadius: 16,
     elevation: 8,
   },
@@ -326,11 +332,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: theme.isDark ? 0.2 : 0.04,
     shadowRadius: 12,
     elevation: 3,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   videoThumbnail: {
     height: 140,
@@ -342,7 +348,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 12,
     right: 12,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -377,11 +383,11 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
+    shadowOpacity: theme.isDark ? 0.2 : 0.03,
     shadowRadius: 12,
     elevation: 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   toolIconWrap: {
     width: 52,
@@ -409,11 +415,11 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
+    shadowOpacity: theme.isDark ? 0.2 : 0.03,
     shadowRadius: 12,
     elevation: 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   articleItem: {
     flexDirection: 'row',
@@ -453,7 +459,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     marginLeft: 20,
   }
 });

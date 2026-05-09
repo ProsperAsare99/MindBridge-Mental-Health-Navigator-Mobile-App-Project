@@ -20,7 +20,7 @@ import {
   Play,
   FileText,
   BookOpen,
-  Youtube,
+  PlayCircle,
   Download
 } from 'lucide-react-native';
 import api from '../../src/services/api';
@@ -128,8 +128,8 @@ export default function ResourcesScreen() {
               {videos.map((video: any, index: number) => (
                 <Animated.View key={video.id} entering={FadeInUp.delay(200 + (index * 50)).duration(500)}>
                   <TouchableOpacity style={styles.videoCard} activeOpacity={0.8}>
-                    <View style={[styles.videoThumbnail, { backgroundColor: (video.color || theme.colors.slate) + '20' }]}>
-                      <Youtube color={video.color || theme.colors.slate} size={32} />
+                    <View style={[styles.videoThumbnail, { backgroundColor: (video.color || theme.colors.accents.slate) + '20' }]}>
+                      <PlayCircle color={video.color || theme.colors.accents.slate} size={32} />
                       <View style={styles.videoDurationBadge}>
                         <Text style={styles.videoDurationText}>{video.duration || 'Watch'}</Text>
                       </View>

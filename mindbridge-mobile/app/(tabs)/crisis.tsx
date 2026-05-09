@@ -1,19 +1,363 @@
-import { View, Text, StyleSheet } from 'react-native';
+import React from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  Linking,
+  StatusBar
+} from 'react-native';
 import { theme } from '../../src/theme/colors';
-import { ShieldAlert } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
+import { 
+  ShieldAlert, 
+  Phone, 
+  MessageSquare, 
+  HeartHandshake, 
+  MapPin,
+  ChevronRight,
+  ShieldCheck
+} from 'lucide-react-native';
+
+const EMERGENCY_CONTACTS = [
+  {
+    id: 'national',
+    title: 'National Emergency',
+    number: '112',
+    description: 'Police, Fire, Ambulance',
+    icon: Phone,
+    color: theme.colors.semantic.danger,
+    primary: true,
+  },
+  {
+    id: 'counseling',
+    title: 'University Counseling',
+    number: '+233 24 123 4567',
+    description: 'KNUST Counseling Center (24/7)',
+    icon: HeartHandshake,
+    color: theme.colors.plum,
+  },
+  {
+    id: 'mental_health_authority',
+    title: 'Mental Health Helpline',
+    number: '0800 678 678',
+    description: 'Toll-free national psychological support',
+    icon: MessageSquare,
+    color: theme.colors.accents.terracotta,
+  }
+];
+
+const SAFETY_PLAN = [
+  { id: '1', text: 'Call my best friend or sibling' },
+  { id: '2', text: 'Listen to my "Calm Down" playlist' },
+  { id: '3', text: 'Do the 5-4-3-2-1 grounding exercise' },
+  { id: '4', text: 'Go for a walk outside' },
+];
 
 export default function CrisisSupportScreen() {
+  const insets = useSafeAreaInsets();
+
+  const handleCall = (number: string) => {
+    Linking.openURL(`tel:${number.replace(/\s+/g, '')}`);
+  };
+
   return (
     <View style={styles.container}>
-      <ShieldAlert color={theme.colors.accents.gentlePeach} size={64} />
-      <Text style={styles.title}>Crisis Support</Text>
-      <Text style={styles.subtitle}>Immediate help and helplines will be listed here.</Text>
+      <StatusBar barStyle="dark-content" />
+      <LinearGradient 
+        colors={['rgba(239, 68, 68, 0.05)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        locations={[0, 0.2, 1]}
+        style={StyleSheet.absoluteFillObject} 
+      />
+
+      <ScrollView 
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
+          <View style={styles.headerIconContainer}>
+            <ShieldAlert color={theme.colors.semantic.danger} size={36} />
+          </View>
+          <Text style={styles.title}>Crisis Support</Text>
+          <Text style={styles.subtitle}>You are not alone. If you are experiencing a mental health emergency, please reach out immediately.</Text>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.section}>
+          <Text style={styles.sectionTitle}>Immediate Help</Text>
+          
+          {EMERGENCY_CONTACTS.map((contact, index) => (
+            <Animated.View key={contact.id} entering={FadeInUp.delay(200 + (index * 100)).springify().damping(14)}>
+              <TouchableOpacity 
+                style={[
+                  styles.contactCard, 
+                  contact.primary && styles.contactCardPrimary
+                ]}
+                onPress={() => handleCall(contact.number)}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.contactIconWrap, { backgroundColor: contact.primary ? 'rgba(255,255,255,0.2)' : contact.color + '15' }]}>
+                  <contact.icon color={contact.primary ? theme.colors.surface : contact.color} size={24} />
+                </View>
+                <View style={styles.contactInfo}>
+                  <Text style={[styles.contactTitle, contact.primary && { color: theme.colors.surface }]}>{contact.title}</Text>
+                  <Text style={[styles.contactDesc, contact.primary && { color: 'rgba(255,255,255,0.8)' }]}>{contact.description}</Text>
+                </View>
+                <View style={styles.callAction}>
+                  <Text style={[styles.contactNumber, contact.primary && { color: theme.colors.surface }]}>{contact.number}</Text>
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
+          ))}
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(600).springify().damping(14)} style={styles.section}>
+          <View style={styles.safetyHeader}>
+            <Text style={styles.sectionTitle}>My Safety Plan</Text>
+            <TouchableOpacity>
+              <Text style={styles.editPlanText}>Edit</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.safetyCard}>
+            <View style={styles.safetyBanner}>
+              <ShieldCheck color={theme.colors.accents.eucalyptus} size={20} />
+              <Text style={styles.safetyBannerText}>Steps to stay safe right now</Text>
+            </View>
+            
+            {SAFETY_PLAN.map((step, index) => (
+              <View key={step.id} style={styles.safetyStep}>
+                <View style={styles.stepNumberWrap}>
+                  <Text style={styles.stepNumber}>{index + 1}</Text>
+                </View>
+                <Text style={styles.stepText}>{step.text}</Text>
+              </View>
+            ))}
+          </View>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(800).springify().damping(14)} style={styles.locationCard}>
+          <View style={styles.locationIconWrap}>
+            <MapPin color={theme.colors.plum} size={24} />
+          </View>
+          <View style={styles.locationInfo}>
+            <Text style={styles.locationTitle}>Find Nearest Hospital</Text>
+            <Text style={styles.locationDesc}>Locate an emergency room near you.</Text>
+          </View>
+          <ChevronRight color={theme.colors.text.disabled} size={20} />
+        </Animated.View>
+
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  title: { fontSize: 24, fontWeight: '800', color: theme.colors.plum, marginTop: 16, marginBottom: 8 },
-  subtitle: { fontSize: 16, color: theme.colors.text.secondary, textAlign: 'center' }
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.backgroundSecondary,
+  },
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 100,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  headerIconContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    shadowColor: theme.colors.semantic.danger,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  title: {
+    fontSize: 34,
+    fontWeight: '800',
+    color: theme.colors.text.primary,
+    marginBottom: 12,
+    letterSpacing: -1,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: theme.colors.text.secondary,
+    lineHeight: 24,
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+  section: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    marginBottom: 16,
+    letterSpacing: -0.5,
+  },
+  contactCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.8)',
+  },
+  contactCardPrimary: {
+    backgroundColor: theme.colors.semantic.danger,
+    borderColor: theme.colors.semantic.danger,
+    shadowColor: theme.colors.semantic.danger,
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  contactIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  contactInfo: {
+    flex: 1,
+  },
+  contactTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    marginBottom: 4,
+  },
+  contactDesc: {
+    fontSize: 13,
+    color: theme.colors.text.secondary,
+    lineHeight: 18,
+  },
+  callAction: {
+    alignItems: 'flex-end',
+    marginLeft: 10,
+  },
+  contactNumber: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: theme.colors.plum,
+  },
+  safetyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  editPlanText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: theme.colors.plum,
+  },
+  safetyCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 24,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.8)',
+  },
+  safetyBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(52, 199, 89, 0.1)',
+    padding: 12,
+    borderRadius: 16,
+    marginBottom: 20,
+  },
+  safetyBannerText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.colors.accents.eucalyptus,
+    marginLeft: 8,
+  },
+  safetyStep: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  stepNumberWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(123, 97, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  stepNumber: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.plum,
+  },
+  stepText: {
+    flex: 1,
+    fontSize: 15,
+    color: theme.colors.text.primary,
+    fontWeight: '500',
+    lineHeight: 22,
+  },
+  locationCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    borderRadius: 24,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.8)',
+    marginBottom: 20,
+  },
+  locationIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(123, 97, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  locationInfo: {
+    flex: 1,
+  },
+  locationTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    marginBottom: 4,
+  },
+  locationDesc: {
+    fontSize: 13,
+    color: theme.colors.text.secondary,
+  },
 });

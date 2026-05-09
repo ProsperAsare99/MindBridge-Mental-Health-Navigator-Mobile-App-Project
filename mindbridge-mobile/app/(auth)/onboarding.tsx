@@ -49,7 +49,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'q1',
     type: 'text',
-    title: "Let's get to know you! 🌟",
+    title: "Let's get to know you! 👋",
     subtitle: "What should we call you?",
     whyWeAsk: "We'll use this to make our conversations feel personal",
     required: false,
@@ -141,7 +141,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'q7',
     type: 'multiple-choice',
-    title: "What helps you feel better? ✨",
+    title: "What helps you feel better? 🌿",
     subtitle: "Select what you already do or want to try:",
     whyWeAsk: "We'll ONLY suggest coping strategies you're comfortable with",
     options: [
@@ -205,7 +205,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'summary',
     type: 'summary',
-    title: "Your Personalized Profile ✨",
+    title: "Your Personalized Profile 📋",
     required: true,
   }
 ];

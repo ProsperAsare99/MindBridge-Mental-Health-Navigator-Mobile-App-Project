@@ -23,7 +23,7 @@ import {
   ChevronRight,
   GraduationCap,
   Heart,
-  Sparkles
+  ClipboardEdit
 } from 'lucide-react-native';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useRouter } from 'expo-router';
@@ -102,7 +102,7 @@ export default function ProfileScreen() {
         {/* Onboarding Resume Banner */}
         <Animated.View entering={FadeInUp.delay(50).springify().damping(14)} style={styles.resumeBanner}>
           <View style={styles.resumeBannerIcon}>
-            <Sparkles color={theme.colors.plum} size={24} />
+            <ClipboardEdit color={theme.colors.plum} size={24} />
           </View>
           <View style={styles.resumeBannerContent}>
             <Text style={styles.resumeBannerTitle}>Complete Setup</Text>

@@ -24,7 +24,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import {
-  Sparkles,
   BookOpen,
   ClipboardList,
   Library,

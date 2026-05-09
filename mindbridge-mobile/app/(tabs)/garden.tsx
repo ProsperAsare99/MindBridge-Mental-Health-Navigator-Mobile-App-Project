@@ -18,7 +18,7 @@ import Animated, {
   useSharedValue, 
   withSpring 
 } from 'react-native-reanimated';
-import { Leaf, Sun, CloudRain, Wind, CloudLightning, Flower2, Sparkles } from 'lucide-react-native';
+import { Leaf, Sun, CloudRain, Wind, CloudLightning, Flower2, CheckCircle2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
@@ -68,7 +68,7 @@ const MoodCard = ({ mood, isSelected, onPress, delay }: any) => {
           <Text style={[styles.moodLabel, { color: theme.colors.plum }]}>{mood.label}</Text>
           {isSelected && (
             <Animated.View entering={FadeIn.duration(300)} style={styles.selectedIndicator}>
-              <Sparkles color={mood.color} size={16} />
+              <CheckCircle2 color={mood.color} size={16} />
             </Animated.View>
           )}
         </Animated.View>

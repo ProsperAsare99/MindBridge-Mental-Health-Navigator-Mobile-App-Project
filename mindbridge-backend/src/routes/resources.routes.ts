@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { getResources } from '../controllers/resources.controller.js';
-import { requireAuth } from '../middleware/auth.middleware.js';
+import { auth } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-router.use(requireAuth);
+router.use(auth);
 
 router.get('/', getResources);
 

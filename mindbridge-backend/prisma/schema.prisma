@@ -17,6 +17,8 @@ model User {
   onboarding     Onboarding?
   moodLogs       MoodLog[]
   journalEntries Journal[]
+  communityPosts CommunityPost[]
+  assessmentResults AssessmentResult[]
 }
 model Onboarding {
   id              String   @id @default(uuid())
@@ -44,5 +46,37 @@ model Journal {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String?
   content   String
+  createdAt DateTime @default(now())
+}
+
+model CommunityPost {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group     String   // e.g., "Anxiety Support"
+  content   String
+  hugs      Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model AssessmentResult {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // e.g., "PHQ-9", "GAD-7", "Burnout"
+  score     Int
+  severity  String   // e.g., "Mild", "Severe"
+  createdAt DateTime @default(now())
+}
+
+model Resource {
+  id        String   @id @default(uuid())
+  title     String
+  type      String   // e.g., "Audio", "Article", "Video", "Book", "Tool"
+  category  String?  // e.g., "Stress", "Anxiety"
+  duration  String?
+  author    String?
+  url       String?
+  color     String?
   createdAt DateTime @default(now())
 }

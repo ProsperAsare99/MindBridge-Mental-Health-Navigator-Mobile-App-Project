@@ -19,7 +19,10 @@ import {
   Play,
   FileText,
   ChevronRight,
-  Sun
+  Sun,
+  BookOpen,
+  Youtube,
+  Download
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
@@ -39,6 +42,18 @@ const ARTICLES = [
   { id: 'a1', title: 'Understanding Academic Burnout', readTime: '4 min read', category: 'Stress' },
   { id: 'a2', title: 'The Science of Deep Breathing', readTime: '3 min read', category: 'Science' },
   { id: 'a3', title: 'Navigating Social Anxiety on Campus', readTime: '6 min read', category: 'Anxiety' },
+];
+
+const BOOKS_AND_PDFS = [
+  { id: 'b1', title: 'The Body Keeps the Score (Summary)', author: 'Bessel van der Kolk', type: 'PDF Guide', icon: Download },
+  { id: 'b2', title: 'Atomic Habits for Students', author: 'James Clear', type: 'Free Guide', icon: FileText },
+  { id: 'b3', title: 'MindBridge Anxiety Workbook', author: 'Clinical Team', type: 'Workbook', icon: BookOpen },
+];
+
+const VIDEOS = [
+  { id: 'v1', title: 'How to Manage Stress as a Student', channel: 'Thomas Frank', duration: '12:45', color: theme.colors.accents.slate },
+  { id: 'v2', title: 'A 10-Minute Meditation for Anxiety', channel: 'Goodful', duration: '10:20', color: theme.colors.accents.blushPink },
+  { id: 'v3', title: 'The Neuroscience of Sleep', channel: 'Huberman Lab', duration: '18:30', color: theme.colors.accents.forestGreen },
 ];
 
 export default function ResourcesScreen() {
@@ -62,11 +77,11 @@ export default function ResourcesScreen() {
             <Library color={theme.colors.accents.forestGreen} size={32} />
           </View>
           <Text style={styles.title}>Learn & Grow</Text>
-          <Text style={styles.subtitle}>Curated audio guides, coping tools, and reading materials for your journey.</Text>
+          <Text style={styles.subtitle}>Curated books, articles, videos, and coping tools for your journey.</Text>
         </Animated.View>
 
         {/* Audio Guides */}
-        <Animated.View entering={FadeInUp.delay(100).duration(600)}>
+        <Animated.View entering={FadeInUp.delay(50).duration(600)}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Guided Audio</Text>
             <TouchableOpacity><Text style={styles.seeAllText}>See all</Text></TouchableOpacity>
@@ -79,7 +94,7 @@ export default function ResourcesScreen() {
             decelerationRate="fast"
           >
             {AUDIO_GUIDES.map((guide, index) => (
-              <Animated.View key={guide.id} entering={FadeInUp.delay(150 + (index * 50)).duration(600)}>
+              <Animated.View key={guide.id} entering={FadeInUp.delay(100 + (index * 50)).duration(600)}>
                 <TouchableOpacity style={[styles.audioCard, { backgroundColor: guide.color + '15', borderColor: guide.color + '30' }]} activeOpacity={0.8}>
                   <View style={[styles.audioIconWrap, { backgroundColor: guide.color }]}>
                     <Headphones color={theme.colors.surface} size={20} />
@@ -92,8 +107,40 @@ export default function ResourcesScreen() {
           </ScrollView>
         </Animated.View>
 
+        {/* Videos (YouTube Style) */}
+        <Animated.View entering={FadeInUp.delay(150).duration(600)}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Helpful Videos</Text>
+            <TouchableOpacity><Text style={styles.seeAllText}>See all</Text></TouchableOpacity>
+          </View>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalScrollPadding}
+            snapToInterval={width * 0.7 + 16}
+            decelerationRate="fast"
+          >
+            {VIDEOS.map((video, index) => (
+              <Animated.View key={video.id} entering={FadeInUp.delay(200 + (index * 50)).duration(600)}>
+                <TouchableOpacity style={styles.videoCard} activeOpacity={0.8}>
+                  <View style={[styles.videoThumbnail, { backgroundColor: video.color + '20' }]}>
+                    <Youtube color={video.color} size={32} />
+                    <View style={styles.videoDurationBadge}>
+                      <Text style={styles.videoDurationText}>{video.duration}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.videoInfo}>
+                    <Text style={styles.videoTitle} numberOfLines={2}>{video.title}</Text>
+                    <Text style={styles.videoChannel}>{video.channel}</Text>
+                  </View>
+                </TouchableOpacity>
+              </Animated.View>
+            ))}
+          </ScrollView>
+        </Animated.View>
+
         {/* Quick Tools */}
-        <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.section}>
+        <Animated.View entering={FadeInUp.delay(250).duration(600)} style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Coping Tools</Text>
           <View style={styles.toolsGrid}>
             {COPING_TOOLS.map((tool) => (
@@ -110,10 +157,34 @@ export default function ResourcesScreen() {
           </View>
         </Animated.View>
 
-        {/* Articles */}
-        <Animated.View entering={FadeInUp.delay(300).duration(600)} style={styles.section}>
+        {/* Books & PDFs */}
+        <Animated.View entering={FadeInUp.delay(350).duration(600)} style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Reading Materials</Text>
+            <Text style={styles.sectionTitle}>Books & Free PDFs</Text>
+          </View>
+          <View style={styles.articleList}>
+            {BOOKS_AND_PDFS.map((book, index) => (
+              <React.Fragment key={book.id}>
+                <TouchableOpacity style={styles.articleItem} activeOpacity={0.7}>
+                  <View style={styles.articleInfo}>
+                    <Text style={[styles.articleCategory, { color: theme.colors.accents.powderBlue }]}>{book.type}</Text>
+                    <Text style={styles.articleTitle}>{book.title}</Text>
+                    <Text style={styles.articleReadTime}>By {book.author}</Text>
+                  </View>
+                  <View style={styles.articleIconWrap}>
+                    <book.icon color={theme.colors.text.disabled} size={24} />
+                  </View>
+                </TouchableOpacity>
+                {index < BOOKS_AND_PDFS.length - 1 && <View style={styles.divider} />}
+              </React.Fragment>
+            ))}
+          </View>
+        </Animated.View>
+
+        {/* Articles */}
+        <Animated.View entering={FadeInUp.delay(450).duration(600)} style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Articles & Journals</Text>
           </View>
           <View style={styles.articleList}>
             {ARTICLES.map((article, index) => (
@@ -233,6 +304,53 @@ const styles = StyleSheet.create({
   audioDuration: {
     fontSize: 13,
     fontWeight: '500',
+    color: theme.colors.text.secondary,
+  },
+  videoCard: {
+    width: width * 0.7,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.8)',
+  },
+  videoThumbnail: {
+    height: 140,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  videoDurationBadge: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  videoDurationText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  videoInfo: {
+    padding: 16,
+  },
+  videoTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    marginBottom: 4,
+    lineHeight: 22,
+  },
+  videoChannel: {
+    fontSize: 13,
     color: theme.colors.text.secondary,
   },
   toolsGrid: {

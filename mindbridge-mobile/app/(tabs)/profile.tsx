@@ -259,7 +259,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginLeft: 12,
   },
   resumeBannerBtnText: {
-    color: theme.colors.onPrimary || '#FFF',
+    color: theme.colors.text.onPrimary || '#FFF',
     fontWeight: '700',
     fontSize: 14,
   },

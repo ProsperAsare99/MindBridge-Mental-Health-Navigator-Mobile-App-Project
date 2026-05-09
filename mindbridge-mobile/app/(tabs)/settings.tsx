@@ -18,7 +18,7 @@ export default function SettingsScreen() {
       activeOpacity={0.8}
     >
       <Icon 
-        color={mode === optionMode ? colors.onPrimary || '#FFF' : colors.text.secondary} 
+        color={mode === optionMode ? colors.text.onPrimary || '#FFF' : colors.text.secondary} 
         size={24} 
       />
       <Text style={[
@@ -114,6 +114,6 @@ const createStyles = (themeContext: any) => StyleSheet.create({
     color: themeContext.colors.text.secondary,
   },
   optionTextActive: {
-    color: themeContext.colors.onPrimary || '#FFF',
+    color: themeContext.colors.text.onPrimary || '#FFF',
   }
 });

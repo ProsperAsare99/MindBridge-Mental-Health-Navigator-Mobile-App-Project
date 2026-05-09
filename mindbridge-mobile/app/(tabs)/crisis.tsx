@@ -105,14 +105,14 @@ export default function CrisisSupportScreen() {
                 activeOpacity={0.8}
               >
                 <View style={[styles.contactIconWrap, { backgroundColor: contact.primary ? 'rgba(255,255,255,0.2)' : contact.color + (themeContext.isDark ? '25' : '15') }]}>
-                  <contact.icon color={contact.primary ? themeContext.colors.onPrimary || '#FFF' : contact.color} size={24} />
+                  <contact.icon color={contact.primary ? themeContext.colors.text.onPrimary || '#FFF' : contact.color} size={24} />
                 </View>
                 <View style={styles.contactInfo}>
-                  <Text style={[styles.contactTitle, contact.primary && { color: themeContext.colors.onPrimary || '#FFF' }]}>{contact.title}</Text>
+                  <Text style={[styles.contactTitle, contact.primary && { color: themeContext.colors.text.onPrimary || '#FFF' }]}>{contact.title}</Text>
                   <Text style={[styles.contactDesc, contact.primary && { color: 'rgba(255,255,255,0.8)' }]}>{contact.description}</Text>
                 </View>
                 <View style={styles.callAction}>
-                  <Text style={[styles.contactNumber, contact.primary && { color: themeContext.colors.onPrimary || '#FFF' }]}>{contact.number}</Text>
+                  <Text style={[styles.contactNumber, contact.primary && { color: themeContext.colors.text.onPrimary || '#FFF' }]}>{contact.number}</Text>
                 </View>
               </TouchableOpacity>
             </Animated.View>

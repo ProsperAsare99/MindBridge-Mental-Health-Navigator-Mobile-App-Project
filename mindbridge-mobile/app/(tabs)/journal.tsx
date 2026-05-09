@@ -119,7 +119,7 @@ export default function JournalScreen() {
                 style={styles.newBtn}
                 onPress={() => setIsWriting(true)}
               >
-                <Plus color={theme.colors.onPrimary || '#FFF'} size={24} />
+                <Plus color={theme.colors.text.onPrimary || '#FFF'} size={24} />
               </TouchableOpacity>
             </View>
           </Animated.View>

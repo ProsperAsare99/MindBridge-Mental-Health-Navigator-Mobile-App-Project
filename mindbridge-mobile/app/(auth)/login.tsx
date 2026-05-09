@@ -219,7 +219,7 @@ export default function LoginScreen() {
               activeOpacity={0.8}
             >
               {loading
-                ? <ActivityIndicator color={themeContext.colors.onPrimary || '#FFF'} />
+                ? <ActivityIndicator color={themeContext.colors.text.onPrimary || '#FFF'} />
                 : <Text style={styles.primaryButtonText}>Log In</Text>}
             </TouchableOpacity>
 
@@ -390,7 +390,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     shadowRadius: 16,
     elevation: 6,
   },
-  primaryButtonText: { color: theme.colors.onPrimary || '#FFF', fontWeight: '800', fontSize: 17, letterSpacing: 0.2 },
+  primaryButtonText: { color: theme.colors.text.onPrimary || '#FFF', fontWeight: '800', fontSize: 17, letterSpacing: 0.2 },
   dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 24, gap: 12 },
   divider: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)' },
   dividerText: { color: theme.colors.text.secondary, fontSize: 13, fontWeight: '700' },

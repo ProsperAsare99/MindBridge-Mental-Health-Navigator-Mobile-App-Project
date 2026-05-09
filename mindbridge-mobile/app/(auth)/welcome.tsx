@@ -206,7 +206,7 @@ export default function WelcomeScreen() {
               end={{ x: 1, y: 1 }}
               style={[styles.primaryBtn, activeSlide < SLIDES.length - 1 && styles.primaryBtnOutline]}
             >
-              <Text style={[styles.primaryLabel, activeSlide < SLIDES.length - 1 ? { color: theme.colors.plum } : { color: theme.colors.onPrimary || '#FFF' }]}>
+              <Text style={[styles.primaryLabel, activeSlide < SLIDES.length - 1 ? { color: theme.colors.plum } : { color: theme.colors.text.onPrimary || '#FFF' }]}>
                 {activeSlide < SLIDES.length - 1 ? 'Continue' : 'Get Started'}
               </Text>
             </LinearGradient>

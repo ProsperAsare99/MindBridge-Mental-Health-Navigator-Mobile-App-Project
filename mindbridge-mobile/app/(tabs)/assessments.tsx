@@ -8,7 +8,7 @@ import {
   Dimensions,
   StatusBar
 } from 'react-native';
-import { theme } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,7 +26,7 @@ import {
 
 const { width } = Dimensions.get('window');
 
-const ASSESSMENTS = [
+const getAssessments = (theme: any) => [
   {
     id: 'phq9',
     title: 'PHQ-9',
@@ -53,7 +53,7 @@ const ASSESSMENTS = [
   }
 ];
 
-const RECENT_RESULTS = [
+const getRecentResults = (theme: any) => [
   {
     id: '1',
     test: 'GAD-7',
@@ -72,11 +72,12 @@ const RECENT_RESULTS = [
   }
 ];
 
-const AssessmentCard = ({ assessment, delay }: any) => {
+const AssessmentCard = ({ assessment, delay, theme }: any) => {
+  const styles = createStyles(theme);
   return (
     <Animated.View entering={FadeInUp.delay(delay).duration(500)}>
       <TouchableOpacity style={styles.assessmentCard} activeOpacity={0.8}>
-        <View style={[styles.assessmentIconWrap, { backgroundColor: assessment.color + '20' }]}>
+        <View style={[styles.assessmentIconWrap, { backgroundColor: assessment.color + (theme.isDark ? '25' : '20') }]}>
           <assessment.icon color={assessment.color} size={28} />
         </View>
         <Text style={styles.assessmentTitle}>{assessment.title}</Text>
@@ -94,12 +95,19 @@ const AssessmentCard = ({ assessment, delay }: any) => {
 
 export default function AssessmentsScreen() {
   const insets = useSafeAreaInsets();
+  const themeContext = useTheme();
+  const styles = createStyles(themeContext);
+  const ASSESSMENTS = getAssessments(themeContext);
+  const RECENT_RESULTS = getRecentResults(themeContext);
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={themeContext.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={['rgba(123, 97, 255, 0.08)', theme.colors.background, theme.colors.backgroundSecondary]} 
+        colors={themeContext.isDark 
+          ? ['rgba(123, 97, 255, 0.1)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+          : ['rgba(123, 97, 255, 0.08)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+        } 
         locations={[0, 0.2, 1]}
         style={StyleSheet.absoluteFillObject} 
       />
@@ -110,7 +118,7 @@ export default function AssessmentsScreen() {
       >
         <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
           <View style={styles.headerIconContainer}>
-            <ClipboardList color={theme.colors.plum} size={32} />
+            <ClipboardList color={themeContext.colors.plum} size={32} />
           </View>
           <Text style={styles.title}>Assessments</Text>
           <Text style={styles.subtitle}>Clinically validated tools to measure and track your mental well-being over time.</Text>
@@ -126,7 +134,7 @@ export default function AssessmentsScreen() {
             decelerationRate="fast"
           >
             {ASSESSMENTS.map((assessment, index) => (
-              <AssessmentCard key={assessment.id} assessment={assessment} delay={200 + (index * 100)} />
+              <AssessmentCard key={assessment.id} assessment={assessment} delay={200 + (index * 100)} theme={themeContext} />
             ))}
           </ScrollView>
         </Animated.View>
@@ -137,7 +145,7 @@ export default function AssessmentsScreen() {
             {RECENT_RESULTS.map((result, index) => (
               <React.Fragment key={result.id}>
                 <TouchableOpacity style={styles.resultItem}>
-                  <View style={[styles.resultIconWrap, { backgroundColor: result.color + '15' }]}>
+                  <View style={[styles.resultIconWrap, { backgroundColor: result.color + (themeContext.isDark ? '25' : '15') }]}>
                     {result.trend === 'down' ? <TrendingDown color={result.color} size={18} /> :
                      result.trend === 'up' ? <TrendingUp color={result.color} size={18} /> :
                      <Minus color={result.color} size={18} />}
@@ -148,7 +156,7 @@ export default function AssessmentsScreen() {
                   </View>
                   <View style={styles.resultRight}>
                     <Text style={styles.resultDate}>{result.date}</Text>
-                    <ChevronRight color={theme.colors.text.disabled} size={18} />
+                    <ChevronRight color={themeContext.colors.text.disabled} size={18} />
                   </View>
                 </TouchableOpacity>
                 {index < RECENT_RESULTS.length - 1 && <View style={styles.divider} />}
@@ -159,7 +167,7 @@ export default function AssessmentsScreen() {
 
         <Animated.View entering={FadeInUp.delay(700).duration(500)} style={styles.educationalCard}>
           <View style={styles.eduIconWrap}>
-            <Info color={theme.colors.plum} size={20} />
+            <Info color={themeContext.colors.plum} size={20} />
           </View>
           <View style={styles.eduContent}>
             <Text style={styles.eduTitle}>Why take assessments?</Text>
@@ -172,7 +180,7 @@ export default function AssessmentsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
@@ -194,7 +202,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: theme.colors.plum,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
+    shadowOpacity: theme.isDark ? 0.3 : 0.1,
     shadowRadius: 16,
     elevation: 8,
   },
@@ -230,11 +238,11 @@ const styles = StyleSheet.create({
     padding: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
+    shadowOpacity: theme.isDark ? 0.2 : 0.05,
     shadowRadius: 16,
     elevation: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   assessmentIconWrap: {
     width: 56,
@@ -272,7 +280,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   startBtnText: {
-    color: theme.colors.surface,
+    color: theme.colors.text.onPrimary || '#FFF',
     fontWeight: '700',
     fontSize: 13,
   },
@@ -285,11 +293,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: theme.isDark ? 0.2 : 0.04,
     shadowRadius: 12,
     elevation: 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
   resultItem: {
     flexDirection: 'row',
@@ -329,18 +337,18 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     marginLeft: 76,
   },
   educationalCard: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(123, 97, 255, 0.08)',
+    backgroundColor: theme.isDark ? 'rgba(123, 97, 255, 0.1)' : 'rgba(123, 97, 255, 0.08)',
     borderRadius: 24,
     padding: 20,
     marginHorizontal: 24,
     marginBottom: 32,
     borderWidth: 1,
-    borderColor: 'rgba(123, 97, 255, 0.15)',
+    borderColor: theme.isDark ? 'rgba(123, 97, 255, 0.15)' : 'rgba(123, 97, 255, 0.15)',
   },
   eduIconWrap: {
     width: 40,
@@ -352,7 +360,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
     shadowColor: theme.colors.plum,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: theme.isDark ? 0.2 : 0.1,
     shadowRadius: 8,
     elevation: 2,
   },

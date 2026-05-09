@@ -106,7 +106,7 @@ export default function ResourcesScreen() {
                 <Animated.View key={guide.id} entering={FadeInUp.delay(100 + (index * 50)).duration(500)}>
                   <TouchableOpacity style={[styles.audioCard, { backgroundColor: (guide.color || theme.colors.plum) + (theme.isDark ? '25' : '15'), borderColor: (guide.color || theme.colors.plum) + (theme.isDark ? '40' : '30') }]} activeOpacity={0.8}>
                     <View style={[styles.audioIconWrap, { backgroundColor: guide.color || theme.colors.plum }]}>
-                      <Headphones color={theme.colors.onPrimary || '#FFF'} size={20} />
+                      <Headphones color={theme.colors.text.onPrimary || '#FFF'} size={20} />
                     </View>
                     <Text style={styles.audioTitle} numberOfLines={2}>{guide.title}</Text>
                     <Text style={styles.audioDuration}>{guide.duration || 'Listen'}</Text>

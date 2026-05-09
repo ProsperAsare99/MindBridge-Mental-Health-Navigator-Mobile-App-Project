@@ -474,7 +474,7 @@ export default function RegisterScreen() {
               activeOpacity={0.8}
             >
               {loading ? (
-                <ActivityIndicator color={themeContext.colors.onPrimary || '#FFF'} />
+                <ActivityIndicator color={themeContext.colors.text.onPrimary || '#FFF'} />
               ) : (
                 <Text style={styles.primaryButtonText}>Create Account</Text>
               )}
@@ -544,7 +544,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   chip: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16, backgroundColor: theme.colors.background, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
   chipActive: { backgroundColor: theme.colors.plum, borderColor: theme.colors.plum },
   chipText: { fontSize: 15, color: theme.colors.text.secondary, fontWeight: '600' },
-  chipTextActive: { color: theme.colors.onPrimary || '#FFF' },
+  chipTextActive: { color: theme.colors.text.onPrimary || '#FFF' },
 
   // Picker Styles
   pickerTrigger: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
@@ -567,7 +567,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   personalizationText: { flex: 1, fontSize: 14, color: theme.colors.plum, fontWeight: '600', lineHeight: 20 },
   
   primaryButton: { backgroundColor: theme.colors.plum, height: 60, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginTop: 16, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 8 }, shadowOpacity: theme.isDark ? 0.4 : 0.2, shadowRadius: 16, elevation: 6 },
-  primaryButtonText: { color: theme.colors.onPrimary || '#FFF', fontWeight: '800', fontSize: 17, letterSpacing: 0.2 },
+  primaryButtonText: { color: theme.colors.text.onPrimary || '#FFF', fontWeight: '800', fontSize: 17, letterSpacing: 0.2 },
   signUpContainer: { marginTop: 16, alignItems: 'center', marginBottom: 20 },
   signUpText: { color: theme.colors.text.secondary, fontSize: 15, fontWeight: '500' },
   signUpLink: { color: theme.colors.plum, fontWeight: '800' },

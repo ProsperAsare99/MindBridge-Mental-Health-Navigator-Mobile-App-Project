@@ -113,7 +113,7 @@ export default function CommunityScreen() {
               <Animated.View key={group.id} entering={FadeInUp.delay(100 + (index * 50)).duration(500)}>
                 <TouchableOpacity style={[styles.groupCard, { backgroundColor: group.color + (theme.isDark ? '25' : '15'), borderColor: group.color + (theme.isDark ? '40' : '30') }]} activeOpacity={0.8}>
                   <View style={[styles.groupIconWrap, { backgroundColor: group.color }]}>
-                    <Users color={theme.colors.onPrimary || '#FFF'} size={20} />
+                    <Users color={theme.colors.text.onPrimary || '#FFF'} size={20} />
                   </View>
                   <Text style={styles.groupTitle} numberOfLines={2}>{group.title}</Text>
                   <Text style={styles.groupMembers}>{group.members} members</Text>
@@ -173,7 +173,7 @@ export default function CommunityScreen() {
       {/* FAB */}
       <Animated.View entering={FadeInUp.delay(400).duration(500)} style={[styles.fabContainer, { bottom: insets.bottom + 20 }]}>
         <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
-          <PenSquare color={theme.colors.onPrimary || '#FFF'} size={24} />
+          <PenSquare color={theme.colors.text.onPrimary || '#FFF'} size={24} />
           <Text style={styles.fabText}>Share Thought</Text>
         </TouchableOpacity>
       </Animated.View>
@@ -360,6 +360,6 @@ const createStyles = (theme: any) => StyleSheet.create({
   fabText: {
     fontSize: 16,
     fontWeight: '700',
-    color: theme.colors.onPrimary || '#FFF',
+    color: theme.colors.text.onPrimary || '#FFF',
   }
 });

@@ -162,7 +162,7 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
 
           <View style={isWide ? styles.wideContent : styles.squareContent}>
             <View style={[styles.widgetIconWrap, { backgroundColor: color }]}>
-              <Icon color={theme.colors.onPrimary || '#FFF'} size={isWide ? 24 : 28} />
+              <Icon color={theme.colors.text.onPrimary || '#FFF'} size={isWide ? 24 : 28} />
             </View>
             <View style={isWide ? styles.wideTextWrap : {}}>
               <Text style={[styles.widgetTitle, isWide && { fontSize: 18 }]}>{title}</Text>

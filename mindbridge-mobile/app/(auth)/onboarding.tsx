@@ -561,7 +561,7 @@ export default function OnboardingScreen() {
             disabled={!isNextEnabled}
           >
             <Text style={styles.nextBtnText}>Next</Text>
-            <ChevronRight color={themeContext.colors.onPrimary || '#FFF'} size={20} />
+            <ChevronRight color={themeContext.colors.text.onPrimary || '#FFF'} size={20} />
           </TouchableOpacity>
         </View>
       )}
@@ -613,7 +613,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   sliderDot: { width: 34, height: 34, borderRadius: 17, backgroundColor: theme.colors.surface, borderWidth: 2, borderColor: theme.colors.accents.softLilac, alignItems: 'center', justifyContent: 'center' },
   sliderDotActive: { backgroundColor: theme.colors.plum, borderColor: theme.colors.plum },
   sliderDotText: { fontSize: 13, fontWeight: '700', color: theme.colors.text.secondary },
-  sliderDotTextActive: { color: theme.colors.onPrimary || '#FFF' },
+  sliderDotTextActive: { color: theme.colors.text.onPrimary || '#FFF' },
 
   // Why We Ask
   whyWeAskBox: { flexDirection: 'row', backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.1)', padding: 16, borderRadius: 12, marginTop: 24, alignItems: 'center' },
@@ -634,9 +634,9 @@ const createStyles = (theme: any) => StyleSheet.create({
   backFooterBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.08)', alignItems: 'center', justifyContent: 'center' },
   nextBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.plum, paddingVertical: 14, paddingHorizontal: 20, borderRadius: 30 },
   nextBtnDisabled: { opacity: 0.5 },
-  nextBtnText: { fontSize: 16, fontWeight: '700', color: theme.colors.onPrimary || '#FFF', marginRight: 8 },
+  nextBtnText: { fontSize: 16, fontWeight: '700', color: theme.colors.text.onPrimary || '#FFF', marginRight: 8 },
   
   // Primary Action
   primaryBtn: { backgroundColor: theme.colors.plum, paddingVertical: 16, paddingHorizontal: 40, borderRadius: 30, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.4 : 0.3, shadowRadius: 8, elevation: 6 },
-  primaryBtnText: { color: theme.colors.onPrimary || '#FFF', fontSize: 18, fontWeight: '700' },
+  primaryBtnText: { color: theme.colors.text.onPrimary || '#FFF', fontSize: 18, fontWeight: '700' },
 });

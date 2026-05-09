@@ -274,7 +274,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     shadowOpacity: 0,
   },
   plantBtnText: {
-    color: theme.colors.onPrimary || '#FFF',
+    color: theme.colors.text.onPrimary || '#FFF',
     fontSize: 17,
     fontWeight: '800',
     letterSpacing: 0.2,

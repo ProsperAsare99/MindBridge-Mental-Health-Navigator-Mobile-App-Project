@@ -90,7 +90,7 @@ export default function AIGuideScreen() {
       <Animated.View entering={FadeIn.duration(600)} style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <View style={styles.headerLeft}>
           <View style={styles.avatarWrap}>
-            <Bot color={theme.colors.onPrimary || '#FFF'} size={24} />
+            <Bot color={theme.colors.text.onPrimary || '#FFF'} size={24} />
           </View>
           <View>
             <Text style={styles.headerTitle}>MindBridge Guide</Text>
@@ -121,7 +121,7 @@ export default function AIGuideScreen() {
             >
               {msg.isAi && (
                 <View style={[styles.messageAvatar, { backgroundColor: theme.colors.plumLight }]}>
-                  <Bot color={theme.colors.onPrimary || '#FFF'} size={16} />
+                  <Bot color={theme.colors.text.onPrimary || '#FFF'} size={16} />
                 </View>
               )}
               <View style={[
@@ -174,7 +174,7 @@ export default function AIGuideScreen() {
               onPress={handleSend}
               disabled={!input.trim()}
             >
-              <Send color={theme.colors.onPrimary || '#FFF'} size={20} />
+              <Send color={theme.colors.text.onPrimary || '#FFF'} size={20} />
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -283,7 +283,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.text.primary,
   },
   textUser: {
-    color: theme.colors.onPrimary || '#FFF',
+    color: theme.colors.text.onPrimary || '#FFF',
   },
   inputArea: {
     backgroundColor: theme.colors.surface,

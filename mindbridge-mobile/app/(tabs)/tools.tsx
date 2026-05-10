@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 import {
   BookOpen,
   ClipboardList,
@@ -22,6 +23,7 @@ import {
   Bot,
   Wind,
   ChevronRight,
+  MoreVertical,
 } from 'lucide-react-native';
 
 const getToolGroups = (theme: any) => [
@@ -74,10 +76,17 @@ export default function ToolsScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
-          <Text style={styles.title}>Explore</Text>
-          <Text style={styles.subtitle}>All your MindBridge tools{'\n'}in one place.</Text>
-        </Animated.View>
+        <ScreenHeader 
+          title="Explore" 
+          subtitle="All your MindBridge tools in one place."
+          rightAction={
+            <TouchableOpacity>
+              <MoreVertical color={themeContext.colors.text.secondary} size={24} />
+            </TouchableOpacity>
+          }
+        />
+
+        <View style={{ height: 20 }} />
 
         {TOOL_GROUPS.map((group, groupIndex) => (
           <Animated.View
@@ -121,26 +130,12 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.colors.backgroundSecondary,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 0, // Reset padding for ScreenHeader to handle it
     paddingBottom: 120
-  },
-  header: {
-    marginBottom: 40,
-  },
-  title: {
-    fontSize: 34,
-    fontWeight: '800',
-    color: theme.colors.text.primary,
-    letterSpacing: -1,
-    marginBottom: 8
-  },
-  subtitle: {
-    fontSize: 16,
-    color: theme.colors.text.secondary,
-    lineHeight: 22
   },
   groupContainer: {
     marginBottom: 32,
+    paddingHorizontal: 24,
   },
   groupTitle: {
     fontSize: 14,

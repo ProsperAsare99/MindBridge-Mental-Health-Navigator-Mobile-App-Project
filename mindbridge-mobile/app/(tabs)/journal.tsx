@@ -35,15 +35,25 @@ export default function JournalScreen() {
   const styles = createStyles(theme);
   
   const [entries, setEntries] = useState<any[]>([]);
+  const [filteredEntries, setFilteredEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isWriting, setIsWriting] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
+  const [selectedMood, setSelectedMood] = useState('calm');
+  const [filterMood, setFilterMood] = useState('all');
+
+  const MOOD_OPTIONS = [
+    { id: 'joy', icon: Sun, color: theme.colors.accents.gentlePeach, label: 'Joyful' },
+    { id: 'calm', icon: Wind, color: theme.colors.accents.eucalyptus, label: 'Calm' },
+    { id: 'anxious', icon: CloudRain, color: theme.colors.accents.powderBlue, label: 'Anxious' },
+  ];
 
   const getMoodIcon = (mood: string) => {
     switch(mood) {
       case 'calm': return <Wind color={theme.colors.accents.eucalyptus} size={16} />;
       case 'anxious': return <CloudRain color={theme.colors.accents.powderBlue} size={16} />;
+      case 'joy': return <Sun color={theme.colors.accents.gentlePeach} size={16} />;
       default: return <Sun color={theme.colors.accents.gentlePeach} size={16} />;
     }
   };
@@ -52,6 +62,7 @@ export default function JournalScreen() {
     try {
       const response = await api.get('/journal');
       setEntries(response.data);
+      setFilteredEntries(response.data);
     } catch (error) {
       console.error('Error fetching journal entries:', error);
     } finally {
@@ -63,6 +74,14 @@ export default function JournalScreen() {
     fetchEntries();
   }, []);
 
+  useEffect(() => {
+    if (filterMood === 'all') {
+      setFilteredEntries(entries);
+    } else {
+      setFilteredEntries(entries.filter(e => e.mood === filterMood));
+    }
+  }, [filterMood, entries]);
+
   const handleSave = async () => {
     if (!newContent.trim()) return;
     
@@ -70,12 +89,14 @@ export default function JournalScreen() {
       const response = await api.post('/journal', {
         title: newTitle.trim() || 'Untitled Entry',
         content: newContent.trim(),
+        mood: selectedMood,
       });
       
       setEntries([response.data, ...entries]);
       setIsWriting(false);
       setNewTitle('');
       setNewContent('');
+      setSelectedMood('calm');
     } catch (error) {
       console.error('Error saving journal entry:', error);
     }
@@ -122,20 +143,40 @@ export default function JournalScreen() {
                 <Plus color={theme.colors.text.onPrimary || '#FFF'} size={24} />
               </TouchableOpacity>
             </View>
+
+            {/* Filter Pills */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterBar}>
+              <TouchableOpacity 
+                onPress={() => setFilterMood('all')}
+                style={[styles.filterPill, filterMood === 'all' && styles.filterPillActive]}
+              >
+                <Text style={[styles.filterText, filterMood === 'all' && styles.filterTextActive]}>All</Text>
+              </TouchableOpacity>
+              {MOOD_OPTIONS.map(mood => (
+                <TouchableOpacity 
+                  key={mood.id}
+                  onPress={() => setFilterMood(mood.id)}
+                  style={[styles.filterPill, filterMood === mood.id && styles.filterPillActive]}
+                >
+                  <mood.icon size={14} color={filterMood === mood.id ? '#FFF' : mood.color} />
+                  <Text style={[styles.filterText, filterMood === mood.id && styles.filterTextActive]}>{mood.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </Animated.View>
 
           {loading ? (
             <ActivityIndicator size="large" color={theme.colors.plum} style={{ marginTop: 40 }} />
-          ) : entries.length === 0 ? (
+          ) : filteredEntries.length === 0 ? (
             <View style={{ padding: 24, alignItems: 'center', marginTop: 40 }}>
               <BookOpen color={theme.colors.text.disabled} size={48} style={{ marginBottom: 16 }} />
               <Text style={{ color: theme.colors.text.secondary, textAlign: 'center' }}>
-                Your journal is empty. Tap the + button to capture your thoughts.
+                {filterMood === 'all' ? 'Your journal is empty. Tap the + button to capture your thoughts.' : `No ${filterMood} entries found.`}
               </Text>
             </View>
           ) : (
             <View style={styles.entriesList}>
-              {entries.map((entry, index) => (
+              {filteredEntries.map((entry, index) => (
                 <Animated.View 
                   key={entry.id}
                   entering={FadeInUp.delay(index * 50).duration(500)}
@@ -177,6 +218,26 @@ export default function JournalScreen() {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.composerBody}
           >
+            {/* Mood Selector in Composer */}
+            <View style={styles.moodSelector}>
+              <Text style={styles.moodSelectorLabel}>How are you feeling?</Text>
+              <View style={styles.moodOptionsRow}>
+                {MOOD_OPTIONS.map(mood => (
+                  <TouchableOpacity 
+                    key={mood.id}
+                    onPress={() => setSelectedMood(mood.id)}
+                    style={[
+                      styles.moodOption, 
+                      selectedMood === mood.id && { backgroundColor: mood.color + '20', borderColor: mood.color }
+                    ]}
+                  >
+                    <mood.icon size={20} color={mood.color} />
+                    <Text style={[styles.moodOptionText, { color: mood.color }]}>{mood.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
             <TextInput
               style={styles.titleInput}
               placeholder="Title (Optional)"
@@ -198,6 +259,7 @@ export default function JournalScreen() {
           </KeyboardAvoidingView>
         </Animated.View>
       )}
+
     </View>
   );
 }
@@ -351,5 +413,63 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 17,
     color: theme.colors.text.primary,
     lineHeight: 26,
+  },
+  filterBar: {
+    marginTop: 16,
+    flexDirection: 'row',
+  },
+  filterPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: theme.colors.surface,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    gap: 6,
+  },
+  filterPillActive: {
+    backgroundColor: theme.colors.plum,
+    borderColor: theme.colors.plum,
+  },
+  filterText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.text.secondary,
+  },
+  filterTextActive: {
+    color: '#FFF',
+  },
+  moodSelector: {
+    marginBottom: 24,
+  },
+  moodSelectorLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.text.tertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 12,
+  },
+  moodOptionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  moodOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+    gap: 8,
+  },
+  moodOptionText: {
+    fontSize: 14,
+    fontWeight: '700',
   }
 });

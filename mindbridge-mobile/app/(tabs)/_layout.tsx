@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useTheme } from '../../src/context/ThemeContext';
-import { LayoutDashboard, Leaf, User, Compass } from 'lucide-react-native';
+import { LayoutDashboard, User, Compass, Settings } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
@@ -33,13 +33,6 @@ export default function TabLayout() {
         }} 
       />
       <Tabs.Screen 
-        name="garden" 
-        options={{ 
-          title: 'Mood Garden',
-          tabBarIcon: ({ color }) => <Leaf color={color} size={24} />
-        }} 
-      />
-      <Tabs.Screen 
         name="tools" 
         options={{ 
           title: 'Explore',
@@ -53,14 +46,22 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <User color={color} size={24} />
         }} 
       />
+      <Tabs.Screen 
+        name="settings" 
+        options={{ 
+          title: 'Settings',
+          tabBarIcon: ({ color }) => <Settings color={color} size={24} />
+        }} 
+      />
       {/* Hidden Screens */}
+      <Tabs.Screen name="journey" options={{ href: null, title: 'Wellness Journey' }} />
+      <Tabs.Screen name="garden" options={{ href: null, title: 'Mood Garden' }} />
       <Tabs.Screen name="ai-guide" options={{ href: null, title: 'AI Guide' }} />
       <Tabs.Screen name="crisis" options={{ href: null, title: 'Crisis Support' }} />
       <Tabs.Screen name="journal" options={{ href: null, title: 'Journal' }} />
       <Tabs.Screen name="assessments" options={{ href: null, title: 'Assessments' }} />
       <Tabs.Screen name="resources" options={{ href: null, title: 'Resources' }} />
       <Tabs.Screen name="community" options={{ href: null, title: 'Community' }} />
-      <Tabs.Screen name="settings" options={{ href: null, title: 'Settings' }} />
     </Tabs>
   );
 }

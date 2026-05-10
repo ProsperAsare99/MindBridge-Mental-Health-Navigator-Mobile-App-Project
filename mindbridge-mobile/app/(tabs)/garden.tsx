@@ -7,7 +7,9 @@ import {
   ScrollView, 
   Dimensions,
   Pressable,
-  StatusBar
+  StatusBar,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,17 +22,18 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Leaf, Sun, CloudRain, Wind, CloudLightning, Flower2, CheckCircle2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import api from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
 
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
 
 const getMoods = (theme: any) => [
-  { id: 'joy', label: 'Joyful', icon: Sun, color: theme.colors.accents.gentlePeach, bg: theme.colors.accents.gentlePeach + '15' },
-  { id: 'calm', label: 'Calm', icon: Leaf, color: theme.colors.accents.eucalyptus, bg: theme.colors.accents.eucalyptus + '15' },
-  { id: 'anxious', label: 'Anxious', icon: Wind, color: theme.colors.accents.softLilac, bg: theme.colors.accents.softLilac + '20' },
-  { id: 'sad', label: 'Sad', icon: CloudRain, color: theme.colors.accents.powderBlue, bg: theme.colors.accents.powderBlue + '20' },
-  { id: 'stressed', label: 'Stressed', icon: CloudLightning, color: theme.colors.accents.slate, bg: theme.colors.accents.slate + '15' },
+  { id: 'joy', label: 'Joyful', icon: Sun, color: theme.colors.accents.gentlePeach, bg: theme.colors.accents.gentlePeach + '15', score: 10 },
+  { id: 'calm', label: 'Calm', icon: Leaf, color: theme.colors.accents.eucalyptus, bg: theme.colors.accents.eucalyptus + '15', score: 8 },
+  { id: 'anxious', label: 'Anxious', icon: Wind, color: theme.colors.accents.softLilac, bg: theme.colors.accents.softLilac + '20', score: 4 },
+  { id: 'sad', label: 'Sad', icon: CloudRain, color: theme.colors.accents.powderBlue, bg: theme.colors.accents.powderBlue + '20', score: 2 },
+  { id: 'stressed', label: 'Stressed', icon: CloudLightning, color: theme.colors.accents.slate, bg: theme.colors.accents.slate + '15', score: 3 },
 ];
 
 const MoodCard = ({ mood, isSelected, onPress, delay, theme }: any) => {
@@ -84,15 +87,36 @@ export default function GardenScreen() {
   const styles = createStyles(themeContext);
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [isPlanted, setIsPlanted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const MOODS = getMoods(themeContext);
 
-  const handlePlant = () => {
+  const handlePlant = async () => {
     if (!selectedMood) return;
-    setIsPlanted(true);
-    setTimeout(() => {
-      setIsPlanted(false);
-      setSelectedMood(null);
-    }, 4000);
+    
+    const moodData = MOODS.find(m => m.id === selectedMood);
+    if (!moodData) return;
+
+    setLoading(true);
+    try {
+      await api.post('/mood', {
+        score: moodData.score,
+        emotions: [moodData.label],
+        note: `Feeling ${moodData.label.toLowerCase()} today.`
+      });
+
+      setIsPlanted(true);
+      
+      // Keep the success state for 4 seconds
+      setTimeout(() => {
+        setIsPlanted(false);
+        setSelectedMood(null);
+      }, 4000);
+    } catch (error) {
+      console.error('Error logging mood:', error);
+      Alert.alert('Connection Issue', 'We couldn\'t plant your seed right now. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -149,18 +173,23 @@ export default function GardenScreen() {
       {!isPlanted && (
         <Animated.View entering={FadeInUp.delay(800).duration(800)} style={[styles.footer, { paddingBottom: insets.bottom + 20, backgroundColor: themeContext.colors.surface }]}>
           <TouchableOpacity 
-            style={[styles.plantBtn, !selectedMood && styles.plantBtnDisabled]}
-            disabled={!selectedMood}
+            style={[styles.plantBtn, (!selectedMood || loading) && styles.plantBtnDisabled]}
+            disabled={!selectedMood || loading}
             onPress={handlePlant}
             activeOpacity={0.8}
           >
-            <Text style={styles.plantBtnText}>Plant Seed</Text>
+            {loading ? (
+              <ActivityIndicator color={themeContext.colors.text.onPrimary || '#FFF'} />
+            ) : (
+              <Text style={styles.plantBtnText}>Plant Seed</Text>
+            )}
           </TouchableOpacity>
         </Animated.View>
       )}
     </View>
   );
 }
+
 
 const createStyles = (theme: any) => StyleSheet.create({
   container: {

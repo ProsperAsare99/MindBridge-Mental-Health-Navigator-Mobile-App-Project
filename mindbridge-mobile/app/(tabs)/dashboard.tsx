@@ -31,9 +31,11 @@ import {
   Users,
   Settings,
   Bot,
+  Leaf,
   Wind,
   ChevronRight,
-  Quote
+  Quote,
+  Clock
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
@@ -243,9 +245,9 @@ export default function DashboardScreen() {
           <Text style={styles.sectionTitle}>Daily Tools</Text>
           <View style={styles.grid}>
             <AppleWidget
-              title="Mood Tracker"
-              subtitle="Log feelings"
-              icon={Wind}
+              title="Mood Garden"
+              subtitle="Cultivate calm"
+              icon={Leaf}
               color={theme.colors.accents.eucalyptus}
               delay={200}
               onPress={() => router.push('/(tabs)/garden')}
@@ -282,6 +284,16 @@ export default function DashboardScreen() {
           <Text style={styles.sectionTitle}>Support & More</Text>
           <View style={styles.listContainer}>
             <AppleWidget
+              title="Wellness Journey"
+              subtitle="Track your daily care plan"
+              icon={Clock}
+              color={theme.colors.plum}
+              size="list"
+              delay={550}
+              onPress={() => router.push('/(tabs)/journey')}
+            />
+            <View style={styles.divider} />
+            <AppleWidget
               title="Crisis Support"
               subtitle="Immediate help and helplines"
               icon={ShieldAlert}
@@ -289,6 +301,16 @@ export default function DashboardScreen() {
               size="list"
               delay={600}
               onPress={() => router.push('/(tabs)/crisis')}
+            />
+            <View style={styles.divider} />
+            <AppleWidget
+              title="Breathing Exercise"
+              subtitle="Quick 4-7-8 relaxation"
+              icon={Wind}
+              color={theme.colors.accents.powderBlue}
+              size="list"
+              delay={650}
+              onPress={() => router.push('/breathing')}
             />
             <View style={styles.divider} />
             <AppleWidget

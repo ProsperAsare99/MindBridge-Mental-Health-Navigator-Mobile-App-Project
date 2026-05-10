@@ -54,7 +54,7 @@ const QUOTES = [
   { text: "There is hope, even when your brain tells you there isn’t.", author: "John Green" },
   { text: "You don’t have to control your thoughts. You just have to stop letting them control you.", author: "Dan Millman" },
   { text: "Deep breathing is our nervous system’s love language.", author: "Dr. Lauren Fogel Mersy" },
-  { text: "Hello! I'm the MindBridge Oracle. I'm here to listen, support, and help you navigate your feelings. How are you doing today?", author: "Mariska Hargitay" },
+  { text: "Healing takes time, and asking for help is a courageous step.", author: "Mariska Hargitay" },
   { text: "Self-care is how you take your power back.", author: "Lalah Delia" },
   { text: "Your present circumstances don't determine where you can go; they merely determine where you start.", author: "Nido Qubein" },
   { text: "Courage doesn't always roar. Sometimes courage is the little voice at the end of the day saying I'll try again tomorrow.", author: "Mary Anne Radmacher" },
@@ -140,7 +140,7 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
               <Icon color={color} size={22} />
             </View>
             <View style={styles.listTextWrap}>
-              <Text style={styles.headerTitle}>MindBridge Oracle</Text>
+              <Text style={styles.listTitle}>{title}</Text>
               {subtitle && <Text style={styles.listSubtitle}>{subtitle}</Text>}
             </View>
             <ChevronRight color={theme.colors.text.disabled} size={20} />

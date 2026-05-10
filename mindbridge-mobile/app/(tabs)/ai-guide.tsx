@@ -34,7 +34,7 @@ const INITIAL_MESSAGES = [
   {
     id: '1',
     isAi: true,
-    text: "Hello! I'm your MindBridge Guide. I'm here to listen, support, and help you navigate your feelings. How are you doing today?",
+    text: "Hello! I'm the MindBridge Oracle. I'm here to listen, support, and help you navigate your feelings. How are you doing today?",
     time: 'Now'
   }
 ];
@@ -93,7 +93,7 @@ export default function AIGuideScreen() {
             <Bot color={theme.colors.text.onPrimary || '#FFF'} size={24} />
           </View>
           <View>
-            <Text style={styles.headerTitle}>MindBridge Guide</Text>
+            <Text style={styles.headerTitle}>MindBridge Oracle</Text>
             <Text style={styles.headerSubtitle}>Always here to listen</Text>
           </View>
         </View>

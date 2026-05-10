@@ -28,7 +28,7 @@ const getToolGroups = (theme: any) => [
   {
     title: 'Daily Growth',
     items: [
-      { id: 'ai-guide', title: 'Personalized AI Guide', subtitle: 'Your private safe space', icon: Bot, color: theme.colors.plum },
+      { id: 'ai-guide', title: 'MindBridge Oracle', subtitle: 'Your private safe space', icon: Bot, color: theme.colors.plum },
       { id: 'garden', title: 'Mood Tracker', subtitle: 'Log your feelings', icon: Wind, color: theme.colors.accents.eucalyptus },
       { id: 'journal', title: 'Unified Journal', subtitle: 'Write your thoughts', icon: BookOpen, color: theme.colors.accents.powderBlue },
     ]

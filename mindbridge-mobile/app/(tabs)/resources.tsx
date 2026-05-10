@@ -34,10 +34,13 @@ export default function ResourcesScreen() {
   
   const [resources, setResources] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  const CATEGORIES = ['All', 'Audio', 'Techniques', 'Articles', 'Videos', 'Books'];
 
   const COPING_TOOLS = [
-    { id: 'breath', title: 'Box Breathing', subtitle: 'Calm your nervous system', icon: Wind, color: theme.colors.accents.softMint },
-    { id: 'ground', title: '5-4-3-2-1 Method', subtitle: 'Instant grounding technique', icon: Play, color: theme.colors.accents.dustyRose },
+    { id: 'breath', title: 'Box Breathing', subtitle: 'Calm your nervous system', icon: Wind, color: theme.colors.accents.eucalyptus },
+    { id: 'ground', title: '5-4-3-2-1 Method', subtitle: 'Instant grounding technique', icon: Play, color: theme.colors.accents.powderBlue },
   ];
 
   useEffect(() => {
@@ -70,7 +73,7 @@ export default function ResourcesScreen() {
       <LinearGradient 
         colors={theme.isDark 
           ? ['rgba(59, 82, 73, 0.15)', theme.colors.background, theme.colors.backgroundSecondary]
-          : ['rgba(59, 82, 73, 0.05)', theme.colors.background, theme.colors.backgroundSecondary]
+          : ['rgba(59, 82, 73, 0.08)', theme.colors.background, theme.colors.backgroundSecondary]
         } 
         locations={[0, 0.2, 1]}
         style={StyleSheet.absoluteFillObject} 
@@ -80,17 +83,45 @@ export default function ResourcesScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeIn.duration(500)} style={styles.header}>
-          <View style={styles.headerIconContainer}>
-            <Library color={theme.colors.accents.forestGreen} size={32} />
-          </View>
-          <Text style={styles.title}>Learn & Grow</Text>
-          <Text style={styles.subtitle}>Curated books, articles, videos, and coping tools for your journey.</Text>
+        <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
+          <Text style={styles.title}>Discovery Hub</Text>
+          <Text style={styles.subtitle}>Curated tools for your mental well-being.</Text>
         </Animated.View>
 
+        {/* Featured Section */}
+        <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.featuredContainer}>
+          <LinearGradient
+            colors={[theme.colors.plum, '#4A3E4F']}
+            style={styles.featuredCard}
+          >
+            <View style={styles.featuredBadge}>
+              <Text style={styles.featuredBadgeText}>FEATURED</Text>
+            </View>
+            <Text style={styles.featuredTitle}>The Art of Self-Compassion</Text>
+            <Text style={styles.featuredSubtitle}>A 10-minute guided audio journey to quiet your inner critic.</Text>
+            <TouchableOpacity style={styles.featuredBtn}>
+              <Play color={theme.colors.plum} size={16} fill={theme.colors.plum} />
+              <Text style={styles.featuredBtnText}>Listen Now</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+        </Animated.View>
+
+        {/* Category Filter */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterBar} contentContainerStyle={styles.filterContent}>
+          {CATEGORIES.map(cat => (
+            <TouchableOpacity 
+              key={cat} 
+              onPress={() => setActiveCategory(cat)}
+              style={[styles.filterPill, activeCategory === cat && styles.filterPillActive]}
+            >
+              <Text style={[styles.filterText, activeCategory === cat && styles.filterTextActive]}>{cat}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
         {/* Audio Guides */}
-        {audio.length > 0 && (
-          <Animated.View entering={FadeInUp.delay(50).duration(500)}>
+        {(activeCategory === 'All' || activeCategory === 'Audio') && audio.length > 0 && (
+          <Animated.View entering={FadeInUp.delay(200).duration(500)}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Guided Audio</Text>
               <TouchableOpacity><Text style={styles.seeAllText}>See all</Text></TouchableOpacity>
@@ -99,50 +130,26 @@ export default function ResourcesScreen() {
               horizontal 
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.horizontalScrollPadding}
-              snapToInterval={width * 0.45 + 16}
+              snapToInterval={width * 0.48 + 16}
               decelerationRate="fast"
             >
               {audio.map((guide: any, index: number) => (
-                <Animated.View key={guide.id} entering={FadeInUp.delay(100 + (index * 50)).duration(500)}>
-                  <TouchableOpacity style={[styles.audioCard, { backgroundColor: (guide.color || theme.colors.plum) + (theme.isDark ? '25' : '15'), borderColor: (guide.color || theme.colors.plum) + (theme.isDark ? '40' : '30') }]} activeOpacity={0.8}>
-                    <View style={[styles.audioIconWrap, { backgroundColor: guide.color || theme.colors.plum }]}>
-                      <Headphones color={theme.colors.text.onPrimary || '#FFF'} size={20} />
+                <Animated.View key={guide.id} entering={FadeInUp.delay(300 + (index * 50)).duration(500)}>
+                  <TouchableOpacity style={styles.audioCard} activeOpacity={0.8}>
+                    <LinearGradient
+                      colors={[theme.colors.surface, theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)']}
+                      style={StyleSheet.absoluteFillObject}
+                    />
+                    <View style={[styles.audioIconWrap, { backgroundColor: (guide.color || theme.colors.plum) + '20' }]}>
+                      <Headphones color={guide.color || theme.colors.plum} size={20} />
                     </View>
-                    <Text style={styles.audioTitle} numberOfLines={2}>{guide.title}</Text>
-                    <Text style={styles.audioDuration}>{guide.duration || 'Listen'}</Text>
-                  </TouchableOpacity>
-                </Animated.View>
-              ))}
-            </ScrollView>
-          </Animated.View>
-        )}
-
-        {/* Videos (YouTube Style) */}
-        {videos.length > 0 && (
-          <Animated.View entering={FadeInUp.delay(150).duration(500)}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Helpful Videos</Text>
-              <TouchableOpacity><Text style={styles.seeAllText}>See all</Text></TouchableOpacity>
-            </View>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalScrollPadding}
-              snapToInterval={width * 0.7 + 16}
-              decelerationRate="fast"
-            >
-              {videos.map((video: any, index: number) => (
-                <Animated.View key={video.id} entering={FadeInUp.delay(200 + (index * 50)).duration(500)}>
-                  <TouchableOpacity style={styles.videoCard} activeOpacity={0.8}>
-                    <View style={[styles.videoThumbnail, { backgroundColor: (video.color || theme.colors.accents.slate) + (theme.isDark ? '30' : '20') }]}>
-                      <PlayCircle color={video.color || theme.colors.accents.slate} size={32} />
-                      <View style={styles.videoDurationBadge}>
-                        <Text style={styles.videoDurationText}>{video.duration || 'Watch'}</Text>
+                    <View>
+                      <Text style={styles.audioTitle} numberOfLines={2}>{guide.title}</Text>
+                      <Text style={styles.audioDuration}>{guide.duration || '15 min'}</Text>
+                      {/* Progress Bar */}
+                      <View style={styles.audioProgressBg}>
+                        <View style={[styles.audioProgressFill, { width: `${Math.random() * 80}%`, backgroundColor: guide.color || theme.colors.plum }]} />
                       </View>
-                    </View>
-                    <View style={styles.videoInfo}>
-                      <Text style={styles.videoTitle} numberOfLines={2}>{video.title}</Text>
-                      <Text style={styles.videoChannel}>{video.author}</Text>
                     </View>
                   </TouchableOpacity>
                 </Animated.View>
@@ -152,57 +159,30 @@ export default function ResourcesScreen() {
         )}
 
         {/* Quick Tools */}
-        <Animated.View entering={FadeInUp.delay(250).duration(500)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Coping Tools</Text>
-          <View style={styles.toolsGrid}>
-            {COPING_TOOLS.map((tool) => (
-              <TouchableOpacity key={tool.id} style={styles.toolCard} activeOpacity={0.8}>
-                <View style={[styles.toolIconWrap, { backgroundColor: tool.color + (theme.isDark ? '30' : '20') }]}>
-                  <tool.icon color={theme.colors.text.primary} size={24} />
-                </View>
-                <View style={styles.toolInfo}>
-                  <Text style={styles.toolTitle}>{tool.title}</Text>
-                  <Text style={styles.toolSubtitle}>{tool.subtitle}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </Animated.View>
-
-        {/* Books & PDFs */}
-        {books.length > 0 && (
-          <Animated.View entering={FadeInUp.delay(350).duration(500)} style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Books & Free PDFs</Text>
-            </View>
-            <View style={styles.articleList}>
-              {books.map((book: any, index: number) => {
-                const IconComponent = book.type.includes('PDF') ? Download : BookOpen;
-                return (
-                  <React.Fragment key={book.id}>
-                    <TouchableOpacity style={styles.articleItem} activeOpacity={0.7}>
-                      <View style={styles.articleInfo}>
-                        <Text style={[styles.articleCategory, { color: theme.colors.accents.powderBlue }]}>{book.type}</Text>
-                        <Text style={styles.articleTitle}>{book.title}</Text>
-                        <Text style={styles.articleReadTime}>By {book.author}</Text>
-                      </View>
-                      <View style={styles.articleIconWrap}>
-                        <IconComponent color={theme.colors.text.disabled} size={24} />
-                      </View>
-                    </TouchableOpacity>
-                    {index < books.length - 1 && <View style={styles.divider} />}
-                  </React.Fragment>
-                );
-              })}
+        {(activeCategory === 'All' || activeCategory === 'Techniques') && (
+          <Animated.View entering={FadeInUp.delay(300).duration(500)} style={styles.section}>
+            <Text style={styles.sectionTitle}>Coping Techniques</Text>
+            <View style={styles.toolsGrid}>
+              {COPING_TOOLS.map((tool) => (
+                <TouchableOpacity key={tool.id} style={styles.toolCard} activeOpacity={0.8}>
+                  <View style={[styles.toolIconWrap, { backgroundColor: tool.color + '20' }]}>
+                    <tool.icon color={tool.color} size={24} />
+                  </View>
+                  <View style={styles.toolInfo}>
+                    <Text style={styles.toolTitle}>{tool.title}</Text>
+                    <Text style={styles.toolSubtitle}>{tool.subtitle}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
             </View>
           </Animated.View>
         )}
 
         {/* Articles */}
-        {articles.length > 0 && (
-          <Animated.View entering={FadeInUp.delay(450).duration(500)} style={styles.section}>
+        {(activeCategory === 'All' || activeCategory === 'Articles') && articles.length > 0 && (
+          <Animated.View entering={FadeInUp.delay(400).duration(500)} style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Articles & Journals</Text>
+              <Text style={styles.sectionTitle}>Deep Dives</Text>
             </View>
             <View style={styles.articleList}>
               {articles.map((article: any, index: number) => (
@@ -239,33 +219,103 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    marginBottom: 32,
-  },
-  headerIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 24,
-    backgroundColor: theme.colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    shadowColor: theme.colors.accents.forestGreen,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: theme.isDark ? 0.3 : 0.15,
-    shadowRadius: 16,
-    elevation: 8,
+    marginBottom: 24,
   },
   title: {
     fontSize: 34,
     fontWeight: '800',
     color: theme.colors.text.primary,
-    marginBottom: 8,
+    marginBottom: 4,
     letterSpacing: -1,
   },
   subtitle: {
     fontSize: 16,
     color: theme.colors.text.secondary,
     lineHeight: 24,
+  },
+  featuredContainer: {
+    paddingHorizontal: 24,
+    marginBottom: 32,
+  },
+  featuredCard: {
+    borderRadius: 32,
+    padding: 28,
+    minHeight: 200,
+    justifyContent: 'center',
+    shadowColor: theme.colors.plum,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  featuredBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  featuredBadgeText: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  featuredTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#FFF',
+    marginBottom: 8,
+    letterSpacing: -0.5,
+  },
+  featuredSubtitle: {
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.8)',
+    lineHeight: 22,
+    marginBottom: 20,
+  },
+  featuredBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 16,
+    gap: 8,
+  },
+  featuredBtnText: {
+    color: theme.colors.plum,
+    fontWeight: '800',
+    fontSize: 15,
+  },
+  filterBar: {
+    marginBottom: 32,
+  },
+  filterContent: {
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  filterPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+  },
+  filterPillActive: {
+    backgroundColor: theme.colors.plum,
+    borderColor: theme.colors.plum,
+  },
+  filterText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.colors.text.secondary,
+  },
+  filterTextActive: {
+    color: '#FFF',
   },
   section: {
     marginBottom: 32,
@@ -295,82 +345,49 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingBottom: 24,
   },
   audioCard: {
-    width: width * 0.45,
-    height: width * 0.45,
+    width: width * 0.48,
     borderRadius: 24,
     padding: 20,
-    borderWidth: 1,
-    justifyContent: 'space-between',
-  },
-  audioIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  audioTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: theme.colors.text.primary,
-    marginBottom: 4,
-  },
-  audioDuration: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: theme.colors.text.secondary,
-  },
-  videoCard: {
-    width: width * 0.7,
-    backgroundColor: theme.colors.surface,
-    borderRadius: 24,
     overflow: 'hidden',
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: theme.isDark ? 0.2 : 0.04,
     shadowRadius: 12,
     elevation: 3,
-    borderWidth: 1,
-    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
-  videoThumbnail: {
-    height: 140,
+  audioIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
+    marginBottom: 16,
   },
-  videoDurationBadge: {
-    position: 'absolute',
-    bottom: 12,
-    right: 12,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  videoDurationText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  videoInfo: {
-    padding: 16,
-  },
-  videoTitle: {
+  audioTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 4,
-    lineHeight: 22,
+    height: 44,
   },
-  videoChannel: {
-    fontSize: 13,
-    color: theme.colors.text.secondary,
+  audioDuration: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.text.tertiary,
+    marginBottom: 12,
+  },
+  audioProgressBg: {
+    height: 4,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  audioProgressFill: {
+    height: '100%',
+    borderRadius: 2,
   },
   toolsGrid: {
     gap: 16,

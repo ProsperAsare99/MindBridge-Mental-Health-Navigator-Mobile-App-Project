@@ -23,12 +23,40 @@ import {
   ChevronRight,
   GraduationCap,
   Heart,
-  ClipboardEdit
+  ClipboardEdit,
+  Flame,
+  Trophy,
+  Award,
+  CheckCircle2,
+  TrendingUp
 } from 'lucide-react-native';
-import { AuthContext } from '../../src/context/AuthContext';
-import { useRouter } from 'expo-router';
 
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
+
+const StatsCard = ({ icon: Icon, value, label, color, theme }: any) => {
+  const styles = createStyles(theme);
+  return (
+    <View style={styles.statsCard}>
+      <View style={[styles.statsIconWrap, { backgroundColor: color + '15' }]}>
+        <Icon color={color} size={20} />
+      </View>
+      <Text style={styles.statsValue}>{value}</Text>
+      <Text style={styles.statsLabel}>{label}</Text>
+    </View>
+  );
+};
+
+const MoodTrendBar = ({ day, score, color, theme }: any) => {
+  const styles = createStyles(theme);
+  return (
+    <View style={styles.moodTrendCol}>
+      <View style={styles.moodTrendBarBg}>
+        <View style={[styles.moodTrendBarFill, { height: `${(score/10)*100}%`, backgroundColor: color }]} />
+      </View>
+      <Text style={styles.moodTrendDay}>{day}</Text>
+    </View>
+  );
+};
 
 const ProfileListItem = ({ icon: Icon, title, color, theme, isLast = false, onPress, destructive = false }: any) => {
   const scale = useSharedValue(1);
@@ -93,23 +121,51 @@ export default function ProfileScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeInUp.duration(600).duration(500)} style={styles.headerProfile}>
-          <View style={styles.avatarContainer}>
+        <Animated.View entering={FadeInUp.duration(600)} style={styles.headerProfile}>
+          <TouchableOpacity style={styles.avatarContainer} activeOpacity={0.9}>
             <Image 
               source={require('../../assets/images/logo.png')} 
               style={styles.avatarImage} 
             />
-          </View>
-          <Text style={styles.userName}>{isGuest ? "Explorer" : "Prosper Shaibu Asare"}</Text>
-          <Text style={styles.userEmail}>{isGuest ? "Anonymous Session" : "anna@example.com"}</Text>
+            <View style={styles.avatarEditBadge}>
+              <Award color="#FFF" size={12} />
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.userName}>{isGuest ? "Explorer" : "Prosper Asare"}</Text>
+          <Text style={styles.userEmail}>{isGuest ? "Anonymous Session" : "prosper@mindbridge.ai"}</Text>
           
           <TouchableOpacity style={styles.editBtn}>
             <Text style={styles.editBtnText}>Edit Profile</Text>
           </TouchableOpacity>
         </Animated.View>
 
+        {/* Stats Grid */}
+        <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.statsGrid}>
+          <StatsCard theme={themeContext} icon={Flame} value="4" label="Streak" color={themeContext.colors.accents.gentlePeach} />
+          <StatsCard theme={themeContext} icon={Trophy} value="1250" label="Points" color={themeContext.colors.accents.powderBlue} />
+          <StatsCard theme={themeContext} icon={CheckCircle2} value="12" label="Done" color={themeContext.colors.accents.eucalyptus} />
+          <StatsCard theme={themeContext} icon={Award} value="3" label="Badges" color={themeContext.colors.plum} />
+        </Animated.View>
+
+        {/* Mood Visualization */}
+        <Animated.View entering={FadeInUp.delay(200).duration(800)} style={styles.insightsCard}>
+          <View style={styles.insightsHeader}>
+            <TrendingUp color={themeContext.colors.plum} size={18} />
+            <Text style={styles.insightsTitle}>Mood Trends (7 Days)</Text>
+          </View>
+          <View style={styles.moodTrendContainer}>
+            <MoodTrendBar theme={themeContext} day="M" score={8} color={themeContext.colors.accents.eucalyptus} />
+            <MoodTrendBar theme={themeContext} day="T" score={6} color={themeContext.colors.accents.powderBlue} />
+            <MoodTrendBar theme={themeContext} day="W" score={4} color={themeContext.colors.accents.softLilac} />
+            <MoodTrendBar theme={themeContext} day="T" score={7} color={themeContext.colors.accents.eucalyptus} />
+            <MoodTrendBar theme={themeContext} day="F" score={9} color={themeContext.colors.accents.gentlePeach} />
+            <MoodTrendBar theme={themeContext} day="S" score={5} color={themeContext.colors.accents.slate} />
+            <MoodTrendBar theme={themeContext} day="S" score={8} color={themeContext.colors.accents.eucalyptus} />
+          </View>
+        </Animated.View>
+
         {/* Onboarding Resume Banner */}
-        <Animated.View entering={FadeInUp.delay(50).duration(500)} style={styles.resumeBanner}>
+        <Animated.View entering={FadeInUp.delay(300).duration(500)} style={styles.resumeBanner}>
           <View style={styles.resumeBannerIcon}>
             <ClipboardEdit color={themeContext.colors.plum} size={24} />
           </View>
@@ -125,18 +181,18 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </Animated.View>
 
-        <ProfileListGroup delay={100} theme={themeContext}>
+        <ProfileListGroup delay={400} theme={themeContext}>
           <ProfileListItem theme={themeContext} icon={User} title="Personal Information" color={themeContext.colors.plum} />
           <ProfileListItem theme={themeContext} icon={GraduationCap} title="Academic Context" color={themeContext.colors.accents.powderBlue} />
           <ProfileListItem theme={themeContext} icon={Heart} title="Support Preferences" color={themeContext.colors.accents.terracotta} isLast />
         </ProfileListGroup>
 
-        <ProfileListGroup delay={200} theme={themeContext}>
+        <ProfileListGroup delay={500} theme={themeContext}>
           <ProfileListItem theme={themeContext} icon={Bell} title="Notifications" color={themeContext.colors.accents.softMint} />
           <ProfileListItem theme={themeContext} icon={Shield} title="Privacy & Security" color={themeContext.colors.accents.slate} isLast />
         </ProfileListGroup>
 
-        <ProfileListGroup delay={300} theme={themeContext}>
+        <ProfileListGroup delay={600} theme={themeContext}>
           <ProfileListItem theme={themeContext} icon={HelpCircle} title="Help & Support" color={themeContext.colors.text.secondary} />
           <ProfileListItem 
             theme={themeContext}
@@ -168,7 +224,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   headerProfile: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 32,
     marginTop: 10,
   },
   avatarContainer: {
@@ -183,11 +239,25 @@ const createStyles = (theme: any) => StyleSheet.create({
     shadowRadius: 16,
     elevation: 8,
     marginBottom: 16,
+    position: 'relative',
   },
   avatarImage: {
     width: '100%',
     height: '100%',
     borderRadius: 46,
+  },
+  avatarEditBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: theme.colors.plum,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: theme.colors.surface,
   },
   userName: {
     fontSize: 24,
@@ -212,6 +282,86 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.plum,
     fontWeight: '800',
     fontSize: 14,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 24,
+  },
+  statsCard: {
+    flex: 1,
+    minWidth: '45%',
+    backgroundColor: theme.colors.surface,
+    padding: 16,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
+  },
+  statsIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  statsValue: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: theme.colors.text.primary,
+  },
+  statsLabel: {
+    fontSize: 12,
+    color: theme.colors.text.tertiary,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  insightsCard: {
+    backgroundColor: theme.colors.surface,
+    padding: 20,
+    borderRadius: 28,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
+  },
+  insightsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 20,
+  },
+  insightsTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+  },
+  moodTrendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    height: 100,
+    paddingHorizontal: 4,
+  },
+  moodTrendCol: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  moodTrendBarBg: {
+    width: 8,
+    height: 80,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    borderRadius: 4,
+    justifyContent: 'flex-end',
+  },
+  moodTrendBarFill: {
+    width: '100%',
+    borderRadius: 4,
+  },
+  moodTrendDay: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: theme.colors.text.tertiary,
   },
   resumeBanner: {
     flexDirection: 'row',

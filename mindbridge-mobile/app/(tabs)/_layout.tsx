@@ -56,7 +56,7 @@ export default function TabLayout() {
       {/* Hidden Screens */}
       <Tabs.Screen name="journey" options={{ href: null, title: 'Wellness Journey' }} />
       <Tabs.Screen name="garden" options={{ href: null, title: 'Mood Garden' }} />
-      <Tabs.Screen name="ai-guide" options={{ href: null, title: 'AI Guide' }} />
+      <Tabs.Screen name="ai-guide" options={{ href: null, title: 'MindBridge Oracle' }} />
       <Tabs.Screen name="crisis" options={{ href: null, title: 'Crisis Support' }} />
       <Tabs.Screen name="journal" options={{ href: null, title: 'Journal' }} />
       <Tabs.Screen name="assessments" options={{ href: null, title: 'Assessments' }} />

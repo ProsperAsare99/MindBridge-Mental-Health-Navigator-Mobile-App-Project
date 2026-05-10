@@ -6,6 +6,7 @@ import journalRoutes from './routes/journal.routes.js';
 import communityRoutes from './routes/community.routes.js';
 import moodRoutes from './routes/mood.routes.js';
 import resourcesRoutes from './routes/resources.routes.js';
+import aiRoutes from './routes/ai.routes.js';
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use('/api/journal', journalRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/mood', moodRoutes);
 app.use('/api/resources', resourcesRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.get('/', (req, res) => {
   res.send('MindBridge API is running');

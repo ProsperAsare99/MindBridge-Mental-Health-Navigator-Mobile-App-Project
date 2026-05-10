@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../src/services/api';
 import { 
   View, 
   Text, 
@@ -46,6 +47,37 @@ export default function AIGuideScreen() {
   
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
+  const [context, setContext] = useState<any>(null);
+  const [loadingContext, setLoadingContext] = useState(true);
+
+  useEffect(() => {
+    const fetchContext = async () => {
+      try {
+        const response = await api.get('/ai/context');
+        setContext(response.data);
+        
+        if (response.data.latestMood) {
+          const mood = response.data.latestMood;
+          const emotions = mood.emotions?.join(', ') || 'unspecified';
+          
+          setMessages([
+            {
+              id: 'context-aware-1',
+              isAi: true,
+              text: `Hello! I'm the MindBridge Oracle. I noticed your last garden seed reflected feeling ${emotions.toLowerCase()}. How are you holding up since then?`,
+              time: 'Now'
+            }
+          ]);
+        }
+      } catch (error) {
+        console.error('Error fetching Oracle context:', error);
+      } finally {
+        setLoadingContext(false);
+      }
+    };
+
+    fetchContext();
+  }, []);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -60,12 +92,21 @@ export default function AIGuideScreen() {
     setMessages([...messages, newMessage]);
     setInput('');
     
-    // Simulate AI typing delay
+    // Sophisticated simulation logic
     setTimeout(() => {
+      let response = "I hear you. It's completely valid to feel that way. I'm here to listen.";
+      
+      const lowerInput = input.toLowerCase();
+      if (lowerInput.includes('help') || lowerInput.includes('anxious')) {
+        response = "I can feel the weight of those thoughts. Would you like to try a 4-7-8 breathing exercise together? It often helps settle the Oracle's energy and yours.";
+      } else if (lowerInput.includes('journal') || lowerInput.includes('write')) {
+        response = "Writing things down is a powerful release. Your recent journal entries show a lot of strength. What else is on your mind?";
+      }
+
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         isAi: true,
-        text: "I hear you. It's completely valid to feel that way. I'm here to listen.",
+        text: response,
         time: 'Now'
       }]);
     }, 1500);
@@ -104,7 +145,8 @@ export default function AIGuideScreen() {
 
       <KeyboardAvoidingView 
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 120 : 20}
       >
         <ScrollView 
           contentContainerStyle={styles.chatContent}
@@ -139,7 +181,7 @@ export default function AIGuideScreen() {
           ))}
         </ScrollView>
 
-        <Animated.View entering={FadeInUp.delay(300).duration(600)} style={[styles.inputArea, { paddingBottom: insets.bottom || 24 }]}>
+        <Animated.View entering={FadeInUp.delay(300).duration(600)} style={[styles.inputArea, { paddingBottom: Platform.OS === 'ios' ? insets.bottom : 16 }]}>
           {messages.length === 1 && (
             <ScrollView 
               horizontal 

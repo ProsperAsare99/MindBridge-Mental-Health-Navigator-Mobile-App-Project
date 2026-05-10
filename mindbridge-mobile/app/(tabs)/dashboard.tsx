@@ -180,15 +180,15 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
 // ─── Main Dashboard ────────────────────────────────────────────────────────
 
 export default function DashboardScreen() {
-  const { signOut, userToken } = useContext(AuthContext);
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const theme = useTheme();
   const styles = createStyles(theme);
-
+  const { userToken, userData: authData } = useContext(AuthContext) as any;
   const isGuest = userToken?.startsWith('guest-token');
+  
   const userData = {
-    name: isGuest ? "Explorer" : "Prosper",
+    name: isGuest ? "Explorer" : (authData?.name?.split(' ')[0] || "Prosper"),
     date: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
   };
 

@@ -32,7 +32,7 @@ export const createEntry = async (req: Request, res: Response) => {
         title,
         content,
         mood,
-      },
+      } as any,
     });
 
     res.status(201).json(newEntry);

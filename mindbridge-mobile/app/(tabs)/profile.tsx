@@ -30,6 +30,8 @@ import {
   CheckCircle2,
   TrendingUp
 } from 'lucide-react-native';
+import { AuthContext } from '../../src/context/AuthContext';
+import { useRouter } from 'expo-router';
 
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
 
@@ -97,13 +99,15 @@ const ProfileListGroup = ({ children, delay, theme }: any) => {
 };
 
 export default function ProfileScreen() {
-  const { signOut, userToken } = useContext(AuthContext);
+  const { signOut, userToken, userData } = useContext(AuthContext) as any;
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const themeContext = useTheme();
   const styles = createStyles(themeContext);
 
   const isGuest = userToken?.startsWith('guest-token');
+  const userEmail = isGuest ? "Anonymous Session" : (userData?.email || "prosper@mindbridge.ai");
+  const userName = isGuest ? "Explorer" : (userData?.name || "Prosper Asare");
 
   return (
     <View style={styles.container}>
@@ -131,8 +135,8 @@ export default function ProfileScreen() {
               <Award color="#FFF" size={12} />
             </View>
           </TouchableOpacity>
-          <Text style={styles.userName}>{isGuest ? "Explorer" : "Prosper Asare"}</Text>
-          <Text style={styles.userEmail}>{isGuest ? "Anonymous Session" : "prosper@mindbridge.ai"}</Text>
+          <Text style={styles.userName}>{userName}</Text>
+          <Text style={styles.userEmail}>{userEmail}</Text>
           
           <TouchableOpacity style={styles.editBtn}>
             <Text style={styles.editBtnText}>Edit Profile</Text>

@@ -252,7 +252,7 @@ export default function RegisterScreen() {
         preferences: { stressSource, supportType, reminders: reminders === 'Yes' }
       };
       const response = await api.post('/auth/register', payload);
-      await signIn(response.data.token);
+      await signIn(response.data.token, response.data.user);
       router.replace('/(auth)/onboarding');
     } catch (error: any) {
       const msg = error.response?.data?.error || 'Unable to connect to server';

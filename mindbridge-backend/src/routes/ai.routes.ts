@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { getOracleContext } from '../controllers/ai.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { getOracleContext } from '../controllers/ai.controller.js';
+import { auth } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-router.get('/context', authenticateToken, getOracleContext);
+router.get('/context', auth, getOracleContext);
 
 export default router;

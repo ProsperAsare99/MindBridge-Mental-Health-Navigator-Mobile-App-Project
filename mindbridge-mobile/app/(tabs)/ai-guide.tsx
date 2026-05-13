@@ -49,6 +49,7 @@ export default function AIGuideScreen() {
   const [input, setInput] = useState('');
   const [context, setContext] = useState<any>(null);
   const [loadingContext, setLoadingContext] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -79,37 +80,41 @@ export default function AIGuideScreen() {
     fetchContext();
   }, []);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isTyping) return;
     
-    const newMessage = {
+    const userMessage = {
       id: Date.now().toString(),
       isAi: false,
       text: input.trim(),
-      time: 'Now'
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    setMessages([...messages, newMessage]);
+    setMessages(prev => [...prev, userMessage]);
+    const currentInput = input.trim();
     setInput('');
+    setIsTyping(true);
     
-    // Sophisticated simulation logic
-    setTimeout(() => {
-      let response = "I hear you. It's completely valid to feel that way. I'm here to listen.";
+    try {
+      const response = await api.post('/ai/chat', { message: currentInput });
       
-      const lowerInput = input.toLowerCase();
-      if (lowerInput.includes('help') || lowerInput.includes('anxious')) {
-        response = "I can feel the weight of those thoughts. Would you like to try a 4-7-8 breathing exercise together? It often helps settle the Oracle's energy and yours.";
-      } else if (lowerInput.includes('journal') || lowerInput.includes('write')) {
-        response = "Writing things down is a powerful release. Your recent journal entries show a lot of strength. What else is on your mind?";
-      }
-
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         isAi: true,
-        text: response,
+        text: response.data.response,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+    } catch (error) {
+      console.error('Error in Oracle chat:', error);
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        isAi: true,
+        text: "I'm sorry, I'm having trouble connecting to the collective wisdom right now. Please try again in a moment.",
         time: 'Now'
       }]);
-    }, 1500);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handlePromptPress = (prompt: string) => {

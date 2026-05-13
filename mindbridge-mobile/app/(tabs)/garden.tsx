@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -20,7 +20,7 @@ import Animated, {
   useSharedValue, 
   withSpring 
 } from 'react-native-reanimated';
-import { Leaf, Sun, CloudRain, Wind, CloudLightning, Flower2, CheckCircle2, Clock } from 'lucide-react-native';
+import { Leaf, Sun, CloudRain, Wind, CloudLightning, Flower2, CheckCircle2, Clock, CircleDashed } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import api from '../../src/services/api';
@@ -89,7 +89,34 @@ export default function GardenScreen() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [isPlanted, setIsPlanted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [moodLogs, setMoodLogs] = useState<any[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(true);
   const MOODS = getMoods(themeContext);
+
+  const fetchLogs = async () => {
+    try {
+      const response = await api.get('/mood');
+      setMoodLogs(response.data);
+    } catch (error) {
+      console.error('Error fetching mood logs:', error);
+    } finally {
+      setLoadingLogs(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  const getGrowthStage = () => {
+    const count = moodLogs.length;
+    if (count >= 10) return { label: 'Full Bloom', icon: Flower2, color: themeContext.colors.plum, stage: 3 };
+    if (count >= 5) return { label: 'Healthy Plant', icon: Leaf, color: themeContext.colors.accents.eucalyptus, stage: 2 };
+    if (count >= 2) return { label: 'Sprouting', icon: Sun, color: themeContext.colors.accents.gentlePeach, stage: 1 };
+    return { label: 'New Seed', icon: CircleDashed, color: themeContext.colors.accents.powderBlue, stage: 0 };
+  };
+
+  const growth = getGrowthStage();
 
   const handlePlant = async () => {
     if (!selectedMood) return;
@@ -106,6 +133,7 @@ export default function GardenScreen() {
       });
 
       setIsPlanted(true);
+      fetchLogs(); // Refresh growth data
       
       // Keep the success state for 4 seconds
       setTimeout(() => {
@@ -118,6 +146,26 @@ export default function GardenScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const GrowthVisual = () => {
+    const stage = getGrowthStage();
+    return (
+      <Animated.View entering={FadeIn.duration(800)} style={styles.growthContainer}>
+        <View style={[styles.growthIconWrap, { backgroundColor: stage.color + '15' }]}>
+          <stage.icon color={stage.color} size={48} />
+        </View>
+        <View style={styles.growthInfo}>
+          <Text style={styles.growthLabel}>{stage.label}</Text>
+          <Text style={styles.growthDesc}>
+            {moodLogs.length} seeds planted. {10 - moodLogs.length > 0 ? `${10 - moodLogs.length} more until Full Bloom!` : 'Your garden is magnificent.'}
+          </Text>
+        </View>
+        <View style={styles.progressBarBg}>
+          <View style={[styles.progressBarFill, { width: `${Math.min((moodLogs.length / 10) * 100, 100)}%`, backgroundColor: stage.color }]} />
+        </View>
+      </Animated.View>
+    );
   };
 
   return (
@@ -135,7 +183,7 @@ export default function GardenScreen() {
       <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]} showsVerticalScrollIndicator={false}>
         <ScreenHeader 
           title="Mood Garden" 
-          subtitle="How is your inner garden growing today? Plant a seed to reflect your feelings."
+          subtitle="Cultivate your inner peace through consistency."
           rightAction={
             <TouchableOpacity 
               style={styles.historyBtn}
@@ -145,6 +193,8 @@ export default function GardenScreen() {
             </TouchableOpacity>
           }
         />
+
+        {!isPlanted && <GrowthVisual />}
 
         {!isPlanted ? (
           <View style={styles.moodGrid}>
@@ -220,6 +270,58 @@ const createStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'space-between',
     gap: 16,
     paddingHorizontal: 24,
+  },
+  growthContainer: {
+    backgroundColor: theme.colors.surface,
+    marginHorizontal: 24,
+    marginBottom: 32,
+    borderRadius: 28,
+    padding: 24,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: theme.isDark ? 0.2 : 0.04,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  growthIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 20,
+  },
+  growthInfo: {
+    flex: 1,
+  },
+  growthLabel: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: theme.colors.text.primary,
+    marginBottom: 4,
+    letterSpacing: -0.5,
+  },
+  growthDesc: {
+    fontSize: 14,
+    color: theme.colors.text.secondary,
+    lineHeight: 20,
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 8,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    borderRadius: 4,
+    marginTop: 20,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 4,
   },
   moodCard: {
     width: (width - 48 - 16) / 2, 

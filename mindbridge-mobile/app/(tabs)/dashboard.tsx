@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
+import api from '../../src/services/api';
 import {
   View,
   Text,
@@ -186,7 +187,22 @@ export default function DashboardScreen() {
   const styles = createStyles(theme);
   const { userToken, userData: authData } = useContext(AuthContext) as any;
   const isGuest = userToken?.startsWith('guest-token');
+  const [hasLoggedToday, setHasLoggedToday] = useState(false);
   
+  useEffect(() => {
+    const checkTodayStatus = async () => {
+      try {
+        const response = await api.get('/mood');
+        const today = new Date().toDateString();
+        const logged = response.data.some((log: any) => new Date(log.createdAt).toDateString() === today);
+        setHasLoggedToday(logged);
+      } catch (error) {
+        console.error('Error checking today status:', error);
+      }
+    };
+    checkTodayStatus();
+  }, []);
+
   const userData = {
     name: isGuest ? "Explorer" : (authData?.name?.split(' ')[0] || "Prosper"),
     date: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
@@ -246,7 +262,7 @@ export default function DashboardScreen() {
           <View style={styles.grid}>
             <AppleWidget
               title="Mood Garden"
-              subtitle="Cultivate calm"
+              subtitle={hasLoggedToday ? "Garden is growing" : "Seed needed today"}
               icon={Leaf}
               color={theme.colors.accents.eucalyptus}
               delay={200}

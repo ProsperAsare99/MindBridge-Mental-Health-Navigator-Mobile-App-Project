@@ -13,6 +13,7 @@ import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { 
   Library,
   Headphones,
@@ -21,72 +22,27 @@ import {
   FileText,
   BookOpen,
   PlayCircle,
-  Download
+  Download,
+  Search,
 } from 'lucide-react-native';
-import api from '../../src/services/api';
 
-const { width } = Dimensions.get('window');
-
-export default function ResourcesScreen() {
-  const insets = useSafeAreaInsets();
-  const theme = useTheme();
-  const styles = createStyles(theme);
-  
-  const [resources, setResources] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState('All');
-
-  const CATEGORIES = ['All', 'Audio', 'Techniques', 'Articles', 'Videos', 'Books'];
-
-  const COPING_TOOLS = [
-    { id: 'breath', title: 'Box Breathing', subtitle: 'Calm your nervous system', icon: Wind, color: theme.colors.accents.eucalyptus },
-    { id: 'ground', title: '5-4-3-2-1 Method', subtitle: 'Instant grounding technique', icon: Play, color: theme.colors.accents.powderBlue },
-  ];
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const response = await api.get('/resources');
-        setResources(response.data);
-      } catch (error) {
-        console.error('Error loading resources:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, []);
-
-  if (loading || !resources) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={theme.colors.plum} />
-      </View>
-    );
-  }
-
-  const { audio = [], articles = [], videos = [], books = [] } = resources;
-
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
-      <LinearGradient 
-        colors={theme.isDark 
-          ? ['rgba(59, 82, 73, 0.15)', theme.colors.background, theme.colors.backgroundSecondary]
-          : ['rgba(59, 82, 73, 0.08)', theme.colors.background, theme.colors.backgroundSecondary]
-        } 
-        locations={[0, 0.2, 1]}
-        style={StyleSheet.absoluteFillObject} 
-      />
+// ... (existing code up to ScrollView)
 
       <ScrollView 
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
-          <Text style={styles.title}>Discovery Hub</Text>
-          <Text style={styles.subtitle}>Curated tools for your mental well-being.</Text>
-        </Animated.View>
+        <ScreenHeader 
+          title="Discovery Hub" 
+          subtitle="Curated tools for your mental well-being."
+          rightAction={
+            <TouchableOpacity style={styles.searchBtn}>
+              <Search color={theme.colors.plum} size={24} />
+            </TouchableOpacity>
+          }
+        />
+
+        <View style={{ height: 20 }} />
 
         {/* Featured Section */}
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.featuredContainer}>

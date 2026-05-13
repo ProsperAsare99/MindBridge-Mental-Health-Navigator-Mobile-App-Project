@@ -18,8 +18,10 @@ import {
   MessageCircle,
   Heart,
   MoreHorizontal,
-  PenSquare
+  PenSquare,
+  Search
 } from 'lucide-react-native';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 import api from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
@@ -88,13 +90,18 @@ export default function CommunityScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeIn.duration(500)} style={styles.header}>
-          <View style={styles.headerIconContainer}>
-            <Users color={theme.colors.accents.gentlePeach} size={32} />
-          </View>
-          <Text style={styles.title}>Safe Space</Text>
-          <Text style={styles.subtitle}>Connect with peers, share anonymously, and find support in a moderated environment.</Text>
-        </Animated.View>
+        <ScreenHeader 
+          title="Safe Space" 
+          subtitle="Connect anonymously with your peer community."
+          rightAction={
+            <TouchableOpacity 
+              style={styles.searchBtn}
+              onPress={() => Alert.alert('Search', 'Community search will be available soon!')}
+            >
+              <Search color={theme.colors.accents.gentlePeach} size={24} />
+            </TouchableOpacity>
+          }
+        />
 
         {/* My Groups */}
         <Animated.View entering={FadeInUp.delay(50).duration(500)}>
@@ -187,37 +194,16 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.colors.backgroundSecondary,
   },
   scrollContent: {
+    paddingHorizontal: 0,
     paddingBottom: 120,
   },
-  header: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
-  },
-  headerIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 24,
-    backgroundColor: theme.colors.surface,
+  searchBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
-    shadowColor: theme.colors.accents.gentlePeach,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: theme.isDark ? 0.3 : 0.15,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  title: {
-    fontSize: 34,
-    fontWeight: '800',
-    color: theme.colors.text.primary,
-    marginBottom: 8,
-    letterSpacing: -1,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: theme.colors.text.secondary,
-    lineHeight: 24,
   },
   section: {
     marginBottom: 32,

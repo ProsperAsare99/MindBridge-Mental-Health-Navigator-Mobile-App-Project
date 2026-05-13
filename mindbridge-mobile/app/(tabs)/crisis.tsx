@@ -12,6 +12,7 @@ import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { 
   ShieldAlert, 
   Phone, 
@@ -83,13 +84,18 @@ export default function CrisisSupportScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
-          <View style={styles.headerIconContainer}>
-            <ShieldAlert color={themeContext.colors.semantic.danger} size={36} />
-          </View>
-          <Text style={styles.title}>Crisis Support</Text>
-          <Text style={styles.subtitle}>You are not alone. If you are experiencing a mental health emergency, please reach out immediately.</Text>
-        </Animated.View>
+        <ScreenHeader 
+          title="Crisis Support" 
+          subtitle="You are not alone. Reach out for immediate help."
+          rightAction={
+            <TouchableOpacity 
+              style={styles.emergencyBtn}
+              onPress={() => handleCall('112')}
+            >
+              <Phone color={themeContext.colors.semantic.danger} size={24} />
+            </TouchableOpacity>
+          }
+        />
 
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.section}>
           <Text style={styles.sectionTitle}>Immediate Help</Text>
@@ -166,44 +172,20 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.colors.backgroundSecondary,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 0,
     paddingBottom: 100,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  headerIconContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: theme.isDark ? 'rgba(239, 68, 68, 0.2)' : 'rgba(239, 68, 68, 0.1)',
+  emergencyBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.05)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
-    shadowColor: theme.colors.semantic.danger,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: theme.isDark ? 0.3 : 0.15,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  title: {
-    fontSize: 34,
-    fontWeight: '800',
-    color: theme.colors.text.primary,
-    marginBottom: 12,
-    letterSpacing: -1,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: theme.colors.text.secondary,
-    lineHeight: 24,
-    textAlign: 'center',
-    paddingHorizontal: 10,
   },
   section: {
     marginBottom: 32,
+    paddingHorizontal: 24,
   },
   sectionTitle: {
     fontSize: 20,
@@ -343,6 +325,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
     marginBottom: 20,
+    marginHorizontal: 24,
   },
   locationIconWrap: {
     width: 48,

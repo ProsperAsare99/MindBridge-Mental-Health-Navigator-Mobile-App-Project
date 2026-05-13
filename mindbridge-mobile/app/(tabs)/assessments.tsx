@@ -12,6 +12,7 @@ import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { 
   ClipboardList, 
   Activity, 
@@ -116,13 +117,18 @@ export default function AssessmentsScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
-          <View style={styles.headerIconContainer}>
-            <ClipboardList color={themeContext.colors.plum} size={32} />
-          </View>
-          <Text style={styles.title}>Assessments</Text>
-          <Text style={styles.subtitle}>Clinically validated tools to measure and track your mental well-being over time.</Text>
-        </Animated.View>
+        <ScreenHeader 
+          title="Assessments" 
+          subtitle="Clinically validated tools to track your well-being."
+          rightAction={
+            <TouchableOpacity 
+              style={styles.infoBtn}
+              onPress={() => Alert.alert('Privacy Info', 'Your assessment results are private and used only to personalize your experience.')}
+            >
+              <Info color={themeContext.colors.plum} size={24} />
+            </TouchableOpacity>
+          }
+        />
 
         <Animated.View entering={FadeInUp.delay(100).duration(800)}>
           <Text style={styles.sectionTitle}>Available Tests</Text>
@@ -186,37 +192,16 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.colors.backgroundSecondary,
   },
   scrollContent: {
+    paddingHorizontal: 0,
     paddingBottom: 100,
   },
-  header: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
-  },
-  headerIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 24,
-    backgroundColor: theme.colors.surface,
+  infoBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
-    shadowColor: theme.colors.plum,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: theme.isDark ? 0.3 : 0.1,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  title: {
-    fontSize: 34,
-    fontWeight: '800',
-    color: theme.colors.text.primary,
-    marginBottom: 8,
-    letterSpacing: -1,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: theme.colors.text.secondary,
-    lineHeight: 24,
   },
   sectionTitle: {
     fontSize: 20,

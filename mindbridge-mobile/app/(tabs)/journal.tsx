@@ -16,6 +16,7 @@ import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { 
   BookOpen, 
   Plus, 
@@ -23,8 +24,10 @@ import {
   Calendar,
   Wind,
   Sun,
-  CloudRain
+  CloudRain,
+  PenLine
 } from 'lucide-react-native';
+
 import api from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
@@ -129,12 +132,10 @@ export default function JournalScreen() {
           contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
           showsVerticalScrollIndicator={false}
         >
-          <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
-            <View style={styles.headerTop}>
-              <View>
-                <Text style={styles.title}>Journal</Text>
-                <Text style={styles.subtitle}>{entries.length} entries</Text>
-              </View>
+          <ScreenHeader 
+            title="Journal" 
+            subtitle={`${entries.length} reflections captured`}
+            rightAction={
               <TouchableOpacity 
                 activeOpacity={0.8} 
                 style={styles.newBtn}
@@ -142,8 +143,10 @@ export default function JournalScreen() {
               >
                 <Plus color={theme.colors.text.onPrimary || '#FFF'} size={24} />
               </TouchableOpacity>
-            </View>
+            }
+          />
 
+          <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
             {/* Filter Pills */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterBar}>
               <TouchableOpacity 
@@ -270,27 +273,12 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.colors.backgroundSecondary, 
   },
   scrollContent: { 
-    paddingHorizontal: 24, 
+    paddingHorizontal: 0, 
     paddingBottom: 120 
   },
   header: { 
     marginBottom: 32,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  title: { 
-    fontSize: 34, 
-    fontWeight: '800', 
-    color: theme.colors.text.primary, 
-    letterSpacing: -1,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: theme.colors.text.secondary,
-    marginTop: 4,
+    paddingHorizontal: 24,
   },
   newBtn: {
     width: 48,
@@ -307,6 +295,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   entriesList: {
     gap: 16,
+    paddingHorizontal: 24,
   },
   entryCard: {
     backgroundColor: theme.colors.surface,

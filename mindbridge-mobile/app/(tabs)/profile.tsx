@@ -13,6 +13,7 @@ import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { 
   User, 
   Mail, 
@@ -28,8 +29,10 @@ import {
   Trophy,
   Award,
   CheckCircle2,
-  TrendingUp
+  TrendingUp,
+  Settings as SettingsIcon,
 } from 'lucide-react-native';
+
 import { AuthContext } from '../../src/context/AuthContext';
 import { useRouter } from 'expo-router';
 
@@ -125,6 +128,16 @@ export default function ProfileScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
       >
+        <ScreenHeader 
+          title="Profile" 
+          subtitle="Your personal dashboard"
+          rightAction={
+            <TouchableOpacity style={styles.settingsBtn}>
+              <SettingsIcon color={themeContext.colors.plum} size={24} />
+            </TouchableOpacity>
+          }
+        />
+
         <Animated.View entering={FadeInUp.duration(600)} style={styles.headerProfile}>
           <TouchableOpacity style={styles.avatarContainer} activeOpacity={0.9}>
             <Image 
@@ -223,13 +236,22 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.colors.backgroundSecondary,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     paddingBottom: 100,
+  },
+  settingsBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerProfile: {
     alignItems: 'center',
     marginBottom: 32,
-    marginTop: 10,
+    marginTop: 0,
+    paddingHorizontal: 20,
   },
   avatarContainer: {
     width: 100,
@@ -292,6 +314,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     flexWrap: 'wrap',
     gap: 12,
     marginBottom: 24,
+    paddingHorizontal: 20,
   },
   statsCard: {
     flex: 1,
@@ -326,6 +349,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     padding: 20,
     borderRadius: 28,
     marginBottom: 24,
+    marginHorizontal: 20,
     borderWidth: 1,
     borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
   },
@@ -374,6 +398,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: 24,
     padding: 16,
     marginBottom: 24,
+    marginHorizontal: 20,
     borderWidth: 1,
     borderColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.15)',
   },
@@ -421,6 +446,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: 24,
     marginBottom: 24,
+    marginHorizontal: 20,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },

@@ -26,7 +26,61 @@ import {
   Search,
 } from 'lucide-react-native';
 
-// ... (existing code up to ScrollView)
+import api from '../../src/services/api';
+
+const { width } = Dimensions.get('window');
+
+export default function ResourcesScreen() {
+  const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const styles = createStyles(theme);
+  
+  const [resources, setResources] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  const CATEGORIES = ['All', 'Audio', 'Techniques', 'Articles', 'Videos', 'Books'];
+
+  const COPING_TOOLS = [
+    { id: 'breath', title: 'Box Breathing', subtitle: 'Calm your nervous system', icon: Wind, color: theme.colors.accents.eucalyptus },
+    { id: 'ground', title: '5-4-3-2-1 Method', subtitle: 'Instant grounding technique', icon: Play, color: theme.colors.accents.powderBlue },
+  ];
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const response = await api.get('/resources');
+        setResources(response.data);
+      } catch (error) {
+        console.error('Error loading resources:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  if (loading || !resources) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={theme.colors.plum} />
+      </View>
+    );
+  }
+
+  const { audio = [], articles = [], videos = [], books = [] } = resources;
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
+      <LinearGradient 
+        colors={theme.isDark 
+          ? ['rgba(59, 82, 73, 0.15)', theme.colors.background, theme.colors.backgroundSecondary]
+          : ['rgba(59, 82, 73, 0.08)', theme.colors.background, theme.colors.backgroundSecondary]
+        } 
+        locations={[0, 0.2, 1]}
+        style={StyleSheet.absoluteFillObject} 
+      />
 
       <ScrollView 
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
@@ -173,21 +227,13 @@ const createStyles = (theme: any) => StyleSheet.create({
   scrollContent: {
     paddingBottom: 100,
   },
-  header: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 34,
-    fontWeight: '800',
-    color: theme.colors.text.primary,
-    marginBottom: 4,
-    letterSpacing: -1,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: theme.colors.text.secondary,
-    lineHeight: 24,
+  searchBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   featuredContainer: {
     paddingHorizontal: 24,

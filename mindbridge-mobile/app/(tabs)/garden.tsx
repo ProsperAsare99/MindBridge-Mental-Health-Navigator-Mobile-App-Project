@@ -20,8 +20,9 @@ import Animated, {
   useSharedValue, 
   withSpring 
 } from 'react-native-reanimated';
-import { Leaf, Sun, CloudRain, Wind, CloudLightning, Flower2, CheckCircle2 } from 'lucide-react-native';
+import { Leaf, Sun, CloudRain, Wind, CloudLightning, Flower2, CheckCircle2, Clock } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 import api from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
@@ -132,13 +133,18 @@ export default function GardenScreen() {
       />
 
       <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]} showsVerticalScrollIndicator={false}>
-        <Animated.View entering={FadeInUp.duration(800)} style={styles.header}>
-          <View style={styles.iconContainer}>
-            <Flower2 color={themeContext.colors.accents.eucalyptus} size={32} />
-          </View>
-          <Text style={styles.title}>Mood Garden</Text>
-          <Text style={styles.subtitle}>How is your inner garden growing today? Plant a seed to reflect your feelings.</Text>
-        </Animated.View>
+        <ScreenHeader 
+          title="Mood Garden" 
+          subtitle="How is your inner garden growing today? Plant a seed to reflect your feelings."
+          rightAction={
+            <TouchableOpacity 
+              style={styles.historyBtn}
+              onPress={() => Alert.alert('Coming Soon', 'Garden history and trends are arriving in the next update!')}
+            >
+              <Clock color={themeContext.colors.plum} size={24} />
+            </TouchableOpacity>
+          }
+        />
 
         {!isPlanted ? (
           <View style={styles.moodGrid}>
@@ -197,46 +203,23 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.colors.backgroundSecondary,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 0, 
     paddingBottom: 120,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: theme.colors.surface,
+  historyBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
-    shadowColor: theme.colors.accents.eucalyptus,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: theme.isDark ? 0.3 : 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  title: {
-    fontSize: 34,
-    fontWeight: '800',
-    color: theme.colors.text.primary,
-    marginBottom: 8,
-    letterSpacing: -1,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 24,
-    paddingHorizontal: 10,
   },
   moodGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: 16,
+    paddingHorizontal: 24,
   },
   moodCard: {
     width: (width - 48 - 16) / 2, 

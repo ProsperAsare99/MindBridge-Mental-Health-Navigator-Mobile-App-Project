@@ -42,6 +42,7 @@ import {
   Wind,
   ChevronRight
 } from 'lucide-react-native';
+import { translations, Language } from '../../src/utils/translations';
 
 const { width } = Dimensions.get('window');
 
@@ -246,6 +247,15 @@ export default function DashboardScreen() {
           journal: !!journalDone,
           breathing: breathingDone
         });
+
+        // Update name and language from context
+        if (res.data.onboarding) {
+          setUserData(prev => ({
+            ...prev,
+            name: res.data.onboarding.firstName || prev.name,
+            language: (res.data.onboarding.preferredLanguage as Language) || prev.language
+          }));
+        }
       } catch (error) {
         console.error('Error checking today status:', error);
       }
@@ -257,16 +267,19 @@ export default function DashboardScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  const userData = {
-    name: isGuest ? "Explorer" : (authData?.name?.split(' ')[0] || "Prosper"),
-    date: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
-  };
+  const [userData, setUserData] = useState({
+    name: 'Prosper Asare',
+    date: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+    language: 'English' as Language
+  });
+
+  const t = translations[userData.language] || translations.English;
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
+    if (hour < 12) return t.dashboard.greetingMorning;
+    if (hour < 18) return t.dashboard.greetingAfternoon;
+    return t.dashboard.greetingEvening;
   };
 
   return (
@@ -302,7 +315,7 @@ export default function DashboardScreen() {
           <View style={styles.ritualHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Leaf color={theme.colors.plum} size={18} />
-              <Text style={styles.ritualTitle}>Today's Progress</Text>
+              <Text style={styles.ritualTitle}>{t.dashboard.ritualsTitle}</Text>
             </View>
             <Text style={styles.ritualProgress}>
               {Object.values(rituals).filter(Boolean).length}/3 Complete
@@ -340,8 +353,8 @@ export default function DashboardScreen() {
         {/* AI Guide Hero Widget */}
         <View style={styles.section}>
           <AppleWidget
-            title="MindBridge Oracle"
-            subtitle="Your private 24/7 safe space for mental well-being."
+            title={t.ai.title}
+            subtitle={t.ai.subtitle}
             icon={Bot}
             color={theme.colors.plum}
             size="wide"
@@ -360,14 +373,14 @@ export default function DashboardScreen() {
             style={styles.clarityOverlay}
           />
           <View style={styles.clarityContent}>
-            <Text style={[styles.clarityTitle, theme.typography.h3]}>Moment of Clarity</Text>
+            <Text style={[styles.clarityTitle, theme.typography.h3]}>{t.dashboard.clarityTitle}</Text>
             <Text style={[styles.clarityQuote, theme.typography.caption]}>"Peace is the result of retraining your mind to process life as it is."</Text>
           </View>
         </Animated.View>
 
         {/* Mindful Tools Horizontal Carousel */}
         <View style={styles.sectionCompact}>
-          <Text style={styles.sectionTitle}>Mindful Tools</Text>
+          <Text style={styles.sectionTitle}>{t.dashboard.toolsTitle}</Text>
           <ScrollView 
             horizontal 
             showsHorizontalScrollIndicator={false} 
@@ -414,7 +427,7 @@ export default function DashboardScreen() {
 
         {/* Support & Community Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Community & Support</Text>
+          <Text style={styles.sectionTitle}>{t.dashboard.supportTitle}</Text>
           <View style={styles.listContainer}>
             <AppleWidget
               title="Wellness Journey"

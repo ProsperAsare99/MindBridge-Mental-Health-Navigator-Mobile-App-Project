@@ -31,8 +31,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { SchedulableTriggerInputTypes } from 'expo-notifications';
 import { LuxuryCard } from '../../src/components/LuxuryCard';
-
-const { width } = Dimensions.get('window');
+import { translations, Language } from '../../src/utils/translations';
+import { AuthContext } from '../../src/context/AuthContext';
+import { useContext } from 'react';
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
 
 // ─── Time-of-day context ────────────────────────────────────────────────────
@@ -166,6 +167,10 @@ export default function GardenScreen() {
   const [step, setStep] = useState<'question_0' | 'question_1' | 'mood' | 'planted'>('question_0');
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const { userData: authData } = useContext(AuthContext);
+  const preferredLanguage = (authData?.preferredLanguage as Language) || 'English';
+  const t = translations[preferredLanguage] || translations.English;
+  
   const [loading, setLoading] = useState(false);
   const [moodLogs, setMoodLogs] = useState<any[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(true);
@@ -368,8 +373,8 @@ export default function GardenScreen() {
 
       <ScrollView contentContainerStyle={[gStyles.scroll, { paddingTop: insets.top + 20 }]} showsVerticalScrollIndicator={false}>
         <ScreenHeader
-          title="Mood Garden"
-          subtitle={step === 'question_0' || step === 'question_1' ? timeCtx.prompt : 'Cultivate your inner peace.'}
+          title={t.garden.title}
+          subtitle={t.garden.subtitle}
           rightAction={
             <TouchableOpacity style={gStyles.historyBtn} onPress={() => Alert.alert('Coming Soon', 'Garden history arrives in the next update!')}>
               <Clock color={themeContext.colors.plum} size={24} />

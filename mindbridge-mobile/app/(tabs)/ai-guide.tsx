@@ -12,6 +12,9 @@ import {
   Dimensions,
   StatusBar
 } from 'react-native';
+import { translations, Language } from '../../src/utils/translations';
+import { AuthContext } from '../../src/context/AuthContext';
+import { useContext } from 'react';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -73,6 +76,9 @@ export default function AIGuideScreen() {
   const theme = useTheme();
   const router = useRouter();
   const styles = createStyles(theme);
+  const { userData: authData } = useContext(AuthContext);
+  const preferredLanguage = (authData?.preferredLanguage as Language) || 'English';
+  const t = translations[preferredLanguage] || translations.English;
   
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
@@ -172,8 +178,8 @@ export default function AIGuideScreen() {
             <Bot color={theme.colors.text.onPrimary || '#FFF'} size={24} />
           </View>
           <View>
-            <Text style={styles.headerTitle}>MindBridge Oracle</Text>
-            <Text style={styles.headerSubtitle}>Always here to listen</Text>
+            <Text style={styles.headerTitle}>{t.ai.title}</Text>
+            <Text style={styles.headerSubtitle}>{t.ai.subtitle}</Text>
           </View>
         </View>
         <TouchableOpacity style={styles.moreBtn}>
@@ -227,7 +233,7 @@ export default function AIGuideScreen() {
                     style={styles.crisisBtn}
                     onPress={() => router.push('/(tabs)/crisis')}
                   >
-                    <Text style={styles.crisisBtnText}>Go to Support Page</Text>
+                    <Text style={styles.crisisBtnText}>{t.goToSupport}</Text>
                     <ArrowRight color="#FFF" size={16} />
                   </TouchableOpacity>
                 )}
@@ -260,7 +266,7 @@ export default function AIGuideScreen() {
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.textInput}
-              placeholder="Type a message..."
+              placeholder={t.ai.placeholder}
               placeholderTextColor={theme.colors.text.disabled}
               value={input}
               onChangeText={setInput}

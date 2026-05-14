@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 
 interface AuthContextType {
   userToken: string | null;
-  userData: { name?: string, email?: string } | null;
+  userData: { name?: string, email?: string, preferredLanguage?: string } | null;
   signIn: (token: string, user?: any) => Promise<void>;
   signOut: () => Promise<void>;
   isLoading: boolean;
@@ -14,7 +14,7 @@ export const AuthContext = createContext<AuthContextType>({} as AuthContextType)
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [userToken, setUserToken] = useState<string | null>(null);
-  const [userData, setUserData] = useState<{ name?: string, email?: string } | null>(null);
+  const [userData, setUserData] = useState<{ name?: string, email?: string, preferredLanguage?: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

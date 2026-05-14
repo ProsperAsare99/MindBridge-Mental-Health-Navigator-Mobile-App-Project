@@ -43,7 +43,9 @@ import {
   Sun,
   CircleDashed,
   TrendingUp,
-  Activity
+  Activity,
+  Heart,
+  ExternalLink
 } from 'lucide-react-native';
 import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
@@ -89,8 +91,6 @@ const ProgressRings = ({ completed, total, theme, styles }: any) => {
 
 const WeeklyPulse = ({ theme, styles, data }: any) => {
   const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  
-  // Calculate real scores from data
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
@@ -98,9 +98,10 @@ const WeeklyPulse = ({ theme, styles, data }: any) => {
   });
 
   const scores = last7Days.map(dayStr => {
-    // Robust date matching
-    const entry = data.find((d: any) => new Date(d.createdAt).toDateString() === dayStr);
-    return entry ? Math.min(Math.max(entry.score / 10, 0.1), 1) : 0.4;
+    const entries = data.filter((d: any) => new Date(d.createdAt).toDateString() === dayStr);
+    if (entries.length === 0) return 0.4;
+    const avg = entries.reduce((sum: number, e: any) => sum + e.score, 0) / entries.length;
+    return Math.min(Math.max(avg / 10, 0.1), 1);
   });
 
   return (
@@ -225,6 +226,32 @@ const RitualItem = ({ label, done, icon: Icon, color, theme, styles, onPress }: 
   </TouchableOpacity>
 );
 
+// ─── Detailed Overview Cards ────────────────────────────────────────────────
+
+const DetailedOverviewCard = ({ title, value, label, icon: Icon, color, progress, theme, styles, onPress, subtitle }: any) => (
+  <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={[styles.detailedCard, { backgroundColor: theme.colors.surface }]}>
+    <View style={styles.detailedHeader}>
+      <View style={[styles.detailedIconWrap, { backgroundColor: color + '15' }]}>
+        <Icon color={color} size={20} />
+      </View>
+      <ChevronRight color={theme.colors.text.disabled} size={18} />
+    </View>
+    <View style={styles.detailedContent}>
+      <Text style={[styles.detailedTitle, { color: theme.colors.text.tertiary }]}>{title}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4, marginVertical: 4 }}>
+        <Text style={[styles.detailedValue, { color: theme.colors.text.primary }]}>{value}</Text>
+        <Text style={[styles.detailedLabel, { color: theme.colors.text.secondary }]}>{label}</Text>
+      </View>
+      {subtitle && <Text style={[styles.detailedSubtitle, { color: theme.colors.text.tertiary }]}>{subtitle}</Text>}
+      {progress !== undefined && (
+        <View style={styles.detailedProgressBg}>
+          <View style={[styles.detailedProgressFill, { width: `${progress * 100}%`, backgroundColor: color }]} />
+        </View>
+      )}
+    </View>
+  </TouchableOpacity>
+);
+
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 
 export default function DashboardScreen() {
@@ -313,34 +340,57 @@ export default function DashboardScreen() {
           </View>
         </Animated.View>
 
-        {/* ── New Overview Section ── */}
+        {/* ── Detailed Overviews ── */}
         <View style={dashStyles.section}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-            <AppleWidget 
-              title="Garden Growth" 
-              subtitle={gardenStats.stage} 
+          <Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary, marginBottom: 16 }]}>Daily Overview</Text>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <DetailedOverviewCard 
+              title="GARDEN" 
+              value={gardenStats.count} 
+              label="Seeds" 
+              subtitle={gardenStats.stage}
               icon={gardenStats.icon} 
               color={gardenStats.color} 
+              progress={Math.min(gardenStats.count / 20, 1)}
               theme={theme} 
-              styles={dashStyles} 
+              styles={dashStyles}
               onPress={() => router.push('/(tabs)/garden')}
-              value={gardenStats.count}
-              label="Seeds"
-              delay={350}
             />
-            <AppleWidget 
-              title="Assessments" 
-              subtitle="Emotional Check" 
+            <DetailedOverviewCard 
+              title="ASSESSMENTS" 
+              value="85" 
+              label="Ready" 
+              subtitle="Mindfulness Check"
               icon={ClipboardList} 
               color={theme.colors.accents.slate} 
+              progress={0.85}
               theme={theme} 
-              styles={dashStyles} 
+              styles={dashStyles}
               onPress={() => router.push('/(tabs)/assessments')}
-              value={moodHistory.length > 0 ? "85%" : "0%"}
-              label="Ready"
-              delay={400}
             />
           </View>
+        </View>
+
+        <View style={dashStyles.section}>
+          <Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary, marginBottom: 16 }]}>Featured Resource</Text>
+          <TouchableOpacity activeOpacity={0.9} style={[dashStyles.resourceCard, { backgroundColor: theme.colors.surface }]}>
+            <LinearGradient colors={['rgba(123, 97, 255, 0.1)', 'transparent']} style={StyleSheet.absoluteFillObject} />
+            <View style={dashStyles.resourceInfo}>
+              <View style={dashStyles.resourceTag}><Text style={dashStyles.resourceTagText}>RECOMMENDED</Text></View>
+              <Text style={[dashStyles.resourceTitle, { color: theme.colors.text.primary }]}>The Art of Box Breathing</Text>
+              <Text style={[dashStyles.resourceSubtitle, { color: theme.colors.text.secondary }]}>Master the 4-4-4 technique to calm your nervous system instantly.</Text>
+              <View style={dashStyles.resourceMeta}>
+                <Clock size={14} color={theme.colors.text.tertiary} />
+                <Text style={dashStyles.resourceMetaText}>5 min read</Text>
+                <View style={dashStyles.dotSeparator} />
+                <Heart size={14} color={theme.colors.text.tertiary} />
+                <Text style={dashStyles.resourceMetaText}>Practical</Text>
+              </View>
+            </View>
+            <View style={dashStyles.resourceAction}>
+              <ExternalLink color={theme.colors.plum} size={20} />
+            </View>
+          </TouchableOpacity>
         </View>
 
         <View style={dashStyles.section}><AppleWidget title="The Oracle" subtitle="AI Personal Guide" icon={Bot} color={theme.colors.plum} size="wide" delay={450} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/ai-guide')} /></View>
@@ -348,6 +398,7 @@ export default function DashboardScreen() {
         <View style={dashStyles.sectionCompact}>
           <View style={dashStyles.sectionHeader}><Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary }]}>Your Wellness Toolkit</Text></View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={dashStyles.horizontalScroll} snapToInterval={154} decelerationRate="fast">
+            <AppleWidget title="Tools" subtitle="Therapeutic" icon={Activity} color={theme.colors.plum} size="fixed" delay={480} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/tools')} />
             <AppleWidget title="Journal" subtitle="Reflections" icon={BookOpen} color={theme.colors.accents.powderBlue} size="fixed" delay={500} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/journal')} />
             <AppleWidget title="Resources" subtitle="Discovery Hub" icon={Library} color={theme.colors.accents.forestGreen} size="fixed" delay={550} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/resources')} />
             <AppleWidget title="Community" subtitle="Connect" icon={Users} color={theme.colors.accents.dustyRose} size="fixed" delay={600} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/community')} />
@@ -356,13 +407,24 @@ export default function DashboardScreen() {
         </View>
 
         <View style={dashStyles.section}>
-          <Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary }]}>Support & Safety</Text>
-          <View style={[dashStyles.listContainer, { backgroundColor: theme.colors.surface, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)' }]}>
-            <AppleWidget title="Wellness Journey" subtitle="View milestones" icon={TrendingUp} color={theme.colors.plum} size="list" delay={700} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/journey')} />
-            <View style={[dashStyles.divider, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]} />
-            <AppleWidget title="Crisis Support" subtitle="Immediate assistance" icon={ShieldAlert} color={theme.colors.accents.terracotta} size="list" delay={750} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/crisis')} />
-          </View>
+          <Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary, marginBottom: 16 }]}>Safety & Support</Text>
+          <TouchableOpacity 
+            activeOpacity={0.9} 
+            onPress={() => router.push('/(tabs)/crisis')}
+            style={[dashStyles.crisisCard, { backgroundColor: theme.colors.accents.terracotta + '15', borderColor: theme.colors.accents.terracotta + '30' }]}
+          >
+            <View style={[dashStyles.crisisIconWrap, { backgroundColor: theme.colors.accents.terracotta }]}>
+              <ShieldAlert color="#FFF" size={24} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[dashStyles.crisisTitle, { color: theme.colors.accents.terracotta }]}>Crisis Support</Text>
+              <Text style={[dashStyles.crisisSubtitle, { color: theme.colors.text.secondary }]}>Talk to a professional or access emergency resources 24/7.</Text>
+            </View>
+            <ChevronRight color={theme.colors.accents.terracotta} size={24} />
+          </TouchableOpacity>
         </View>
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
@@ -374,7 +436,7 @@ const dashStyles = StyleSheet.create({
   bgBlob: { position: 'absolute', width: 400, height: 400, borderRadius: 200 },
   headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, marginBottom: 24 },
   section: { marginBottom: 32, paddingHorizontal: 24 },
-  sectionHeader: { paddingHorizontal: 24, marginBottom: 16 },
+  sectionHeader: { paddingHorizontal: 0, marginBottom: 16 },
   sectionTitleText: { fontSize: 20, fontWeight: '800' },
   sectionCompact: { marginBottom: 32 },
   horizontalScroll: { paddingLeft: 24, paddingRight: 8 },
@@ -425,4 +487,34 @@ const dashStyles = StyleSheet.create({
   listTitle: { fontSize: 16, fontWeight: '800' },
   listSubtitle: { fontSize: 13 },
   divider: { height: StyleSheet.hairlineWidth, marginLeft: 72 },
+
+  // Detailed Card Styles
+  detailedCard: { flex: 1, borderRadius: 28, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 },
+  detailedHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  detailedIconWrap: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  detailedContent: {},
+  detailedTitle: { fontSize: 10, fontWeight: '800', letterSpacing: 1 },
+  detailedValue: { fontSize: 24, fontWeight: '800' },
+  detailedLabel: { fontSize: 12, fontWeight: '600', marginBottom: 4 },
+  detailedSubtitle: { fontSize: 11, fontWeight: '600', marginBottom: 12 },
+  detailedProgressBg: { height: 4, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 2, overflow: 'hidden' },
+  detailedProgressFill: { height: '100%', borderRadius: 2 },
+
+  // Resource Card Styles
+  resourceCard: { borderRadius: 32, padding: 24, flexDirection: 'row', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 3, overflow: 'hidden' },
+  resourceInfo: { flex: 1 },
+  resourceTag: { alignSelf: 'flex-start', backgroundColor: 'rgba(123, 97, 255, 0.1)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginBottom: 12 },
+  resourceTagText: { fontSize: 10, fontWeight: '800', color: '#7B61FF', letterSpacing: 0.5 },
+  resourceTitle: { fontSize: 18, fontWeight: '800', marginBottom: 8 },
+  resourceSubtitle: { fontSize: 14, lineHeight: 20, marginBottom: 16 },
+  resourceMeta: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  resourceMetaText: { fontSize: 12, fontWeight: '600' },
+  dotSeparator: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: 'rgba(0,0,0,0.2)', marginHorizontal: 4 },
+  resourceAction: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(123, 97, 255, 0.08)', alignItems: 'center', justifyContent: 'center', marginLeft: 16 },
+
+  // Crisis Card Styles
+  crisisCard: { flexDirection: 'row', alignItems: 'center', padding: 24, borderRadius: 32, borderWidth: 1.5 },
+  crisisIconWrap: { width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 20 },
+  crisisTitle: { fontSize: 20, fontWeight: '800', marginBottom: 4 },
+  crisisSubtitle: { fontSize: 14, lineHeight: 20 },
 });

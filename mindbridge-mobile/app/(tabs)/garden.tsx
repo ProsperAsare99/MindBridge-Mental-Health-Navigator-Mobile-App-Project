@@ -86,16 +86,19 @@ const MoodCircle = ({ mood, isSelected, onPress, delay, theme }: any) => {
         style={({ pressed }) => [
           styles.moodCircle,
           { 
-            backgroundColor: isSelected ? mood.color : (theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'),
+            backgroundColor: isSelected ? mood.color : (theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)'),
             borderColor: isSelected ? mood.color : (theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'),
-            borderWidth: 1.5,
+            borderWidth: 1,
           },
           isSelected && styles.moodCircleSelected
         ]}
       >
-        <Text style={{ fontSize: 28 }}>{mood.emoji}</Text>
+        <Text style={{ fontSize: 32 }}>{mood.emoji}</Text>
       </Pressable>
-      <Text style={[styles.moodLabel, isSelected && { color: theme.colors.text.primary, fontWeight: '700' }]}>
+      <Text 
+        style={[styles.moodLabel, { fontFamily: theme.typography.fonts.body }, isSelected && { color: theme.colors.text.primary, fontWeight: '700' }]}
+        numberOfLines={1}
+      >
         {mood.label}
       </Text>
     </Animated.View>
@@ -413,7 +416,7 @@ const styles = StyleSheet.create({
   moodCircleWrap: { width: (width - 48 - 56 - 40) / 3, alignItems: 'center', marginBottom: 16 },
   moodCircle: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
   moodCircleSelected: { shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 12, elevation: 6 },
-  moodLabel: { fontSize: 11, color: '#999', textAlign: 'center' },
+  moodLabel: { fontSize: 12, color: '#888', textAlign: 'center', marginTop: 4 },
   nudge: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(123, 97, 255, 0.1)', padding: 12, borderRadius: 16, marginBottom: 20 },
   nudgeText: { flex: 1, fontSize: 12, fontWeight: '500' },
   nudgeLink: { fontSize: 12, fontWeight: '700', color: '#7B61FF', textDecorationLine: 'underline' },

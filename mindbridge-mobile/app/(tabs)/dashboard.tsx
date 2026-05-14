@@ -620,16 +620,14 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginLeft: 16,
   },
   widgetTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    ...theme.typography.bodyBold,
+    fontFamily: theme.typography.fonts.header,
     color: theme.colors.text.primary,
-    letterSpacing: -0.3,
   },
   widgetSubtitle: {
-    fontSize: 13,
+    ...theme.typography.caption,
     color: theme.colors.text.secondary,
-    marginTop: 4,
-    lineHeight: 18,
+    marginTop: 2,
   },
   clarityCard: {
     marginHorizontal: 24,

@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export const lightColors = {
   // ─── Primary Brand Colors ─
   plum: '#2E4057',
@@ -110,45 +112,42 @@ export const borderRadius = {
 
 export const typography = {
   fonts: {
-    header: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-    body: Platform.OS === 'ios' ? 'System' : 'sans-serif',
-    accent: Platform.OS === 'ios' ? 'American Typewriter' : 'monospace',
+    header: 'Outfit-Bold',
+    body: 'Outfit-Regular',
+    accent: 'Outfit-SemiBold',
   },
   h1: {
     fontSize: 32,
-    fontWeight: '800' as const,
+    fontFamily: 'Outfit-ExtraBold',
     letterSpacing: -1,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   h2: {
     fontSize: 24,
-    fontWeight: '700' as const,
+    fontFamily: 'Outfit-Bold',
     letterSpacing: -0.5,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   h3: {
     fontSize: 20,
-    fontWeight: '700' as const,
+    fontFamily: 'Outfit-Bold',
     letterSpacing: -0.5,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   body: {
     fontSize: 16,
-    fontWeight: '400' as const,
+    fontFamily: 'Outfit-Regular',
     lineHeight: 24,
   },
   bodyBold: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontFamily: 'Outfit-SemiBold',
   },
   caption: {
     fontSize: 13,
-    fontWeight: '500' as const,
+    fontFamily: 'Outfit-Regular',
     letterSpacing: 0.2,
   },
   label: {
     fontSize: 12,
-    fontWeight: '700' as const,
+    fontFamily: 'Outfit-Bold',
     textTransform: 'uppercase' as const,
     letterSpacing: 1,
   }

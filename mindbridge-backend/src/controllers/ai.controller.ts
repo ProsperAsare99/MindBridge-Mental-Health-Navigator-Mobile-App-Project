@@ -39,12 +39,25 @@ export const getOracleContext = async (req: Request, res: Response) => {
     });
 
     res.json({
-      latestMood,
-      recentJournal,
-      onboarding
+      latestMood: latestMood || null,
+      recentJournal: recentJournal || [],
+      onboarding: onboarding || null,
+      dbStatus: 'online'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching Oracle context:', error);
+    
+    // If it's a connection error (P1001), return empty context instead of 500
+    if (error.code === 'P1001' || error.message.includes('Can\'t reach database server')) {
+      return res.json({
+        latestMood: null,
+        recentJournal: [],
+        onboarding: null,
+        dbStatus: 'offline',
+        warning: 'Database is momentarily sleeping. Please try again in a few seconds.'
+      });
+    }
+
     res.status(500).json({ error: 'Server error' });
   }
 };

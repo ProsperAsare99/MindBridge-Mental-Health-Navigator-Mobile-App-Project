@@ -417,7 +417,8 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
-    lineHeight: 24,
+    fontFamily: theme.typography.fonts.content,
+    lineHeight: 22,
   },
   textAi: {
     color: theme.colors.text.primary,

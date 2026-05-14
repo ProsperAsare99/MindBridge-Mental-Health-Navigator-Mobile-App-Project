@@ -113,9 +113,10 @@ export const borderRadius = {
 export const typography = {
   fonts: {
     header: 'Poppins-Bold',
-    body: 'Poppins-Regular',
+    body: 'Inter-Regular',
+    content: 'OpenSans-Regular',
     accent: 'Poppins-SemiBold',
-    medium: 'Poppins-Medium',
+    humanist: 'Lato-Regular',
   },
   h1: {
     fontSize: 32,
@@ -134,25 +135,31 @@ export const typography = {
   },
   body: {
     fontSize: 16,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: 'Inter-Regular',
     lineHeight: 24,
   },
   bodyBold: {
     fontSize: 16,
-    fontFamily: 'Poppins-SemiBold',
+    fontFamily: 'Inter-SemiBold',
   },
-  bodyMedium: {
+  content: {
     fontSize: 16,
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'OpenSans-Regular',
+    lineHeight: 26,
+  },
+  secondary: {
+    fontSize: 15,
+    fontFamily: 'Lato-Regular',
+    lineHeight: 22,
   },
   caption: {
     fontSize: 13,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: 'Inter-Regular',
     letterSpacing: 0.2,
   },
   label: {
     fontSize: 12,
-    fontFamily: 'Poppins-Bold',
+    fontFamily: 'Inter-Bold',
     textTransform: 'uppercase' as const,
     letterSpacing: 1,
   }

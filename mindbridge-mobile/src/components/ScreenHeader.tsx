@@ -4,13 +4,16 @@ import {
   Text, 
   StyleSheet, 
   TouchableOpacity, 
-  Platform 
+  Platform,
+  Dimensions
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, MoreHorizontal } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import { BlurView } from 'expo-blur';
+
+const { width } = Dimensions.get('window');
 
 interface ScreenHeaderProps {
   title: string;
@@ -18,6 +21,7 @@ interface ScreenHeaderProps {
   showBack?: boolean;
   onBack?: () => void;
   rightAction?: React.ReactNode;
+  variant?: 'large' | 'compact';
 }
 
 export const ScreenHeader = ({ 
@@ -25,106 +29,126 @@ export const ScreenHeader = ({
   subtitle, 
   showBack = false, 
   onBack, 
-  rightAction 
+  rightAction,
+  variant = 'large'
 }: ScreenHeaderProps) => {
   const theme = useTheme();
   const router = useRouter();
   const styles = createStyles(theme);
 
   const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      router.back();
-    }
+    if (onBack) onBack();
+    else router.back();
   };
 
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
   return (
-    <View style={styles.container}>
-      <View style={styles.topRow}>
+    <View style={styles.outerContainer}>
+      {/* Top Navigation Row */}
+      <View style={styles.navRow}>
         {showBack ? (
-          <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
-            <ChevronLeft color={theme.colors.plum} size={28} />
+          <TouchableOpacity onPress={handleBack} style={styles.iconBtn}>
+            <BlurView intensity={theme.isDark ? 20 : 40} tint={theme.isDark ? 'dark' : 'light'} style={styles.blurCircle}>
+              <ChevronLeft color={theme.colors.plum} size={24} strokeWidth={2.5} />
+            </BlurView>
           </TouchableOpacity>
         ) : (
-          <View style={styles.placeholder} />
-        )}
-        
-        {rightAction && (
-          <View style={styles.rightActionContainer}>
-            {rightAction}
+          <View style={styles.dateWrap}>
+            <Text style={styles.dateText}>{today.toUpperCase()}</Text>
           </View>
         )}
+        
+        <View style={styles.rightActions}>
+          {rightAction || (
+            <TouchableOpacity style={styles.iconBtn}>
+              <BlurView intensity={theme.isDark ? 20 : 40} tint={theme.isDark ? 'dark' : 'light'} style={styles.blurCircle}>
+                <MoreHorizontal color={theme.colors.plum} size={20} />
+              </BlurView>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
-      <Animated.View entering={FadeIn.duration(600)} style={styles.content}>
+      {/* Main Title Content */}
+      <Animated.View 
+        entering={FadeInDown.springify().damping(15).stiffness(100)} 
+        style={[styles.content, variant === 'compact' && styles.contentCompact]}
+      >
         <Text style={styles.title}>{title}</Text>
         {subtitle && (
           <Text style={styles.subtitle}>{subtitle}</Text>
         )}
       </Animated.View>
-
-      {/* Subtle bottom separator gradient */}
-      <LinearGradient 
-        colors={[
-          theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-          'transparent'
-        ]}
-        style={styles.separator}
-      />
     </View>
   );
 };
 
 const createStyles = (theme: any) => StyleSheet.create({
-  container: {
+  outerContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 20,
+    paddingTop: Platform.OS === 'ios' ? 10 : 20,
+    paddingBottom: 24,
     backgroundColor: 'transparent',
   },
-  topRow: {
+  navRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 44,
-    marginBottom: 8,
+    height: 56,
+    marginBottom: 12,
   },
-  backBtn: {
+  dateWrap: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+  },
+  dateText: {
+    fontSize: 10,
+    fontFamily: theme.typography.fonts.header,
+    color: theme.colors.text.tertiary,
+    letterSpacing: 2,
+  },
+  iconBtn: {
+    overflow: 'hidden',
+    borderRadius: 22,
+  },
+  blurCircle: {
     width: 44,
     height: 44,
-    marginLeft: -12,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.8)',
   },
-  placeholder: {
-    width: 44,
-  },
-  rightActionContainer: {
-    minWidth: 44,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
+  rightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   content: {
-    marginTop: 4,
+    marginTop: 0,
+  },
+  contentCompact: {
+    alignItems: 'center',
+    textAlign: 'center',
   },
   title: {
-    fontSize: 34,
-    fontWeight: '800',
+    fontSize: 40,
+    fontFamily: theme.typography.fonts.header,
     color: theme.colors.text.primary,
-    letterSpacing: -1,
+    letterSpacing: -1.5,
+    lineHeight: 48,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 17,
+    fontFamily: theme.typography.fonts.humanist,
     color: theme.colors.text.secondary,
-    fontWeight: '500',
-    marginTop: 4,
-    lineHeight: 22,
+    marginTop: 8,
+    lineHeight: 24,
+    opacity: 0.8,
   },
-  separator: {
-    height: 1,
-    width: '100%',
-    position: 'absolute',
-    bottom: 0,
-    left: 24,
-  }
 });
+

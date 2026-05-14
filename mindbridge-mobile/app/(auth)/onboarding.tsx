@@ -691,13 +691,13 @@ const createStyles = (theme: any) => StyleSheet.create({
   
   // Privacy / Consent
   privacyText: { fontSize: 15, color: theme.colors.text.primary, lineHeight: 28, textAlign: 'center', paddingHorizontal: 10 },
-  consentGreeting: { fontSize: 18, fontWeight: '700', color: theme.colors.text.primary, marginBottom: 12, marginTop: 10 },
-  consentBody: { fontSize: 15, color: theme.colors.text.secondary, lineHeight: 24, marginBottom: 24 },
+  consentGreeting: { fontSize: 18, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, marginBottom: 12, marginTop: 10 },
+  consentBody: { fontSize: 15, fontFamily: theme.typography.fonts.content, color: theme.colors.text.secondary, lineHeight: 24, marginBottom: 24 },
   consentPointsBox: { backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.05)' : 'rgba(0,0,0,0.02)', borderRadius: 20, padding: 20, gap: 16, marginBottom: 24 },
   consentPointRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  consentPointText: { flex: 1, fontSize: 14, color: theme.colors.text.primary, fontWeight: '500' },
-  consentCommitmentTitle: { fontSize: 16, fontWeight: '800', color: theme.colors.plum, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 },
-  consentCommitmentText: { fontSize: 14, color: theme.colors.text.tertiary, lineHeight: 22, fontStyle: 'italic' },
+  consentPointText: { flex: 1, fontSize: 14, fontFamily: theme.typography.fonts.body, color: theme.colors.text.primary, fontWeight: '500' },
+  consentCommitmentTitle: { fontSize: 16, fontFamily: theme.typography.fonts.header, color: theme.colors.plum, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 },
+  consentCommitmentText: { fontSize: 14, fontFamily: theme.typography.fonts.humanist, color: theme.colors.text.tertiary, lineHeight: 22, fontStyle: 'italic' },
   
   // Options
   optionBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.surface, paddingHorizontal: 20, paddingVertical: 18, borderRadius: 20, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.2 : 0.04, shadowRadius: 12, elevation: 2 },

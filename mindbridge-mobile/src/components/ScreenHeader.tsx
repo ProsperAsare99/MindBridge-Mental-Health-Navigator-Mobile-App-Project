@@ -22,6 +22,8 @@ interface ScreenHeaderProps {
   onBack?: () => void;
   rightAction?: React.ReactNode;
   variant?: 'large' | 'compact';
+  noPadding?: boolean;
+  noDate?: boolean;
 }
 
 export const ScreenHeader = ({ 
@@ -30,7 +32,9 @@ export const ScreenHeader = ({
   showBack = false, 
   onBack, 
   rightAction,
-  variant = 'large'
+  variant = 'large',
+  noPadding = false,
+  noDate = false
 }: ScreenHeaderProps) => {
   const theme = useTheme();
   const router = useRouter();
@@ -44,7 +48,7 @@ export const ScreenHeader = ({
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 
   return (
-    <View style={styles.outerContainer}>
+    <View style={[styles.outerContainer, noPadding && { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0 }]}>
       {/* Top Navigation Row */}
       <View style={styles.navRow}>
         {showBack ? (
@@ -54,9 +58,11 @@ export const ScreenHeader = ({
             </BlurView>
           </TouchableOpacity>
         ) : (
-          <View style={styles.dateWrap}>
-            <Text style={styles.dateText}>{today.toUpperCase()}</Text>
-          </View>
+          !noDate && (
+            <View style={styles.dateWrap}>
+              <Text style={styles.dateText}>{today.toUpperCase()}</Text>
+            </View>
+          )
         )}
         
         <View style={styles.rightActions}>
@@ -75,7 +81,7 @@ export const ScreenHeader = ({
         entering={FadeInDown.springify().damping(15).stiffness(100)} 
         style={[styles.content, variant === 'compact' && styles.contentCompact]}
       >
-        <Text style={styles.title}>{title}</Text>
+        <Text style={[styles.title, variant === 'compact' && { fontSize: 24, lineHeight: 32 }]}>{title}</Text>
         {subtitle && (
           <Text style={styles.subtitle}>{subtitle}</Text>
         )}
@@ -83,6 +89,7 @@ export const ScreenHeader = ({
     </View>
   );
 };
+
 
 const createStyles = (theme: any) => StyleSheet.create({
   outerContainer: {

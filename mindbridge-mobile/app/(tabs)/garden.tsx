@@ -29,6 +29,8 @@ import { ScreenHeader } from '../../src/components/ScreenHeader';
 import api from '../../src/services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
+import { SchedulableTriggerInputTypes } from 'expo-notifications';
+import { LuxuryCard } from '../../src/components/LuxuryCard';
 
 const { width } = Dimensions.get('window');
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
@@ -172,8 +174,10 @@ export default function GardenScreen() {
 
   const fetchLogs = async () => {
     try {
-      const res = await api.get('/mood');
-      setMoodLogs(res.data);
+      // Use the unified oracle-context endpoint
+      const res = await api.get('/ai/oracle-context');
+      setMoodLogs(res.data.recentJournal || []); // Simplified for growth tracking
+      // Note: We might want a dedicated endpoint for ALL mood logs if we want a full history
     } catch (e) {
       console.error(e);
     } finally {
@@ -231,7 +235,12 @@ export default function GardenScreen() {
       for (const t of times) {
         await Notifications.scheduleNotificationAsync({
           content: { title: '🌱 Time to plant your seed', body: 'How are you feeling right now?', sound: true },
-          trigger: { hour: t.hour, minute: t.min, repeats: true },
+          trigger: { 
+            type: SchedulableTriggerInputTypes.CALENDAR,
+            hour: t.hour, 
+            minute: t.min, 
+            repeats: true 
+          },
         });
       }
     }
@@ -244,20 +253,24 @@ export default function GardenScreen() {
 
   // ── Growth visual ──
   const GrowthVisual = () => (
-    <Animated.View entering={FadeIn.duration(800)} style={[gStyles.growthCard, { borderColor: themeContext.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' }]}>
-      <View style={[gStyles.growthIconWrap, { backgroundColor: growth.color + '20' }]}>
-        <growth.icon color={growth.color} size={44} />
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={[gStyles.growthLabel, { color: themeContext.colors.text.primary }]}>{growth.label}</Text>
-        <Text style={[gStyles.growthDesc, { color: themeContext.colors.text.secondary }]}>
-          {moodLogs.length} seeds planted.{' '}
-          {moodLogs.length < 20 ? `${20 - moodLogs.length} until Ancient Tree!` : 'Your garden is legendary.'}
-        </Text>
-      </View>
-      <View style={[gStyles.progressBg, { backgroundColor: themeContext.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
-        <View style={[gStyles.progressFill, { width: `${Math.min((moodLogs.length / 20) * 100, 100)}%`, backgroundColor: growth.color }]} />
-      </View>
+    <Animated.View entering={FadeIn.duration(800)} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
+      <LuxuryCard variant="glass" padding="none">
+        <View style={gStyles.growthContent}>
+          <View style={[gStyles.growthIconWrap, { backgroundColor: growth.color + '20' }]}>
+            <growth.icon color={growth.color} size={44} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[gStyles.growthLabel, { color: themeContext.colors.text.primary }]}>{growth.label}</Text>
+            <Text style={[gStyles.growthDesc, { color: themeContext.colors.text.secondary }]}>
+              {moodLogs.length} seeds planted.{' '}
+              {moodLogs.length < 20 ? `${20 - moodLogs.length} until Ancient Tree!` : 'Your garden is legendary.'}
+            </Text>
+          </View>
+        </View>
+        <View style={[gStyles.progressBg, { backgroundColor: themeContext.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
+          <View style={[gStyles.progressFill, { width: `${Math.min((moodLogs.length / 20) * 100, 100)}%`, backgroundColor: growth.color }]} />
+        </View>
+      </LuxuryCard>
     </Animated.View>
   );
 
@@ -405,12 +418,12 @@ const gStyles = StyleSheet.create({
   historyBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
 
   // Growth card
-  growthCard: { backgroundColor: 'rgba(255,255,255,0.7)', marginHorizontal: 24, marginBottom: 28, borderRadius: 28, padding: 22, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', borderWidth: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 3 },
+  growthContent: { flexDirection: 'row', alignItems: 'center', padding: 22 },
   growthIconWrap: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
   growthLabel: { fontSize: 20, fontWeight: '800', letterSpacing: -0.5, marginBottom: 4 },
   growthDesc: { fontSize: 13, lineHeight: 19 },
-  progressBg: { width: '100%', height: 7, borderRadius: 4, marginTop: 16, overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 4 },
+  progressBg: { width: '100%', height: 7, borderRadius: 0, overflow: 'hidden' },
+  progressFill: { height: '100%' },
 
   // Questions
   questionWrap: { alignItems: 'center', paddingHorizontal: 32, paddingTop: 8 },

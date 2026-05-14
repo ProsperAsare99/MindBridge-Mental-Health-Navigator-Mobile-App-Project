@@ -83,7 +83,7 @@ export default function AIGuideScreen() {
   useEffect(() => {
     const fetchContext = async () => {
       try {
-        const response = await api.get('/ai/context');
+        const response = await api.get('/ai/oracle-context');
         setContext(response.data);
         
         if (response.data.latestMood) {
@@ -184,7 +184,7 @@ export default function AIGuideScreen() {
       <KeyboardAvoidingView 
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 120 : 20}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
       >
         <ScrollView 
           contentContainerStyle={styles.chatContent}

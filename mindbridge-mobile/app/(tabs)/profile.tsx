@@ -1,4 +1,5 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
+import api from '../../src/services/api';
 import { 
   View, 
   Text, 
@@ -110,8 +111,25 @@ export default function ProfileScreen() {
   const styles = createStyles(themeContext);
 
   const isGuest = userToken?.startsWith('guest-token');
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get('/ai/oracle-context');
+        setProfile(res.data.onboarding);
+      } catch (e) {
+        console.error('Error fetching profile:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const userEmail = isGuest ? "Anonymous Session" : (userData?.email || "prosper@mindbridge.ai");
-  const userName = isGuest ? "Explorer" : (userData?.name || "Prosper Asare");
+  const userName = profile?.firstName || userData?.name || "Prosper Asare";
 
   return (
     <View style={styles.container}>
@@ -200,9 +218,25 @@ export default function ProfileScreen() {
         </Animated.View>
 
         <ProfileListGroup delay={400} theme={themeContext}>
-          <ProfileListItem theme={themeContext} icon={User} title="Personal Information" color={themeContext.colors.plum} />
-          <ProfileListItem theme={themeContext} icon={GraduationCap} title="Academic Context" color={themeContext.colors.accents.powderBlue} />
-          <ProfileListItem theme={themeContext} icon={Heart} title="Support Preferences" color={themeContext.colors.accents.terracotta} isLast />
+          <ProfileListItem 
+            theme={themeContext} 
+            icon={User} 
+            title="Personal Information" 
+            color={themeContext.colors.plum} 
+          />
+          <ProfileListItem 
+            theme={themeContext} 
+            icon={GraduationCap} 
+            title={`${profile?.program || 'Engineering'} • L${profile?.level || '400'}`} 
+            color={themeContext.colors.accents.powderBlue} 
+          />
+          <ProfileListItem 
+            theme={themeContext} 
+            icon={Heart} 
+            title={`${profile?.communicationStyle || 'Gentle'} Style • ${profile?.preferredLanguage || 'English'}`} 
+            color={themeContext.colors.accents.terracotta} 
+            isLast 
+          />
         </ProfileListGroup>
 
         <ProfileListGroup delay={500} theme={themeContext}>

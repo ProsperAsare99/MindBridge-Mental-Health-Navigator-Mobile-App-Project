@@ -6,8 +6,10 @@ import {
   TouchableOpacity, 
   StatusBar,
   Dimensions,
-  Vibration
+  Vibration,
+  Alert
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { 
@@ -124,7 +126,14 @@ export default function BreathingScreen() {
             </TouchableOpacity>
           </Animated.View>
         ) : (
-          <TouchableOpacity style={styles.stopBtn} onPress={() => router.back()}>
+          <TouchableOpacity 
+            style={styles.stopBtn} 
+            onPress={async () => {
+              const today = new Date().toDateString();
+              await AsyncStorage.setItem(`breathing_${today}`, 'true');
+              router.back();
+            }}
+          >
             <Text style={styles.stopBtnText}>End Session</Text>
           </TouchableOpacity>
         )}

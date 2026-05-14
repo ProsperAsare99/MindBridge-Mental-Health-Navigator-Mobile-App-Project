@@ -12,6 +12,7 @@ import {
   Pressable,
   Platform
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +26,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import {
+  Quote,
+  Clock,
+  CheckCircle2,
+  Circle,
+  Sparkles,
   BookOpen,
   ClipboardList,
   Library,
@@ -34,9 +40,7 @@ import {
   Bot,
   Leaf,
   Wind,
-  ChevronRight,
-  Quote,
-  Clock
+  ChevronRight
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
@@ -178,6 +182,29 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
   );
 };
 
+// ─── Ritual Item Component ───────────────────────────────────────────────────
+
+const RitualItem = ({ label, done, icon: Icon, color, theme, onPress }: any) => {
+  const styles = createStyles(theme);
+  return (
+    <TouchableOpacity 
+      style={[styles.ritualItem, done && styles.ritualItemDone]} 
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View style={[styles.ritualIconCircle, { backgroundColor: done ? color : (theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)') }]}>
+        <Icon color={done ? '#FFF' : theme.colors.text.disabled} size={20} />
+        {done && (
+          <View style={styles.checkBadge}>
+            <CheckCircle2 color="#FFF" size={10} fill={color} />
+          </View>
+        )}
+      </View>
+      <Text style={[styles.ritualLabel, done && { color: theme.colors.text.primary, fontWeight: '700' }]}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
+
 // ─── Main Dashboard ────────────────────────────────────────────────────────
 
 export default function DashboardScreen() {
@@ -187,20 +214,42 @@ export default function DashboardScreen() {
   const styles = createStyles(theme);
   const { userToken, userData: authData } = useContext(AuthContext) as any;
   const isGuest = userToken?.startsWith('guest-token');
-  const [hasLoggedToday, setHasLoggedToday] = useState(false);
+  const [rituals, setRituals] = useState({
+    garden: false,
+    journal: false,
+    breathing: false
+  });
   
   useEffect(() => {
     const checkTodayStatus = async () => {
       try {
-        const response = await api.get('/mood');
-        const today = new Date().toDateString();
-        const logged = response.data.some((log: any) => new Date(log.createdAt).toDateString() === today);
-        setHasLoggedToday(logged);
-      } catch (error) {
+        const todayStr = new Date().toDateString();
+        
+        // 1. Check Mood Garden
+        const moodRes = await api.get('/mood');
+        const gardenDone = moodRes.data.some((log: any) => new Date(log.createdAt).toDateString() === todayStr);
+        
+        // 2. Check Journal
+        const journalRes = await api.get('/journal');
+        const journalDone = journalRes.data.some((log: any) => new Date(log.createdAt).toDateString() === todayStr);
+        
+        // 3. Check Breathing (Local Storage)
+        const breathingDone = await AsyncStorage.getItem(`breathing_${todayStr}`) === 'true';
+        
+          setRituals({
+            garden: gardenDone,
+            journal: journalDone,
+            breathing: breathingDone
+          });
+        } catch (error) {
         console.error('Error checking today status:', error);
       }
     };
     checkTodayStatus();
+    
+    // Refresh on focus (simplified for now)
+    const interval = setInterval(checkTodayStatus, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const userData = {
@@ -243,6 +292,46 @@ export default function DashboardScreen() {
           <QuoteSlideshow />
         </View>
 
+        {/* Today's Rituals — Habitat Pattern */}
+        <Animated.View entering={FadeInUp.delay(100).duration(600)} style={styles.ritualsContainer}>
+          <View style={styles.ritualHeader}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Sparkles color={theme.colors.plum} size={18} />
+              <Text style={styles.ritualTitle}>Today's Rituals</Text>
+            </View>
+            <Text style={styles.ritualProgress}>
+              {Object.values(rituals).filter(Boolean).length}/3 Complete
+            </Text>
+          </View>
+          
+          <View style={styles.ritualRow}>
+            <RitualItem 
+              label="Plant Seed" 
+              done={rituals.garden} 
+              icon={Leaf} 
+              color={theme.colors.accents.eucalyptus} 
+              theme={theme}
+              onPress={() => router.push('/(tabs)/garden')}
+            />
+            <RitualItem 
+              label="Reflect" 
+              done={rituals.journal} 
+              icon={BookOpen} 
+              color={theme.colors.accents.powderBlue} 
+              theme={theme}
+              onPress={() => router.push('/(tabs)/journal')}
+            />
+            <RitualItem 
+              label="Breathe" 
+              done={rituals.breathing} 
+              icon={Wind} 
+              color={theme.colors.accents.softLilac} 
+              theme={theme}
+              onPress={() => router.push('/breathing')}
+            />
+          </View>
+        </Animated.View>
+
         {/* AI Guide Hero Widget */}
         <View style={styles.section}>
           <AppleWidget
@@ -262,7 +351,7 @@ export default function DashboardScreen() {
           <View style={styles.grid}>
             <AppleWidget
               title="Mood Garden"
-              subtitle={hasLoggedToday ? "Garden is growing" : "Seed needed today"}
+              subtitle={rituals.garden ? "Garden is growing" : "Seed needed today"}
               icon={Leaf}
               color={theme.colors.accents.eucalyptus}
               delay={200}
@@ -554,5 +643,74 @@ const createStyles = (theme: any) => StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     marginLeft: 72, // Aligns with text
+  },
+  // Rituals styles
+  ritualsContainer: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 32,
+    padding: 24,
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: theme.isDark ? 0.2 : 0.04,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  ritualHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  ritualTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: theme.colors.text.primary,
+    letterSpacing: -0.3,
+  },
+  ritualProgress: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: theme.colors.plum,
+    backgroundColor: theme.colors.plum + '15',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  ritualRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  ritualItem: {
+    alignItems: 'center',
+    gap: 8,
+    width: (width - 48 - 48) / 3,
+  },
+  ritualItemDone: {
+    opacity: 1,
+  },
+  ritualIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  ritualLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.text.disabled,
+  },
+  checkBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 1,
   }
 });

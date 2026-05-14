@@ -1,7 +1,14 @@
 import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { generateOracleResponse } from '../services/gemini.service.js';
 
 const prisma = new PrismaClient();
+
+// High-risk keywords for safety screening
+const CRISIS_KEYWORDS = [
+  'suicide', 'self-harm', 'kill myself', 'end my life', 'better off dead',
+  'hurt myself', 'cutting', 'overdose', 'hopeless', 'no reason to live'
+];
 
 export const getOracleContext = async (req: Request, res: Response) => {
   try {
@@ -26,9 +33,15 @@ export const getOracleContext = async (req: Request, res: Response) => {
       }
     });
 
+    // Get onboarding data for personality matching
+    const onboarding = await prisma.onboarding.findUnique({
+      where: { userId }
+    });
+
     res.json({
       latestMood,
       recentJournal,
+      onboarding
     });
   } catch (error) {
     console.error('Error fetching Oracle context:', error);
@@ -45,7 +58,18 @@ export const chatWithOracle = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    // Get context for deeper analysis
+    // 1. Safety Screening (Pre-LLM)
+    const lowerInput = message.toLowerCase();
+    const isCrisis = CRISIS_KEYWORDS.some(kw => lowerInput.includes(kw));
+
+    if (isCrisis) {
+      return res.json({
+        response: "I'm hearing a lot of pain in your words, and I'm very concerned about you. You don't have to carry this alone. Please reach out to one of the professionals on our Crisis Support page immediately — they are ready to help right now.",
+        suggestCrisis: true
+      });
+    }
+
+    // 2. Fetch Context
     const latestMood = await prisma.moodLog.findFirst({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -53,29 +77,25 @@ export const chatWithOracle = async (req: Request, res: Response) => {
 
     const recentJournal = await prisma.journal.findMany({
       where: { userId },
-      take: 2,
+      take: 3,
       orderBy: { createdAt: 'desc' },
     });
 
-    // Rule-based engine (Preparation for LLM integration)
-    let response = "I'm listening closely. Your feelings are valid, and I'm here to support you in whatever way you need right now.";
-    const lowerInput = message.toLowerCase();
+    const onboarding = await prisma.onboarding.findUnique({
+      where: { userId }
+    });
 
-    // Context-aware logic
-    if (lowerInput.includes('help') || lowerInput.includes('anxious') || lowerInput.includes('panic')) {
-      response = "I can feel the weight of those thoughts. Would you like to try a 4-7-8 breathing exercise together? It often helps settle the Oracle's energy and yours.";
-    } else if (lowerInput.includes('journal') || lowerInput.includes('write')) {
-      response = "Writing things down is a powerful release. Your recent journal entries show a lot of strength and self-awareness. What else is on your mind?";
-    } else if (latestMood && (lowerInput.includes('mood') || lowerInput.includes('feeling') || lowerInput.includes('garden'))) {
-       const emotions = latestMood.emotions.join(', ').toLowerCase();
-       response = `I remember your last garden seed reflected feeling ${emotions}. It's brave of you to keep exploring these feelings. How are you doing in this moment?`;
-    } else if (recentJournal.length > 0 && lowerInput.includes('reflect')) {
-      response = "Reflection is the key to growth. Looking at your recent thoughts, I see a pattern of resilience. What's one thing you're proud of today?";
-    }
+    // 3. Generate AI Response
+    const aiResponse = await generateOracleResponse(message, {
+      latestMood,
+      recentJournal,
+      onboarding
+    });
 
-    res.json({ response });
+    res.json({ response: aiResponse });
   } catch (error) {
     console.error('Error in Oracle chat:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'I am momentarily resting my thoughts. Please try talking to me again in a moment.' });
   }
 };
+

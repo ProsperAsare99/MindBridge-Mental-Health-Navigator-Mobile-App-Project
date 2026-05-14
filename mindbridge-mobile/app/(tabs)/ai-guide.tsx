@@ -14,13 +14,16 @@ import {
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInUp, FadeIn, useSharedValue, withSpring } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { 
   Bot,
   Send,
-  MoreVertical
+  MoreVertical,
+  AlertTriangle,
+  ArrowRight
 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -36,13 +39,39 @@ const INITIAL_MESSAGES = [
     id: '1',
     isAi: true,
     text: "Hello! I'm the MindBridge Oracle. I'm here to listen, support, and help you navigate your feelings. How are you doing today?",
-    time: 'Now'
+    time: 'Now',
+    suggestCrisis: false
   }
 ];
+
+// ─── Typing Indicator Component ──────────────────────────────────────────────
+const TypingIndicator = ({ theme }: any) => {
+  const dotScale = useSharedValue(1);
+  
+  useEffect(() => {
+    dotScale.value = withSpring(1.2, { damping: 2, stiffness: 80 });
+  }, []);
+
+  return (
+    <Animated.View entering={FadeIn.duration(400)} style={styles_typing.container}>
+      <View style={[styles_typing.dot, { backgroundColor: theme.colors.plum + '40' }]} />
+      <View style={[styles_typing.dot, { backgroundColor: theme.colors.plum + '70' }]} />
+      <View style={[styles_typing.dot, { backgroundColor: theme.colors.plum }]} />
+      <Text style={[styles_typing.text, { color: theme.colors.text.secondary }]}>Oracle is reflecting...</Text>
+    </Animated.View>
+  );
+};
+
+const styles_typing = StyleSheet.create({
+  container: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 40, marginBottom: 20 },
+  dot: { width: 6, height: 6, borderRadius: 3 },
+  text: { fontSize: 13, fontWeight: '600', marginLeft: 4 },
+});
 
 export default function AIGuideScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const router = useRouter();
   const styles = createStyles(theme);
   
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
@@ -66,7 +95,8 @@ export default function AIGuideScreen() {
               id: 'context-aware-1',
               isAi: true,
               text: `Hello! I'm the MindBridge Oracle. I noticed your last garden seed reflected feeling ${emotions.toLowerCase()}. How are you holding up since then?`,
-              time: 'Now'
+              time: 'Now',
+              suggestCrisis: false
             }
           ]);
         }
@@ -87,7 +117,8 @@ export default function AIGuideScreen() {
       id: Date.now().toString(),
       isAi: false,
       text: input.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      suggestCrisis: false
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -102,7 +133,8 @@ export default function AIGuideScreen() {
         id: (Date.now() + 1).toString(),
         isAi: true,
         text: response.data.response,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        suggestCrisis: !!response.data.suggestCrisis
       }]);
     } catch (error) {
       console.error('Error in Oracle chat:', error);
@@ -110,7 +142,8 @@ export default function AIGuideScreen() {
         id: (Date.now() + 1).toString(),
         isAi: true,
         text: "I'm sorry, I'm having trouble connecting to the collective wisdom right now. Please try again in a moment.",
-        time: 'Now'
+        time: 'Now',
+        suggestCrisis: false
       }]);
     } finally {
       setIsTyping(false);
@@ -173,17 +206,35 @@ export default function AIGuideScreen() {
               )}
               <View style={[
                 styles.messageBubble,
-                msg.isAi ? styles.bubbleAi : styles.bubbleUser
+                msg.isAi ? styles.bubbleAi : styles.bubbleUser,
+                msg.suggestCrisis && styles.bubbleCrisis
               ]}>
+                {msg.suggestCrisis && (
+                  <View style={styles.crisisHeader}>
+                    <AlertTriangle color="#EF4444" size={16} />
+                    <Text style={styles.crisisHeaderText}>Crisis Support Recommended</Text>
+                  </View>
+                )}
                 <Text style={[
                   styles.messageText,
-                  msg.isAi ? styles.textAi : styles.textUser
+                  msg.isAi ? styles.textAi : styles.textUser,
+                  msg.suggestCrisis && { color: theme.isDark ? '#FFF' : '#000' }
                 ]}>
                   {msg.text}
                 </Text>
+                {msg.suggestCrisis && (
+                  <TouchableOpacity 
+                    style={styles.crisisBtn}
+                    onPress={() => router.push('/(tabs)/crisis')}
+                  >
+                    <Text style={styles.crisisBtnText}>Go to Support Page</Text>
+                    <ArrowRight color="#FFF" size={16} />
+                  </TouchableOpacity>
+                )}
               </View>
             </Animated.View>
           ))}
+          {isTyping && <TypingIndicator theme={theme} />}
         </ScrollView>
 
         <Animated.View entering={FadeInUp.delay(300).duration(600)} style={[styles.inputArea, { paddingBottom: Platform.OS === 'ios' ? insets.bottom : 16 }]}>
@@ -390,5 +441,39 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   sendBtnDisabled: {
     opacity: 0.4,
+  },
+  // Crisis styles
+  bubbleCrisis: {
+    borderColor: '#EF4444',
+    borderWidth: 2,
+    backgroundColor: theme.isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.05)',
+  },
+  crisisHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  crisisHeaderText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#EF4444',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  crisisBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EF4444',
+    paddingVertical: 10,
+    borderRadius: 12,
+    marginTop: 12,
+    gap: 8,
+  },
+  crisisBtnText: {
+    color: '#FFF',
+    fontWeight: '800',
+    fontSize: 14,
   }
 });

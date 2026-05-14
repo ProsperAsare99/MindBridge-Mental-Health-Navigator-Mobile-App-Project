@@ -24,11 +24,54 @@ import {
   PlayCircle,
   Download,
   Search,
+  Sparkles,
 } from 'lucide-react-native';
-
 import api from '../../src/services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
+
+// MindDoc-inspired: onboarding answers → curated resource cards
+const FOR_YOU_MAP: Record<string, { title: string; subtitle: string; emoji: string; color: string; tag: string }[]> = {
+  academic_stress: [
+    { title: 'Exam Stress Toolkit', subtitle: '5 evidence-based strategies', emoji: '📚', color: '#6366F1', tag: 'For You' },
+    { title: 'Study Without Burning Out', subtitle: 'Sustainable study habits', emoji: '🧠', color: '#8B5CF6', tag: 'Trending' },
+  ],
+  anxiety: [
+    { title: 'Managing Anxiety', subtitle: 'Calm your nervous system', emoji: '🌊', color: '#06B6D4', tag: 'For You' },
+    { title: 'Box Breathing Guide', subtitle: '5-minute daily practice', emoji: '💨', color: '#0EA5E9', tag: 'Quick' },
+  ],
+  sadness: [
+    { title: 'Lifting Your Mood', subtitle: 'CBT techniques for low days', emoji: '🌤', color: '#F59E0B', tag: 'For You' },
+    { title: 'Behavioural Activation', subtitle: 'Do more, feel more', emoji: '🚶', color: '#EF4444', tag: 'Evidence-Based' },
+  ],
+  loneliness: [
+    { title: 'Building Connections', subtitle: 'From isolation to belonging', emoji: '🤝', color: '#10B981', tag: 'For You' },
+    { title: 'Connecting on Campus', subtitle: 'Find your community', emoji: '🏫', color: '#34D399', tag: 'Student' },
+  ],
+  relationships: [
+    { title: 'Interpersonal Skills', subtitle: 'Communicate with confidence', emoji: '💬', color: '#EC4899', tag: 'For You' },
+    { title: 'Setting Healthy Boundaries', subtitle: 'Protect your energy', emoji: '🛡', color: '#F43F5E', tag: 'Popular' },
+  ],
+  financial: [
+    { title: 'Financial Stress & Wellbeing', subtitle: 'Mind-body connection', emoji: '💰', color: '#84CC16', tag: 'For You' },
+    { title: 'Student Money Guide', subtitle: 'Budget without anxiety', emoji: '📊', color: '#65A30D', tag: 'Practical' },
+  ],
+  family: [
+    { title: 'Family Pressure & Identity', subtitle: 'Navigate expectations', emoji: '🏠', color: '#F97316', tag: 'For You' },
+    { title: 'Cultural Identity & Wellbeing', subtitle: 'Holding multiple worlds', emoji: '🌍', color: '#EA580C', tag: 'Deep Dive' },
+  ],
+  tracking: [
+    { title: 'Understanding Your Mood', subtitle: 'Read your emotional patterns', emoji: '📈', color: '#7C3AED', tag: 'For You' },
+    { title: 'Journaling for Clarity', subtitle: 'Write to understand yourself', emoji: '📓', color: '#6D28D9', tag: 'Reflective' },
+  ],
+  default: [
+    { title: 'Getting Started with Mindfulness', subtitle: 'Your 5-min daily practice', emoji: '🧘', color: '#14B8A6', tag: 'Start Here' },
+    { title: 'Sleep Better Tonight', subtitle: 'Science-backed sleep hygiene', emoji: '🌙', color: '#6366F1', tag: 'Popular' },
+    { title: 'Self-Compassion 101', subtitle: 'Be kind to yourself', emoji: '💛', color: '#F59E0B', tag: 'For You' },
+  ],
+};
+
 
 export default function ResourcesScreen() {
   const insets = useSafeAreaInsets();
@@ -38,6 +81,7 @@ export default function ResourcesScreen() {
   const [resources, setResources] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
+  const [forYouCards, setForYouCards] = useState<any[]>([]);
 
   const CATEGORIES = ['All', 'Audio', 'Techniques', 'Articles', 'Videos', 'Books'];
 
@@ -57,8 +101,46 @@ export default function ResourcesScreen() {
         setLoading(false);
       }
     };
+
+    const loadForYou = async () => {
+      try {
+        const raw = await AsyncStorage.getItem('onboarding_answers');
+        const answers = raw ? JSON.parse(raw) : {};
+        const goals: string[] = answers['q5'] || [];
+        const cards: any[] = [];
+        const seen = new Set<string>();
+
+        // Collect up to 6 personalized cards based on goals
+        for (const goal of goals) {
+          const mapped = FOR_YOU_MAP[goal] || [];
+          for (const card of mapped) {
+            if (!seen.has(card.title) && cards.length < 6) {
+              seen.add(card.title);
+              cards.push(card);
+            }
+          }
+        }
+
+        // Pad with defaults if fewer than 3
+        if (cards.length < 3) {
+          for (const card of FOR_YOU_MAP.default) {
+            if (!seen.has(card.title) && cards.length < 6) {
+              seen.add(card.title);
+              cards.push(card);
+            }
+          }
+        }
+
+        setForYouCards(cards);
+      } catch (e) {
+        setForYouCards(FOR_YOU_MAP.default);
+      }
+    };
+
     loadData();
+    loadForYou();
   }, []);
+
 
   if (loading || !resources) {
     return (
@@ -69,6 +151,25 @@ export default function ResourcesScreen() {
   }
 
   const { audio = [], articles = [], videos = [], books = [] } = resources;
+
+  // ── For You Card Component ──────────────────────────────────
+  const ForYouCard = ({ card, index }: { card: any; index: number }) => (
+    <Animated.View entering={FadeInUp.delay(80 + index * 60).duration(450)}>
+      <TouchableOpacity
+        activeOpacity={0.82}
+        style={[fyStyles.card, { backgroundColor: card.color + '18', borderColor: card.color + '40' }]}
+        onPress={() => {}}
+      >
+        <Text style={{ fontSize: 36, marginBottom: 10 }}>{card.emoji}</Text>
+        <View style={[fyStyles.tag, { backgroundColor: card.color + '25' }]}>
+          <Sparkles color={card.color} size={10} />
+          <Text style={[fyStyles.tagText, { color: card.color }]}>{card.tag}</Text>
+        </View>
+        <Text style={[fyStyles.cardTitle, { color: theme.colors.text.primary }]} numberOfLines={2}>{card.title}</Text>
+        <Text style={[fyStyles.cardSub, { color: theme.colors.text.secondary }]} numberOfLines={2}>{card.subtitle}</Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
 
   return (
     <View style={styles.container}>
@@ -97,6 +198,30 @@ export default function ResourcesScreen() {
         />
 
         <View style={{ height: 20 }} />
+
+        {/* ── For You Section (MindDoc Discover pattern) ── */}
+        {forYouCards.length > 0 && (
+          <Animated.View entering={FadeInUp.delay(80).duration(600)}>
+            <View style={styles.sectionHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Sparkles color={theme.colors.plum} size={18} />
+                <Text style={styles.sectionTitle}>For You</Text>
+              </View>
+              <TouchableOpacity><Text style={styles.seeAllText}>See all</Text></TouchableOpacity>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 24, gap: 14, paddingBottom: 8 }}
+              snapToInterval={160 + 14}
+              decelerationRate="fast"
+            >
+              {forYouCards.map((card, i) => <ForYouCard key={card.title} card={card} index={i} />)}
+            </ScrollView>
+          </Animated.View>
+        )}
+
+        <View style={{ height: 24 }} />
 
         {/* Featured Section */}
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.featuredContainer}>
@@ -481,4 +606,45 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     marginLeft: 20,
   }
+});
+
+const fyStyles = StyleSheet.create({
+  card: {
+    width: 158,
+    borderRadius: 24,
+    padding: 18,
+    borderWidth: 1.5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  tagText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.4,
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+    marginBottom: 4,
+    lineHeight: 20,
+  },
+  cardSub: {
+    fontSize: 12,
+    fontWeight: '500',
+    lineHeight: 17,
+  },
 });

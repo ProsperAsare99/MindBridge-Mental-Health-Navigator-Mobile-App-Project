@@ -31,6 +31,7 @@ import {
   CheckCircle2,
   TrendingUp,
   Settings as SettingsIcon,
+  PhoneCall,
 } from 'lucide-react-native';
 
 import { AuthContext } from '../../src/context/AuthContext';
@@ -208,6 +209,25 @@ export default function ProfileScreen() {
           <ProfileListItem theme={themeContext} icon={Bell} title="Notifications" color={themeContext.colors.accents.softMint} />
           <ProfileListItem theme={themeContext} icon={Shield} title="Privacy & Security" color={themeContext.colors.accents.slate} isLast />
         </ProfileListGroup>
+
+        {/* Crisis & Support — always pinned, never buried (MindDoc pattern) */}
+        <Animated.View entering={FadeInUp.delay(550).duration(500)} style={[
+          styles.listGroup,
+          {
+            borderWidth: 1.5,
+            borderColor: themeContext.isDark ? 'rgba(248,113,113,0.25)' : 'rgba(239,68,68,0.15)',
+            backgroundColor: themeContext.isDark ? 'rgba(248,113,113,0.07)' : 'rgba(255,241,241,0.9)',
+          }
+        ]}>
+          <ProfileListItem
+            theme={themeContext}
+            icon={PhoneCall}
+            title="Crisis & Mental Health Hotline"
+            color="#EF4444"
+            isLast
+            onPress={() => router.push('/(tabs)/crisis')}
+          />
+        </Animated.View>
 
         <ProfileListGroup delay={600} theme={themeContext}>
           <ProfileListItem theme={themeContext} icon={HelpCircle} title="Help & Support" color={themeContext.colors.text.secondary} />

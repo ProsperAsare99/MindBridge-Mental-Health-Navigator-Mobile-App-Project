@@ -5,11 +5,12 @@ import { View, ActivityIndicator } from 'react-native';
 import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 import { 
   useFonts,
-  Outfit_400Regular,
-  Outfit_600SemiBold,
-  Outfit_700Bold,
-  Outfit_800ExtraBold 
-} from '@expo-google-fonts/outfit';
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+  Poppins_800ExtraBold 
+} from '@expo-google-fonts/poppins';
 import * as SplashScreen from 'expo-splash-screen';
 
 SplashScreen.preventAutoHideAsync();
@@ -21,10 +22,11 @@ const InitialLayout = () => {
   const router = useRouter();
 
   const [fontsLoaded] = useFonts({
-    'Outfit-Regular': Outfit_400Regular,
-    'Outfit-SemiBold': Outfit_600SemiBold,
-    'Outfit-Bold': Outfit_700Bold,
-    'Outfit-ExtraBold': Outfit_800ExtraBold,
+    'Poppins-Regular': Poppins_400Regular,
+    'Poppins-Medium': Poppins_500Medium,
+    'Poppins-SemiBold': Poppins_600SemiBold,
+    'Poppins-Bold': Poppins_700Bold,
+    'Poppins-ExtraBold': Poppins_800ExtraBold,
   });
 
   useEffect(() => {

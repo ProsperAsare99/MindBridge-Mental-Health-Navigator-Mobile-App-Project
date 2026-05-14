@@ -112,42 +112,47 @@ export const borderRadius = {
 
 export const typography = {
   fonts: {
-    header: 'Outfit-Bold',
-    body: 'Outfit-Regular',
-    accent: 'Outfit-SemiBold',
+    header: 'Poppins-Bold',
+    body: 'Poppins-Regular',
+    accent: 'Poppins-SemiBold',
+    medium: 'Poppins-Medium',
   },
   h1: {
     fontSize: 32,
-    fontFamily: 'Outfit-ExtraBold',
+    fontFamily: 'Poppins-ExtraBold',
     letterSpacing: -1,
   },
   h2: {
     fontSize: 24,
-    fontFamily: 'Outfit-Bold',
+    fontFamily: 'Poppins-Bold',
     letterSpacing: -0.5,
   },
   h3: {
     fontSize: 20,
-    fontFamily: 'Outfit-Bold',
+    fontFamily: 'Poppins-Bold',
     letterSpacing: -0.5,
   },
   body: {
     fontSize: 16,
-    fontFamily: 'Outfit-Regular',
+    fontFamily: 'Poppins-Regular',
     lineHeight: 24,
   },
   bodyBold: {
     fontSize: 16,
-    fontFamily: 'Outfit-SemiBold',
+    fontFamily: 'Poppins-SemiBold',
+  },
+  bodyMedium: {
+    fontSize: 16,
+    fontFamily: 'Poppins-Medium',
   },
   caption: {
     fontSize: 13,
-    fontFamily: 'Outfit-Regular',
+    fontFamily: 'Poppins-Regular',
     letterSpacing: 0.2,
   },
   label: {
     fontSize: 12,
-    fontFamily: 'Outfit-Bold',
+    fontFamily: 'Poppins-Bold',
     textTransform: 'uppercase' as const,
     letterSpacing: 1,
   }

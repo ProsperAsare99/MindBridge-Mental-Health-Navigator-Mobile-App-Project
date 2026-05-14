@@ -26,6 +26,7 @@ import Animated, {
 import { Leaf, Sun, CloudRain, Wind, CloudLightning, Flower2, Clock, CircleDashed, Bell, X, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { useRouter } from 'expo-router';
 import api from '../../src/services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
@@ -160,7 +161,9 @@ const getGrowthStage = (count: number) => {
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 export default function GardenScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const themeContext = useTheme();
+  const gStyles = createStyles(themeContext);
   const MOODS = getMoods(themeContext);
 
   // Flow steps: 'question_0' | 'question_1' | 'mood' | 'planted'
@@ -429,7 +432,7 @@ export default function GardenScreen() {
   );
 }
 
-const gStyles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: { flex: 1 },
   scroll: { paddingHorizontal: 0, paddingBottom: 140 },
   historyBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },

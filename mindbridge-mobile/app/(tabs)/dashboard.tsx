@@ -111,7 +111,7 @@ type WidgetProps = {
   icon: any;
   color: string;
   onPress: () => void;
-  size?: 'wide' | 'square' | 'list';
+  size?: 'wide' | 'square' | 'list' | 'fixed';
   delay?: number;
 };
 
@@ -161,8 +161,8 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
     <Animated.View 
       entering={FadeInUp.delay(delay).duration(500)} 
       style={[
-        isWide ? { width: '100%' } : { width: '48%' }, // Use percentage for better responsiveness
-        { marginBottom: 16 }
+        isWide ? { width: '100%' } : (size === 'fixed' ? { width: 140 } : { width: '47.5%' }), 
+        { marginBottom: 12, marginRight: size === 'fixed' ? 16 : 0 }
       ]}
     >
       <Pressable
@@ -301,8 +301,8 @@ export default function DashboardScreen() {
         <Animated.View entering={FadeInUp.delay(100).duration(600)} style={styles.ritualsContainer}>
           <View style={styles.ritualHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Sparkles color={theme.colors.plum} size={18} />
-              <Text style={styles.ritualTitle}>Today's Rituals</Text>
+              <Leaf color={theme.colors.plum} size={18} />
+              <Text style={styles.ritualTitle}>Today's Progress</Text>
             </View>
             <Text style={styles.ritualProgress}>
               {Object.values(rituals).filter(Boolean).length}/3 Complete
@@ -350,15 +350,35 @@ export default function DashboardScreen() {
           />
         </View>
 
-        {/* Core Tools Grid */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Daily Tools</Text>
-          <View style={styles.grid}>
+        <Animated.View entering={FadeInUp.delay(200).duration(800)} style={styles.clarityCard}>
+          <Image 
+            source={require('../../assets/images/clarity.png')} 
+            style={styles.clarityImage} 
+          />
+          <LinearGradient 
+            colors={['transparent', 'rgba(0,0,0,0.6)']} 
+            style={styles.clarityOverlay}
+          />
+          <View style={styles.clarityContent}>
+            <Text style={[styles.clarityTitle, theme.typography.h3]}>Moment of Clarity</Text>
+            <Text style={[styles.clarityQuote, theme.typography.caption]}>"Peace is the result of retraining your mind to process life as it is."</Text>
+          </View>
+        </Animated.View>
+
+        {/* Mindful Tools Horizontal Carousel */}
+        <View style={styles.sectionCompact}>
+          <Text style={styles.sectionTitle}>Mindful Tools</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            contentContainerStyle={styles.horizontalScroll}
+          >
             <AppleWidget
               title="Mood Garden"
-              subtitle={rituals.garden ? "Garden is growing" : "Seed needed today"}
+              subtitle="Cultivate"
               icon={Leaf}
-              color={theme.colors.accents.eucalyptus}
+              color={theme.colors.accents.gentlePeach}
+              size="fixed"
               delay={200}
               onPress={() => router.push('/(tabs)/garden')}
             />
@@ -367,6 +387,7 @@ export default function DashboardScreen() {
               subtitle="Reflect"
               icon={BookOpen}
               color={theme.colors.accents.powderBlue}
+              size="fixed"
               delay={300}
               onPress={() => router.push('/(tabs)/journal')}
             />
@@ -375,23 +396,25 @@ export default function DashboardScreen() {
               subtitle="Check in"
               icon={ClipboardList}
               color={theme.colors.accents.slate}
+              size="fixed"
               delay={400}
               onPress={() => router.push('/(tabs)/assessments')}
             />
             <AppleWidget
               title="Resources"
-              subtitle="Learn"
+              subtitle="Explore"
               icon={Library}
               color={theme.colors.accents.forestGreen}
+              size="fixed"
               delay={500}
               onPress={() => router.push('/(tabs)/resources')}
             />
-          </View>
+          </ScrollView>
         </View>
 
         {/* Support & Community Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Support & More</Text>
+          <Text style={styles.sectionTitle}>Community & Support</Text>
           <View style={styles.listContainer}>
             <AppleWidget
               title="Wellness Journey"
@@ -466,17 +489,13 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginBottom: 32
   },
   dateText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: theme.colors.text.secondary,
-    letterSpacing: 1,
+    ...theme.typography.label,
+    color: theme.colors.text.tertiary,
     marginBottom: 4
   },
   greetingText: {
-    fontSize: 34,
-    fontWeight: '800',
+    ...theme.typography.h1,
     color: theme.colors.text.primary,
-    letterSpacing: -1,
     lineHeight: 40
   },
   profileBtn: {
@@ -544,17 +563,23 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginBottom: 32,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+    ...theme.typography.h3,
     color: theme.colors.text.primary,
     marginBottom: 16,
-    letterSpacing: -0.5
+    paddingHorizontal: 24,
+  },
+  sectionCompact: {
+    marginBottom: 28,
+  },
+  horizontalScroll: {
+    paddingHorizontal: 24,
+    paddingBottom: 8,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 16
+    justifyContent: 'flex-start',
+    gap: 12
   },
   widget: {
     backgroundColor: theme.colors.surface,
@@ -605,6 +630,44 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.text.secondary,
     marginTop: 4,
     lineHeight: 18,
+  },
+  clarityCard: {
+    marginHorizontal: 24,
+    height: 180,
+    borderRadius: 32,
+    overflow: 'hidden',
+    marginBottom: 32,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+  },
+  clarityImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+  clarityOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  clarityContent: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 24,
+  },
+  clarityTitle: {
+    color: '#FFF',
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  clarityQuote: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    fontStyle: 'italic',
   },
   listContainer: {
     backgroundColor: theme.colors.surface,

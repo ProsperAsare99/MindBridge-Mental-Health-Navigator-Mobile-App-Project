@@ -233,7 +233,7 @@ export default function ProfileScreen() {
           <ProfileListItem 
             theme={themeContext} 
             icon={Heart} 
-            title={`${profile?.communicationStyle || 'Gentle'} Style • ${profile?.preferredLanguage || 'English'}`} 
+            title={`${profile?.communicationStyle || 'Gentle'} • ${profile?.preferredLanguage || 'English'}`} 
             color={themeContext.colors.accents.terracotta} 
             isLast 
           />
@@ -340,11 +340,9 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderColor: theme.colors.surface,
   },
   userName: {
-    fontSize: 24,
-    fontWeight: '800',
+    ...theme.typography.h2,
     color: theme.colors.text.primary,
     marginBottom: 4,
-    letterSpacing: -0.5,
   },
   userEmail: {
     fontSize: 15,
@@ -371,8 +369,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 20,
   },
   statsCard: {
-    flex: 1,
-    minWidth: '45%',
+    width: '48%',
     backgroundColor: theme.colors.surface,
     padding: 16,
     borderRadius: 24,

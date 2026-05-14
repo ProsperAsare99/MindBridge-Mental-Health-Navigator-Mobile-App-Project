@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme as useDeviceColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { lightColors, darkColors, spacing, borderRadius } from '../theme/colors';
+import { lightColors, darkColors, spacing, borderRadius, typography } from '../theme/colors';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -12,6 +12,7 @@ interface ThemeContextType {
   colors: typeof lightColors;
   spacing: typeof spacing;
   borderRadius: typeof borderRadius;
+  typography: typeof typography;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -56,6 +57,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     colors,
     spacing,
     borderRadius,
+    typography,
   };
 
   if (!isLoaded) {

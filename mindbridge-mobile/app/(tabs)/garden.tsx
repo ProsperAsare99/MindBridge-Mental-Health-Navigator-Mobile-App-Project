@@ -108,9 +108,9 @@ const MoodCircle = ({ mood, isSelected, onPress, delay }: any) => {
 };
 
 const styles_circle = StyleSheet.create({
-  wrap: { alignItems: 'center', width: (width - 72) / 3 },
-  circle: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
-  label: { fontSize: 12, fontWeight: '600', color: '#888', textAlign: 'center' },
+  wrap: { alignItems: 'center', width: '31%' },
+  circle: { width: 68, height: 68, borderRadius: 34, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  label: { fontSize: 11, fontWeight: '600', color: '#888', textAlign: 'center' },
 });
 
 // ─── Notification modal ──────────────────────────────────────────────────────
@@ -439,7 +439,7 @@ const gStyles = StyleSheet.create({
   moodWrap: { paddingHorizontal: 24, paddingTop: 4 },
   thankYou: { fontSize: 26, fontWeight: '800', textAlign: 'center', marginBottom: 8, letterSpacing: -0.5 },
   moodQuestion: { fontSize: 15, textAlign: 'center', lineHeight: 22, marginBottom: 28 },
-  moodGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, justifyContent: 'center' },
+  moodGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'space-between' },
 
   // Success
   successWrap: { alignItems: 'center', paddingTop: 40, paddingHorizontal: 32 },

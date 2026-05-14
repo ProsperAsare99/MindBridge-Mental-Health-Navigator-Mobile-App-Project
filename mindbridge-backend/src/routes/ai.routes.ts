@@ -4,7 +4,7 @@ import { auth } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-router.get('/context', auth, getOracleContext);
+router.get('/oracle-context', auth, getOracleContext);
 router.post('/chat', auth, chatWithOracle);
 
 export default router;

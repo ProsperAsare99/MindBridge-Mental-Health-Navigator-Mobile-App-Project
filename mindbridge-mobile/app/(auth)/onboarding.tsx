@@ -23,7 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../src/context/ThemeContext';
 import { 
-  ChevronRight, ChevronLeft, ShieldCheck, User, Sparkles, CheckCircle2,
+  ChevronRight, ChevronLeft, ShieldCheck, User, CheckCircle2,
   Info
 } from 'lucide-react-native';
 

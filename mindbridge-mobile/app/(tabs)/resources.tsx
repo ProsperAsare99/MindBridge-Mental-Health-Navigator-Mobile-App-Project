@@ -24,7 +24,6 @@ import {
   PlayCircle,
   Download,
   Search,
-  Sparkles,
 } from 'lucide-react-native';
 import api from '../../src/services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -162,7 +161,7 @@ export default function ResourcesScreen() {
       >
         <Text style={{ fontSize: 36, marginBottom: 10 }}>{card.emoji}</Text>
         <View style={[fyStyles.tag, { backgroundColor: card.color + '25' }]}>
-          <Sparkles color={card.color} size={10} />
+          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: card.color }} />
           <Text style={[fyStyles.tagText, { color: card.color }]}>{card.tag}</Text>
         </View>
         <Text style={[fyStyles.cardTitle, { color: theme.colors.text.primary }]} numberOfLines={2}>{card.title}</Text>
@@ -204,7 +203,7 @@ export default function ResourcesScreen() {
           <Animated.View entering={FadeInUp.delay(80).duration(600)}>
             <View style={styles.sectionHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Sparkles color={theme.colors.plum} size={18} />
+                <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: theme.colors.plum }} />
                 <Text style={styles.sectionTitle}>For You</Text>
               </View>
               <TouchableOpacity><Text style={styles.seeAllText}>See all</Text></TouchableOpacity>

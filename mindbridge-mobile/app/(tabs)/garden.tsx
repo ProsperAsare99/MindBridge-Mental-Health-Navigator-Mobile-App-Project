@@ -28,7 +28,6 @@ import {
   Flower2, 
   CircleDashed, 
   Bell, 
-  Sparkles,
   ChevronRight
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -356,7 +355,7 @@ const StepMood = ({ timeCtx, moods, selected, setSelected, theme, t, router }: a
 
     {['tired', 'anxious', 'sad', 'stressed'].includes(selected || '') && (
       <Animated.View entering={FadeInUp} style={styles.nudge}>
-        <Sparkles color={theme.colors.plum} size={16} />
+        <View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: theme.colors.plum }} />
         <Text style={styles.nudgeText}>{t.garden.supportNudge}</Text>
         <TouchableOpacity onPress={() => router.push('/(tabs)/tools')}>
           <Text style={styles.nudgeLink}>Try Breathing</Text>
@@ -375,7 +374,7 @@ const StepMood = ({ timeCtx, moods, selected, setSelected, theme, t, router }: a
 const StepSuccess = ({ theme, t }: any) => (
   <Animated.View entering={FadeIn.duration(800)} style={styles.successContainer}>
     <View style={styles.successIconWrap}>
-      <Sparkles color={theme.colors.accents.eucalyptus} size={48} />
+      <Flower2 color={theme.colors.accents.eucalyptus} size={48} />
     </View>
     <Text style={styles.successTitle}>{t.garden.successTitle}</Text>
     <Text style={styles.successSubtitle}>{t.garden.successSubtitle}</Text>

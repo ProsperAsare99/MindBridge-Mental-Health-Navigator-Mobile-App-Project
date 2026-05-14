@@ -42,7 +42,7 @@ import {
   Wind,
   ChevronRight
 } from 'lucide-react-native';
-import { translations, Language } from '../../src/utils/translations';
+import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 
 const { width } = Dimensions.get('window');
 
@@ -273,7 +273,7 @@ export default function DashboardScreen() {
     language: 'English' as Language
   });
 
-  const t = translations[userData.language] || translations.English;
+  const t: TranslationSchema = translations[userData.language] || translations.English;
 
   const getGreeting = () => {
     const hour = new Date().getHours();

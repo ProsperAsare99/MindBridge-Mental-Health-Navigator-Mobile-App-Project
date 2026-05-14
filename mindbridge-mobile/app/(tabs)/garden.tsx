@@ -31,7 +31,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { SchedulableTriggerInputTypes } from 'expo-notifications';
 import { LuxuryCard } from '../../src/components/LuxuryCard';
-import { translations, Language } from '../../src/utils/translations';
+import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useContext } from 'react';
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
@@ -169,7 +169,7 @@ export default function GardenScreen() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const { userData: authData } = useContext(AuthContext);
   const preferredLanguage = (authData?.preferredLanguage as Language) || 'English';
-  const t = translations[preferredLanguage] || translations.English;
+  const t: TranslationSchema = translations[preferredLanguage] || translations.English;
   
   const [loading, setLoading] = useState(false);
   const [moodLogs, setMoodLogs] = useState<any[]>([]);

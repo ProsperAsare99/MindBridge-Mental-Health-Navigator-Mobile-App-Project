@@ -12,7 +12,7 @@ import {
   Dimensions,
   StatusBar
 } from 'react-native';
-import { translations, Language } from '../../src/utils/translations';
+import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useContext } from 'react';
 import { useTheme } from '../../src/context/ThemeContext';
@@ -78,7 +78,7 @@ export default function AIGuideScreen() {
   const styles = createStyles(theme);
   const { userData: authData } = useContext(AuthContext);
   const preferredLanguage = (authData?.preferredLanguage as Language) || 'English';
-  const t = translations[preferredLanguage] || translations.English;
+  const t: TranslationSchema = translations[preferredLanguage] || translations.English;
   
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
@@ -233,7 +233,7 @@ export default function AIGuideScreen() {
                     style={styles.crisisBtn}
                     onPress={() => router.push('/(tabs)/crisis')}
                   >
-                    <Text style={styles.crisisBtnText}>{t.goToSupport}</Text>
+                    <Text style={styles.crisisBtnText}>{t.ai.goToSupport}</Text>
                     <ArrowRight color="#FFF" size={16} />
                   </TouchableOpacity>
                 )}

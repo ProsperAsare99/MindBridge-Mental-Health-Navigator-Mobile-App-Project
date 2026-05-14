@@ -23,7 +23,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { Leaf, Sun, CloudRain, Wind, CloudLightning, Flower2, Clock, CircleDashed, Bell, X } from 'lucide-react-native';
+import { Leaf, Sun, CloudRain, Wind, CloudLightning, Flower2, Clock, CircleDashed, Bell, X, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import api from '../../src/services/api';
@@ -329,8 +329,20 @@ export default function GardenScreen() {
       </Text>
       <Text style={[gStyles.moodQuestion, { color: themeContext.colors.text.secondary }]}>
         {timeCtx.prompt}
-        {'\n'}How are you feeling right now?
+        {'\n'}{t.garden.seedQuestion}
       </Text>
+      
+      <Text style={gStyles.takeYourTime}>{t.common.takeYourTime}</Text>
+
+      {['tired', 'anxious', 'sad', 'stressed'].includes(selectedMood || '') && (
+        <Animated.View entering={FadeInUp} style={gStyles.supportNudge}>
+          <Sparkles color={themeContext.colors.plum} size={18} />
+          <Text style={gStyles.supportNudgeText}>{t.garden.supportNudge}</Text>
+          <TouchableOpacity onPress={() => router.push('/breathing')}>
+            <Text style={gStyles.nudgeAction}>Try Breathing</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
 
       <View style={gStyles.moodGrid}>
         {MOODS.map((mood, i) => (
@@ -352,10 +364,10 @@ export default function GardenScreen() {
       <LinearGradient colors={[themeContext.colors.accents.eucalyptus + '20', 'transparent']} style={gStyles.successGlow} />
       <Animated.Text entering={FadeInUp.delay(200).duration(500)} style={{ fontSize: 72 }}>🌱</Animated.Text>
       <Animated.Text entering={FadeInUp.delay(400).duration(500)} style={[gStyles.successTitle, { color: themeContext.colors.text.primary }]}>
-        Seed Planted!
+        {t.garden.successTitle}
       </Animated.Text>
       <Animated.Text entering={FadeInUp.delay(600).duration(500)} style={[gStyles.successSubtitle, { color: themeContext.colors.text.secondary }]}>
-        Your garden is growing beautifully.{'\n'}Take a deep breath — you're doing great.
+        {t.garden.successSubtitle}
       </Animated.Text>
     </Animated.View>
   );
@@ -451,6 +463,12 @@ const gStyles = StyleSheet.create({
   successGlow: { position: 'absolute', width: 280, height: 280, borderRadius: 140, top: 0 },
   successTitle: { fontSize: 30, fontWeight: '800', marginTop: 20, marginBottom: 12, letterSpacing: -0.5 },
   successSubtitle: { fontSize: 16, textAlign: 'center', lineHeight: 26 },
+
+  // UCD Additions
+  takeYourTime: { fontSize: 13, fontWeight: '700', color: theme.colors.plum, textAlign: 'center', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 20, opacity: 0.6 },
+  supportNudge: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.isDark ? 'rgba(123, 97, 255, 0.15)' : 'rgba(123, 97, 255, 0.08)', padding: 16, borderRadius: 20, marginBottom: 24, gap: 12, borderWidth: 1, borderColor: theme.isDark ? 'rgba(123, 97, 255, 0.2)' : 'rgba(123, 97, 255, 0.1)' },
+  supportNudgeText: { flex: 1, fontSize: 14, color: theme.colors.text.primary, fontWeight: '600', lineHeight: 20 },
+  nudgeAction: { fontSize: 14, fontWeight: '800', color: theme.colors.plum, textDecorationLine: 'underline' },
 
   // Footer
   footer: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 24, paddingTop: 18, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(0,0,0,0.06)' },

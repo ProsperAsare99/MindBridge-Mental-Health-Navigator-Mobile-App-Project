@@ -10,7 +10,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
-  StatusBar
+  StatusBar,
+  Alert,
+  Clipboard
 } from 'react-native';
 import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 import { AuthContext } from '../../src/context/AuthContext';
@@ -24,7 +26,8 @@ import {
   Send,
   MoreVertical,
   AlertTriangle,
-  ArrowRight
+  ArrowRight,
+  Info
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
@@ -196,6 +199,12 @@ export default function AIGuideScreen() {
           contentContainerStyle={styles.chatContent}
           showsVerticalScrollIndicator={false}
         >
+          {/* Safety Disclaimer */}
+          <View style={styles.disclaimerBox}>
+            <Info color={theme.colors.plum} size={16} />
+            <Text style={styles.disclaimerText}>{t.ai.disclaimer}</Text>
+          </View>
+
           {messages.map((msg, index) => (
             <Animated.View 
               key={msg.id} 
@@ -210,34 +219,41 @@ export default function AIGuideScreen() {
                   <Bot color={theme.colors.text.onPrimary || '#FFF'} size={16} />
                 </View>
               )}
-              <View style={[
-                styles.messageBubble,
-                msg.isAi ? styles.bubbleAi : styles.bubbleUser,
-                msg.suggestCrisis && styles.bubbleCrisis
-              ]}>
-                {msg.suggestCrisis && (
-                  <View style={styles.crisisHeader}>
-                    <AlertTriangle color="#EF4444" size={16} />
-                    <Text style={styles.crisisHeaderText}>Crisis Support Recommended</Text>
-                  </View>
-                )}
-                <Text style={[
-                  styles.messageText,
-                  msg.isAi ? styles.textAi : styles.textUser,
-                  msg.suggestCrisis && { color: theme.isDark ? '#FFF' : '#000' }
-                ]}>
-                  {msg.text}
-                </Text>
-                {msg.suggestCrisis && (
-                  <TouchableOpacity 
-                    style={styles.crisisBtn}
-                    onPress={() => router.push('/(tabs)/crisis')}
-                  >
-                    <Text style={styles.crisisBtnText}>{t.ai.goToSupport}</Text>
-                    <ArrowRight color="#FFF" size={16} />
-                  </TouchableOpacity>
-                )}
-              </View>
+                <TouchableOpacity 
+                  activeOpacity={0.9}
+                  onLongPress={() => {
+                    Clipboard.setString(msg.text);
+                    Alert.alert('Saved', 'Message copied to clipboard.');
+                  }}
+                  style={[
+                    styles.messageBubble,
+                    msg.isAi ? styles.bubbleAi : styles.bubbleUser,
+                    msg.suggestCrisis && styles.bubbleCrisis
+                  ]}
+                >
+                  {msg.suggestCrisis && (
+                    <View style={styles.crisisHeader}>
+                      <AlertTriangle color="#EF4444" size={16} />
+                      <Text style={styles.crisisHeaderText}>Crisis Support Recommended</Text>
+                    </View>
+                  )}
+                  <Text style={[
+                    styles.messageText,
+                    msg.isAi ? styles.textAi : styles.textUser,
+                    msg.suggestCrisis && { color: theme.isDark ? '#FFF' : '#000' }
+                  ]}>
+                    {msg.text}
+                  </Text>
+                  {msg.suggestCrisis && (
+                    <TouchableOpacity 
+                      style={styles.crisisBtn}
+                      onPress={() => router.push('/(tabs)/crisis')}
+                    >
+                      <Text style={styles.crisisBtnText}>{t.ai.goToSupport}</Text>
+                      <ArrowRight color="#FFF" size={16} />
+                    </TouchableOpacity>
+                  )}
+                </TouchableOpacity>
             </Animated.View>
           ))}
           {isTyping && <TypingIndicator theme={theme} />}
@@ -291,6 +307,26 @@ const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
+  },
+  disclaimerBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.08)',
+    padding: 16,
+    borderRadius: 20,
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.12)',
+  },
+  disclaimerText: {
+    flex: 1,
+    fontSize: 12,
+    color: theme.colors.text.tertiary,
+    marginLeft: 12,
+    lineHeight: 18,
+    fontWeight: '500',
   },
   keyboardView: {
     flex: 1,

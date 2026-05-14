@@ -11,7 +11,10 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
+import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 import { FadeInUp, FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import Reanimated from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
@@ -242,7 +245,12 @@ export default function OnboardingScreen() {
   const [answers, setAnswers] = useState<Record<string, any>>({
     stressors: {}
   });
+  const [showSkipModal, setShowSkipModal] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
   const progressAnim = useRef(new Animated.Value(0)).current;
+
+  const preferredLanguage = (authData?.preferredLanguage as Language) || 'English';
+  const t: TranslationSchema = translations[preferredLanguage] || translations.English;
 
   const step = ONBOARDING_STEPS[currentStepIndex];
 
@@ -267,8 +275,26 @@ export default function OnboardingScreen() {
     if (currentStepIndex < ONBOARDING_STEPS.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
     } else {
-      router.replace('/(tabs)/dashboard');
+      setIsFinishing(true);
+      // Artificial delay to show system status feedback
+      setTimeout(() => {
+        router.replace('/(tabs)/dashboard');
+      }, 2500);
     }
+  };
+
+  const jumpToStep = (index: number) => {
+    setCurrentStepIndex(index);
+  };
+
+  const handleSkipRequest = () => {
+    if (step.required) return;
+    setShowSkipModal(true);
+  };
+
+  const confirmSkip = () => {
+    setShowSkipModal(false);
+    handleNext();
   };
 
   const handleBack = () => {
@@ -447,20 +473,36 @@ export default function OnboardingScreen() {
             <View style={styles.iconCircle}>
               <User color={themeContext.colors.plum} size={40} strokeWidth={1.5} />
             </View>
-            <Text style={styles.title}>{step.title}</Text>
+            <Text style={styles.title}>{t.onboarding.summaryTitle || step.title}</Text>
             <Text style={styles.summaryGreeting}>Hey {name}!</Text>
             
             <View style={styles.summaryBox}>
               <Text style={styles.summaryBoxTitle}>Here's what we learned about you:</Text>
-              <Text style={styles.summaryItem}>• {level} {program} at {uni}</Text>
+              
+              <TouchableOpacity onPress={() => jumpToStep(2)} style={styles.summaryItemRow}>
+                <Text style={styles.summaryItem}>• {level} {program} at {uni}</Text>
+                <Text style={styles.editLabel}>Edit</Text>
+              </TouchableOpacity>
+
               {(answers['q5'] && answers['q5'].length > 0) && (
-                <Text style={styles.summaryItem}>• Working on: {answers['q5'].length} concern(s)</Text>
+                <TouchableOpacity onPress={() => jumpToStep(6)} style={styles.summaryItemRow}>
+                  <Text style={styles.summaryItem}>• Working on: {answers['q5'].length} concern(s)</Text>
+                  <Text style={styles.editLabel}>Edit</Text>
+                </TouchableOpacity>
               )}
+
               {(answers['q7'] && answers['q7'].length > 0) && (
-                <Text style={styles.summaryItem}>• Coping via: {answers['q7'].length} method(s)</Text>
+                <TouchableOpacity onPress={() => jumpToStep(8)} style={styles.summaryItemRow}>
+                  <Text style={styles.summaryItem}>• Coping via: {answers['q7'].length} method(s)</Text>
+                  <Text style={styles.editLabel}>Edit</Text>
+                </TouchableOpacity>
               )}
+
               {goalsLabels ? (
-                <Text style={styles.summaryItem}>• Goals: {goalsLabels}</Text>
+                <TouchableOpacity onPress={() => jumpToStep(11)} style={styles.summaryItemRow}>
+                  <Text style={styles.summaryItem}>• Goals: {goalsLabels}</Text>
+                  <Text style={styles.editLabel}>Edit</Text>
+                </TouchableOpacity>
               ) : null}
             </View>
 
@@ -549,8 +591,8 @@ export default function OnboardingScreen() {
             </TouchableOpacity>
             
             {!step.required && (
-              <TouchableOpacity onPress={handleNext} style={styles.skipBtn}>
-                <Text style={styles.skipText}>Skip</Text>
+              <TouchableOpacity onPress={handleSkipRequest} style={styles.skipBtn}>
+                <Text style={styles.skipText}>{t.common.skip}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -560,11 +602,37 @@ export default function OnboardingScreen() {
             style={[styles.nextBtn, !isNextEnabled && styles.nextBtnDisabled]}
             disabled={!isNextEnabled}
           >
-            <Text style={styles.nextBtnText}>Next</Text>
+            <Text style={styles.nextBtnText}>{t.common.next}</Text>
             <ChevronRight color={themeContext.colors.text.onPrimary || '#FFF'} size={20} />
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Skip Confirmation Modal */}
+      <Modal visible={showSkipModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <Reanimated.View entering={FadeInUp} style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Wait a moment</Text>
+            <Text style={styles.modalText}>{t.onboarding.skipConfirm}</Text>
+            <TouchableOpacity style={styles.modalPrimaryBtn} onPress={confirmSkip}>
+              <Text style={styles.modalPrimaryBtnText}>{t.onboarding.skipConfirmAction}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalSecondaryBtn} onPress={() => setShowSkipModal(false)}>
+              <Text style={styles.modalSecondaryBtnText}>{t.onboarding.skipConfirmCancel}</Text>
+            </TouchableOpacity>
+          </Reanimated.View>
+        </View>
+      </Modal>
+
+      {/* Finishing / Transition Modal */}
+      <Modal visible={isFinishing} transparent animationType="fade">
+        <View style={[styles.modalOverlay, { backgroundColor: themeContext.colors.background }]}>
+          <Reanimated.View entering={FadeInUp} style={{ alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={themeContext.colors.plum} />
+            <Text style={[styles.modalTitle, { marginTop: 24 }]}>{t.common.loadingSafeSpace}</Text>
+          </Reanimated.View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -623,8 +691,20 @@ const createStyles = (theme: any) => StyleSheet.create({
   summaryGreeting: { fontSize: 22, fontWeight: '700', color: theme.colors.text.primary, marginBottom: 24 },
   summaryBox: { backgroundColor: theme.colors.surface, padding: 24, borderRadius: 24, width: '100%', marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.2 : 0.04, shadowRadius: 12, elevation: 3, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' },
   summaryBoxTitle: { fontSize: 16, fontWeight: '700', color: theme.colors.plum, marginBottom: 12 },
-  summaryItem: { fontSize: 15, color: theme.colors.text.secondary, marginBottom: 8, lineHeight: 22 },
+  summaryItem: { flex: 1, fontSize: 15, color: theme.colors.text.secondary, marginBottom: 8, lineHeight: 22 },
+  summaryItemRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  editLabel: { fontSize: 13, fontWeight: '700', color: theme.colors.plum, marginLeft: 10, backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.1)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
   summaryFooterBox: { width: '100%', paddingHorizontal: 10, marginTop: 10 },
+
+  // Modals
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  modalContent: { backgroundColor: theme.colors.surface, borderRadius: 32, padding: 32, width: '100%', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 20, elevation: 10 },
+  modalTitle: { fontSize: 22, fontWeight: '800', color: theme.colors.text.primary, marginBottom: 12 },
+  modalText: { fontSize: 16, color: theme.colors.text.secondary, textAlign: 'center', lineHeight: 24, marginBottom: 32 },
+  modalPrimaryBtn: { backgroundColor: theme.colors.plum, paddingVertical: 16, paddingHorizontal: 32, borderRadius: 20, width: '100%', alignItems: 'center' },
+  modalPrimaryBtnText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
+  modalSecondaryBtn: { paddingVertical: 16, width: '100%', alignItems: 'center', marginTop: 8 },
+  modalSecondaryBtnText: { color: theme.colors.text.tertiary, fontSize: 15, fontWeight: '600' },
 
   // Footer
   footer: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, justifyContent: 'space-between', backgroundColor: theme.colors.surface, borderTopWidth: 1, borderTopColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: theme.isDark ? 0.3 : 0.05, shadowRadius: 12, elevation: 8, zIndex: 100 },

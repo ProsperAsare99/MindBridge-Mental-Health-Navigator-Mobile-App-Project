@@ -17,7 +17,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { useTheme } from '../../src/context/ThemeContext';
-import { Ghost } from 'lucide-react-native';
+import { Ghost, ShieldCheck } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -230,6 +230,12 @@ export default function WelcomeScreen() {
               <Text style={styles.signInAccent}>Sign In</Text>
             </Text>
           </TouchableOpacity>
+
+          {/* Trust Badge */}
+          <View style={styles.trustRow}>
+            <ShieldCheck color={theme.colors.text.tertiary} size={14} />
+            <Text style={styles.trustText}>Secured with hospital-grade encryption & confidentiality</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -280,4 +286,18 @@ const createStyles = (theme: any) => StyleSheet.create({
   signInRow: { height: 46, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   signInText: { fontSize: 15, color: theme.colors.text.primary, fontWeight: '600' },
   signInAccent: { color: theme.colors.plum, fontWeight: '800' },
+  trustRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 16,
+    opacity: 0.7
+  },
+  trustText: {
+    fontSize: 11,
+    color: theme.colors.text.tertiary,
+    fontWeight: '600',
+    letterSpacing: 0.1
+  }
 });

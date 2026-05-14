@@ -310,17 +310,18 @@ export default function DashboardScreen() {
           <QuoteSlideshow />
         </View>
 
-        {/* Today's Rituals — Habitat Pattern */}
+        {/* Daily Nurture — Habitat Pattern */}
         <Animated.View entering={FadeInUp.delay(100).duration(600)} style={styles.ritualsContainer}>
           <View style={styles.ritualHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Leaf color={theme.colors.plum} size={18} />
-              <Text style={styles.ritualTitle}>{t.dashboard.ritualsTitle}</Text>
+              <Text style={styles.ritualTitle}>{t.dashboard.nurtureTitle}</Text>
             </View>
             <Text style={styles.ritualProgress}>
               {Object.values(rituals).filter(Boolean).length}/3 Complete
             </Text>
           </View>
+          <Text style={styles.ritualSubtitle}>Gentle steps for your peace of mind</Text>
           
           <View style={styles.ritualRow}>
             <RitualItem 
@@ -747,7 +748,14 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 17,
     fontWeight: '800',
     color: theme.colors.text.primary,
-    letterSpacing: -0.3,
+    letterSpacing: -0.5,
+  },
+  ritualSubtitle: {
+    fontSize: 13,
+    color: theme.colors.text.tertiary,
+    marginTop: -16,
+    marginBottom: 20,
+    fontWeight: '500',
   },
   ritualProgress: {
     fontSize: 12,

@@ -16,6 +16,7 @@ export interface TranslationSchema {
     skipConfirmCancel: string;
     privacyTitle: string;
     privacyPoints: string[];
+    summaryTitle: string;
   };
   dashboard: {
     greetingMorning: string;
@@ -66,6 +67,7 @@ export const translations: Record<Language, TranslationSchema> = {
         'Delete your account anytime',
         'No data shared without permission'
       ],
+      summaryTitle: 'Your Mindful Summary',
     },
     dashboard: {
       greetingMorning: 'Good Morning',
@@ -114,6 +116,7 @@ export const translations: Record<Language, TranslationSchema> = {
         'Bere biara wotumi popa wo akawnt',
         'Yɛmfa w’asɛm mma obiara gye sɛ woma yɛn kwan'
       ],
+      summaryTitle: 'Wo Dwumadi ho Ntsetsee',
     },
     dashboard: {
       greetingMorning: 'Maakye',
@@ -162,6 +165,7 @@ export const translations: Record<Language, TranslationSchema> = {
         'Supprimez votre compte à tout moment',
         'Aucune donnée partagée sans permission'
       ],
+      summaryTitle: 'Votre résumé de pleine conscience',
     },
     dashboard: {
       greetingMorning: 'Bon matin',
@@ -210,6 +214,7 @@ export const translations: Record<Language, TranslationSchema> = {
         'Kpa o-account be fɛɛ be',
         'Wɔmbalamɛ obiara ni wɔheee gbɛ'
       ],
+      summaryTitle: 'O-jwɛŋmɔ he mlitsɔɔmɔ',
     },
     dashboard: {
       greetingMorning: 'Leebi kpakpa',
@@ -258,6 +263,7 @@ export const translations: Record<Language, TranslationSchema> = {
         'Nàte ŋu atsɔ wò akawnt ko ɣesiaɣi',
         'Míemana nya aɖeke obiara o negbe ɖe nèma mɔ mí'
       ],
+      summaryTitle: 'Wò Nunyanya ƒe Nuvidi',
     },
     dashboard: {
       greetingMorning: 'Ŋdi na wò',
@@ -306,6 +312,7 @@ export const translations: Record<Language, TranslationSchema> = {
         'Share asusunku kowane lokaci',
         'Babu raba bayanai ba tare da izini ba'
       ],
+      summaryTitle: 'Takaitaccen Tunani',
     },
     dashboard: {
       greetingMorning: 'Ina kwana',

@@ -158,7 +158,13 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
   const isWide = size === 'wide';
 
   return (
-    <Animated.View entering={FadeInUp.delay(delay).duration(500)} style={isWide ? { width: '100%' } : { width: (width - 48 - 16) / 2 }}>
+    <Animated.View 
+      entering={FadeInUp.delay(delay).duration(500)} 
+      style={[
+        isWide ? { width: '100%' } : { width: '48%' }, // Use percentage for better responsiveness
+        { marginBottom: 16 }
+      ]}
+    >
       <Pressable
         onPress={onPress}
         onPressIn={handlePressIn}
@@ -169,7 +175,7 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
 
           <View style={isWide ? styles.wideContent : styles.squareContent}>
             <View style={[styles.widgetIconWrap, { backgroundColor: color }]}>
-              <Icon color={theme.colors.text.onPrimary || '#FFF'} size={isWide ? 24 : 28} />
+              <Icon color={'#FFF'} size={isWide ? 24 : 28} />
             </View>
             <View style={isWide ? styles.wideTextWrap : {}}>
               <Text style={[styles.widgetTitle, isWide && { fontSize: 18 }]}>{title}</Text>
@@ -225,30 +231,29 @@ export default function DashboardScreen() {
       try {
         const todayStr = new Date().toDateString();
         
-        // 1. Check Mood Garden
-        const moodRes = await api.get('/mood');
-        const gardenDone = moodRes.data.some((log: any) => new Date(log.createdAt).toDateString() === todayStr);
+        // Use the unified oracle-context endpoint for better performance
+        const res = await api.get('/ai/oracle-context');
+        const { latestMood, recentJournal } = res.data;
         
-        // 2. Check Journal
-        const journalRes = await api.get('/journal');
-        const journalDone = journalRes.data.some((log: any) => new Date(log.createdAt).toDateString() === todayStr);
+        const gardenDone = latestMood && new Date(latestMood.createdAt).toDateString() === todayStr;
+        const journalDone = recentJournal && recentJournal.some((log: any) => new Date(log.createdAt).toDateString() === todayStr);
         
         // 3. Check Breathing (Local Storage)
         const breathingDone = await AsyncStorage.getItem(`breathing_${todayStr}`) === 'true';
         
-          setRituals({
-            garden: gardenDone,
-            journal: journalDone,
-            breathing: breathingDone
-          });
-        } catch (error) {
+        setRituals({
+          garden: !!gardenDone,
+          journal: !!journalDone,
+          breathing: breathingDone
+        });
+      } catch (error) {
         console.error('Error checking today status:', error);
       }
     };
     checkTodayStatus();
     
     // Refresh on focus (simplified for now)
-    const interval = setInterval(checkTodayStatus, 5000);
+    const interval = setInterval(checkTodayStatus, 10000); // 10s is enough
     return () => clearInterval(interval);
   }, []);
 

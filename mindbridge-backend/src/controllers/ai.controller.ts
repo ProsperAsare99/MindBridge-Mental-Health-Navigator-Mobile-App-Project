@@ -90,7 +90,7 @@ export const chatWithOracle = async (req: Request, res: Response) => {
       latestMood,
       recentJournal,
       onboarding
-    });
+    }, userId);
 
     res.json({ response: aiResponse });
   } catch (error) {

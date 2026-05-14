@@ -21,15 +21,24 @@ model User {
   assessmentResults AssessmentResult[]
 }
 model Onboarding {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  primaryGoals    String[] 
-  currentMood     String
-  sleepPattern    String
-  stressLevel     Int      // 1-10
-  crisisHistory   Boolean  @default(false)
-  completedAt     DateTime @default(now())
+  id                    String   @id @default(uuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName             String?
+  university            String?
+  program               String?
+  level                 String?
+  preferredLanguage     String?  // e.g., "Twi", "Ewe", "Ga", "English"
+  communicationStyle    String?  // e.g., "Gentle", "Direct", "Analytical"
+  spiritualBackground   String?  // e.g., "Christian", "Muslim", "Traditional", "None"
+  interests             String[] // e.g., ["Music", "Sports", "Art"]
+  currentAcademicSeason String?  // e.g., "Exams", "Thesis", "Holiday"
+  primaryGoals          String[] 
+  currentMood           String
+  sleepPattern          String
+  stressLevel           Int      // 1-10
+  crisisHistory         Boolean  @default(false)
+  completedAt           DateTime @default(now())
 }
 model MoodLog {
   id        String   @id @default(uuid())

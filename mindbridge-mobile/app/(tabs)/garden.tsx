@@ -22,12 +22,12 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { 
-  Leaf, 
-  Sun, 
-  Flower2, 
-  CircleDashed, 
-  Bell, 
+import {
+  Leaf,
+  Sun,
+  Flower2,
+  CircleDashed,
+  Bell,
   ChevronRight
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -85,7 +85,7 @@ const MoodCircle = ({ mood, isSelected, onPress, delay, theme }: any) => {
         onPressOut={() => { scale.value = withSpring(isSelected ? 1.05 : 1, springConfig); }}
         style={({ pressed }) => [
           styles.moodCircle,
-          { 
+          {
             backgroundColor: isSelected ? mood.color : (theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)'),
             borderColor: isSelected ? mood.color : (theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'),
             borderWidth: 1,
@@ -95,7 +95,7 @@ const MoodCircle = ({ mood, isSelected, onPress, delay, theme }: any) => {
       >
         <Text style={{ fontSize: 32 }}>{mood.emoji}</Text>
       </Pressable>
-      <Text 
+      <Text
         style={[styles.moodLabel, { fontFamily: theme.typography.fonts.body }, isSelected && { color: theme.colors.text.primary, fontWeight: '700' }]}
         numberOfLines={1}
       >
@@ -134,7 +134,7 @@ const NotificationModal = ({ visible, onAllow, onLater, theme }: any) => (
           Cultivate Your Peace 🌱
         </Text>
         <Text style={{ fontSize: 15, fontFamily: theme.typography.fonts.body, color: theme.colors.text.secondary, textAlign: 'center', lineHeight: 22, marginBottom: 32, paddingHorizontal: 20 }}>
-          Allow gentle reminders to help you plant your mood seeds and track your wellness journey.
+          Allow Gentle reminders to help you plant your Mood seeds and Track your Wellness Journey.
         </Text>
         <TouchableOpacity
           onPress={onAllow}
@@ -158,7 +158,7 @@ export default function GardenScreen() {
   const theme = useTheme();
   const { userData: authData } = useContext(AuthContext) as any;
   const t: TranslationSchema = translations[authData?.preferredLanguage as Language] || translations.English;
-  
+
   const [step, setStep] = useState<'question_0' | 'question_1' | 'mood' | 'planted'>('question_0');
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
@@ -172,7 +172,7 @@ export default function GardenScreen() {
     try {
       const res = await api.get('/ai/oracle-context');
       setMoodLogs(res.data.recentJournal || []);
-    } catch (e) {}
+    } catch (e) { }
   };
 
   useEffect(() => { fetchLogs(); }, []);
@@ -218,12 +218,12 @@ export default function GardenScreen() {
       const times = [{ hour: 8, min: 0 }, { hour: 13, min: 0 }, { hour: 20, min: 0 }];
       for (const t of times) {
         await Notifications.scheduleNotificationAsync({
-          content: { title: '🌱 Time to plant your seed', body: 'How are you feeling right now?', sound: true },
-          trigger: { 
+          content: { title: '🌱 Time to Plant your seed', body: 'How are you feeling right now?', sound: true },
+          trigger: {
             type: SchedulableTriggerInputTypes.CALENDAR,
-            hour: t.hour, 
-            minute: t.min, 
-            repeats: true 
+            hour: t.hour,
+            minute: t.min,
+            repeats: true
           },
         });
       }
@@ -275,18 +275,18 @@ export default function GardenScreen() {
         <View style={styles.cardContainer}>
           <BlurView intensity={theme.isDark ? 30 : 80} tint={theme.isDark ? 'dark' : 'light'} style={styles.glassCard}>
             {step === 'question_0' || step === 'question_1' ? (
-              <StepQuestion 
-                q={CHECK_IN_QUESTIONS[step === 'question_0' ? 0 : 1]} 
-                onAnswer={handleAnswer} 
+              <StepQuestion
+                q={CHECK_IN_QUESTIONS[step === 'question_0' ? 0 : 1]}
+                onAnswer={handleAnswer}
                 stepIndex={step === 'question_0' ? 0 : 1}
                 theme={theme}
               />
             ) : step === 'mood' ? (
-              <StepMood 
-                timeCtx={timeCtx} 
-                moods={MOODS} 
-                selected={selectedMood} 
-                setSelected={setSelectedMood} 
+              <StepMood
+                timeCtx={timeCtx}
+                moods={MOODS}
+                selected={selectedMood}
+                setSelected={setSelectedMood}
                 theme={theme}
                 t={t}
                 router={router}
@@ -299,8 +299,8 @@ export default function GardenScreen() {
 
         {step === 'mood' && (
           <Animated.View entering={FadeInUp.delay(500)} style={styles.footer}>
-            <TouchableOpacity 
-              style={[styles.plantBtn, { backgroundColor: theme.colors.plum }, !selectedMood && { opacity: 0.5 }]} 
+            <TouchableOpacity
+              style={[styles.plantBtn, { backgroundColor: theme.colors.plum }, !selectedMood && { opacity: 0.5 }]}
               disabled={!selectedMood || loading}
               onPress={handlePlant}
             >

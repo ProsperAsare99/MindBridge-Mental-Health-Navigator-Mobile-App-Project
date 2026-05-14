@@ -166,7 +166,6 @@ export default function GardenScreen() {
   const gStyles = createStyles(themeContext);
   const MOODS = getMoods(themeContext);
 
-  // Flow steps: 'question_0' | 'question_1' | 'mood' | 'planted'
   const [step, setStep] = useState<'question_0' | 'question_1' | 'mood' | 'planted'>('question_0');
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
@@ -182,10 +181,8 @@ export default function GardenScreen() {
 
   const fetchLogs = async () => {
     try {
-      // Use the unified oracle-context endpoint
       const res = await api.get('/ai/oracle-context');
-      setMoodLogs(res.data.recentJournal || []); // Simplified for growth tracking
-      // Note: We might want a dedicated endpoint for ALL mood logs if we want a full history
+      setMoodLogs(res.data.recentJournal || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -197,14 +194,12 @@ export default function GardenScreen() {
 
   const growth = getGrowthStage(moodLogs.length);
 
-  // ── Binary question answer ──
   const handleAnswer = (key: string, value: boolean) => {
     setAnswers(prev => ({ ...prev, [key]: value }));
     if (step === 'question_0') setStep('question_1');
     else setStep('mood');
   };
 
-  // ── Plant seed ──
   const handlePlant = async () => {
     if (!selectedMood) return;
     const moodData = MOODS.find(m => m.id === selectedMood)!;
@@ -219,12 +214,14 @@ export default function GardenScreen() {
       setStep('planted');
       fetchLogs();
 
-      // Show notification modal only on first seed ever
       const hasAsked = await AsyncStorage.getItem('notif_asked');
       if (!hasAsked) setShowNotifModal(true);
 
-      // Auto-reset after 5s
-      setTimeout(() => { setStep('question_0'); setSelectedMood(null); setAnswers({}); }, 5000);
+      setTimeout(() => { 
+        setStep('question_0'); 
+        setSelectedMood(null); 
+        setAnswers({}); 
+      }, 6000);
     } catch (e) {
       Alert.alert('Connection Issue', 'We couldn\'t plant your seed. Please try again.');
     } finally {
@@ -232,13 +229,11 @@ export default function GardenScreen() {
     }
   };
 
-  // ── Notification permission ──
   const handleAllowNotifications = async () => {
     setShowNotifModal(false);
     await AsyncStorage.setItem('notif_asked', 'true');
     const { status } = await Notifications.requestPermissionsAsync();
     if (status === 'granted') {
-      // Schedule morning, afternoon, evening reminders
       const times = [{ hour: 8, min: 0 }, { hour: 13, min: 0 }, { hour: 20, min: 0 }];
       for (const t of times) {
         await Notifications.scheduleNotificationAsync({
@@ -259,168 +254,71 @@ export default function GardenScreen() {
     await AsyncStorage.setItem('notif_asked', 'true');
   };
 
-  // ── Growth visual ──
-  const GrowthVisual = () => (
-    <Animated.View entering={FadeIn.duration(800)} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
-      <LuxuryCard variant="glass" padding="none">
-        <View style={gStyles.growthContent}>
-          <View style={[gStyles.growthIconWrap, { backgroundColor: growth.color + '20' }]}>
-            <growth.icon color={growth.color} size={44} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[gStyles.growthLabel, { color: themeContext.colors.text.primary }]}>{growth.label}</Text>
-            <Text style={[gStyles.growthDesc, { color: themeContext.colors.text.secondary }]}>
-              {moodLogs.length} seeds planted.{' '}
-              {moodLogs.length < 20 ? `${20 - moodLogs.length} until Ancient Tree!` : 'Your garden is legendary.'}
-            </Text>
+  const GrowthHeader = () => (
+    <Animated.View entering={FadeIn.duration(1000)} style={gStyles.growthHeader}>
+      <BlurView intensity={themeContext.isDark ? 20 : 40} tint={themeContext.isDark ? 'dark' : 'light'} style={gStyles.growthGlass}>
+        <View style={[gStyles.growthIconWrap, { backgroundColor: growth.color + '20' }]}>
+          <growth.icon color={growth.color} size={32} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={gStyles.growthLabel}>{growth.label}</Text>
+          <View style={gStyles.progressBg}>
+            <View style={[gStyles.progressFill, { width: `${Math.min((moodLogs.length / 20) * 100, 100)}%`, backgroundColor: growth.color }]} />
           </View>
         </View>
-        <View style={[gStyles.progressBg, { backgroundColor: themeContext.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
-          <View style={[gStyles.progressFill, { width: `${Math.min((moodLogs.length / 20) * 100, 100)}%`, backgroundColor: growth.color }]} />
+        <View style={gStyles.seedCount}>
+          <Text style={gStyles.seedCountText}>{moodLogs.length}</Text>
+          <Leaf color={themeContext.colors.text.tertiary} size={12} />
         </View>
-      </LuxuryCard>
-    </Animated.View>
-  );
-
-  // ── Binary question screen ──
-  const renderQuestion = (qIndex: 0 | 1) => {
-    const q = CHECK_IN_QUESTIONS[qIndex];
-    return (
-      <Animated.View key={step} entering={FadeInRight.duration(350)} style={gStyles.questionWrap}>
-        {/* Dot pagination */}
-        <View style={gStyles.dotRow}>
-          {[0, 1, 2].map(i => (
-            <View key={i} style={[gStyles.dot, { backgroundColor: i <= qIndex ? themeContext.colors.plum : (themeContext.isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)') }]} />
-          ))}
-        </View>
-
-        <View style={gStyles.questionCircle}>
-          <Text style={{ fontSize: 52 }}>{q.emoji}</Text>
-        </View>
-        <Text style={[gStyles.questionText, { color: themeContext.colors.text.primary }]}>{q.question}</Text>
-
-        <View style={gStyles.binaryRow}>
-          <TouchableOpacity
-            style={[gStyles.binaryBtn, { backgroundColor: themeContext.colors.surface, borderColor: themeContext.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]}
-            onPress={() => handleAnswer(q.key, false)}
-          >
-            <Text style={[gStyles.binaryBtnText, { color: themeContext.colors.text.primary }]}>No</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[gStyles.binaryBtn, { backgroundColor: themeContext.colors.plum }]}
-            onPress={() => handleAnswer(q.key, true)}
-          >
-            <Text style={[gStyles.binaryBtnText, { color: '#FFF' }]}>Yes</Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-    );
-  };
-
-  // ── Mood selector screen ──
-  const renderMoodSelector = () => (
-    <Animated.View key="mood" entering={FadeInRight.duration(350)} style={gStyles.moodWrap}>
-      {/* Dot pagination — step 3 active */}
-      <View style={gStyles.dotRow}>
-        {[0, 1, 2].map(i => (
-          <View key={i} style={[gStyles.dot, { backgroundColor: themeContext.colors.plum }]} />
-        ))}
-      </View>
-
-      <Text style={[gStyles.thankYou, { color: themeContext.colors.text.primary }]}>
-        Thank you for sharing! 🙏
-      </Text>
-      <Text style={[gStyles.moodQuestion, { color: themeContext.colors.text.secondary }]}>
-        {timeCtx.prompt}
-        {'\n'}{t.garden.seedQuestion}
-      </Text>
-      
-      <Text style={gStyles.takeYourTime}>{t.common.takeYourTime}</Text>
-
-      {['tired', 'anxious', 'sad', 'stressed'].includes(selectedMood || '') && (
-        <Animated.View entering={FadeInUp} style={gStyles.supportNudge}>
-          <Sparkles color={themeContext.colors.plum} size={18} />
-          <Text style={gStyles.supportNudgeText}>{t.garden.supportNudge}</Text>
-          <TouchableOpacity onPress={() => router.push('/breathing')}>
-            <Text style={gStyles.nudgeAction}>Try Breathing</Text>
-          </TouchableOpacity>
-        </Animated.View>
-      )}
-
-      <View style={gStyles.moodGrid}>
-        {MOODS.map((mood, i) => (
-          <MoodCircle
-            key={mood.id}
-            mood={mood}
-            isSelected={selectedMood === mood.id}
-            onPress={() => setSelectedMood(mood.id)}
-            delay={i * 50}
-          />
-        ))}
-      </View>
-    </Animated.View>
-  );
-
-  // ── Success state ──
-  const renderSuccess = () => (
-    <Animated.View entering={FadeIn.duration(700)} style={gStyles.successWrap}>
-      <LinearGradient colors={[themeContext.colors.accents.eucalyptus + '20', 'transparent']} style={gStyles.successGlow} />
-      <Animated.Text entering={FadeInUp.delay(200).duration(500)} style={{ fontSize: 72 }}>🌱</Animated.Text>
-      <Animated.Text entering={FadeInUp.delay(400).duration(500)} style={[gStyles.successTitle, { color: themeContext.colors.text.primary }]}>
-        {t.garden.successTitle}
-      </Animated.Text>
-      <Animated.Text entering={FadeInUp.delay(600).duration(500)} style={[gStyles.successSubtitle, { color: themeContext.colors.text.secondary }]}>
-        {t.garden.successSubtitle}
-      </Animated.Text>
+      </BlurView>
     </Animated.View>
   );
 
   return (
-    <View style={[gStyles.container, { backgroundColor: themeContext.colors.backgroundSecondary }]}>
+    <View style={[gStyles.container, { backgroundColor: themeContext.colors.background }]}>
       <StatusBar barStyle={themeContext.isDark ? 'light-content' : 'dark-content'} />
-      <LinearGradient
-        colors={themeContext.isDark
-          ? ['rgba(123, 97, 255, 0.15)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
-          : ['rgba(123, 97, 255, 0.12)', themeContext.colors.background, themeContext.colors.backgroundSecondary]}
-        locations={[0, 0.3, 1]}
-        style={StyleSheet.absoluteFillObject}
-      />
+      
+      {/* Background Organic Elements */}
+      <View style={StyleSheet.absoluteFillObject}>
+        <LinearGradient
+          colors={themeContext.isDark
+            ? ['#1A1A1A', '#0D0D0D']
+            : ['#FDFCFB', '#E2D1C3']}
+          style={StyleSheet.absoluteFillObject}
+        />
+        <Animated.View entering={FadeIn.delay(300)} style={[gStyles.blob, { top: -100, right: -100, backgroundColor: themeContext.colors.plum + '10' }]} />
+        <Animated.View entering={FadeIn.delay(600)} style={[gStyles.blob, { bottom: -150, left: -150, backgroundColor: themeContext.colors.accents.softMint + '15' }]} />
+      </View>
 
-      <ScrollView contentContainerStyle={[gStyles.scroll, { paddingTop: insets.top + 20 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[gStyles.scroll, { paddingTop: insets.top }]} showsVerticalScrollIndicator={false}>
         <ScreenHeader
           title={t.garden.title}
           subtitle={t.garden.subtitle}
-          rightAction={
-            <TouchableOpacity style={gStyles.historyBtn} onPress={() => Alert.alert('Coming Soon', 'Garden history arrives in the next update!')}>
-              <Clock color={themeContext.colors.plum} size={24} />
-            </TouchableOpacity>
-          }
         />
 
-        {step !== 'planted' && <GrowthVisual />}
+        <GrowthHeader />
 
-        {step === 'question_0' && renderQuestion(0)}
-        {step === 'question_1' && renderQuestion(1)}
-        {step === 'mood' && renderMoodSelector()}
-        {step === 'planted' && renderSuccess()}
+        <View style={gStyles.mainCardWrap}>
+          <BlurView intensity={themeContext.isDark ? 40 : 80} tint={themeContext.isDark ? 'dark' : 'light'} style={gStyles.mainGlassCard}>
+            {step === 'question_0' && renderQuestion(0)}
+            {step === 'question_1' && renderQuestion(1)}
+            {step === 'mood' && renderMoodSelector()}
+            {step === 'planted' && renderSuccess()}
+          </BlurView>
+        </View>
+
+        {step === 'mood' && (
+          <Animated.View entering={FadeInUp.delay(600)} style={gStyles.actionFooter}>
+            <TouchableOpacity
+              style={[gStyles.plantBtn, { backgroundColor: themeContext.colors.plum }, (!selectedMood || loading) && { opacity: 0.5 }]}
+              disabled={!selectedMood || loading}
+              onPress={handlePlant}
+            >
+              {loading ? <ActivityIndicator color="#FFF" /> : <Text style={gStyles.plantBtnText}>Nurture My Peace 🌱</Text>}
+            </TouchableOpacity>
+          </Animated.View>
+        )}
       </ScrollView>
-
-      {/* Plant Seed CTA */}
-      {step === 'mood' && (
-        <Animated.View entering={FadeInUp.delay(600).duration(600)} style={[gStyles.footer, { paddingBottom: insets.bottom + 20, backgroundColor: themeContext.colors.surface }]}>
-          <TouchableOpacity
-            style={[gStyles.plantBtn, { backgroundColor: themeContext.colors.plum }, (!selectedMood || loading) && gStyles.plantBtnDisabled]}
-            disabled={!selectedMood || loading}
-            onPress={handlePlant}
-            activeOpacity={0.85}
-          >
-            {loading
-              ? <ActivityIndicator color="#FFF" />
-              : <Text style={gStyles.plantBtnText}>Plant My Seed 🌱</Text>
-            }
-          </TouchableOpacity>
-        </Animated.View>
-      )}
 
       <NotificationModal
         visible={showNotifModal}
@@ -430,52 +328,122 @@ export default function GardenScreen() {
       />
     </View>
   );
+
+  function renderQuestion(qIndex: 0 | 1) {
+    const q = CHECK_IN_QUESTIONS[qIndex];
+    return (
+      <Animated.View key={`q-${qIndex}`} entering={FadeInRight.springify()} style={gStyles.stepContent}>
+        <View style={gStyles.pagination}>
+          {[0, 1, 2].map(i => (
+            <View key={i} style={[gStyles.paginationDot, i <= qIndex && { backgroundColor: themeContext.colors.plum, width: 24 }]} />
+          ))}
+        </View>
+        <Text style={gStyles.stepEmoji}>{q.emoji}</Text>
+        <Text style={gStyles.stepTitle}>{q.question}</Text>
+        <View style={gStyles.choiceRow}>
+          <TouchableOpacity style={gStyles.choiceBtn} onPress={() => handleAnswer(q.key, false)}>
+            <Text style={gStyles.choiceBtnText}>No</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[gStyles.choiceBtn, { backgroundColor: themeContext.colors.plum }]} onPress={() => handleAnswer(q.key, true)}>
+            <Text style={[gStyles.choiceBtnText, { color: '#FFF' }]}>Yes</Text>
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+    );
+  }
+
+  function renderMoodSelector() {
+    return (
+      <Animated.View key="mood-step" entering={FadeInRight.springify()} style={gStyles.stepContent}>
+        <View style={gStyles.pagination}>
+          {[0, 1, 2].map(i => (
+            <View key={i} style={[gStyles.paginationDot, { backgroundColor: themeContext.colors.plum, width: 24 }]} />
+          ))}
+        </View>
+        <Text style={gStyles.moodPromptTitle}>{timeCtx.prompt}</Text>
+        <Text style={gStyles.moodPromptSubtitle}>{t.garden.seedQuestion}</Text>
+        
+        {['tired', 'anxious', 'sad', 'stressed'].includes(selectedMood || '') && (
+          <Animated.View entering={FadeInUp} style={gStyles.nudgeBox}>
+            <Sparkles color={themeContext.colors.plum} size={16} />
+            <Text style={gStyles.nudgeText}>{t.garden.supportNudge}</Text>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/tools')}>
+              <Text style={gStyles.nudgeLink}>Try Breathing</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
+        <View style={gStyles.moodGrid}>
+          {MOODS.map((mood, i) => (
+            <MoodCircle
+              key={mood.id}
+              mood={mood}
+              isSelected={selectedMood === mood.id}
+              onPress={() => setSelectedMood(mood.id)}
+              delay={i * 40}
+            />
+          ))}
+        </View>
+      </Animated.View>
+    );
+  }
+
+  function renderSuccess() {
+    return (
+      <Animated.View entering={FadeIn.duration(800)} style={gStyles.successContent}>
+        <Sparkles color={themeContext.colors.accents.eucalyptus} size={48} style={{ marginBottom: 20 }} />
+        <Text style={gStyles.successTitle}>{t.garden.successTitle}</Text>
+        <Text style={gStyles.successSubtitle}>{t.garden.successSubtitle}</Text>
+      </Animated.View>
+    );
+  }
 }
 
 const createStyles = (theme: any) => StyleSheet.create({
   container: { flex: 1 },
-  scroll: { paddingHorizontal: 0, paddingBottom: 140 },
-  historyBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  scroll: { paddingBottom: 100 },
+  blob: { position: 'absolute', width: 400, height: 400, borderRadius: 200, opacity: 0.4 },
+  
+  // Growth Header
+  growthHeader: { paddingHorizontal: 24, marginBottom: 24 },
+  growthGlass: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 24, overflow: 'hidden', borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.8)' },
+  growthIconWrap: { width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
+  growthLabel: { fontSize: 17, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, marginBottom: 6 },
+  progressBg: { height: 6, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', borderRadius: 3, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 3 },
+  seedCount: { paddingLeft: 16, alignItems: 'center' },
+  seedCountText: { fontSize: 18, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary },
 
-  // Growth card
-  growthContent: { flexDirection: 'row', alignItems: 'center', padding: 22 },
-  growthIconWrap: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
-  growthLabel: { fontSize: 20, fontWeight: '800', letterSpacing: -0.5, marginBottom: 4 },
-  growthDesc: { fontSize: 13, lineHeight: 19 },
-  progressBg: { width: '100%', height: 7, borderRadius: 0, overflow: 'hidden' },
-  progressFill: { height: '100%' },
+  // Main Card
+  mainCardWrap: { paddingHorizontal: 24 },
+  mainGlassCard: { borderRadius: 32, overflow: 'hidden', padding: 32, minHeight: 460, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)', shadowColor: '#000', shadowOffset: { width: 0, height: 20 }, shadowOpacity: 0.1, shadowRadius: 30, elevation: 10 },
+  
+  // Steps
+  stepContent: { alignItems: 'center', width: '100%' },
+  pagination: { flexDirection: 'row', gap: 6, marginBottom: 40 },
+  paginationDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' },
+  stepEmoji: { fontSize: 64, marginBottom: 24 },
+  stepTitle: { fontSize: 24, fontFamily: theme.typography.fonts.header, textAlign: 'center', color: theme.colors.text.primary, lineHeight: 32, marginBottom: 48 },
+  choiceRow: { flexDirection: 'row', gap: 16, width: '100%' },
+  choiceBtn: { flex: 1, height: 64, borderRadius: 22, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' },
+  choiceBtnText: { fontSize: 18, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary },
 
-  // Questions
-  questionWrap: { alignItems: 'center', paddingHorizontal: 32, paddingTop: 8 },
-  dotRow: { flexDirection: 'row', gap: 8, marginBottom: 36 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  questionCircle: { width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(123,97,255,0.08)', alignItems: 'center', justifyContent: 'center', marginBottom: 28 },
-  questionText: { fontSize: 22, fontWeight: '700', textAlign: 'center', lineHeight: 32, marginBottom: 40, letterSpacing: -0.4 },
-  binaryRow: { flexDirection: 'row', gap: 16, width: '100%' },
-  binaryBtn: { flex: 1, height: 58, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
-  binaryBtnText: { fontSize: 18, fontWeight: '800' },
-
-  // Mood
-  moodWrap: { paddingHorizontal: 24, paddingTop: 4 },
-  thankYou: { fontSize: 26, fontWeight: '800', textAlign: 'center', marginBottom: 8, letterSpacing: -0.5 },
-  moodQuestion: { fontSize: 15, textAlign: 'center', lineHeight: 22, marginBottom: 28 },
-  moodGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'space-between' },
+  // Mood step
+  moodPromptTitle: { fontSize: 22, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, textAlign: 'center', marginBottom: 8 },
+  moodPromptSubtitle: { fontSize: 15, fontFamily: theme.typography.fonts.content, color: theme.colors.text.secondary, textAlign: 'center', marginBottom: 24 },
+  nudgeBox: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: theme.colors.plum + '10', padding: 12, borderRadius: 16, marginBottom: 20, width: '100%' },
+  nudgeText: { flex: 1, fontSize: 13, color: theme.colors.text.primary, fontFamily: theme.typography.fonts.body },
+  nudgeLink: { fontSize: 13, fontFamily: theme.typography.fonts.header, color: theme.colors.plum, textDecorationLine: 'underline' },
+  moodGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', width: '100%' },
 
   // Success
-  successWrap: { alignItems: 'center', paddingTop: 40, paddingHorizontal: 32 },
-  successGlow: { position: 'absolute', width: 280, height: 280, borderRadius: 140, top: 0 },
-  successTitle: { fontSize: 30, fontWeight: '800', marginTop: 20, marginBottom: 12, letterSpacing: -0.5 },
-  successSubtitle: { fontSize: 16, textAlign: 'center', lineHeight: 26 },
-
-  // UCD Additions
-  takeYourTime: { fontSize: 13, fontWeight: '700', color: theme.colors.plum, textAlign: 'center', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 20, opacity: 0.6 },
-  supportNudge: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.isDark ? 'rgba(123, 97, 255, 0.15)' : 'rgba(123, 97, 255, 0.08)', padding: 16, borderRadius: 20, marginBottom: 24, gap: 12, borderWidth: 1, borderColor: theme.isDark ? 'rgba(123, 97, 255, 0.2)' : 'rgba(123, 97, 255, 0.1)' },
-  supportNudgeText: { flex: 1, fontSize: 14, color: theme.colors.text.primary, fontWeight: '600', lineHeight: 20 },
-  nudgeAction: { fontSize: 14, fontWeight: '800', color: theme.colors.plum, textDecorationLine: 'underline' },
+  successContent: { alignItems: 'center', justifyContent: 'center', flex: 1 },
+  successTitle: { fontSize: 28, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, textAlign: 'center', marginBottom: 16 },
+  successSubtitle: { fontSize: 16, fontFamily: theme.typography.fonts.content, color: theme.colors.text.secondary, textAlign: 'center', lineHeight: 24 },
 
   // Footer
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 24, paddingTop: 18, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(0,0,0,0.06)' },
-  plantBtn: { height: 60, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 16, elevation: 6 },
-  plantBtnDisabled: { opacity: 0.4, shadowOpacity: 0 },
-  plantBtnText: { color: '#FFF', fontSize: 17, fontWeight: '800', letterSpacing: 0.2 },
+  actionFooter: { paddingHorizontal: 24, marginTop: 24 },
+  plantBtn: { height: 64, borderRadius: 22, alignItems: 'center', justifyContent: 'center', shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 20, elevation: 8 },
+  plantBtnText: { color: '#FFF', fontSize: 18, fontFamily: theme.typography.fonts.header },
 });
+

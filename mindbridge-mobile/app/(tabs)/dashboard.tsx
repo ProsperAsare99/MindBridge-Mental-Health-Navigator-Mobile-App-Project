@@ -10,7 +10,8 @@ import {
   Image,
   StatusBar,
   Pressable,
-  Platform
+  Platform,
+  ActivityIndicator
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../../src/context/AuthContext';
@@ -29,7 +30,6 @@ import {
   Quote,
   Clock,
   CheckCircle2,
-  Circle,
   Sparkles,
   BookOpen,
   ClipboardList,
@@ -43,31 +43,23 @@ import {
   ChevronRight
 } from 'lucide-react-native';
 import { translations, Language, TranslationSchema } from '../../src/utils/translations';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 
 const { width } = Dimensions.get('window');
 
-// Apple-inspired spring configuration
 const springConfig = {
   damping: 15,
   stiffness: 150,
   mass: 0.8,
 };
 
-// ─── Quote Slideshow Component ──────────────────────────────────────────────
+// ─── Quote Slideshow ────────────────────────────────────────────────────────
 
 const QUOTES = [
   { text: "What mental health needs is more sunlight, more candor, and more unashamed conversation.", author: "Glenn Close" },
   { text: "There is hope, even when your brain tells you there isn’t.", author: "John Green" },
-  { text: "You don’t have to control your thoughts. You just have to stop letting them control you.", author: "Dan Millman" },
-  { text: "Deep breathing is our nervous system’s love language.", author: "Dr. Lauren Fogel Mersy" },
   { text: "Healing takes time, and asking for help is a courageous step.", author: "Mariska Hargitay" },
   { text: "Self-care is how you take your power back.", author: "Lalah Delia" },
-  { text: "Your present circumstances don't determine where you can go; they merely determine where you start.", author: "Nido Qubein" },
-  { text: "Courage doesn't always roar. Sometimes courage is the little voice at the end of the day saying I'll try again tomorrow.", author: "Mary Anne Radmacher" },
-  { text: "You alone are enough. You have nothing to prove to anybody.", author: "Maya Angelou" },
-  { text: "The only journey is the journey within.", author: "Rainer Maria Rilke" },
-  { text: "Not until we are lost do we begin to understand ourselves.", author: "Henry David Thoreau" },
-  { text: "It is during our darkest moments that we must focus to see the light.", author: "Aristotle" }
 ];
 
 const QuoteSlideshow = () => {
@@ -104,7 +96,7 @@ const QuoteSlideshow = () => {
   );
 };
 
-// ─── Apple-Inspired Widget Component ─────────────────────────────────────────
+// ─── Apple Widget ───────────────────────────────────────────────────────────
 
 type WidgetProps = {
   title: string;
@@ -125,22 +117,13 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
     transform: [{ scale: scale.value }]
   }));
 
-  const handlePressIn = () => {
-    scale.value = withSpring(0.96, springConfig);
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1, springConfig);
-  };
+  const handlePressIn = () => { scale.value = withSpring(0.96, springConfig); };
+  const handlePressOut = () => { scale.value = withSpring(1, springConfig); };
 
   if (size === 'list') {
     return (
       <Animated.View entering={FadeInUp.delay(delay).duration(500)}>
-        <Pressable
-          onPress={onPress}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-        >
+        <Pressable onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut}>
           <Animated.View style={[styles.listWidget, animatedStyle]}>
             <View style={[styles.listIconWrap, { backgroundColor: color + (theme.isDark ? '30' : '15') }]}>
               <Icon color={color} size={22} />
@@ -157,30 +140,22 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
   }
 
   const isWide = size === 'wide';
+  const isFixed = size === 'fixed';
 
   return (
     <Animated.View 
       entering={FadeInUp.delay(delay).duration(500)} 
-      style={[
-        isWide ? { width: '100%' } : (size === 'fixed' ? { width: 140 } : { width: '47.5%' }), 
-        { marginBottom: 12, marginRight: size === 'fixed' ? 16 : 0 }
-      ]}
+      style={isWide ? { width: '100%' } : (isFixed ? { width: 140, marginRight: 12 } : { width: '47.5%' })}
     >
-      <Pressable
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-      >
-        <Animated.View style={[styles.widget, isWide ? styles.widgetWide : styles.widgetSquare, animatedStyle]}>
-          <LinearGradient colors={[color + (theme.isDark ? '20' : '10'), color + '03']} style={StyleSheet.absoluteFillObject} />
-
+      <Pressable onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut}>
+        <Animated.View style={[styles.widget, isWide ? styles.widgetWide : (isFixed ? styles.widgetFixed : styles.widgetSquare), animatedStyle]}>
           <View style={isWide ? styles.wideContent : styles.squareContent}>
             <View style={[styles.widgetIconWrap, { backgroundColor: color }]}>
-              <Icon color={'#FFF'} size={isWide ? 24 : 28} />
+              <Icon color={'#FFF'} size={isWide ? 22 : 24} />
             </View>
-            <View style={isWide ? styles.wideTextWrap : {}}>
-              <Text style={[styles.widgetTitle, isWide && { fontSize: 18 }]}>{title}</Text>
-              {subtitle && <Text style={[styles.widgetSubtitle, isWide && { fontSize: 14 }]} numberOfLines={2}>{subtitle}</Text>}
+            <View style={isWide ? styles.wideTextWrap : { marginTop: 12 }}>
+              <Text style={styles.widgetTitle} numberOfLines={1}>{title}</Text>
+              {subtitle && <Text style={styles.widgetSubtitle} numberOfLines={1}>{subtitle}</Text>}
             </View>
           </View>
         </Animated.View>
@@ -189,30 +164,26 @@ const AppleWidget = ({ title, subtitle, icon: Icon, color, onPress, size = 'squa
   );
 };
 
-// ─── Ritual Item Component ───────────────────────────────────────────────────
+// ─── Ritual Item ────────────────────────────────────────────────────────────
 
 const RitualItem = ({ label, done, icon: Icon, color, theme, onPress }: any) => {
   const styles = createStyles(theme);
   return (
-    <TouchableOpacity 
-      style={[styles.ritualItem, done && styles.ritualItemDone]} 
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
+    <TouchableOpacity style={styles.ritualItem} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.ritualIconCircle, { backgroundColor: done ? color : (theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)') }]}>
-        <Icon color={done ? '#FFF' : theme.colors.text.disabled} size={20} />
+        <Icon color={done ? '#FFF' : theme.colors.text.disabled} size={24} />
         {done && (
           <View style={styles.checkBadge}>
-            <CheckCircle2 color="#FFF" size={10} fill={color} />
+            <CheckCircle2 color="#FFF" size={12} fill={color} />
           </View>
         )}
       </View>
-      <Text style={[styles.ritualLabel, done && { color: theme.colors.text.primary, fontWeight: '700' }]}>{label}</Text>
+      <Text style={[styles.ritualLabel, done && { color: theme.colors.text.primary }]}>{label}</Text>
     </TouchableOpacity>
   );
 };
 
-// ─── Main Dashboard ────────────────────────────────────────────────────────
+// ─── Dashboard Screen ────────────────────────────────────────────────────────
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -220,60 +191,35 @@ export default function DashboardScreen() {
   const theme = useTheme();
   const styles = createStyles(theme);
   const { userToken, userData: authData } = useContext(AuthContext) as any;
-  const isGuest = userToken?.startsWith('guest-token');
-  const [rituals, setRituals] = useState({
-    garden: false,
-    journal: false,
-    breathing: false
-  });
   
-  useEffect(() => {
-    const checkTodayStatus = async () => {
-      try {
-        const todayStr = new Date().toDateString();
-        
-        // Use the unified oracle-context endpoint for better performance
-        const res = await api.get('/ai/oracle-context');
-        const { latestMood, recentJournal } = res.data;
-        
-        const gardenDone = latestMood && new Date(latestMood.createdAt).toDateString() === todayStr;
-        const journalDone = recentJournal && recentJournal.some((log: any) => new Date(log.createdAt).toDateString() === todayStr);
-        
-        // 3. Check Breathing (Local Storage)
-        const breathingDone = await AsyncStorage.getItem(`breathing_${todayStr}`) === 'true';
-        
-        setRituals({
-          garden: !!gardenDone,
-          journal: !!journalDone,
-          breathing: breathingDone
-        });
-
-        // Update name and language from context
-        if (res.data.onboarding) {
-          setUserData(prev => ({
-            ...prev,
-            name: res.data.onboarding.firstName || prev.name,
-            language: (res.data.onboarding.preferredLanguage as Language) || prev.language
-          }));
-        }
-      } catch (error) {
-        console.error('Error checking today status:', error);
-      }
-    };
-    checkTodayStatus();
-    
-    // Refresh on focus (simplified for now)
-    const interval = setInterval(checkTodayStatus, 10000); // 10s is enough
-    return () => clearInterval(interval);
-  }, []);
-
+  const [rituals, setRituals] = useState({ garden: false, journal: false, breathing: false });
   const [userData, setUserData] = useState({
-    name: 'Prosper Asare',
-    date: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+    name: authData?.name || 'Friend',
     language: 'English' as Language
   });
 
   const t: TranslationSchema = translations[userData.language] || translations.English;
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const todayStr = new Date().toDateString();
+        const res = await api.get('/ai/oracle-context');
+        const { latestMood, recentJournal } = res.data;
+        
+        setRituals({
+          garden: latestMood && new Date(latestMood.createdAt).toDateString() === todayStr,
+          journal: recentJournal && recentJournal.some((log: any) => new Date(log.createdAt).toDateString() === todayStr),
+          breathing: await AsyncStorage.getItem(`breathing_${todayStr}`) === 'true'
+        });
+
+        if (res.data.onboarding?.firstName) {
+          setUserData(prev => ({ ...prev, name: res.data.onboarding.firstName }));
+        }
+      } catch (e) {}
+    };
+    checkStatus();
+  }, []);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -285,519 +231,110 @@ export default function DashboardScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
-      <LinearGradient
-        colors={[theme.colors.background, theme.colors.backgroundSecondary, theme.colors.backgroundSecondary]}
-        locations={[0, 0.4, 1]}
-        style={StyleSheet.absoluteFillObject}
-      />
-      <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Apple-style Header */}
-        <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
-          <View>
-            <Text style={styles.dateText}>{userData.date.toUpperCase()}</Text>
-            <Text style={styles.greetingText}>{getGreeting()},{'\n'}{userData.name}.</Text>
-          </View>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/profile')} style={styles.profileBtn}>
-            <Image source={require('../../assets/images/logo.png')} style={styles.avatar} />
-          </TouchableOpacity>
-        </Animated.View>
+      <View style={StyleSheet.absoluteFillObject}>
+        <LinearGradient
+          colors={theme.isDark 
+            ? ['#121212', '#1A1A1A', '#0D0D0D'] 
+            : ['#FDFCFB', '#F4F7F9', '#E6E9EF']}
+          style={StyleSheet.absoluteFillObject}
+        />
+        <View style={[styles.bgBlob, { top: -50, right: -50, backgroundColor: theme.colors.plum + '08' }]} />
+        <View style={[styles.bgBlob, { bottom: 100, left: -50, backgroundColor: theme.colors.accents.powderBlue + '05' }]} />
+      </View>
 
-        {/* Daily Reflection Slideshow */}
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]} showsVerticalScrollIndicator={false}>
+        <ScreenHeader 
+          title={`${getGreeting()}, ${userData.name}`}
+          subtitle="How can we nurture your peace today?"
+        />
+
         <View style={styles.section}>
           <QuoteSlideshow />
         </View>
 
-        {/* Daily Nurture — Habitat Pattern */}
-        <Animated.View entering={FadeInUp.delay(100).duration(600)} style={styles.ritualsContainer}>
+        <Animated.View entering={FadeInUp.delay(100)} style={styles.ritualsContainer}>
           <View style={styles.ritualHeader}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Leaf color={theme.colors.plum} size={18} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Leaf color={theme.colors.plum} size={20} strokeWidth={2.5} />
               <Text style={styles.ritualTitle}>{t.dashboard.nurtureTitle}</Text>
             </View>
-            <Text style={styles.ritualProgress}>
-              {Object.values(rituals).filter(Boolean).length}/3 Complete
-            </Text>
+            <View style={styles.progressBadge}>
+              <Text style={styles.ritualProgress}>{Object.values(rituals).filter(Boolean).length}/3</Text>
+            </View>
           </View>
-          <Text style={styles.ritualSubtitle}>Gentle steps for your peace of mind</Text>
           
           <View style={styles.ritualRow}>
-            <RitualItem 
-              label="Plant Seed" 
-              done={rituals.garden} 
-              icon={Leaf} 
-              color={theme.colors.accents.eucalyptus} 
-              theme={theme}
-              onPress={() => router.push('/(tabs)/garden')}
-            />
-            <RitualItem 
-              label="Reflect" 
-              done={rituals.journal} 
-              icon={BookOpen} 
-              color={theme.colors.accents.powderBlue} 
-              theme={theme}
-              onPress={() => router.push('/(tabs)/journal')}
-            />
-            <RitualItem 
-              label="Breathe" 
-              done={rituals.breathing} 
-              icon={Wind} 
-              color={theme.colors.accents.softLilac} 
-              theme={theme}
-              onPress={() => router.push('/breathing')}
-            />
+            <RitualItem label="Mood Seed" done={rituals.garden} icon={Leaf} color={theme.colors.accents.eucalyptus} theme={theme} onPress={() => router.push('/(tabs)/garden')} />
+            <RitualItem label="Reflect" done={rituals.journal} icon={BookOpen} color={theme.colors.accents.powderBlue} theme={theme} onPress={() => router.push('/(tabs)/journal')} />
+            <RitualItem label="Breathe" done={rituals.breathing} icon={Wind} color={theme.colors.accents.softLilac} theme={theme} onPress={() => router.push('/breathing')} />
           </View>
         </Animated.View>
 
-        {/* AI Guide Hero Widget */}
         <View style={styles.section}>
-          <AppleWidget
-            title={t.ai.title}
-            subtitle={t.ai.subtitle}
-            icon={Bot}
-            color={theme.colors.plum}
-            size="wide"
-            delay={100}
-            onPress={() => router.push('/(tabs)/ai-guide')}
-          />
+          <AppleWidget title={t.ai.title} subtitle={t.ai.subtitle} icon={Bot} color={theme.colors.plum} size="wide" delay={150} onPress={() => router.push('/(tabs)/ai-guide')} />
         </View>
 
-        <Animated.View entering={FadeInUp.delay(200).duration(800)} style={styles.clarityCard}>
-          <Image 
-            source={require('../../assets/images/clarity.png')} 
-            style={styles.clarityImage} 
-          />
-          <LinearGradient 
-            colors={['transparent', 'rgba(0,0,0,0.6)']} 
-            style={styles.clarityOverlay}
-          />
-          <View style={styles.clarityContent}>
-            <Text style={[styles.clarityTitle, theme.typography.h3]}>{t.dashboard.clarityTitle}</Text>
-            <Text style={[styles.clarityQuote, theme.typography.caption]}>"Peace is the result of retraining your mind to process life as it is."</Text>
-          </View>
-        </Animated.View>
-
-        {/* Mindful Tools Horizontal Carousel */}
         <View style={styles.sectionCompact}>
           <Text style={styles.sectionTitle}>{t.dashboard.toolsTitle}</Text>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
-            contentContainerStyle={styles.horizontalScroll}
-          >
-            <AppleWidget
-              title="Mood Garden"
-              subtitle="Cultivate"
-              icon={Leaf}
-              color={theme.colors.accents.gentlePeach}
-              size="fixed"
-              delay={200}
-              onPress={() => router.push('/(tabs)/garden')}
-            />
-            <AppleWidget
-              title="Journal"
-              subtitle="Reflect"
-              icon={BookOpen}
-              color={theme.colors.accents.powderBlue}
-              size="fixed"
-              delay={300}
-              onPress={() => router.push('/(tabs)/journal')}
-            />
-            <AppleWidget
-              title="Assessments"
-              subtitle="Check in"
-              icon={ClipboardList}
-              color={theme.colors.accents.slate}
-              size="fixed"
-              delay={400}
-              onPress={() => router.push('/(tabs)/assessments')}
-            />
-            <AppleWidget
-              title="Resources"
-              subtitle="Explore"
-              icon={Library}
-              color={theme.colors.accents.forestGreen}
-              size="fixed"
-              delay={500}
-              onPress={() => router.push('/(tabs)/resources')}
-            />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll} snapToInterval={152} decelerationRate="fast">
+            <AppleWidget title="Assessments" subtitle="Daily check" icon={ClipboardList} color={theme.colors.accents.slate} size="fixed" delay={200} onPress={() => router.push('/(tabs)/assessments')} />
+            <AppleWidget title="Resources" subtitle="Library" icon={Library} color={theme.colors.accents.forestGreen} size="fixed" delay={300} onPress={() => router.push('/(tabs)/resources')} />
+            <AppleWidget title="Community" subtitle="Connect" icon={Users} color={theme.colors.accents.dustyRose} size="fixed" delay={400} onPress={() => router.push('/(tabs)/community')} />
           </ScrollView>
         </View>
 
-        {/* Support & Community Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.dashboard.supportTitle}</Text>
           <View style={styles.listContainer}>
-            <AppleWidget
-              title="Wellness Journey"
-              subtitle="Track your daily care plan"
-              icon={Clock}
-              color={theme.colors.plum}
-              size="list"
-              delay={550}
-              onPress={() => router.push('/(tabs)/journey')}
-            />
+            <AppleWidget title="Wellness Journey" subtitle="Your personalized roadmap" icon={Clock} color={theme.colors.plum} size="list" delay={500} onPress={() => router.push('/(tabs)/journey')} />
             <View style={styles.divider} />
-            <AppleWidget
-              title="Crisis Support"
-              subtitle="Immediate help and helplines"
-              icon={ShieldAlert}
-              color={theme.colors.accents.terracotta}
-              size="list"
-              delay={600}
-              onPress={() => router.push('/(tabs)/crisis')}
-            />
-            <View style={styles.divider} />
-            <AppleWidget
-              title="Breathing Exercise"
-              subtitle="Quick 4-7-8 relaxation"
-              icon={Wind}
-              color={theme.colors.accents.powderBlue}
-              size="list"
-              delay={650}
-              onPress={() => router.push('/breathing')}
-            />
-            <View style={styles.divider} />
-            <AppleWidget
-              title="Support Community"
-              subtitle="Connect with peers anonymously"
-              icon={Users}
-              color={theme.colors.plum}
-              size="list"
-              delay={700}
-              onPress={() => router.push('/(tabs)/community')}
-            />
-            <View style={styles.divider} />
-            <AppleWidget
-              title="Settings"
-              subtitle="App preferences"
-              icon={Settings}
-              color={theme.colors.text.secondary}
-              size="list"
-              delay={800}
-              onPress={() => router.push('/(tabs)/settings')}
-            />
+            <AppleWidget title="Crisis Support" subtitle="Immediate assistance 24/7" icon={ShieldAlert} color={theme.colors.accents.terracotta} size="list" delay={600} onPress={() => router.push('/(tabs)/crisis')} />
           </View>
         </View>
-
       </ScrollView>
     </View>
   );
 }
 
 const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.backgroundSecondary,
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 100
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 32
-  },
-  dateText: {
-    ...theme.typography.label,
-    color: theme.colors.text.tertiary,
-    marginBottom: 4
-  },
-  greetingText: {
-    ...theme.typography.h1,
-    color: theme.colors.text.primary,
-    lineHeight: 40
-  },
-  profileBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: theme.colors.surface,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: theme.isDark ? 0.3 : 0.1,
-    shadowRadius: 8,
-    elevation: 4
-  },
-  avatar: {
-    width: '100%',
-    height: '100%'
-  },
-  quoteCardContainer: {
-    shadowColor: theme.colors.plum,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: theme.isDark ? 0.4 : 0.25,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  quoteCard: {
-    borderRadius: 24,
-    padding: 28,
-    paddingTop: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 180, 
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  quoteMarkContainer: {
-    position: 'absolute',
-    top: -20,
-    left: 20,
-    opacity: 0.15,
-  },
-  largeQuoteMark: {
-    fontSize: 120,
-    color: '#FFFFFF',
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-  },
-  quoteText: {
-    fontSize: 19,
-    color: '#FFFFFF',
-    textAlign: 'center',
-    lineHeight: 28,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-    marginBottom: 16,
-    letterSpacing: 0.3,
-  },
-  quoteAuthor: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: 'rgba(255, 255, 255, 0.7)',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
-  },
-  section: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    ...theme.typography.h3,
-    color: theme.colors.text.primary,
-    marginBottom: 16,
-    paddingHorizontal: 24,
-  },
-  sectionCompact: {
-    marginBottom: 28,
-  },
-  horizontalScroll: {
-    paddingHorizontal: 24,
-    paddingBottom: 8,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-    gap: 12
-  },
-  widget: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: 28,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: theme.isDark ? 0.2 : 0.06,
-    shadowRadius: 16,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)'
-  },
-  widgetSquare: {
-    aspectRatio: 1,
-    padding: 20,
-  },
-  widgetWide: {
-    padding: 24,
-  },
-  squareContent: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  wideContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  widgetIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  wideTextWrap: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  widgetTitle: {
-    ...theme.typography.bodyBold,
-    fontFamily: theme.typography.fonts.header,
-    color: theme.colors.text.primary,
-  },
-  widgetSubtitle: {
-    ...theme.typography.caption,
-    color: theme.colors.text.secondary,
-    marginTop: 2,
-  },
-  clarityCard: {
-    marginHorizontal: 24,
-    height: 180,
-    borderRadius: 32,
-    overflow: 'hidden',
-    marginBottom: 32,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-  },
-  clarityImage: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-  },
-  clarityOverlay: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  clarityContent: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    padding: 24,
-  },
-  clarityTitle: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  clarityQuote: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '500',
-    fontStyle: 'italic',
-  },
-  listContainer: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: 24,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: theme.isDark ? 0.2 : 0.04,
-    shadowRadius: 12,
-    elevation: 3,
-  },
-  listWidget: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: theme.colors.surface,
-  },
-  listIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  listTextWrap: {
-    flex: 1,
-  },
-  listTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: theme.colors.text.primary,
-    letterSpacing: -0.3,
-  },
-  listSubtitle: {
-    fontSize: 13,
-    color: theme.colors.text.secondary,
-    marginTop: 2,
-  },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-    marginLeft: 72, // Aligns with text
-  },
-  // Rituals styles
-  ritualsContainer: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: 32,
-    padding: 24,
-    marginBottom: 32,
-    borderWidth: 1,
-    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: theme.isDark ? 0.2 : 0.04,
-    shadowRadius: 16,
-    elevation: 4,
-  },
-  ritualHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  ritualTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: theme.colors.text.primary,
-    letterSpacing: -0.5,
-  },
-  ritualSubtitle: {
-    fontSize: 13,
-    color: theme.colors.text.tertiary,
-    marginTop: -16,
-    marginBottom: 20,
-    fontWeight: '500',
-  },
-  ritualProgress: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: theme.colors.plum,
-    backgroundColor: theme.colors.plum + '15',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  ritualRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  ritualItem: {
-    alignItems: 'center',
-    gap: 8,
-    width: (width - 48 - 48) / 3,
-  },
-  ritualItemDone: {
-    opacity: 1,
-  },
-  ritualIconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  ritualLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: theme.colors.text.disabled,
-  },
-  checkBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-    padding: 1,
-  }
+  container: { flex: 1 },
+  scrollContent: { paddingBottom: 120 },
+  bgBlob: { position: 'absolute', width: 300, height: 300, borderRadius: 150, opacity: 0.6 },
+  section: { marginBottom: 32, paddingHorizontal: 24 },
+  sectionTitle: { fontSize: 20, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, marginBottom: 16, paddingHorizontal: 24 },
+  sectionCompact: { marginBottom: 32 },
+  horizontalScroll: { paddingLeft: 24, paddingRight: 8 },
+  quoteCardContainer: { shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 10 },
+  quoteCard: { borderRadius: 32, padding: 32, minHeight: 200, justifyContent: 'center', overflow: 'hidden' },
+  quoteMarkContainer: { position: 'absolute', top: -20, left: 20, opacity: 0.1 },
+  largeQuoteMark: { fontSize: 140, color: '#FFF', fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+  quoteText: { fontSize: 18, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', color: '#FFF', lineHeight: 28, textAlign: 'center', fontStyle: 'italic', marginBottom: 16 },
+  quoteAuthor: { fontSize: 11, fontFamily: theme.typography.fonts.header, color: 'rgba(255,255,255,0.7)', textAlign: 'center', textTransform: 'uppercase', letterSpacing: 2 },
+  ritualsContainer: { marginHorizontal: 24, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.6)', borderRadius: 32, padding: 24, marginBottom: 32, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' },
+  ritualHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
+  ritualTitle: { fontSize: 18, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary },
+  progressBadge: { backgroundColor: theme.colors.plum + '15', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 10 },
+  ritualProgress: { fontSize: 13, fontFamily: theme.typography.fonts.header, color: theme.colors.plum },
+  ritualRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  ritualItem: { alignItems: 'center', width: (width - 48 - 48) / 3 },
+  ritualIconCircle: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  checkBadge: { position: 'absolute', bottom: 0, right: 0, backgroundColor: '#FFF', borderRadius: 10, padding: 2 },
+  ritualLabel: { fontSize: 11, fontFamily: theme.typography.fonts.header, color: theme.colors.text.tertiary, textAlign: 'center' },
+  widget: { borderRadius: 28, overflow: 'hidden', backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' },
+  widgetSquare: { aspectRatio: 1, padding: 20 },
+  widgetWide: { padding: 24, minHeight: 110 },
+  widgetFixed: { width: 140, aspectRatio: 1, padding: 16 },
+  squareContent: { flex: 1, justifyContent: 'space-between' },
+  wideContent: { flexDirection: 'row', alignItems: 'center', height: '100%' },
+  widgetIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  wideTextWrap: { flex: 1, marginLeft: 16 },
+  widgetTitle: { fontSize: 15, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary },
+  widgetSubtitle: { fontSize: 12, fontFamily: theme.typography.fonts.body, color: theme.colors.text.secondary, marginTop: 2 },
+  listContainer: { backgroundColor: theme.colors.surface, borderRadius: 28, overflow: 'hidden', borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)' },
+  listWidget: { flexDirection: 'row', alignItems: 'center', padding: 16 },
+  listIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
+  listTextWrap: { flex: 1 },
+  listTitle: { fontSize: 16, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary },
+  listSubtitle: { fontSize: 13, fontFamily: theme.typography.fonts.body, color: theme.colors.text.secondary },
+  divider: { height: StyleSheet.hairlineWidth, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', marginLeft: 72 },
 });

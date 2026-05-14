@@ -103,12 +103,14 @@ const ProfileListGroup = ({ children, delay, theme }: any) => {
   );
 };
 
+// ─── Main Profile Screen ───────────────────────────────────────────────────
+
 export default function ProfileScreen() {
   const { signOut, userToken, userData } = useContext(AuthContext) as any;
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const themeContext = useTheme();
-  const styles = createStyles(themeContext);
+  const theme = useTheme();
+  const styles = createStyles(theme);
 
   const isGuest = userToken?.startsWith('guest-token');
   const [profile, setProfile] = useState<any>(null);
@@ -133,28 +135,26 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={themeContext.isDark ? "light-content" : "dark-content"} />
-      <LinearGradient 
-        colors={themeContext.isDark 
-          ? ['rgba(123, 97, 255, 0.15)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
-          : ['rgba(123, 97, 255, 0.12)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
-        } 
-        locations={[0, 0.3, 1]}
-        style={StyleSheet.absoluteFillObject} 
-      />
+      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
+      <View style={StyleSheet.absoluteFillObject}>
+        <LinearGradient 
+          colors={theme.isDark 
+            ? ['#121212', '#1A1A1A', '#0D0D0D'] 
+            : ['#FDFCFB', '#F4F7F9', '#E6E9EF']
+          } 
+          style={StyleSheet.absoluteFillObject} 
+        />
+        <View style={[styles.bgBlob, { top: -80, left: -80, backgroundColor: theme.colors.plum + '08' }]} />
+        <View style={[styles.bgBlob, { bottom: 0, right: -100, backgroundColor: theme.colors.accents.softMint + '05' }]} />
+      </View>
 
       <ScrollView 
-        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
         <ScreenHeader 
-          title="Profile" 
-          subtitle="Your personal dashboard"
-          rightAction={
-            <TouchableOpacity style={styles.settingsBtn}>
-              <SettingsIcon color={themeContext.colors.plum} size={24} />
-            </TouchableOpacity>
-          }
+          title="My Space" 
+          subtitle="Reflect on your growth and journey"
         />
 
         <Animated.View entering={FadeInUp.duration(600)} style={styles.headerProfile}>
@@ -171,105 +171,85 @@ export default function ProfileScreen() {
           <Text style={styles.userEmail}>{userEmail}</Text>
           
           <TouchableOpacity style={styles.editBtn}>
-            <Text style={styles.editBtnText}>Edit Profile</Text>
+            <Text style={styles.editBtnText}>Manage Account</Text>
           </TouchableOpacity>
         </Animated.View>
 
         {/* Stats Grid */}
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.statsGrid}>
-          <StatsCard theme={themeContext} icon={Flame} value="4" label="Streak" color={themeContext.colors.accents.gentlePeach} />
-          <StatsCard theme={themeContext} icon={Trophy} value="1250" label="Points" color={themeContext.colors.accents.powderBlue} />
-          <StatsCard theme={themeContext} icon={CheckCircle2} value="12" label="Done" color={themeContext.colors.accents.eucalyptus} />
-          <StatsCard theme={themeContext} icon={Award} value="3" label="Badges" color={themeContext.colors.plum} />
+          <StatsCard theme={theme} icon={Flame} value="4" label="Day Streak" color={theme.colors.accents.gentlePeach} />
+          <StatsCard theme={theme} icon={Trophy} value="1250" label="Points" color={theme.colors.accents.powderBlue} />
+          <StatsCard theme={theme} icon={CheckCircle2} value="12" label="Seeds" color={theme.colors.accents.eucalyptus} />
+          <StatsCard theme={theme} icon={Award} value="3" label="Badges" color={theme.colors.plum} />
         </Animated.View>
 
         {/* Mood Visualization */}
         <Animated.View entering={FadeInUp.delay(200).duration(800)} style={styles.insightsCard}>
           <View style={styles.insightsHeader}>
-            <TrendingUp color={themeContext.colors.plum} size={18} />
-            <Text style={styles.insightsTitle}>Mood Trends (7 Days)</Text>
+            <TrendingUp color={theme.colors.plum} size={18} />
+            <Text style={styles.insightsTitle}>Mood Insights (7 Days)</Text>
           </View>
           <View style={styles.moodTrendContainer}>
-            <MoodTrendBar theme={themeContext} day="M" score={8} color={themeContext.colors.accents.eucalyptus} />
-            <MoodTrendBar theme={themeContext} day="T" score={6} color={themeContext.colors.accents.powderBlue} />
-            <MoodTrendBar theme={themeContext} day="W" score={4} color={themeContext.colors.accents.softLilac} />
-            <MoodTrendBar theme={themeContext} day="T" score={7} color={themeContext.colors.accents.eucalyptus} />
-            <MoodTrendBar theme={themeContext} day="F" score={9} color={themeContext.colors.accents.gentlePeach} />
-            <MoodTrendBar theme={themeContext} day="S" score={5} color={themeContext.colors.accents.slate} />
-            <MoodTrendBar theme={themeContext} day="S" score={8} color={themeContext.colors.accents.eucalyptus} />
+            <MoodTrendBar theme={theme} day="M" score={8} color={theme.colors.accents.eucalyptus} />
+            <MoodTrendBar theme={theme} day="T" score={6} color={theme.colors.accents.powderBlue} />
+            <MoodTrendBar theme={theme} day="W" score={4} color={theme.colors.accents.softLilac} />
+            <MoodTrendBar theme={theme} day="T" score={7} color={theme.colors.accents.eucalyptus} />
+            <MoodTrendBar theme={theme} day="F" score={9} color={theme.colors.accents.gentlePeach} />
+            <MoodTrendBar theme={theme} day="S" score={5} color={theme.colors.accents.slate} />
+            <MoodTrendBar theme={theme} day="S" score={8} color={theme.colors.accents.eucalyptus} />
           </View>
         </Animated.View>
 
-        {/* Onboarding Resume Banner */}
-        <Animated.View entering={FadeInUp.delay(300).duration(500)} style={styles.resumeBanner}>
-          <View style={styles.resumeBannerIcon}>
-            <ClipboardEdit color={themeContext.colors.plum} size={24} />
-          </View>
-          <View style={styles.resumeBannerContent}>
-            <Text style={styles.resumeBannerTitle}>Complete Setup</Text>
-            <Text style={styles.resumeBannerSubtitle}>Finish onboarding for personalized support.</Text>
-          </View>
-          <TouchableOpacity 
-            style={styles.resumeBannerBtn}
-            onPress={() => router.push('/(auth)/onboarding')}
-          >
-            <Text style={styles.resumeBannerBtnText}>Resume</Text>
-          </TouchableOpacity>
-        </Animated.View>
-
-        <ProfileListGroup delay={400} theme={themeContext}>
+        <ProfileListGroup delay={400} theme={theme}>
           <ProfileListItem 
-            theme={themeContext} 
+            theme={theme} 
             icon={User} 
-            title="Personal Information" 
-            color={themeContext.colors.plum} 
+            title="Identity & Personalize" 
+            color={theme.colors.plum} 
           />
           <ProfileListItem 
-            theme={themeContext} 
+            theme={theme} 
             icon={GraduationCap} 
-            title={`${profile?.program || 'Engineering'} • L${profile?.level || '400'}`} 
-            color={themeContext.colors.accents.powderBlue} 
+            title={`${profile?.program || 'Engineering'} • Level ${profile?.level || '400'}`} 
+            color={theme.colors.accents.powderBlue} 
           />
           <ProfileListItem 
-            theme={themeContext} 
+            theme={theme} 
             icon={Heart} 
             title={`${profile?.communicationStyle || 'Gentle'} • ${profile?.preferredLanguage || 'English'}`} 
-            color={themeContext.colors.accents.terracotta} 
+            color={theme.colors.accents.dustyRose} 
             isLast 
           />
         </ProfileListGroup>
 
-        <ProfileListGroup delay={500} theme={themeContext}>
-          <ProfileListItem theme={themeContext} icon={Bell} title="Notifications" color={themeContext.colors.accents.softMint} />
-          <ProfileListItem theme={themeContext} icon={Shield} title="Privacy & Security" color={themeContext.colors.accents.slate} isLast />
-        </ProfileListGroup>
-
-        {/* Crisis & Support — always pinned, never buried (MindDoc pattern) */}
-        <Animated.View entering={FadeInUp.delay(550).duration(500)} style={[
+        {/* Crisis & Support — always pinned (MindDoc pattern) */}
+        <Animated.View entering={FadeInUp.delay(500)} style={[
           styles.listGroup,
           {
             borderWidth: 1.5,
-            borderColor: themeContext.isDark ? 'rgba(248,113,113,0.25)' : 'rgba(239,68,68,0.15)',
-            backgroundColor: themeContext.isDark ? 'rgba(248,113,113,0.07)' : 'rgba(255,241,241,0.9)',
+            borderColor: theme.isDark ? 'rgba(239,68,68,0.2)' : 'rgba(239,68,68,0.1)',
+            backgroundColor: theme.isDark ? 'rgba(239,68,68,0.05)' : 'rgba(255,241,241,0.8)',
           }
         ]}>
           <ProfileListItem
-            theme={themeContext}
+            theme={theme}
             icon={PhoneCall}
-            title="Crisis & Mental Health Hotline"
+            title="Crisis Hotline & Support"
             color="#EF4444"
             isLast
             onPress={() => router.push('/(tabs)/crisis')}
           />
         </Animated.View>
 
-        <ProfileListGroup delay={600} theme={themeContext}>
-          <ProfileListItem theme={themeContext} icon={HelpCircle} title="Help & Support" color={themeContext.colors.text.secondary} />
+        <ProfileListGroup delay={600} theme={theme}>
+          <ProfileListItem theme={theme} icon={Bell} title="Reminders" color={theme.colors.accents.softMint} />
+          <ProfileListItem theme={theme} icon={Shield} title="Privacy & Security" color={theme.colors.accents.slate} />
+          <ProfileListItem theme={theme} icon={HelpCircle} title="Help Center" color={theme.colors.text.secondary} />
           <ProfileListItem 
-            theme={themeContext}
+            theme={theme}
             icon={LogOut} 
-            title={isGuest ? "End Session" : "Log Out"} 
-            color={themeContext.colors.text.secondary} 
+            title={isGuest ? "End Session" : "Sign Out"} 
+            color={theme.colors.text.secondary} 
             destructive 
             isLast 
             onPress={() => {
@@ -278,259 +258,40 @@ export default function ProfileScreen() {
             }}
           />
         </ProfileListGroup>
-
       </ScrollView>
     </View>
   );
 }
 
 const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.backgroundSecondary,
-  },
-  scrollContent: {
-    paddingHorizontal: 0,
-    paddingBottom: 100,
-  },
-  settingsBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerProfile: {
-    alignItems: 'center',
-    marginBottom: 32,
-    marginTop: 0,
-    paddingHorizontal: 20,
-  },
-  avatarContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: theme.colors.surface,
-    padding: 4,
-    shadowColor: theme.colors.plum,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: theme.isDark ? 0.3 : 0.15,
-    shadowRadius: 16,
-    elevation: 8,
-    marginBottom: 16,
-    position: 'relative',
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 46,
-  },
-  avatarEditBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: theme.colors.plum,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: theme.colors.surface,
-  },
-  userName: {
-    ...theme.typography.h2,
-    color: theme.colors.text.primary,
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 15,
-    color: theme.colors.text.secondary,
-    fontWeight: '500',
-    marginBottom: 20,
-  },
-  editBtn: {
-    backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.1)',
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  editBtnText: {
-    color: theme.colors.plum,
-    fontWeight: '800',
-    fontSize: 14,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 24,
-    paddingHorizontal: 20,
-  },
-  statsCard: {
-    width: '48%',
-    backgroundColor: theme.colors.surface,
-    padding: 16,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
-  },
-  statsIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  statsValue: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: theme.colors.text.primary,
-  },
-  statsLabel: {
-    fontSize: 12,
-    color: theme.colors.text.tertiary,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  insightsCard: {
-    backgroundColor: theme.colors.surface,
-    padding: 20,
-    borderRadius: 28,
-    marginBottom: 24,
-    marginHorizontal: 20,
-    borderWidth: 1,
-    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
-  },
-  insightsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 20,
-  },
-  insightsTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.colors.text.primary,
-  },
-  moodTrendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    height: 100,
-    paddingHorizontal: 4,
-  },
-  moodTrendCol: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  moodTrendBarBg: {
-    width: 8,
-    height: 80,
-    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-    borderRadius: 4,
-    justifyContent: 'flex-end',
-  },
-  moodTrendBarFill: {
-    width: '100%',
-    borderRadius: 4,
-  },
-  moodTrendDay: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: theme.colors.text.tertiary,
-  },
-  resumeBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.08)',
-    borderRadius: 24,
-    padding: 16,
-    marginBottom: 24,
-    marginHorizontal: 20,
-    borderWidth: 1,
-    borderColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.15)',
-  },
-  resumeBannerIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: theme.colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: theme.colors.plum,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: theme.isDark ? 0.2 : 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-    marginRight: 16,
-  },
-  resumeBannerContent: {
-    flex: 1,
-  },
-  resumeBannerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.colors.text.primary,
-    marginBottom: 4,
-  },
-  resumeBannerSubtitle: {
-    fontSize: 13,
-    color: theme.colors.text.secondary,
-    lineHeight: 18,
-  },
-  resumeBannerBtn: {
-    backgroundColor: theme.colors.plum,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    marginLeft: 12,
-  },
-  resumeBannerBtnText: {
-    color: theme.colors.text.onPrimary || '#FFF',
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  listGroup: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: 24,
-    marginBottom: 24,
-    marginHorizontal: 20,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: theme.isDark ? 0.2 : 0.04,
-    shadowRadius: 12,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
-  },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: theme.colors.surface,
-  },
-  listIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  listTitle: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.text.primary,
-    letterSpacing: -0.3,
-  },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-    marginLeft: 68, 
-  },
+  container: { flex: 1 },
+  scrollContent: { paddingBottom: 120 },
+  bgBlob: { position: 'absolute', width: 400, height: 400, borderRadius: 200, opacity: 0.5 },
+  headerProfile: { alignItems: 'center', marginBottom: 32, paddingHorizontal: 20 },
+  avatarContainer: { width: 100, height: 100, borderRadius: 50, backgroundColor: theme.colors.surface, padding: 4, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 10, marginBottom: 16 },
+  avatarImage: { width: '100%', height: '100%', borderRadius: 46 },
+  avatarEditBadge: { position: 'absolute', bottom: 0, right: 0, backgroundColor: theme.colors.plum, width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: theme.colors.surface },
+  userName: { fontSize: 24, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, marginBottom: 4 },
+  userEmail: { fontSize: 14, fontFamily: theme.typography.fonts.body, color: theme.colors.text.secondary, marginBottom: 20 },
+  editBtn: { backgroundColor: theme.colors.plum + '10', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 20 },
+  editBtnText: { color: theme.colors.plum, fontFamily: theme.typography.fonts.header, fontSize: 13 },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24, paddingHorizontal: 20 },
+  statsCard: { width: '48%', backgroundColor: theme.colors.surface, padding: 20, borderRadius: 28, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' },
+  statsIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  statsValue: { fontSize: 20, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary },
+  statsLabel: { fontSize: 12, fontFamily: theme.typography.fonts.body, color: theme.colors.text.tertiary, marginTop: 2 },
+  insightsCard: { backgroundColor: theme.colors.surface, padding: 24, borderRadius: 32, marginBottom: 24, marginHorizontal: 20, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' },
+  insightsHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24 },
+  insightsTitle: { fontSize: 17, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary },
+  moodTrendContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', height: 100 },
+  moodTrendCol: { alignItems: 'center', gap: 8 },
+  moodTrendBarBg: { width: 8, height: 80, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', borderRadius: 4, justifyContent: 'flex-end' },
+  moodTrendBarFill: { width: '100%', borderRadius: 4 },
+  moodTrendDay: { fontSize: 10, fontFamily: theme.typography.fonts.header, color: theme.colors.text.tertiary },
+  listGroup: { backgroundColor: theme.colors.surface, borderRadius: 32, marginBottom: 24, marginHorizontal: 20, overflow: 'hidden', borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)' },
+  listItem: { flexDirection: 'row', alignItems: 'center', padding: 18, backgroundColor: theme.colors.surface },
+  listIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
+  listTitle: { flex: 1, fontSize: 16, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, letterSpacing: -0.3 },
+  divider: { height: StyleSheet.hairlineWidth, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', marginLeft: 72 },
 });
+

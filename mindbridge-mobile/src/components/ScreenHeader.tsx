@@ -128,7 +128,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.05)',
   },
   rightActions: {
     flexDirection: 'row',
@@ -155,7 +155,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.text.secondary,
     marginTop: 8,
     lineHeight: 24,
-    opacity: 0.8,
+    opacity: theme.isDark ? 1 : 0.8,
   },
 });
 

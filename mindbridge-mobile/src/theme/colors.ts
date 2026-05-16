@@ -60,10 +60,10 @@ export const darkColors = {
   // ─── Standardized Text ────────────────────
   text: {
     primary: '#F0F0F0',
-    secondary: '#A8A8A8',
-    tertiary: '#737373',
+    secondary: '#D1D5DB', // Brightened from #A8A8A8 (Gray 300 equivalent)
+    tertiary: '#9CA3AF',  // Brightened from #737373 (Gray 400 equivalent)
     onPrimary: '#121212',
-    disabled: '#4A4A4A',
+    disabled: '#6B7280',  // Brightened from #4A4A4A (Gray 500 equivalent)
   },
 
   // ─── Multi-Palette Accents (Slightly more vibrant for dark contrast) ─────

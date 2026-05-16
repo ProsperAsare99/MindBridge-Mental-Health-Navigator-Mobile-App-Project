@@ -347,8 +347,8 @@ export default function AIGuideScreen() {
           backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : 'rgba(123,97,255,0.06)',
           borderColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(123,97,255,0.14)',
         }]}>
-          <Info color={theme.colors.plum} size={13} />
-          <Text style={[S.disclaimerText, { color: theme.colors.text.tertiary }]}>
+          <Info color={theme.isDark ? theme.colors.accents.powderBlue : theme.colors.plum} size={13} />
+          <Text style={[S.disclaimerText, { color: theme.isDark ? theme.colors.text.secondary : theme.colors.text.tertiary }]}>
             {t.ai?.disclaimer || 'The Oracle supports your wellbeing but is not a substitute for professional care.'}
           </Text>
         </View>
@@ -441,7 +441,7 @@ const S = StyleSheet.create({
   // Header
   header: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(0,0,0,0.08)',
+    borderBottomColor: 'rgba(123,97,255,0.1)',
     zIndex: 10,
   },
   headerInner: {

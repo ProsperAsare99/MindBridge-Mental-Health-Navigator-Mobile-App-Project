@@ -307,7 +307,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     shadowRadius: 12,
     elevation: 3,
     borderWidth: 1,
-    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.8)',
   },
   entryHeader: {
     flexDirection: 'row',

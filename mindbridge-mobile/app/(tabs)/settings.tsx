@@ -25,18 +25,15 @@ import { AuthContext } from '../../src/context/AuthContext';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../src/services/api';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const themeContext = useTheme();
   const styles = createStyles(themeContext);
-  const { mode, setMode, colors, isDark } = themeContext;
+  const { mode, setMode, colors, isDark, language, setLanguage, t } = themeContext;
   const { logout } = React.useContext(AuthContext) as any;
   const router = useRouter();
-
-  const [notifications, setNotifications] = React.useState(true);
-  const [biometrics, setBiometrics] = React.useState(false);
-  const [language, setLanguage] = React.useState('English');
   const [isPasswordModalVisible, setIsPasswordModalVisible] = React.useState(false);
   const [isFeedbackVisible, setIsFeedbackVisible] = React.useState(false);
   const [isAboutVisible, setIsAboutVisible] = React.useState(false);
@@ -45,6 +42,10 @@ export default function SettingsScreen() {
   const [feedback, setFeedback] = React.useState('');
   const [isSendingFeedback, setIsSendingFeedback] = React.useState(false);
 
+  const [notifications, setNotifications] = React.useState(true);
+  const [biometrics, setBiometrics] = React.useState(false);
+  const [biometricType, setBiometricType] = React.useState('Biometric');
+  
   const [passForm, setPassForm] = React.useState({ current: '', new: '', confirm: '' });
   const [isUpdatingPass, setIsUpdatingPass] = React.useState(false);
 
@@ -53,10 +54,16 @@ export default function SettingsScreen() {
     const loadPrefs = async () => {
       const n = await AsyncStorage.getItem('settings_notifications');
       const b = await AsyncStorage.getItem('settings_biometrics');
-      const l = await AsyncStorage.getItem('settings_language');
       if (n !== null) setNotifications(n === 'true');
       if (b !== null) setBiometrics(b === 'true');
-      if (l !== null) setLanguage(l);
+
+      // Check biometric types
+      const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+      if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+        setBiometricType('FaceID');
+      } else if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+        setBiometricType('Fingerprint');
+      }
     };
     loadPrefs();
   }, []);
@@ -67,27 +74,51 @@ export default function SettingsScreen() {
   };
 
   const toggleBiometrics = async (val: boolean) => {
-    setBiometrics(val);
-    await AsyncStorage.setItem('settings_biometrics', val.toString());
+    if (val) {
+      // Check if device supports biometrics
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+      if (!hasHardware || !isEnrolled) {
+        Alert.alert(
+          "Not Supported", 
+          "Your device does not support biometric authentication or no biometrics are enrolled."
+        );
+        return;
+      }
+
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Verify your identity to enable Biometric Unlock',
+        fallbackLabel: 'Use Passcode',
+      });
+
+      if (result.success) {
+        setBiometrics(true);
+        await AsyncStorage.setItem('settings_biometrics', 'true');
+        Alert.alert("Enabled", "Biometric unlock is now active for your account. 🔒");
+      } else {
+        Alert.alert("Authentication Failed", "We could not verify your identity.");
+      }
+    } else {
+      setBiometrics(false);
+      await AsyncStorage.setItem('settings_biometrics', 'false');
+    }
   };
 
   const changeLanguage = () => {
     Alert.alert(
-      "Select Language",
-      "Choose your preferred language for the MindBridge experience.",
+      t('settings.select_language'),
+      t('settings.language_desc'),
       [
-        { text: "English", onPress: () => handleLanguageChange('English') },
-        { text: "French", onPress: () => handleLanguageChange('French') },
-        { text: "Twi", onPress: () => handleLanguageChange('Twi') },
-        { text: "Ewe", onPress: () => handleLanguageChange('Ewe') },
+        { text: "English", onPress: () => setLanguage('English') },
+        { text: "French", onPress: () => setLanguage('French') },
+        { text: "Twi", onPress: () => setLanguage('Twi') },
+        { text: "Ewe", onPress: () => setLanguage('Ewe') },
+        { text: "Ga", onPress: () => setLanguage('Ga') },
+        { text: "Hausa", onPress: () => setLanguage('Hausa') },
         { text: "Cancel", style: "cancel" }
       ]
     );
-  };
-
-  const handleLanguageChange = async (lang: string) => {
-    setLanguage(lang);
-    await AsyncStorage.setItem('settings_language', lang);
   };
 
   const handleComingSoon = (feature: string) => {
@@ -201,25 +232,25 @@ export default function SettingsScreen() {
 
         {/* ── Account Section ── */}
         <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Account & Privacy</Text>
+          <Text style={styles.sectionHeader}>{t('settings.account_privacy')}</Text>
           <View style={styles.card}>
             <SettingRow 
               icon={User} 
               color={colors.plum} 
-              label="Personal Information" 
+              label={t('settings.personal_info')} 
               value="Manage" 
               onPress={() => router.push('/(tabs)/profile')}
             />
             <SettingRow 
               icon={Lock} 
               color={colors.accents.powderBlue} 
-              label="Security & Password" 
+              label={t('settings.security_password')} 
               onPress={() => setIsPasswordModalVisible(true)}
             />
             <SettingRow 
               icon={ShieldCheck} 
               color={colors.accents.eucalyptus} 
-              label="Biometric Unlock" 
+              label={t('settings.passcode_unlock')} 
               type="switch" 
               value={biometrics} 
               onPress={toggleBiometrics} 
@@ -230,12 +261,12 @@ export default function SettingsScreen() {
 
         {/* ── Notifications Section ── */}
         <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Notifications</Text>
+          <Text style={styles.sectionHeader}>{t('settings.notifications')}</Text>
           <View style={styles.card}>
             <SettingRow 
               icon={Bell} 
               color={colors.accents.terracotta} 
-              label="Daily Quest Reminders" 
+              label={t('settings.quest_reminders')} 
               type="switch" 
               value={notifications} 
               onPress={toggleNotifications} 
@@ -243,7 +274,7 @@ export default function SettingsScreen() {
             <SettingRow 
               icon={Globe} 
               color={colors.accents.powderBlue} 
-              label="Language" 
+              label={t('settings.language')} 
               value={language} 
               onPress={changeLanguage}
               isLast 
@@ -253,24 +284,24 @@ export default function SettingsScreen() {
 
         {/* ── Support Section ── */}
         <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Support & Legal</Text>
+          <Text style={styles.sectionHeader}>{t('settings.support_legal')}</Text>
           <View style={styles.card}>
             <SettingRow 
               icon={HelpCircle} 
               color={colors.accents.slate} 
-              label="Help Center" 
+              label={t('settings.help_center')} 
               onPress={() => setIsHelpVisible(true)}
             />
             <SettingRow 
               icon={MessageSquare} 
               color={colors.accents.forestGreen} 
-              label="Send Feedback" 
+              label={t('settings.feedback')} 
               onPress={() => setIsFeedbackVisible(true)}
             />
             <SettingRow 
               icon={Info} 
               color={colors.text.tertiary} 
-              label="About MindBridge" 
+              label={t('settings.about')} 
               onPress={() => setIsAboutVisible(true)}
               isLast 
             />
@@ -284,7 +315,7 @@ export default function SettingsScreen() {
           activeOpacity={0.8}
         >
           <LogOut color="#FFF" size={20} />
-          <Text style={styles.logoutText}>Log Out</Text>
+          <Text style={styles.logoutText}>{t('settings.log_out')}</Text>
         </TouchableOpacity>
 
         <Text style={styles.versionText}>MindBridge v1.2.0 • Build 2026.05</Text>

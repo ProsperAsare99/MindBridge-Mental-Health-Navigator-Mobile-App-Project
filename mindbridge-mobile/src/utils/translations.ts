@@ -10,6 +10,13 @@ export interface TranslationSchema {
     confirm: string;
     cancel: string;
   };
+  tabs: {
+    today: string;
+    garden: string;
+    oracle: string;
+    profile: string;
+    settings: string;
+  };
   onboarding: {
     skipConfirm: string;
     skipConfirmAction: string;
@@ -47,6 +54,22 @@ export interface TranslationSchema {
     greetingRecent: string;
     greetingWelcome: string;
   };
+  settings: {
+    account_privacy: string;
+    personal_info: string;
+    security_password: string;
+    passcode_unlock: string;
+    notifications: string;
+    quest_reminders: string;
+    language: string;
+    support_legal: string;
+    help_center: string;
+    feedback: string;
+    about: string;
+    log_out: string;
+    select_language: string;
+    language_desc: string;
+  };
 }
 
 export const translations: Record<Language, TranslationSchema> = {
@@ -59,6 +82,13 @@ export const translations: Record<Language, TranslationSchema> = {
       skip: 'Skip',
       confirm: 'Confirm',
       cancel: 'Cancel',
+    },
+    tabs: {
+      today: 'Today',
+      garden: 'Garden',
+      oracle: 'Oracle',
+      profile: 'Profile',
+      settings: 'Settings',
     },
     onboarding: {
       skipConfirm: 'This information helps us personalize your support. Are you sure you want to skip?',
@@ -102,7 +132,23 @@ export const translations: Record<Language, TranslationSchema> = {
       greetingGlowing: "Hello {name}! Your last seed was glowing with {emotions} 🌱 What's been contributing to that good energy?",
       greetingRecent: "Hi {name}. I see your recent mood reflected {emotions}. How are you really doing today?",
       greetingWelcome: "Welcome, {name}. I'm the MindBridge Oracle — your personal guide. What's on your mind today?",
-    }
+    },
+    settings: {
+      account_privacy: 'Account & Privacy',
+      personal_info: 'Personal Information',
+      security_password: 'Security & Password',
+      passcode_unlock: 'Passcode Unlock',
+      notifications: 'Notifications',
+      quest_reminders: 'Daily Quest Reminders',
+      language: 'Language',
+      support_legal: 'Support & Legal',
+      help_center: 'Help Center',
+      feedback: 'Send Feedback',
+      about: 'About MindBridge',
+      log_out: 'Log Out',
+      select_language: 'Select Language',
+      language_desc: 'Choose your preferred language for the MindBridge experience.',
+    },
   },
   Twi: {
     common: {
@@ -113,6 +159,13 @@ export const translations: Record<Language, TranslationSchema> = {
       skip: 'Twa mu',
       confirm: 'Si so dua',
       cancel: 'Paasowa',
+    },
+    tabs: {
+      today: 'Nnɛ',
+      garden: 'Tuo',
+      oracle: 'Oracle',
+      profile: 'Profile',
+      settings: 'Settings',
     },
     onboarding: {
       skipConfirm: 'Saa asɛm yi bɛboa yɛn ma yɛahu sɛnea yɛbɛboa wo. Wopɛ sɛ wotwa mu ampa?',
@@ -156,7 +209,23 @@ export const translations: Record<Language, TranslationSchema> = {
       greetingGlowing: "Maakye {name}! Wo aba a ɛtwa toɔ no na ɛrehyerɛn ne {emotions} 🌱 Dɛn na ɛde saa ahoɔden pa yi aba?",
       greetingRecent: "Maakye {name}. Mehuu sɛ wo nkaebɔ a ɛtwa toɔ no kyerɛ {emotions}. Wowɔ tebea bɛn mu paa nnɛ?",
       greetingWelcome: "Akwaaba, {name}. Me ne MindBridge Oracle — wo ankasa wo kwankyerɛfo. Dɛn na ɛwɔ w’adwene mu nnɛ?",
-    }
+    },
+    settings: {
+      account_privacy: 'Akawnt ne Kokoamsɛm',
+      personal_info: 'Wo Ho Asɛm',
+      security_password: 'Banbɔ ne Paasowa',
+      passcode_unlock: 'Kɔde',
+      notifications: 'Nkaebɔ',
+      quest_reminders: 'Daa Nkaebɔ',
+      language: 'Kasa',
+      support_legal: 'Mmoa ne Mmara',
+      help_center: 'Mmoa Bea',
+      feedback: 'Kyerɛ W’adwene',
+      about: 'MindBridge Ho Asɛm',
+      log_out: 'Pue',
+      select_language: 'Paw Kasa',
+      language_desc: 'Paw kasa a wopɛ sɛ wode di dwuma wɔ MindBridge.',
+    },
   },
   French: {
     common: {
@@ -167,6 +236,13 @@ export const translations: Record<Language, TranslationSchema> = {
       skip: 'Passer',
       confirm: 'Confirmer',
       cancel: 'Annuler',
+    },
+    tabs: {
+      today: 'Aujourd\'hui',
+      garden: 'Jardin',
+      oracle: 'Oracle',
+      profile: 'Profil',
+      settings: 'Paramètres',
     },
     onboarding: {
       skipConfirm: 'Ces informations nous aident à personnaliser votre soutien. Êtes-vous sûr de vouloir passer ?',
@@ -210,7 +286,23 @@ export const translations: Record<Language, TranslationSchema> = {
       greetingGlowing: "Bonjour {name} ! Votre dernière graine brillait de {emotions} 🌱 Qu'est-ce qui a contribué à cette bonne énergie ?",
       greetingRecent: "Salut {name}. Je vois que votre humeur récente reflétait {emotions}. Comment allez-vous vraiment aujourd'hui ?",
       greetingWelcome: "Bienvenue, {name}. Je suis l'Oracle MindBridge — votre guide personnel. Qu'avez-vous à l'esprit aujourd'hui ?",
-    }
+    },
+    settings: {
+      account_privacy: 'Compte et confidentialité',
+      personal_info: 'Informations personnelles',
+      security_password: 'Sécurité et mot de passe',
+      passcode_unlock: 'Déverrouillage par code',
+      notifications: 'Notifications',
+      quest_reminders: 'Rappels quotidiens',
+      language: 'Langue',
+      support_legal: 'Support et juridique',
+      help_center: 'Centre d\'aide',
+      feedback: 'Envoyer des commentaires',
+      about: 'À propos de MindBridge',
+      log_out: 'Déconnexion',
+      select_language: 'Choisir la langue',
+      language_desc: 'Choisissez votre langue préférée pour l\'expérience MindBridge.',
+    },
   },
   Ga: {
     common: {
@@ -221,6 +313,13 @@ export const translations: Record<Language, TranslationSchema> = {
       skip: 'Fã',
       confirm: 'Ma nɔ mi',
       cancel: 'Twa',
+    },
+    tabs: {
+      today: 'Nnɛ',
+      garden: 'Abɔɔ',
+      oracle: 'Oracle',
+      profile: 'Profile',
+      settings: 'Settings',
     },
     onboarding: {
       skipConfirm: 'Nitsumɔi nɛ bɛye bɛbua wɔ ni wɔtsɔɔ bo gbɛ ni sa. Omiishɛɛ ni ofã?',
@@ -264,7 +363,23 @@ export const translations: Record<Language, TranslationSchema> = {
       greetingGlowing: "Leebi {name}! O-dua ni ofee nyɛ lɛ miitsɛ̀ kɛ {emotions} 🌱 Mɛni ha onuɔ he akɛ o-he wa nakai?",
       greetingRecent: "Hé {name}. Mina akɛ o-jwɛŋmɔ mli lɛ etsɔɔ {emotions}. Te onuɔ he tɛŋŋ paa nnɛ?",
       greetingWelcome: "Akwaaba, {name}. Mi ji MindBridge Oracle lɛ — o-gbɛtsɔɔlɔ paa. Mɛni yɔɔ o-jwɛŋmɔ mli nnɛ?",
-    }
+    },
+    settings: {
+      account_privacy: 'Account kɛ Kokoamsɛm',
+      personal_info: 'O-he Sane',
+      security_password: 'Banbɔ kɛ Paasowa',
+      passcode_unlock: 'Kɔde',
+      notifications: 'Nkaebɔ',
+      quest_reminders: 'Daa Nkaebɔ',
+      language: 'Kasa',
+      support_legal: 'Mmoa kɛ Mla',
+      help_center: 'Mmoa Bea',
+      feedback: 'Tsɔɔ O-jwɛŋmɔ',
+      about: 'MindBridge He Sane',
+      log_out: 'Pue',
+      select_language: 'Hala Kasa',
+      language_desc: 'Hala kasa ni oosumɔ ni okɛtsu nii yɛ MindBridge.',
+    },
   },
   Ewe: {
     common: {
@@ -275,6 +390,13 @@ export const translations: Record<Language, TranslationSchema> = {
       skip: 'Tutu',
       confirm: 'Ðo kpe edzi',
       cancel: 'Tso eme',
+    },
+    tabs: {
+      today: 'Egbe',
+      garden: 'Abɔ',
+      oracle: 'Oracle',
+      profile: 'Profile',
+      settings: 'Settings',
     },
     onboarding: {
       skipConfirm: 'Nyakpui siawo akpe ɖe mía ŋu be míawɔ nu siwo asɔ na wò. Èka ɖe edzi be èdi be yeatutui?',
@@ -318,7 +440,23 @@ export const translations: Record<Language, TranslationSchema> = {
       greetingGlowing: "Ŋdi {name}! Wò ku mamlɛa le dzo dam kple {emotions} 🌱 Nu kae na nèle seselelãme nyui sia me?",
       greetingRecent: "Hé {name}. Mekpɔe be wò seselelãme mamlɛa fia {emotions}. Aleke nèle sese me vavã fifia?",
       greetingWelcome: "Woezor, {name}. Nyee nye MindBridge Oracle — wò mɔfiala. Nu kae le wò jwɛŋmɔ me fifia?",
-    }
+    },
+    settings: {
+      account_privacy: 'Akawnt kple Ɣlaɣla nyawo',
+      personal_info: 'Wò Ŋutinya',
+      security_password: 'Banbɔ kple Paasowa',
+      passcode_unlock: 'Kɔde',
+      notifications: 'Gbeɖasiwo',
+      quest_reminders: 'Ŋkekea ƒe Ŋkuɖodzinyawo',
+      language: 'Gbegbɔgblɔ',
+      support_legal: 'Kpedenanu kple Se',
+      help_center: 'Kpekpedenu',
+      feedback: 'Gblɔ wò nyanyawo',
+      about: 'MindBridge Ŋutinya',
+      log_out: 'Do go',
+      select_language: 'Tia Gbegbɔgblɔ',
+      language_desc: 'Tia gbegbɔgblɔ si nàdi be yeazã le MindBridge.',
+    },
   },
   Hausa: {
     common: {
@@ -329,6 +467,13 @@ export const translations: Record<Language, TranslationSchema> = {
       skip: 'Tsallake',
       confirm: 'Tabbatar',
       cancel: 'Soke',
+    },
+    tabs: {
+      today: 'Yau',
+      garden: 'Lambu',
+      oracle: 'Oracle',
+      profile: 'Profile',
+      settings: 'Saituna',
     },
     onboarding: {
       skipConfirm: 'Wannan bayanin yana taimaka mana mu keɓance goyan bayan ku. Kun tabbata kuna son tsallake?',
@@ -372,6 +517,22 @@ export const translations: Record<Language, TranslationSchema> = {
       greetingGlowing: "Sannu {name}! Irin ka na ƙarshe ya kasance mai haske da {emotions} 🌱 Me ya taimaka wa wannan kyakkyawan kuzari?",
       greetingRecent: "Sannu {name}. Na ga cewa yanayin ka na baya-bayan nan ya nuna {emotions}. Yaya kake da gaske yau?",
       greetingWelcome: "Barka da zuwa, {name}. Ni ne MindBridge Oracle — jagoran ku. Me ke ranka yau?",
-    }
-  }
+    },
+    settings: {
+      account_privacy: 'Asusu da Sirri',
+      personal_info: 'Bayanin Kai',
+      security_password: 'Tsaro da Kalmar Sirri',
+      passcode_unlock: 'Kulle Lambar Sirri',
+      notifications: 'Sanarwa',
+      quest_reminders: 'Tunatarwa Kullum',
+      language: 'Yare',
+      support_legal: 'Taimako da Shari\'a',
+      help_center: 'Cibiyar Taimako',
+      feedback: 'Aiko da Sharhi',
+      about: 'Game da MindBridge',
+      log_out: 'Fita',
+      select_language: 'Zaɓi Yare',
+      language_desc: 'Zaɓi yaren da kuke so don MindBridge.',
+    },
+  },
 };

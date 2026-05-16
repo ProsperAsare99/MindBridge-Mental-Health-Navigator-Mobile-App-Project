@@ -14,7 +14,10 @@
       "backgroundColor": "#050505"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "MindBridge uses FaceID to securely protect your wellness data and reflections."
+      }
     },
     "android": {
       "adaptiveIcon": {

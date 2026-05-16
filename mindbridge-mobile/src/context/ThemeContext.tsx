@@ -2,13 +2,18 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme as useDeviceColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { lightColors, darkColors, spacing, borderRadius, typography } from '../theme/colors';
+import { translations, Language as TransLanguage } from '../utils/translations';
 
 type ThemeMode = 'system' | 'light' | 'dark';
+type Language = TransLanguage;
 
 interface ThemeContextType {
   mode: ThemeMode;
   isDark: boolean;
+  language: Language;
   setMode: (mode: ThemeMode) => void;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
   colors: typeof lightColors;
   spacing: typeof spacing;
   borderRadius: typeof borderRadius;
@@ -20,22 +25,28 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const deviceColorScheme = useDeviceColorScheme();
   const [mode, setModeState] = useState<ThemeMode>('system');
+  const [language, setLanguageState] = useState<Language>('English');
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const loadTheme = async () => {
+    const loadSettings = async () => {
       try {
         const savedMode = await AsyncStorage.getItem('@theme_mode');
+        const savedLang = await AsyncStorage.getItem('@app_language');
+        
         if (savedMode && ['system', 'light', 'dark'].includes(savedMode)) {
           setModeState(savedMode as ThemeMode);
         }
+        if (savedLang && ['English', 'French', 'Twi', 'Ewe'].includes(savedLang)) {
+          setLanguageState(savedLang as Language);
+        }
       } catch (error) {
-        console.error('Failed to load theme preference:', error);
+        console.error('Failed to load settings:', error);
       } finally {
         setIsLoaded(true);
       }
     };
-    loadTheme();
+    loadSettings();
   }, []);
 
   const setMode = async (newMode: ThemeMode) => {
@@ -47,13 +58,38 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const setLanguage = async (newLang: Language) => {
+    setLanguageState(newLang);
+    try {
+      await AsyncStorage.setItem('@app_language', newLang);
+    } catch (error) {
+      console.error('Failed to save language preference:', error);
+    }
+  };
+
+  const t = (path: string): string => {
+    try {
+      const keys = path.split('.');
+      let result: any = translations[language];
+      for (const key of keys) {
+        result = result[key];
+      }
+      return result || path;
+    } catch {
+      return path;
+    }
+  };
+
   const isDark = mode === 'system' ? deviceColorScheme === 'dark' : mode === 'dark';
   const colors = isDark ? darkColors : lightColors;
 
   const value = {
     mode,
     isDark,
+    language,
     setMode,
+    setLanguage,
+    t,
     colors,
     spacing,
     borderRadius,

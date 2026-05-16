@@ -12,7 +12,7 @@ export interface TranslationSchema {
   };
   tabs: {
     today: string;
-    garden: string;
+    tracker: string;
     oracle: string;
     profile: string;
     settings: string;
@@ -47,10 +47,10 @@ export interface TranslationSchema {
     wellnessHub: string;
     wellnessToolkit: string;
   };
-  garden: {
+  tracker: {
     title: string;
     subtitle: string;
-    seedQuestion: string;
+    checkInQuestion: string;
     supportNudge: string;
     successTitle: string;
     successSubtitle: string;
@@ -59,7 +59,7 @@ export interface TranslationSchema {
     socialInteraction: string;
     physicalSymptoms: string;
     audioNote: string;
-    nurtureBtn: string;
+    submitBtn: string;
   };
   ai: {
     title: string;
@@ -206,7 +206,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Today',
-      garden: 'Garden',
+      tracker: 'Tracker',
       oracle: 'Oracle',
       profile: 'Profile',
       settings: 'Settings',
@@ -252,19 +252,19 @@ export const translations: Record<Language, TranslationSchema> = {
       wellnessHub: 'Wellness Hub',
       wellnessToolkit: 'Wellness Toolkit',
     },
-    garden: {
-      title: 'Mood Garden',
-      subtitle: 'Nurture your peace',
-      seedQuestion: 'How are you feeling right now?',
+    tracker: {
+      title: 'Wellness Tracker',
+      subtitle: 'Track your daily balance',
+      checkInQuestion: 'How are you feeling right now?',
       supportNudge: "I'm sorry you're feeling this way. Would you like to try a quick breathing exercise?",
-      successTitle: 'Seed Planted!',
-      successSubtitle: "Your garden is a little more vibrant now. Take this peace with you into the rest of your day.",
+      successTitle: 'Check-in Complete!',
+      successSubtitle: "Your wellness record has been updated. This data helps us provide better support for you.",
       energyLevel: "How is your energy?",
       sleepQuality: "How was your sleep?",
       socialInteraction: "Who have you been with?",
       physicalSymptoms: "Any physical symptoms?",
       audioNote: "Voice Reflection",
-      nurtureBtn: "Nurture My Peace 🌱"
+      submitBtn: "Complete Check-in"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -311,7 +311,7 @@ export const translations: Record<Language, TranslationSchema> = {
       academic_info: 'Academic Info',
       emergency_contact: 'Emergency Contact',
       crisis_support: 'Crisis Support',
-      my_garden: 'My Garden',
+      my_garden: 'Wellness History',
       settings: 'Settings',
       log_out: 'Log Out',
     },
@@ -409,7 +409,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Nnɛ',
-      garden: 'Tuo',
+      tracker: 'Suivi',
       oracle: 'Oracle',
       profile: 'Profile',
       settings: 'Settings',
@@ -455,10 +455,10 @@ export const translations: Record<Language, TranslationSchema> = {
       wellnessHub: 'Wellness Hub',
       wellnessToolkit: 'Wellness Toolkit',
     },
-    garden: {
+    tracker: {
       title: 'Tuo Garden',
       subtitle: 'Hwɛ wo asomdwoe so',
-      seedQuestion: 'Tebea bɛn na wowɔ mu seesei?',
+      checkInQuestion: 'Tebea bɛn na wowɔ mu seesei?',
       supportNudge: "Ɛyɛ me ya sɛ wote nka saa. Wopɛ sɛ wosɔ mframa gye bi hwɛ?",
       successTitle: 'Aba no adua!',
       successSubtitle: "Wo turo no ayɛ fɛ paa seesei. Fa saa asomdwoe yi kura wo wɔ wo da no nyinaa mu.",
@@ -467,7 +467,7 @@ export const translations: Record<Language, TranslationSchema> = {
       socialInteraction: "Hwan na wo ne no wɔ hɔ?",
       physicalSymptoms: "Wo honam mu yɛ wo den?",
       audioNote: "Nne nkaebɔ",
-      nurtureBtn: "Ma m'asomdwoe nnɔ 🌱"
+      submitBtn: "Ma m'asomdwoe nnɔ 🌱"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -612,7 +612,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Aujourd\'hui',
-      garden: 'Jardin',
+      tracker: 'Suivi',
       oracle: 'Oracle',
       profile: 'Profil',
       settings: 'Paramètres',
@@ -658,10 +658,10 @@ export const translations: Record<Language, TranslationSchema> = {
       wellnessHub: 'Centre de Bien-être',
       wellnessToolkit: 'Boîte à Outils de Bien-être',
     },
-    garden: {
+    tracker: {
       title: "Jardin d'humeur",
       subtitle: 'Cultivez votre paix',
-      seedQuestion: 'Comment vous sentez-vous en ce moment?',
+      checkInQuestion: 'Comment vous sentez-vous en ce moment?',
       supportNudge: "Je suis désolé que vous vous sentiez ainsi. Voudriez-vous essayer un exercice de respiration rapide ?",
       successTitle: 'Graine plantée !',
       successSubtitle: "Votre jardin est un peu plus vibrant maintenant. Emportez cette paix avec vous pour le reste de votre journée.",
@@ -670,7 +670,7 @@ export const translations: Record<Language, TranslationSchema> = {
       socialInteraction: "Avec qui étiez-vous ?",
       physicalSymptoms: "Des symptômes physiques ?",
       audioNote: "Réflexion vocale",
-      nurtureBtn: "Nourrir ma paix 🌱"
+      submitBtn: "Nourrir ma paix 🌱"
     },
     ai: {
       title: 'Oracle MindBridge',
@@ -815,7 +815,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Nnɛ',
-      garden: 'Abɔɔ',
+      tracker: 'Abɔɔ',
       oracle: 'Oracle',
       profile: 'Profile',
       settings: 'Settings',
@@ -861,10 +861,10 @@ export const translations: Record<Language, TranslationSchema> = {
       wellnessHub: 'Wellness Hub',
       wellnessToolkit: 'Wellness Toolkit',
     },
-    garden: {
+    tracker: {
       title: 'Susuma Abɔɔ',
       subtitle: 'Kwɛmɔ ohejɔlɛ lɛ nɔ',
-      seedQuestion: 'Te onuɔ he tɛŋŋ bianɛ?',
+      checkInQuestion: 'Te onuɔ he tɛŋŋ bianɛ?',
       supportNudge: "Eshwerɛ mi akɛ onuɔ he nakai. Oosumɔ ni okee mu ko kwee?",
       successTitle: 'Dua lɛ edua!',
       successSubtitle: "Wò abɔ lolo vi aɖe fifia. Kpɔ fafa sia ɖe wò ŋukeke si susɔ la me.",
@@ -873,7 +873,7 @@ export const translations: Record<Language, TranslationSchema> = {
       socialInteraction: "Amekawo gbɔ nèle?",
       physicalSymptoms: "Lãmesẽkuxi aɖewo le wò hã?",
       audioNote: "Gbeɖiɖi dzesi",
-      nurtureBtn: "Na nye fafa natsi 🌱"
+      submitBtn: "Na nye fafa natsi 🌱"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -1018,7 +1018,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Egbe',
-      garden: 'Abɔ',
+      tracker: 'Abɔ',
       oracle: 'Oracle',
       profile: 'Profile',
       settings: 'Settings',
@@ -1064,10 +1064,10 @@ export const translations: Record<Language, TranslationSchema> = {
       wellnessHub: 'Wellness Hub',
       wellnessToolkit: 'Wellness Toolkit',
     },
-    garden: {
+    tracker: {
       title: 'Seselelãme ƒe Abɔ',
       subtitle: 'Kpɔ wo ŋutifafa ta',
-      seedQuestion: 'Aleke nèle sese me fifia?',
+      checkInQuestion: 'Aleke nèle sese me fifia?',
       supportNudge: "Eve m be nèle sese me nenema. Àdi be yeasɔ gbɔgbɔ ƒe dɔwɔnu aɖea?",
       successTitle: 'Ku la ƒe dodo!',
       successSubtitle: "Wò abɔ lolo vi aɖe fifia. Kpɔ fafa sia ɖe wò ŋukeke si susɔ la me.",
@@ -1076,7 +1076,7 @@ export const translations: Record<Language, TranslationSchema> = {
       socialInteraction: "Amekawo gbɔ nèle?",
       physicalSymptoms: "Lãmesẽkuxi aɖewo le wò hã?",
       audioNote: "Gbeɖiɖi dzesi",
-      nurtureBtn: "Na nye fafa natsi 🌱"
+      submitBtn: "Na nye fafa natsi 🌱"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -1221,7 +1221,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Yau',
-      garden: 'Lambu',
+      tracker: 'Lambu',
       oracle: 'Oracle',
       profile: 'Profile',
       settings: 'Saituna',
@@ -1267,10 +1267,10 @@ export const translations: Record<Language, TranslationSchema> = {
       wellnessHub: 'Cibiyar Lafiya',
       wellnessToolkit: 'Kayan Aikin Lafiya',
     },
-    garden: {
+    tracker: {
       title: 'Lambun Zuciya',
       subtitle: 'Rafi na kwanciyar hankali',
-      seedQuestion: 'Yaya kake ji a yanzu?',
+      checkInQuestion: 'Yaya kake ji a yanzu?',
       supportNudge: "Yi haƙuri kuna jin haka. Za ku so ku gwada darasin numfashi?",
       successTitle: 'An dasa iri!',
       successSubtitle: "Lambun ku ya ɗan ƙara girma yanzu. Ka tafi da wannan kwanciyar hankali cikin sauran ranar ka.",
@@ -1279,7 +1279,7 @@ export const translations: Record<Language, TranslationSchema> = {
       socialInteraction: "Da wa kake tare?",
       physicalSymptoms: "Akwai wata matsalar lafiya?",
       audioNote: "Muryar tunani",
-      nurtureBtn: "Haɓaka kwanciyar hankali na 🌱"
+      submitBtn: "Haɓaka kwanciyar hankali na 🌱"
     },
     ai: {
       title: 'MindBridge Oracle',

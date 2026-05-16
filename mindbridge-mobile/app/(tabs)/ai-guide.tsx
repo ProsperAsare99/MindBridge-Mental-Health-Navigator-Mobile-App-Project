@@ -257,8 +257,9 @@ export default function AIGuideScreen() {
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, aiMsg]);
-    } catch (e) {
-      Alert.alert('Oracle is resting', 'Please try again in a moment.');
+    } catch (e: any) {
+      const errorMsg = e.response?.data?.message || 'Please try again in a moment.';
+      Alert.alert('Oracle is resting', errorMsg);
     } finally {
       setLoading(false);
     }

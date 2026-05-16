@@ -153,12 +153,18 @@ export default function ProfileScreen() {
         name: res.data.name,
         phoneNumber: res.data.phoneNumber,
         studentId: res.data.studentId,
+        username: res.data.username,
         university: res.data.onboarding?.university,
         program: res.data.onboarding?.program,
         level: res.data.onboarding?.level,
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error('Error fetching profile:', e);
+      if (e.response?.status === 401 || e.response?.status === 404) {
+        Alert.alert('Session Expired', 'Please log in again to continue.');
+        signOut();
+        router.replace('/(auth)/welcome');
+      }
     } finally {
       setLoading(false);
     }
@@ -249,6 +255,7 @@ export default function ProfileScreen() {
             </View>
           </TouchableOpacity>
           <Text style={styles.userName}>{profile?.name || userData?.name}</Text>
+          <Text style={styles.userHandle}>@{profile?.username || 'username'}</Text>
           <Text style={styles.userEmail}>{isGuest ? "Guest User" : profile?.email}</Text>
           
           <TouchableOpacity style={styles.editBtn} activeOpacity={0.8} onPress={() => setIsEditing(true)}>
@@ -415,6 +422,16 @@ export default function ProfileScreen() {
                   />
                 </View>
                 <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Username</Text>
+                  <TextInput 
+                    style={styles.input} 
+                    value={editData.username} 
+                    onChangeText={t => setEditData({...editData, username: t})}
+                    placeholder="Enter username"
+                    autoCapitalize="none"
+                  />
+                </View>
+                <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Phone Number</Text>
                   <TextInput 
                     style={styles.input} 
@@ -501,7 +518,8 @@ const createStyles = (theme: any) => StyleSheet.create({
   avatarContainer: { width: 100, height: 100, borderRadius: 50, backgroundColor: theme.colors.surface, padding: 4, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 10, marginBottom: 16 },
   avatarImage: { width: '100%', height: '100%', borderRadius: 46 },
   avatarEditBadge: { position: 'absolute', bottom: 0, right: 0, backgroundColor: theme.colors.plum, width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: theme.colors.surface },
-  userName: { fontSize: 24, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, marginBottom: 4 },
+  userName: { fontSize: 24, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, marginBottom: 2 },
+  userHandle: { fontSize: 15, fontFamily: theme.typography.fonts.body, color: theme.colors.plum, fontWeight: '700', marginBottom: 6 },
   userEmail: { fontSize: 14, fontFamily: theme.typography.fonts.body, color: theme.colors.text.secondary, marginBottom: 20 },
   editBtn: { backgroundColor: theme.colors.plum + '10', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 20 },
   editBtnText: { color: theme.colors.plum, fontFamily: theme.typography.fonts.header, fontSize: 13 },

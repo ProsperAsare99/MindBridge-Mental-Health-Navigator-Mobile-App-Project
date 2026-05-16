@@ -129,6 +129,10 @@ export const chatWithOracle = async (req: Request, res: Response) => {
       select: { name: true }
     });
 
+    if (!user) {
+      return res.status(401).json({ message: "Account not found. Please log out and back in." });
+    }
+
     const onboarding = await prisma.onboarding.findUnique({
       where: { userId }
     });

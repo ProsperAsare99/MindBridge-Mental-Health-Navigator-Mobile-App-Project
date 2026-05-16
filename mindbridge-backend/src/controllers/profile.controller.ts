@@ -14,7 +14,7 @@ export const getProfile = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(401).json({ error: 'User not found. Session invalid.', code: 'USER_NOT_FOUND' });
     }
 
     // Don't send password
@@ -82,13 +82,14 @@ export const getProfile = async (req: Request, res: Response) => {
 export const updateProfile = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
-    const { name, phoneNumber, profileImage, studentId, university, program, level } = req.body;
+    const { name, username, phoneNumber, profileImage, studentId, university, program, level } = req.body;
 
     // Update User table
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
         name,
+        username,
         phoneNumber,
         profileImage,
         studentId,

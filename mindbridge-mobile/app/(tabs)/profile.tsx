@@ -239,6 +239,22 @@ export default function ProfileScreen() {
         <ScreenHeader 
           title={t('profile.title')} 
           subtitle={t('profile.subtitle')}
+          rightAction={
+            <TouchableOpacity 
+              activeOpacity={0.8} 
+              onPress={() => router.push('/(tabs)/settings')}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <SettingsIcon color={theme.colors.plum} size={22} />
+            </TouchableOpacity>
+          }
         />
 
         <Animated.View entering={FadeInUp.duration(600)} style={styles.headerProfile}>

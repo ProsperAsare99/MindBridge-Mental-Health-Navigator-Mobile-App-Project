@@ -52,7 +52,9 @@ import {
   Info,
   PenLine,
   ChevronDown,
-  Flame
+  Flame,
+  Feather,
+  Sparkles
 } from 'lucide-react-native';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 
@@ -518,7 +520,7 @@ export default function DashboardScreen() {
             >
               <View style={styles.reflectionHeader}>
                 <View style={[styles.reflectionMood, { backgroundColor: theme.colors.plum + '10' }]}>
-                  <Text style={{ fontSize: 26 }}>{journalHistory[0].mood || '📝'}</Text>
+                  <Feather size={24} color={theme.colors.plum} strokeWidth={1.5} />
                 </View>
                 <View style={{ flex: 1, marginLeft: 4 }}>
                   <View style={styles.reflectionTag}>

@@ -21,6 +21,12 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withRepeat,
+  withSequence,
+  withDelay,
+  withTiming,
+  interpolate,
+  Extrapolate
 } from 'react-native-reanimated';
 import {
   Leaf,
@@ -28,7 +34,10 @@ import {
   Flower2,
   CircleDashed,
   Bell,
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  CloudRain,
+  Wind
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -105,12 +114,57 @@ const MoodCircle = ({ mood, isSelected, onPress, delay, theme }: any) => {
 };
 
 const getGrowthStage = (count: number) => {
-  if (count >= 20) return { label: 'Ancient Tree', icon: Flower2, color: '#8B5CF6' };
-  if (count >= 14) return { label: 'Full Bloom', icon: Flower2, color: '#7B61FF' };
-  if (count >= 8) return { label: 'Healthy Plant', icon: Leaf, color: '#34D399' };
-  if (count >= 4) return { label: 'Sprouting', icon: Sun, color: '#FBBF24' };
-  if (count >= 1) return { label: 'New Seed', icon: Leaf, color: '#60A5FA' };
-  return { label: 'Empty Garden', icon: CircleDashed, color: '#94A3B8' };
+  if (count >= 20) return { label: 'Ancient Tree', icon: Flower2, color: '#8B5CF6', atmosphere: ['#2E1065', '#4C1D95'] as any, sparkles: true };
+  if (count >= 14) return { label: 'Full Bloom', icon: Flower2, color: '#7B61FF', atmosphere: ['#4C1D95', '#5B21B6'] as any, sparkles: true };
+  if (count >= 8) return { label: 'Healthy Plant', icon: Leaf, color: '#34D399', atmosphere: ['#064E3B', '#065F46'] as any, sparkles: false };
+  if (count >= 4) return { label: 'Sprouting', icon: Sun, color: '#FBBF24', atmosphere: ['#78350F', '#92400E'] as any, sparkles: false };
+  if (count >= 1) return { label: 'New Seed', icon: Leaf, color: '#60A5FA', atmosphere: ['#1E3A8A', '#1E40AF'] as any, sparkles: false };
+  return { label: 'Empty Garden', icon: CircleDashed, color: '#94A3B8', atmosphere: ['#1F2937', '#111827'] as any, sparkles: false };
+};
+
+const PeaceParticle = ({ delay, theme }: any) => {
+  const translateY = useSharedValue(0);
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.5);
+
+  useEffect(() => {
+    translateY.value = withRepeat(
+      withSequence(
+        withTiming(-100, { duration: 4000 + Math.random() * 2000 }),
+        withTiming(0, { duration: 0 })
+      ),
+      -1
+    );
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0.6, { duration: 1000 }),
+        withTiming(0.6, { duration: 2000 }),
+        withTiming(0, { duration: 1000 })
+      ),
+      -1
+    );
+    scale.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2000 }),
+        withTiming(0.5, { duration: 2000 })
+      ),
+      -1
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }, { scale: scale.value }],
+    opacity: opacity.value,
+    position: 'absolute',
+    left: `${Math.random() * 100}%`,
+    top: '80%',
+  }));
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <Sparkles color="#FFF" size={8} opacity={0.4} />
+    </Animated.View>
+  );
 };
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
@@ -163,6 +217,7 @@ export default function GardenScreen() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [moodLogs, setMoodLogs] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [showNotifModal, setShowNotifModal] = useState(false);
   const timeCtx = getTimeContext();
   const MOODS = getMoods(theme);
@@ -171,12 +226,12 @@ export default function GardenScreen() {
     try {
       const res = await api.get('/ai/oracle-context');
       setMoodLogs(res.data.recentJournal || []);
+      setTotalCount(res.data.moodCount || 0);
     } catch (e) { }
   };
 
   useEffect(() => { fetchLogs(); }, []);
-
-  const growth = getGrowthStage(moodLogs.length);
+  const growth = getGrowthStage(totalCount);
 
   const handleAnswer = (key: string, value: boolean) => {
     setAnswers(prev => ({ ...prev, [key]: value }));
@@ -234,25 +289,65 @@ export default function GardenScreen() {
     await AsyncStorage.setItem('notif_asked', 'true');
   };
 
-  const GrowthHeader = () => (
-    <Animated.View entering={FadeIn.duration(800)} style={styles.growthContainer}>
-      <BlurView intensity={theme.isDark ? 20 : 40} tint={theme.isDark ? 'dark' : 'light'} style={styles.growthCard}>
-        <View style={[styles.growthIconWrap, { backgroundColor: growth.color + '20' }]}>
-          <growth.icon color={growth.color} size={28} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.growthLabel, { fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary }]}>{growth.label}</Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${Math.min((moodLogs.length / 20) * 100, 100)}%`, backgroundColor: growth.color }]} />
+  const GrowthHeader = () => {
+    const scale = useSharedValue(1);
+    
+    useEffect(() => {
+      scale.value = withRepeat(
+        withSequence(
+          withTiming(1.05, { duration: 2000 }),
+          withTiming(1, { duration: 2000 })
+        ),
+        -1,
+        true
+      );
+    }, []);
+
+    const animStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }]
+    }));
+
+    return (
+      <Animated.View entering={FadeIn.duration(800)} style={styles.growthContainer}>
+        <LinearGradient
+          colors={theme.isDark ? growth.atmosphere : ['#FFF', '#F8FAFC']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.growthCard}
+        >
+          {growth.sparkles && theme.isDark && Array.from({ length: 15 }).map((_, i) => (
+            <PeaceParticle key={i} theme={theme} />
+          ))}
+          
+          <Animated.View style={[styles.growthIconWrap, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.1)' : growth.color + '20' }, animStyle]}>
+            <growth.icon color={theme.isDark ? '#FFF' : growth.color} size={32} />
+          </Animated.View>
+          
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.growthLabel, { 
+              fontFamily: theme.typography.fonts.header, 
+              color: theme.isDark ? '#FFF' : theme.colors.text.primary 
+            }]}>
+              {growth.label}
+            </Text>
+            <View style={[styles.progressBar, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
+              <View style={[styles.progressFill, { width: `${Math.min((totalCount / 20) * 100, 100)}%`, backgroundColor: theme.isDark ? '#FFF' : growth.color }]} />
+            </View>
           </View>
-        </View>
-        <View style={styles.growthCount}>
-          <Text style={[styles.growthCountText, { fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary }]}>{moodLogs.length}</Text>
-          <Leaf size={14} color={theme.colors.plum} fill={theme.colors.plum + '20'} />
-        </View>
-      </BlurView>
-    </Animated.View>
-  );
+          
+          <View style={styles.growthCount}>
+            <Text style={[styles.growthCountText, { 
+              fontFamily: theme.typography.fonts.header, 
+              color: theme.isDark ? '#FFF' : theme.colors.text.primary 
+            }]}>
+              {totalCount}
+            </Text>
+            <Leaf size={14} color={theme.isDark ? '#FFF' : theme.colors.plum} fill={theme.isDark ? 'rgba(255,255,255,0.2)' : theme.colors.plum + '20'} />
+          </View>
+        </LinearGradient>
+      </Animated.View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -365,10 +460,43 @@ const StepMood = ({ timeCtx, moods, selected, setSelected, theme, t, router }: a
       </Animated.View>
     )}
 
-    <View style={styles.moodGrid}>
-      {moods.map((m: any, i: number) => (
-        <MoodCircle key={m.id} mood={m} isSelected={selected === m.id} onPress={() => setSelected(m.id)} delay={i * 30} theme={theme} />
-      ))}
+    <View style={styles.wheelContainer}>
+      <View style={styles.wheelCenter}>
+        {selected ? (
+          <Animated.View entering={FadeIn} style={[styles.selectedMoodCircle, { backgroundColor: moods.find((m: any) => m.id === selected)?.color + '20' }]}>
+            <Text style={{ fontSize: 56 }}>{moods.find((m: any) => m.id === selected)?.emoji}</Text>
+            <Text style={[styles.selectedMoodLabel, { color: theme.colors.text.primary }]}>{moods.find((m: any) => m.id === selected)?.label}</Text>
+          </Animated.View>
+        ) : (
+          <View style={styles.wheelPlaceholder}>
+            <Text style={[styles.placeholderEmoji, { color: theme.colors.text.tertiary }]}>✨</Text>
+          </View>
+        )}
+      </View>
+
+      {moods.map((m: any, i: number) => {
+        const angle = (i * (360 / moods.length)) * (Math.PI / 180);
+        const radius = 120;
+        const x = radius * Math.cos(angle);
+        const y = radius * Math.sin(angle);
+        
+        return (
+          <TouchableOpacity
+            key={m.id}
+            onPress={() => setSelected(m.id)}
+            style={[
+              styles.wheelItem,
+              { 
+                transform: [{ translateX: x }, { translateY: y }],
+                backgroundColor: selected === m.id ? m.color : (theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)'),
+                borderColor: selected === m.id ? m.color : (theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'),
+              }
+            ]}
+          >
+            <Text style={{ fontSize: 26 }}>{m.emoji}</Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   </Animated.View>
 );
@@ -416,6 +544,13 @@ const styles = StyleSheet.create({
   moodCircle: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
   moodCircleSelected: { shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 12, elevation: 6 },
   moodLabel: { fontSize: 12, color: '#888', textAlign: 'center', marginTop: 4 },
+  wheelContainer: { width: 300, height: 300, alignItems: 'center', justifyContent: 'center', marginVertical: 32 },
+  wheelCenter: { width: 140, height: 140, borderRadius: 70, alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+  wheelItem: { position: 'absolute', width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', borderWidth: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 4 },
+  selectedMoodCircle: { alignItems: 'center', justifyContent: 'center', width: 140, height: 140, borderRadius: 70 },
+  selectedMoodLabel: { fontSize: 16, fontWeight: '800', marginTop: 8 },
+  wheelPlaceholder: { alignItems: 'center', justifyContent: 'center' },
+  placeholderEmoji: { fontSize: 40, opacity: 0.5 },
   nudge: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(123, 97, 255, 0.1)', padding: 12, borderRadius: 16, marginBottom: 20 },
   nudgeText: { flex: 1, fontSize: 12, fontWeight: '500' },
   nudgeLink: { fontSize: 12, fontWeight: '700', color: '#7B61FF', textDecorationLine: 'underline' },

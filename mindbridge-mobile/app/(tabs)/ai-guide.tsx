@@ -111,8 +111,8 @@ const MessageItem = ({ item, theme, router, t }: any) => {
                 borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
               }]}
             >
-              <Text style={[S.disclaimerText, { color: theme.colors.text.secondary }]}>
-                {t('ai.disclaimer')}
+              <Text style={[msgStyles.textAi, { color: theme.colors.text.primary }]}>
+                {item.text}
               </Text>
             </TouchableOpacity>
           )}

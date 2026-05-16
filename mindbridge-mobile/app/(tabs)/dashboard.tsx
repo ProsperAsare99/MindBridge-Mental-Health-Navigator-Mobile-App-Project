@@ -1004,5 +1004,12 @@ const createStyles = (theme: any) => StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     marginTop: 2,
-  }
+  },
+  crisisActionBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

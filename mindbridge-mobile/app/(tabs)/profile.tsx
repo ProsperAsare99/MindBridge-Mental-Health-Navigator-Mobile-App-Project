@@ -39,7 +39,9 @@ import {
   Settings as SettingsIcon,
   PhoneCall,
   X,
-  Camera
+  Camera,
+  ShieldAlert,
+  Phone
 } from 'lucide-react-native';
 
 import { AuthContext } from '../../src/context/AuthContext';
@@ -299,6 +301,26 @@ export default function ProfileScreen() {
 
         <ProfileListGroup delay={500} theme={theme}>
           <View style={styles.sectionLabelRow}>
+            <ShieldAlert size={14} color={theme.colors.semantic.danger} />
+            <Text style={[styles.sectionLabel, { color: theme.colors.semantic.danger }]}>{t('profile.crisis_support')}</Text>
+          </View>
+          <TouchableOpacity 
+            style={[styles.crisisCard, { backgroundColor: theme.isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.05)' }]}
+            onPress={() => router.push('/(tabs)/crisis')}
+          >
+            <View style={[styles.crisisIconWrap, { backgroundColor: theme.colors.semantic.danger }]}>
+              <Phone size={20} color="#FFF" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.crisisTitle}>Emergency Hotline</Text>
+              <Text style={styles.crisisSubtitle}>Tap for immediate mental health support</Text>
+            </View>
+            <ChevronRight color={theme.colors.semantic.danger} size={20} />
+          </TouchableOpacity>
+        </ProfileListGroup>
+
+        <ProfileListGroup delay={600} theme={theme}>
+          <View style={styles.sectionLabelRow}>
             <GraduationCap size={14} color={theme.colors.text.tertiary} />
             <Text style={styles.sectionLabel}>{t('profile.academic_info')}</Text>
           </View>
@@ -516,6 +538,32 @@ const createStyles = (theme: any) => StyleSheet.create({
   uniOptionText: {
     fontSize: 14,
     color: theme.colors.text.secondary,
-  }
+  },
+  crisisCard: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginHorizontal: 20, 
+    padding: 16, 
+    borderRadius: 20, 
+    marginBottom: 16,
+    gap: 12
+  },
+  crisisIconWrap: { 
+    width: 40, 
+    height: 40, 
+    borderRadius: 12, 
+    alignItems: 'center', 
+    justifyContent: 'center' 
+  },
+  crisisTitle: { 
+    fontSize: 16, 
+    fontFamily: theme.typography.fonts.header, 
+    color: theme.colors.text.primary 
+  },
+  crisisSubtitle: { 
+    fontSize: 12, 
+    fontFamily: theme.typography.fonts.body, 
+    color: theme.colors.text.secondary 
+  },
 });
 

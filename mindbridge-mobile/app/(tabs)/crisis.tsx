@@ -6,8 +6,11 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Linking,
-  StatusBar
+  StatusBar,
+  Alert
 } from 'react-native';
+import { AuthContext } from '../../src/context/AuthContext';
+import { useContext, useEffect, useState } from 'react';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
@@ -20,36 +23,85 @@ import {
   HeartHandshake, 
   MapPin,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Building2,
+  PhoneForwarded
 } from 'lucide-react-native';
 
-const getEmergencyContacts = (theme: any, t: any) => [
-  {
-    id: 'national',
-    title: t('crisis.national_emergency'),
-    number: '112',
-    description: 'Police, Fire, Ambulance',
-    icon: Phone,
-    color: theme.colors.semantic.danger,
-    primary: true,
-  },
-  {
-    id: 'counseling',
-    title: t('crisis.university_counseling'),
+const UNIVERSITY_COUNSELING_CENTERS: Record<string, any> = {
+  'KNUST': {
+    name: 'KNUST Counseling Center',
     number: '+233 24 123 4567',
-    description: 'KNUST Counseling Center (24/7)',
-    icon: HeartHandshake,
-    color: theme.colors.plum,
+    description: 'Professional support for students & staff (24/7)'
   },
-  {
-    id: 'mental_health_authority',
-    title: t('crisis.mental_health_helpline'),
+  'University of Ghana (UG)': {
+    name: 'UG Counseling & Placement Center',
+    number: '+233 30 250 0381',
+    description: 'Confidential psychological support at Legon'
+  },
+  'University of Cape Coast (UCC)': {
+    name: 'UCC Counseling Center',
+    number: '+233 24 485 5411',
+    description: 'Mental health and career guidance services'
+  },
+  'Ashesi University': {
+    name: 'Ashesi Health & Wellbeing',
+    number: '+233 30 261 0330',
+    description: 'Holistic support for Ashesi students'
+  },
+  'Academic City': {
+    name: 'Academic City Student Support',
+    number: '+233 30 277 2222',
+    description: 'Wellness and counseling for ACity students'
+  },
+  'UPSA': {
+    name: 'UPSA Counseling Services',
+    number: '+233 30 250 1181',
+    description: 'Professional guidance and counseling unit'
+  },
+  'GIMPA': {
+    name: 'GIMPA Counseling Unit',
+    number: '+233 30 240 1681',
+    description: 'Support for the GIMPA community'
+  },
+  'Other': {
+    name: 'National Counseling Line',
     number: '0800 678 678',
-    description: 'Toll-free national psychological support',
-    icon: MessageSquare,
-    color: theme.colors.accents.terracotta,
+    description: 'Toll-free national psychological support'
   }
-];
+};
+
+const getEmergencyContacts = (theme: any, t: any, userUni: string) => {
+  const uniCenter = UNIVERSITY_COUNSELING_CENTERS[userUni] || UNIVERSITY_COUNSELING_CENTERS['Other'];
+  
+  return [
+    {
+      id: 'national',
+      title: t('crisis.national_emergency'),
+      number: '112',
+      description: 'Police, Fire, Ambulance (24/7)',
+      icon: Phone,
+      color: theme.colors.semantic.danger,
+      primary: true,
+    },
+    {
+      id: 'counseling',
+      title: uniCenter.name,
+      number: uniCenter.number,
+      description: uniCenter.description,
+      icon: Building2,
+      color: theme.colors.plum,
+    },
+    {
+      id: 'mental_health_authority',
+      title: t('crisis.mental_health_helpline'),
+      number: '0800 678 678',
+      description: 'Mental Health Authority Support Line',
+      icon: PhoneForwarded,
+      color: theme.colors.accents.terracotta,
+    }
+  ];
+};
 
 const SAFETY_PLAN = [
   { id: '1', text: 'Call my best friend or sibling' },
@@ -62,8 +114,11 @@ export default function CrisisSupportScreen() {
   const insets = useSafeAreaInsets();
   const themeContext = useTheme();
   const { t } = themeContext;
+  const { userData } = useContext(AuthContext) as any;
+  const userUni = userData?.onboarding?.university || 'Other';
+  
   const styles = createStyles(themeContext);
-  const EMERGENCY_CONTACTS = getEmergencyContacts(themeContext, t);
+  const EMERGENCY_CONTACTS = getEmergencyContacts(themeContext, t, userUni);
 
   const handleCall = (number: string) => {
     Linking.openURL(`tel:${number.replace(/\s+/g, '')}`);
@@ -151,15 +206,21 @@ export default function CrisisSupportScreen() {
           </View>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(800).duration(500)} style={styles.locationCard}>
-          <View style={styles.locationIconWrap}>
-            <MapPin color={themeContext.colors.plum} size={24} />
-          </View>
-          <View style={styles.locationInfo}>
-            <Text style={styles.locationTitle}>{t('crisis.find_hospital')}</Text>
-            <Text style={styles.locationDesc}>{t('crisis.find_hospital_desc')}</Text>
-          </View>
-          <ChevronRight color={themeContext.colors.text.disabled} size={20} />
+        <Animated.View entering={FadeInUp.delay(800).duration(500)}>
+          <TouchableOpacity 
+            style={styles.locationCard}
+            onPress={() => Linking.openURL('https://www.google.com/maps/search/counseling+services+near+me')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.locationIconWrap}>
+              <MapPin color={themeContext.colors.plum} size={24} />
+            </View>
+            <View style={styles.locationInfo}>
+              <Text style={styles.locationTitle}>{t('crisis.find_hospital')}</Text>
+              <Text style={styles.locationDesc}>{t('crisis.find_hospital_desc')}</Text>
+            </View>
+            <ChevronRight color={themeContext.colors.text.disabled} size={20} />
+          </TouchableOpacity>
         </Animated.View>
 
       </ScrollView>

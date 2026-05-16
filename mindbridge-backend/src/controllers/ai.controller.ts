@@ -15,11 +15,14 @@ export const getOracleContext = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
 
-    // Get latest mood log
-    const latestMood = await prisma.moodLog.findFirst({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-    });
+    // Get latest mood log & total count
+    const [latestMood, moodCount] = await Promise.all([
+      prisma.moodLog.findFirst({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.moodLog.count({ where: { userId } })
+    ]);
 
     // Get user name for fallback personalization
     const user = await prisma.user.findUnique({
@@ -27,18 +30,21 @@ export const getOracleContext = async (req: Request, res: Response) => {
       select: { name: true }
     });
 
-    // Get 3 most recent journal entries
-    const recentJournal = await prisma.journal.findMany({
-      where: { userId },
-      take: 3,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        title: true,
-        content: true,
-        mood: true,
-        createdAt: true,
-      }
-    });
+    // Get 3 most recent journal entries & total count
+    const [recentJournal, journalCount] = await Promise.all([
+      prisma.journal.findMany({
+        where: { userId },
+        take: 3,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          title: true,
+          content: true,
+          mood: true,
+          createdAt: true,
+        }
+      }),
+      prisma.journal.count({ where: { userId } })
+    ]);
 
     // Get onboarding data for personality matching
     const onboarding = await prisma.onboarding.findUnique({
@@ -58,7 +64,9 @@ export const getOracleContext = async (req: Request, res: Response) => {
 
     res.json({
       latestMood: latestMood || null,
+      moodCount: moodCount || 0,
       recentJournal: recentJournal || [],
+      journalCount: journalCount || 0,
       onboarding: onboarding || null,
       userName: user?.name || 'Friend',
       history: history || [],

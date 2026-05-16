@@ -148,7 +148,13 @@ export const chatWithOracle = async (req: Request, res: Response) => {
       onboarding,
       userName: user?.name || 'Friend',
       history,
-      assessments
+      assessments,
+      // Add advanced dimensions
+      energy: latestMood?.energyLevel,
+      sleep: { hours: latestMood?.sleepHours, quality: latestMood?.sleepQuality },
+      social: latestMood?.socialSetting,
+      symptoms: latestMood?.physicalSymptoms,
+      weather: latestMood?.weather,
     }, userId);
 
     // 5. Save AI Response

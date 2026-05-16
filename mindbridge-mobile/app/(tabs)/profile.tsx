@@ -41,7 +41,8 @@ import {
   X,
   Camera,
   ShieldAlert,
-  Phone
+  Phone,
+  Mic
 } from 'lucide-react-native';
 
 import { AuthContext } from '../../src/context/AuthContext';
@@ -138,6 +139,7 @@ export default function ProfileScreen() {
   const isGuest = userToken?.startsWith('guest-token');
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [insights, setInsights] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<any>({});
   const [showUniPicker, setShowUniPicker] = useState(false);
@@ -164,7 +166,15 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     fetchProfile();
+    fetchInsights();
   }, []);
+
+  const fetchInsights = async () => {
+    try {
+      const res = await api.get('/mood/insights');
+      setInsights(res.data);
+    } catch (e) {}
+  };
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -261,7 +271,7 @@ export default function ProfileScreen() {
             <Text style={styles.insightsTitle}>{t('profile.mood_insights')}</Text>
           </View>
           <View style={styles.moodTrendContainer}>
-            {(profile?.stats?.trend || Array.from({length: 7}).map((_, i) => ({day: ['M','T','W','T','F','S','S'][i], score: 0}))).map((item: any, i: number) => (
+            {(insights?.trend || Array.from({length: 7}).map((_, i) => ({day: ['M','T','W','T','F','S','S'][i], score: 0}))).map((item: any, i: number) => (
               <MoodTrendBar 
                 key={i}
                 theme={theme} 
@@ -271,6 +281,21 @@ export default function ProfileScreen() {
               />
             ))}
           </View>
+          
+          {insights?.hasData && (
+            <View style={styles.correlationGrid}>
+              <View style={[styles.correlationCard, { backgroundColor: theme.colors.accents.gentlePeach + '10' }]}>
+                <Heart size={16} color={theme.colors.accents.gentlePeach} />
+                <Text style={styles.correlationVal}>{insights.bestSocialSetting?.setting || 'N/A'}</Text>
+                <Text style={styles.correlationLab}>Best Social Setting</Text>
+              </View>
+              <View style={[styles.correlationCard, { backgroundColor: theme.colors.accents.powderBlue + '10' }]}>
+                <Mic size={16} color={theme.colors.accents.powderBlue} />
+                <Text style={styles.correlationVal}>{insights.voiceJournals || '0'}</Text>
+                <Text style={styles.correlationLab}>Voice Reflections</Text>
+              </View>
+            </View>
+          )}
         </Animated.View>
 
         <ProfileListGroup delay={400} theme={theme}>
@@ -493,6 +518,10 @@ const createStyles = (theme: any) => StyleSheet.create({
   moodTrendBarBg: { width: 8, height: 80, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', borderRadius: 4, justifyContent: 'flex-end' },
   moodTrendBarFill: { width: '100%', borderRadius: 4 },
   moodTrendDay: { fontSize: 10, fontFamily: theme.typography.fonts.header, color: theme.colors.text.tertiary },
+  correlationGrid: { flexDirection: 'row', gap: 12, marginTop: 24, borderTopWidth: 1, borderTopColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', paddingTop: 20 },
+  correlationCard: { flex: 1, padding: 16, borderRadius: 20, alignItems: 'center', gap: 4 },
+  correlationVal: { fontSize: 16, fontWeight: '800', color: theme.colors.text.primary, textTransform: 'capitalize' },
+  correlationLab: { fontSize: 11, fontWeight: '600', color: theme.colors.text.tertiary, textAlign: 'center' },
   listGroup: { backgroundColor: theme.colors.surface, borderRadius: 32, marginBottom: 24, marginHorizontal: 20, overflow: 'hidden', borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)' },
   listItem: { flexDirection: 'row', alignItems: 'center', padding: 18, backgroundColor: theme.colors.surface },
   listIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 16 },

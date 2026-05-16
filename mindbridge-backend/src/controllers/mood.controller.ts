@@ -62,3 +62,51 @@ export const createMoodLog = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+export const getInsights = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const logs = await prisma.moodLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+
+    if (logs.length === 0) return res.json({ message: 'Not enough data yet', hasData: false });
+
+    // Calculate correlations
+    const avgMood = logs.reduce((acc, l) => acc + (l.score || 0), 0) / logs.length;
+    
+    // Social Impact
+    const socialMoods: Record<string, number[]> = {};
+    logs.forEach(l => {
+      if (l.socialSetting) {
+        if (!socialMoods[l.socialSetting]) socialMoods[l.socialSetting] = [];
+        socialMoods[l.socialSetting].push(l.score);
+      }
+    });
+    
+    const socialInsights = Object.keys(socialMoods).map(key => ({
+      setting: key,
+      avg: socialMoods[key].reduce((a, b) => a + b, 0) / socialMoods[key].length
+    })).sort((a, b) => b.avg - a.avg);
+
+    // Recent Trend (Last 7 logs)
+    const trend = logs.slice(0, 7).reverse().map(l => ({
+      day: new Date(l.createdAt).toLocaleDateString('en-US', { weekday: 'short' }),
+      score: l.score
+    }));
+    
+    res.json({
+      hasData: true,
+      avgMood: Math.round(avgMood * 10) / 10,
+      bestSocialSetting: socialInsights[0] || null,
+      trend,
+      totalLogs: logs.length,
+      voiceJournals: logs.filter(l => l.audioUrl).length
+    });
+  } catch (error) {
+    console.error('Error calculating insights:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

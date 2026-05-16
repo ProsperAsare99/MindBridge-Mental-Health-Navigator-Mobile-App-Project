@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import api from '../../src/services/api';
 import {
   View,
@@ -26,7 +26,7 @@ import Animated, {
   withSpring,
   FadeIn
 } from 'react-native-reanimated';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import {
   Clock,
   CheckCircle2,
@@ -48,7 +48,8 @@ import {
   ExternalLink,
   MessageCircle,
   BarChart2,
-  BrainCircuit
+  BrainCircuit,
+  Info
 } from 'lucide-react-native';
 import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
@@ -280,39 +281,41 @@ export default function DashboardScreen() {
     return { label: 'Empty Garden', icon: CircleDashed, color: '#94A3B8' };
   };
 
-  useEffect(() => {
-    const checkStatus = async () => {
-      try {
-        const todayStr = new Date().toDateString();
-        const res = await api.get('/ai/oracle-context');
-        const moodsRes = await api.get('/mood');
-        
-        const logs = res.data.recentJournal || [];
-        setJournalHistory(logs);
-        setMoodHistory(moodsRes.data || []);
-        setChatHistory(res.data.history || []);
-        
-        const growth = getGrowthStage(logs.length);
-        setGardenStats({ count: logs.length, stage: growth.label, icon: growth.icon, color: growth.color });
-        
-        setAssessments(res.data.assessments || []);
-        setLatestPost(res.data.latestCommunityPost || null);
+  const checkStatus = useCallback(async () => {
+    try {
+      const todayStr = new Date().toDateString();
+      const res = await api.get('/ai/oracle-context');
+      const moodsRes = await api.get('/mood');
+      
+      const logs = res.data.recentJournal || [];
+      setJournalHistory(logs);
+      setMoodHistory(moodsRes.data || []);
+      setChatHistory(res.data.history || []);
+      
+      const growth = getGrowthStage(logs.length);
+      setGardenStats({ count: logs.length, stage: growth.label, icon: growth.icon, color: growth.color });
+      
+      setAssessments(res.data.assessments || []);
+      setLatestPost(res.data.latestCommunityPost || null);
 
-        setRituals({
-          garden: res.data.latestMood && new Date(res.data.latestMood.createdAt).toDateString() === todayStr,
-          journal: logs.some((log: any) => new Date(log.createdAt).toDateString() === todayStr),
-          breathing: await AsyncStorage.getItem(`breathing_${todayStr}`) === 'true'
-        });
-        if (res.data.onboarding?.firstName) {
-          const onboardingName = res.data.onboarding.firstName;
-          // Avoid showing internal test names if the user has a real name in authData
-          const finalName = (onboardingName === 'TESTKW' && authData?.name) ? authData.name : onboardingName;
-          setUserData(prev => ({ ...prev, name: finalName }));
-        }
-      } catch (e) {}
-    };
-    checkStatus();
-  }, []);
+      setRituals({
+        garden: res.data.latestMood && new Date(res.data.latestMood.createdAt).toDateString() === todayStr,
+        journal: logs.some((log: any) => new Date(log.createdAt).toDateString() === todayStr),
+        breathing: await AsyncStorage.getItem(`breathing_${todayStr}`) === 'true'
+      });
+      if (res.data.onboarding?.firstName) {
+        const onboardingName = res.data.onboarding.firstName;
+        const finalName = (onboardingName === 'TESTKW' && authData?.name) ? authData.name : onboardingName;
+        setUserData(prev => ({ ...prev, name: finalName }));
+      }
+    } catch (e) {}
+  }, [authData]);
+
+  useFocusEffect(
+    useCallback(() => {
+      checkStatus();
+    }, [checkStatus])
+  );
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -494,7 +497,21 @@ export default function DashboardScreen() {
           </ScrollView>
         </View>
 
-        <View style={{ height: 20 }} />
+        {/* ── Clinical Disclaimer ── */}
+        <View style={[styles.section, { marginTop: 24 }]}>
+          <View style={[styles.disclaimerCard, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(123,97,255,0.03)', borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(123,97,255,0.1)' }]}>
+            <View style={styles.disclaimerHeader}>
+              <Info size={16} color={theme.colors.text.tertiary} />
+              <Text style={[styles.disclaimerTitle, { color: theme.colors.text.tertiary }]}>Clinical Disclaimer</Text>
+            </View>
+            <Text style={[styles.disclaimerText, { color: theme.colors.text.tertiary }]}>
+              MindBridge is an AI-powered guidance and context-aware system designed specifically for students. 
+              <Text style={{ fontWeight: '700' }}> It is not a replacement for professional therapy or clinical mental health services.</Text> If you are in immediate distress, please visit the Crisis Support section.
+            </Text>
+          </View>
+        </View>
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
@@ -616,4 +633,26 @@ const createStyles = (theme: any) => StyleSheet.create({
   crisisIconWrap: { width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 20 },
   crisisTitle: { fontSize: 20, fontWeight: '800', marginBottom: 4 },
   crisisSubtitle: { fontSize: 14, lineHeight: 20 },
+  disclaimerCard: {
+    padding: 24,
+    borderRadius: 24,
+    borderWidth: 1,
+  },
+  disclaimerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  disclaimerTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  disclaimerText: {
+    fontSize: 13,
+    lineHeight: 20,
+    opacity: 0.8,
+  },
 });

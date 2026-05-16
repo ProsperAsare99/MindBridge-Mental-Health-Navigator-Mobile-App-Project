@@ -15,7 +15,8 @@ import {
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInUp, FadeIn, SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import Animated, { FadeInUp, FadeIn, SlideInDown, SlideOutDown, withRepeat, withSequence, withTiming, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { 
@@ -27,7 +28,11 @@ import {
   Sun,
   CloudRain,
   PenLine,
-  Trash2
+  Trash2,
+  Mic,
+  StopCircle,
+  Play,
+  Pause
 } from 'lucide-react-native';
 
 import api from '../../src/services/api';
@@ -47,6 +52,14 @@ export default function JournalScreen() {
   const [newContent, setNewContent] = useState('');
   const [selectedMood, setSelectedMood] = useState('calm');
   const [filterMood, setFilterMood] = useState('all');
+  
+  // Audio State
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [audioUri, setAudioUri] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState<string | null>(null);
+  const micScale = useSharedValue(1);
 
   const MOOD_OPTIONS = [
     { id: 'joy', icon: Sun, color: theme.colors.accents.gentlePeach, label: 'Joyful' },
@@ -87,6 +100,53 @@ export default function JournalScreen() {
     }
   }, [filterMood, entries]);
 
+  useEffect(() => {
+    return () => {
+      if (sound) sound.unloadAsync();
+    };
+  }, [sound]);
+
+  const startRecording = async () => {
+    try {
+      const permission = await Audio.requestPermissionsAsync();
+      if (permission.status === 'granted') {
+        await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+        const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+        setRecording(recording);
+        setIsRecording(true);
+        micScale.value = withRepeat(withSequence(withTiming(1.2), withTiming(1)), -1, true);
+      }
+    } catch (err) {
+      console.error('Failed to start recording', err);
+    }
+  };
+
+  const stopRecording = async () => {
+    setIsRecording(false);
+    setRecording(null);
+    micScale.value = withTiming(1);
+    await recording?.stopAndUnloadAsync();
+    const uri = recording?.getURI();
+    setAudioUri(uri || null);
+  };
+
+  const playSound = async (uri: string, id: string) => {
+    if (isPlaying === id) {
+      await sound?.pauseAsync();
+      setIsPlaying(null);
+      return;
+    }
+    
+    if (sound) await sound.unloadAsync();
+    const { sound: newSound } = await Audio.Sound.createAsync({ uri });
+    setSound(newSound);
+    setIsPlaying(id);
+    await newSound.playAsync();
+    newSound.setOnPlaybackStatusUpdate((status: any) => {
+      if (status.didJustFinish) setIsPlaying(null);
+    });
+  };
+
   const handleSave = async () => {
     if (!newContent.trim()) return;
     
@@ -95,6 +155,7 @@ export default function JournalScreen() {
         title: newTitle.trim() || 'Untitled Entry',
         content: newContent.trim(),
         mood: selectedMood,
+        audioUrl: audioUri,
       });
       
       setEntries([response.data, ...entries]);
@@ -102,6 +163,7 @@ export default function JournalScreen() {
       setNewTitle('');
       setNewContent('');
       setSelectedMood('calm');
+      setAudioUri(null);
     } catch (error) {
       console.error('Error saving journal entry:', error);
     }
@@ -230,6 +292,27 @@ export default function JournalScreen() {
                   </View>
                   <Text style={styles.entryTitle}>{entry.title}</Text>
                   <Text style={styles.entryContent} numberOfLines={4}>{entry.content}</Text>
+                  
+                  {entry.audioUrl && (
+                    <TouchableOpacity 
+                      style={[styles.audioPreview, { backgroundColor: theme.colors.plum + '10' }]}
+                      onPress={() => playSound(entry.audioUrl, entry.id)}
+                    >
+                      {isPlaying === entry.id ? <Pause size={14} color={theme.colors.plum} /> : <Play size={14} color={theme.colors.plum} />}
+                      <Text style={[styles.audioText, { color: theme.colors.plum }]}>Voice Reflection</Text>
+                      <View style={styles.audioWaveform}>
+                        {Array.from({ length: 12 }).map((_, i) => (
+                          <View 
+                            key={i} 
+                            style={[
+                              styles.waveBar, 
+                              { height: Math.random() * 12 + 4, backgroundColor: isPlaying === entry.id ? theme.colors.plum : theme.colors.text.disabled }
+                            ]} 
+                          />
+                        ))}
+                      </View>
+                    </TouchableOpacity>
+                  )}
                 </Animated.View>
               ))}
             </View>
@@ -293,6 +376,35 @@ export default function JournalScreen() {
               autoFocus
               textAlignVertical="top"
             />
+
+            {/* Audio Recording UI */}
+            <View style={styles.audioComposer}>
+              {audioUri ? (
+                <View style={styles.audioPreviewActive}>
+                  <TouchableOpacity onPress={() => playSound(audioUri, 'new')} style={styles.playIconBtn}>
+                    {isPlaying === 'new' ? <Pause color="#FFF" size={20} /> : <Play color="#FFF" size={20} />}
+                  </TouchableOpacity>
+                  <Text style={styles.audioPreviewText}>Voice recorded</Text>
+                  <TouchableOpacity onPress={() => setAudioUri(null)} style={styles.removeAudioBtn}>
+                    <X color={theme.colors.text.tertiary} size={16} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.recordingSection}>
+                  <TouchableOpacity 
+                    onPress={isRecording ? stopRecording : startRecording}
+                    style={[styles.micBtn, isRecording && styles.micBtnRecording]}
+                  >
+                    <Animated.View style={useAnimatedStyle(() => ({ transform: [{ scale: micScale.value }] }))}>
+                      {isRecording ? <StopCircle color="#FFF" size={28} /> : <Mic color="#FFF" size={28} />}
+                    </Animated.View>
+                  </TouchableOpacity>
+                  <Text style={styles.recordingLabel}>
+                    {isRecording ? "Recording... Tap to stop" : "Tap to add voice"}
+                  </Text>
+                </View>
+              )}
+            </View>
           </KeyboardAvoidingView>
         </Animated.View>
       )}
@@ -502,5 +614,84 @@ const createStyles = (theme: any) => StyleSheet.create({
   moodOptionText: {
     fontSize: 14,
     fontWeight: '700',
+  },
+  audioPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 16,
+    marginTop: 16,
+    gap: 10,
+  },
+  audioText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  audioWaveform: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    justifyContent: 'flex-end',
+  },
+  waveBar: {
+    width: 2,
+    borderRadius: 1,
+  },
+  audioComposer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  recordingSection: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  micBtn: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: theme.colors.plum,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: theme.colors.plum,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  micBtnRecording: {
+    backgroundColor: theme.colors.accents.terracotta,
+    shadowColor: theme.colors.accents.terracotta,
+  },
+  recordingLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.text.tertiary,
+  },
+  audioPreviewActive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.plum + '10',
+    padding: 12,
+    borderRadius: 20,
+    gap: 12,
+    width: '100%',
+  },
+  playIconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: theme.colors.plum,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  audioPreviewText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+  },
+  removeAudioBtn: {
+    padding: 4,
   }
 });

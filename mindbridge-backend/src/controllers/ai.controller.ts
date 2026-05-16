@@ -20,6 +20,12 @@ export const getOracleContext = async (req: Request, res: Response) => {
       orderBy: { createdAt: 'desc' },
     });
 
+    // Get user name for fallback personalization
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true }
+    });
+
     // Get 3 most recent journal entries
     const recentJournal = await prisma.journal.findMany({
       where: { userId },
@@ -42,6 +48,7 @@ export const getOracleContext = async (req: Request, res: Response) => {
       latestMood: latestMood || null,
       recentJournal: recentJournal || [],
       onboarding: onboarding || null,
+      userName: user?.name || 'Friend',
       dbStatus: 'online'
     });
   } catch (error: any) {
@@ -98,11 +105,17 @@ export const chatWithOracle = async (req: Request, res: Response) => {
       where: { userId }
     });
 
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true }
+    });
+
     // 3. Generate AI Response
     const aiResponse = await generateOracleResponse(message, {
       latestMood,
       recentJournal,
-      onboarding
+      onboarding,
+      userName: user?.name || 'Friend'
     }, userId);
 
     res.json({ response: aiResponse });

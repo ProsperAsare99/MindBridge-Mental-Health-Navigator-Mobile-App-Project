@@ -14,6 +14,8 @@ import {
   Modal,
   ActivityIndicator,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../../src/services/api';
 import { AuthContext } from '../../src/context/AuthContext';
 import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 import { FadeInUp, FadeInRight, FadeOutLeft } from 'react-native-reanimated';
@@ -272,15 +274,45 @@ export default function OnboardingScreen() {
     }).start();
   }, [currentStepIndex]);
 
+  const finishOnboarding = async () => {
+    try {
+      setIsFinishing(true);
+      
+      // Map frontend answers to backend schema
+      const payload = {
+        firstName: answers['q1'],
+        university: answers['q2'],
+        level: answers['q3'],
+        program: answers['q4'],
+        primaryGoals: answers['q10'] || [],
+        interests: answers['q7'] || [],
+        // Simplified stress level mapping
+        stressLevel: answers.stressors ? Math.max(1, ...Object.values(answers.stressors).map(v => Number(v))) : 3,
+        currentMood: 'Good', 
+        sleepPattern: 'Average',
+        preferredLanguage: preferredLanguage,
+      };
+
+      await api.post('/onboarding', payload);
+      await AsyncStorage.setItem('onboarding_completed', 'true');
+      await AsyncStorage.setItem('onboarding_answers', JSON.stringify(answers));
+      
+      // Delay slightly for effect
+      setTimeout(() => {
+        router.replace('/(tabs)/dashboard');
+      }, 1500);
+    } catch (error) {
+      console.error('Failed to save onboarding:', error);
+      // Proceed anyway to not block user, they can try again or settings
+      router.replace('/(tabs)/dashboard');
+    }
+  };
+
   const handleNext = () => {
     if (currentStepIndex < ONBOARDING_STEPS.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
     } else {
-      setIsFinishing(true);
-      // Artificial delay to show system status feedback
-      setTimeout(() => {
-        router.replace('/(tabs)/dashboard');
-      }, 2500);
+      finishOnboarding();
     }
   };
 

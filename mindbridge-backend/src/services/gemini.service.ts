@@ -127,6 +127,9 @@ export const generateOracleResponse = async (userMessage: string, context: any, 
     const onboarding = context.onboarding;
     const latestMood = context.latestMood;
     const recentJournal = context.recentJournal || [];
+    const userName = context.userName || onboarding?.firstName || 'User';
+    // Use first name if full name provided
+    const firstName = userName.split(' ')[0];
 
     const moodSummary = latestMood
       ? `Latest mood: ${latestMood.emotions?.join(', ') || 'unspecified'} (score: ${latestMood.score}/10) on ${new Date(latestMood.createdAt).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}`
@@ -146,7 +149,7 @@ CURRENT USER CONTEXT (Confidential — for your use only)
 ═══════════════════════════════════════════
 
 PROFILE:
-  Name: ${onboarding?.firstName || 'User'}
+  Name: ${firstName} (use this to address them)
   University: ${onboarding?.university || 'Unknown University'}
   Program: ${onboarding?.program || 'Unknown Program'}
   Level: ${onboarding?.level || 'N/A'}

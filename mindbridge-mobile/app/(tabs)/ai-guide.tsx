@@ -181,26 +181,36 @@ export default function AIGuideScreen() {
       try {
         const response = await api.get('/ai/oracle-context');
         const data = response.data;
-        let greeting = "Hello! I'm the MindBridge Oracle. I'm here to listen, support, and help you navigate your feelings. How are you doing today?";
+        const userName = data.onboarding?.firstName || data.userName || authData?.name || 'Friend';
+        const firstName = userName.split(' ')[0];
+        
+        let greeting = t.ai.greetingStandard;
 
         if (data.latestMood) {
           const emotions = data.latestMood.emotions?.join(', ') || 'something meaningful';
           const score = data.latestMood.score;
-          const name = data.onboarding?.firstName ? `, ${data.onboarding.firstName}` : '';
           if (score <= 4) {
-            greeting = `Hey${name}. I noticed your last check-in felt heavy — feeling ${emotions.toLowerCase()}. That takes courage to name. What's been weighing on you most?`;
+            greeting = t.ai.greetingHeavy.replace('{name}', firstName).replace('{emotions}', emotions.toLowerCase());
           } else if (score >= 8) {
-            greeting = `Hello${name}! Your last seed was glowing with ${emotions.toLowerCase()} 🌱 What's been contributing to that good energy?`;
+            greeting = t.ai.greetingGlowing.replace('{name}', firstName).replace('{emotions}', emotions.toLowerCase());
           } else {
-            greeting = `Hi${name}. I see your recent mood reflected ${emotions.toLowerCase()}. How are you really doing today?`;
+            greeting = t.ai.greetingRecent.replace('{name}', firstName).replace('{emotions}', emotions.toLowerCase());
           }
-        } else if (data.onboarding?.firstName) {
-          greeting = `Welcome, ${data.onboarding.firstName}. I'm the MindBridge Oracle — your personal guide. What's on your mind today?`;
+        } else if (data.onboarding?.firstName || data.userName || authData?.name) {
+          greeting = t.ai.greetingWelcome.replace('{name}', firstName);
         }
 
         setMessages([{ id: 'welcome', isAi: true, text: greeting, time: 'Now', suggestCrisis: false }]);
       } catch {
-        setMessages([{ id: 'welcome', isAi: true, text: "Hello! I'm the MindBridge Oracle. I'm here to listen and support you. How are you feeling today?", time: 'Now', suggestCrisis: false }]);
+        const userName = authData?.name || 'Friend';
+        const firstName = userName.split(' ')[0];
+        setMessages([{ 
+          id: 'welcome', 
+          isAi: true, 
+          text: t.ai.greetingWelcome ? t.ai.greetingWelcome.replace('{name}', firstName) : t.ai.greetingStandard, 
+          time: 'Now', 
+          suggestCrisis: false 
+        }]);
       }
     };
     fetchContext();

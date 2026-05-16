@@ -41,6 +41,11 @@ export interface TranslationSchema {
     placeholder: string;
     goToSupport: string;
     disclaimer: string;
+    greetingStandard: string;
+    greetingHeavy: string;
+    greetingGlowing: string;
+    greetingRecent: string;
+    greetingWelcome: string;
   };
 }
 
@@ -92,6 +97,11 @@ export const translations: Record<Language, TranslationSchema> = {
       placeholder: 'Type your message...',
       goToSupport: 'Get Support Now',
       disclaimer: "I'm here to listen and support, but I'm not a replacement for clinical care. If you're in immediate danger, please use our Crisis Support tab.",
+      greetingStandard: "Hello! I'm the MindBridge Oracle. I'm here to listen, support, and help you navigate your feelings. How are you doing today?",
+      greetingHeavy: "Hey {name}. I noticed your last check-in felt heavy — feeling {emotions}. That takes courage to name. What's been weighing on you most?",
+      greetingGlowing: "Hello {name}! Your last seed was glowing with {emotions} 🌱 What's been contributing to that good energy?",
+      greetingRecent: "Hi {name}. I see your recent mood reflected {emotions}. How are you really doing today?",
+      greetingWelcome: "Welcome, {name}. I'm the MindBridge Oracle — your personal guide. What's on your mind today?",
     }
   },
   Twi: {
@@ -141,6 +151,11 @@ export const translations: Record<Language, TranslationSchema> = {
       placeholder: 'Twerɛ wo asɛm...',
       goToSupport: 'Nya Mmoa Seesei',
       disclaimer: "Mewɔ ha sɛ metie wo na maboa wo, nanso menyɛ ayaresabea dɔkta. Sɛ wowɔ asiane mu a, yɛsrɛ wo fa Mmoa akwan no so.",
+      greetingStandard: "Maakye! Me ne MindBridge Oracle. Mewɔ ha sɛ metie wo, maboa wo, na mama woahu sɛnea wobɛyɛ wo nkaebɔ ho adwuma. Tebea bɛn na wowɔ mu nnɛ?",
+      greetingHeavy: "Hey {name}. Mehuu sɛ wo nkaebɔ a ɛtwa toɔ no yɛ duru — wote nka sɛ {emotions}. Akokoɔduo na ɛhia sɛ wobɛbɔ din. Dɛn na ɛreyɛ wo duru paa?",
+      greetingGlowing: "Maakye {name}! Wo aba a ɛtwa toɔ no na ɛrehyerɛn ne {emotions} 🌱 Dɛn na ɛde saa ahoɔden pa yi aba?",
+      greetingRecent: "Maakye {name}. Mehuu sɛ wo nkaebɔ a ɛtwa toɔ no kyerɛ {emotions}. Wowɔ tebea bɛn mu paa nnɛ?",
+      greetingWelcome: "Akwaaba, {name}. Me ne MindBridge Oracle — wo ankasa wo kwankyerɛfo. Dɛn na ɛwɔ w’adwene mu nnɛ?",
     }
   },
   French: {
@@ -190,6 +205,11 @@ export const translations: Record<Language, TranslationSchema> = {
       placeholder: 'Tapez votre message...',
       goToSupport: 'Obtenir de l\'aide',
       disclaimer: "Je suis là pour écouter et soutenir, mais je ne remplace pas les soins cliniques. Si vous êtes en danger immédiat, veuillez utiliser l'onglet Support de crise.",
+      greetingStandard: "Bonjour ! Je suis l'Oracle MindBridge. Je suis ici pour vous écouter, vous soutenir et vous aider à gérer vos émotions. Comment allez-vous aujourd'hui ?",
+      greetingHeavy: "Hé {name}. J'ai remarqué que votre dernier enregistrement était lourd — vous vous sentiez {emotions}. Il faut du courage pour le dire. Qu'est-ce qui vous pèse le plus ?",
+      greetingGlowing: "Bonjour {name} ! Votre dernière graine brillait de {emotions} 🌱 Qu'est-ce qui a contribué à cette bonne énergie ?",
+      greetingRecent: "Salut {name}. Je vois que votre humeur récente reflétait {emotions}. Comment allez-vous vraiment aujourd'hui ?",
+      greetingWelcome: "Bienvenue, {name}. Je suis l'Oracle MindBridge — votre guide personnel. Qu'avez-vous à l'esprit aujourd'hui ?",
     }
   },
   Ga: {
@@ -239,6 +259,11 @@ export const translations: Record<Language, TranslationSchema> = {
       placeholder: 'Ŋmaa osane...',
       goToSupport: 'Yaa Hejɔlɛ He',
       disclaimer: "Miyɛ biɛ ni mabua bo, shi mifeee dɔkta. Kɛ́ ooshɛ oshãra mli lɛ, ofainɛ yaa Mmoa gbɛ lɛ nɔ.",
+      greetingStandard: "Leebi! Mi ji MindBridge Oracle lɛ. Miyɛ biɛ ni mabua bo ni maduru ojwɛŋmɔ mli. Te onuɔ he tɛŋŋ nnɛ?",
+      greetingHeavy: "Hé {name}. Mina akɛ o-nitsumɔ ni ofee nyɛ lɛ wa — onuɔ he akɛ {emotions}. Ehe hiaa ekãa akɛ obɛtsɛ́ gbɛ́i. Mɛni haa onuɔ he tɛŋŋ?",
+      greetingGlowing: "Leebi {name}! O-dua ni ofee nyɛ lɛ miitsɛ̀ kɛ {emotions} 🌱 Mɛni ha onuɔ he akɛ o-he wa nakai?",
+      greetingRecent: "Hé {name}. Mina akɛ o-jwɛŋmɔ mli lɛ etsɔɔ {emotions}. Te onuɔ he tɛŋŋ paa nnɛ?",
+      greetingWelcome: "Akwaaba, {name}. Mi ji MindBridge Oracle lɛ — o-gbɛtsɔɔlɔ paa. Mɛni yɔɔ o-jwɛŋmɔ mli nnɛ?",
     }
   },
   Ewe: {
@@ -288,6 +313,11 @@ export const translations: Record<Language, TranslationSchema> = {
       placeholder: 'Ŋlɔ wò gbedasi...',
       goToSupport: 'Kpɔ Kpedenanu Fifia',
       disclaimer: "Mele afii be mase wò nya agbɔ, gake nyemye dɔkta o. Ne èle nɔnɔme sesẽ me la, taflatse zã Kpedenanu mɔwo.",
+      greetingStandard: "Ŋdi! Nyee nye MindBridge Oracle. Mele afii be mase wò nya agbɔ, mado alɔ wò eye makpe ɖe ŋuwò be nàkpɔ wò seselelãmewo gbɔ. Aleke nèle fifia?",
+      greetingHeavy: "Hé {name}. Mekpɔe be wò seselelãme mamlɛa mefa o — nèle {emotions} sem. Ehiã dzinɔameƒe be nàgblɔe. Nu kae le fu ɖem na wò wu?",
+      greetingGlowing: "Ŋdi {name}! Wò ku mamlɛa le dzo dam kple {emotions} 🌱 Nu kae na nèle seselelãme nyui sia me?",
+      greetingRecent: "Hé {name}. Mekpɔe be wò seselelãme mamlɛa fia {emotions}. Aleke nèle sese me vavã fifia?",
+      greetingWelcome: "Woezor, {name}. Nyee nye MindBridge Oracle — wò mɔfiala. Nu kae le wò jwɛŋmɔ me fifia?",
     }
   },
   Hausa: {
@@ -337,6 +367,11 @@ export const translations: Record<Language, TranslationSchema> = {
       placeholder: 'Rubuta saƙonku...',
       goToSupport: 'Nemi Taimako Yanzu',
       disclaimer: "Ina nan don sauraro da taimako, amma ni ba likita ba ne. Idan kana cikin haɗari, don Allah yi amfani da sashen Taimakon Gaggawa.",
+      greetingStandard: "Ina kwana! Ni ne MindBridge Oracle. Ina nan don in saurare ka, in taimaka maka, in kuma taimaka maka wajen tafiyar da yadda kake ji. Yaya kake yau?",
+      greetingHeavy: "Sannu {name}. Na lura cewa bincikenka na ƙarshe ya yi nauyi — kana jin {emotions}. Yana bukatar jajircewa don bayyana hakan. Me ya fi damun ka?",
+      greetingGlowing: "Sannu {name}! Irin ka na ƙarshe ya kasance mai haske da {emotions} 🌱 Me ya taimaka wa wannan kyakkyawan kuzari?",
+      greetingRecent: "Sannu {name}. Na ga cewa yanayin ka na baya-bayan nan ya nuna {emotions}. Yaya kake da gaske yau?",
+      greetingWelcome: "Barka da zuwa, {name}. Ni ne MindBridge Oracle — jagoran ku. Me ke ranka yau?",
     }
   }
 };

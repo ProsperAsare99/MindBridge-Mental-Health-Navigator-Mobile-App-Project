@@ -1,119 +1,659 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
-import { Settings, Moon, Sun, Smartphone } from 'lucide-react-native';
+import { 
+  Settings, 
+  Moon, 
+  Sun, 
+  Smartphone, 
+  User, 
+  Bell, 
+  Globe, 
+  Lock, 
+  ShieldCheck, 
+  HelpCircle, 
+  MessageSquare, 
+  LogOut,
+  ChevronRight,
+  Info,
+  X
+} from 'lucide-react-native';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, Switch, Alert, Modal, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { AuthContext } from '../../src/context/AuthContext';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../../src/services/api';
 
 export default function SettingsScreen() {
+  const insets = useSafeAreaInsets();
   const themeContext = useTheme();
   const styles = createStyles(themeContext);
-  const { mode, setMode, colors } = themeContext;
+  const { mode, setMode, colors, isDark } = themeContext;
+  const { logout } = React.useContext(AuthContext) as any;
+  const router = useRouter();
+
+  const [notifications, setNotifications] = React.useState(true);
+  const [biometrics, setBiometrics] = React.useState(false);
+  const [language, setLanguage] = React.useState('English');
+  const [isPasswordModalVisible, setIsPasswordModalVisible] = React.useState(false);
+  const [isFeedbackVisible, setIsFeedbackVisible] = React.useState(false);
+  const [isAboutVisible, setIsAboutVisible] = React.useState(false);
+  const [isHelpVisible, setIsHelpVisible] = React.useState(false);
+  
+  const [feedback, setFeedback] = React.useState('');
+  const [isSendingFeedback, setIsSendingFeedback] = React.useState(false);
+
+  const [passForm, setPassForm] = React.useState({ current: '', new: '', confirm: '' });
+  const [isUpdatingPass, setIsUpdatingPass] = React.useState(false);
+
+  // Load preferences
+  React.useEffect(() => {
+    const loadPrefs = async () => {
+      const n = await AsyncStorage.getItem('settings_notifications');
+      const b = await AsyncStorage.getItem('settings_biometrics');
+      const l = await AsyncStorage.getItem('settings_language');
+      if (n !== null) setNotifications(n === 'true');
+      if (b !== null) setBiometrics(b === 'true');
+      if (l !== null) setLanguage(l);
+    };
+    loadPrefs();
+  }, []);
+
+  const toggleNotifications = async (val: boolean) => {
+    setNotifications(val);
+    await AsyncStorage.setItem('settings_notifications', val.toString());
+  };
+
+  const toggleBiometrics = async (val: boolean) => {
+    setBiometrics(val);
+    await AsyncStorage.setItem('settings_biometrics', val.toString());
+  };
+
+  const changeLanguage = () => {
+    Alert.alert(
+      "Select Language",
+      "Choose your preferred language for the MindBridge experience.",
+      [
+        { text: "English", onPress: () => handleLanguageChange('English') },
+        { text: "French", onPress: () => handleLanguageChange('French') },
+        { text: "Twi", onPress: () => handleLanguageChange('Twi') },
+        { text: "Ewe", onPress: () => handleLanguageChange('Ewe') },
+        { text: "Cancel", style: "cancel" }
+      ]
+    );
+  };
+
+  const handleLanguageChange = async (lang: string) => {
+    setLanguage(lang);
+    await AsyncStorage.setItem('settings_language', lang);
+  };
+
+  const handleComingSoon = (feature: string) => {
+    Alert.alert("Coming Soon", `${feature} is currently under development and will be available in the next update! ✨`);
+  };
+
+  const submitFeedback = async () => {
+    if (!feedback.trim()) return;
+    setIsSendingFeedback(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsSendingFeedback(false);
+      setIsFeedbackVisible(false);
+      setFeedback('');
+      Alert.alert("Thank You!", "Your feedback helps us make MindBridge better for everyone. 💜");
+    }, 1500);
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!passForm.current || !passForm.new || !passForm.confirm) {
+      Alert.alert("Error", "Please fill in all password fields.");
+      return;
+    }
+    if (passForm.new !== passForm.confirm) {
+      Alert.alert("Error", "New passwords do not match.");
+      return;
+    }
+    if (passForm.new.length < 6) {
+      Alert.alert("Error", "New password must be at least 6 characters.");
+      return;
+    }
+
+    setIsUpdatingPass(true);
+    try {
+      await api.post('/auth/update-password', {
+        currentPassword: passForm.current,
+        newPassword: passForm.new
+      });
+      Alert.alert("Success", "Your password has been updated securely. 🛡️");
+      setIsPasswordModalVisible(false);
+      setPassForm({ current: '', new: '', confirm: '' });
+    } catch (err: any) {
+      const msg = err.response?.data?.error || "Failed to update password. Please check your current password.";
+      Alert.alert("Security Error", msg);
+    } finally {
+      setIsUpdatingPass(false);
+    }
+  };
+
+  const SettingRow = ({ icon: Icon, color, label, value, onPress, isLast, type = 'link' }: any) => (
+    <TouchableOpacity 
+      activeOpacity={0.7} 
+      onPress={onPress}
+      disabled={type === 'switch'}
+      style={[styles.row, isLast && { borderBottomWidth: 0 }]}
+    >
+      <View style={[styles.rowIconWrap, { backgroundColor: color + '15' }]}>
+        <Icon color={color} size={20} />
+      </View>
+      <Text style={styles.rowLabel}>{label}</Text>
+      
+      {type === 'link' && (
+        <View style={styles.rowRight}>
+          {value && <Text style={styles.rowValue}>{value}</Text>}
+          <ChevronRight color={colors.text.disabled} size={18} />
+        </View>
+      )}
+      
+      {type === 'switch' && (
+        <Switch 
+          value={value} 
+          onValueChange={onPress}
+          trackColor={{ false: colors.text.disabled + '40', true: colors.plum + '60' }}
+          thumbColor={value ? colors.plum : '#f4f3f4'}
+        />
+      )}
+    </TouchableOpacity>
+  );
 
   const ThemeOption = ({ optionMode, icon: Icon, label }: any) => (
     <TouchableOpacity 
-      style={[
-        styles.optionBtn, 
-        mode === optionMode && styles.optionBtnActive
-      ]}
+      style={[styles.themeOption, mode === optionMode && styles.themeOptionActive]}
       onPress={() => setMode(optionMode)}
       activeOpacity={0.8}
     >
-      <Icon 
-        color={mode === optionMode ? colors.text.onPrimary || '#FFF' : colors.text.secondary} 
-        size={24} 
-      />
-      <Text style={[
-        styles.optionText,
-        mode === optionMode && styles.optionTextActive
-      ]}>
-        {label}
-      </Text>
+      <Icon color={mode === optionMode ? '#FFF' : colors.text.secondary} size={20} />
+      <Text style={[styles.themeOptionText, mode === optionMode && styles.themeOptionTextActive]}>{label}</Text>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <Settings color={colors.text.secondary} size={64} style={{ marginBottom: 24 }} />
-      <Text style={styles.title}>Settings</Text>
-      <Text style={styles.subtitle}>Manage your app preferences and theme.</Text>
-      
-      <View style={styles.themeSection}>
-        <Text style={styles.sectionTitle}>App Theme</Text>
-        <View style={styles.optionsRow}>
-          <ThemeOption optionMode="system" icon={Smartphone} label="System" />
-          <ThemeOption optionMode="light" icon={Sun} label="Light" />
-          <ThemeOption optionMode="dark" icon={Moon} label="Dark" />
+      <ScrollView 
+        contentContainerStyle={[
+          styles.scrollContent, 
+          { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 100 }
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <ScreenHeader title="Settings" subtitle="Customize your wellness experience" />
+
+        {/* ── Theme Section ── */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>App Appearance</Text>
+          <View style={styles.themeCard}>
+            <ThemeOption optionMode="system" icon={Smartphone} label="System" />
+            <ThemeOption optionMode="light" icon={Sun} label="Light" />
+            <ThemeOption optionMode="dark" icon={Moon} label="Dark" />
+          </View>
         </View>
-      </View>
+
+        {/* ── Account Section ── */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Account & Privacy</Text>
+          <View style={styles.card}>
+            <SettingRow 
+              icon={User} 
+              color={colors.plum} 
+              label="Personal Information" 
+              value="Manage" 
+              onPress={() => router.push('/(tabs)/profile')}
+            />
+            <SettingRow 
+              icon={Lock} 
+              color={colors.accents.powderBlue} 
+              label="Security & Password" 
+              onPress={() => setIsPasswordModalVisible(true)}
+            />
+            <SettingRow 
+              icon={ShieldCheck} 
+              color={colors.accents.eucalyptus} 
+              label="Biometric Unlock" 
+              type="switch" 
+              value={biometrics} 
+              onPress={toggleBiometrics} 
+              isLast 
+            />
+          </View>
+        </View>
+
+        {/* ── Notifications Section ── */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Notifications</Text>
+          <View style={styles.card}>
+            <SettingRow 
+              icon={Bell} 
+              color={colors.accents.terracotta} 
+              label="Daily Quest Reminders" 
+              type="switch" 
+              value={notifications} 
+              onPress={toggleNotifications} 
+            />
+            <SettingRow 
+              icon={Globe} 
+              color={colors.accents.powderBlue} 
+              label="Language" 
+              value={language} 
+              onPress={changeLanguage}
+              isLast 
+            />
+          </View>
+        </View>
+
+        {/* ── Support Section ── */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Support & Legal</Text>
+          <View style={styles.card}>
+            <SettingRow 
+              icon={HelpCircle} 
+              color={colors.accents.slate} 
+              label="Help Center" 
+              onPress={() => setIsHelpVisible(true)}
+            />
+            <SettingRow 
+              icon={MessageSquare} 
+              color={colors.accents.forestGreen} 
+              label="Send Feedback" 
+              onPress={() => setIsFeedbackVisible(true)}
+            />
+            <SettingRow 
+              icon={Info} 
+              color={colors.text.tertiary} 
+              label="About MindBridge" 
+              onPress={() => setIsAboutVisible(true)}
+              isLast 
+            />
+          </View>
+        </View>
+
+        {/* ── Logout Section ── */}
+        <TouchableOpacity 
+          style={styles.logoutBtn} 
+          onPress={logout}
+          activeOpacity={0.8}
+        >
+          <LogOut color="#FFF" size={20} />
+          <Text style={styles.logoutText}>Log Out</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.versionText}>MindBridge v1.2.0 • Build 2026.05</Text>
+        <View style={{ height: 40 }} />
+      </ScrollView>
+
+      {/* ── Change Password Modal ── */}
+      <Modal
+        visible={isPasswordModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsPasswordModalVisible(false)}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <View style={[styles.modalIconWrap, { backgroundColor: colors.accents.powderBlue + '20' }]}>
+                <Lock color={colors.accents.powderBlue} size={24} />
+              </View>
+              <Text style={styles.modalTitle}>Update Password</Text>
+              <TouchableOpacity onPress={() => setIsPasswordModalVisible(false)} style={styles.closeBtn}>
+                <X color={colors.text.tertiary} size={24} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalBody}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Current Password</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Enter current password"
+                  placeholderTextColor={colors.text.disabled}
+                  secureTextEntry
+                  value={passForm.current}
+                  onChangeText={(val) => setPassForm(prev => ({ ...prev, current: val }))}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>New Password</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Minimum 6 characters"
+                  placeholderTextColor={colors.text.disabled}
+                  secureTextEntry
+                  value={passForm.new}
+                  onChangeText={(val) => setPassForm(prev => ({ ...prev, new: val }))}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Confirm New Password</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Re-type new password"
+                  placeholderTextColor={colors.text.disabled}
+                  secureTextEntry
+                  value={passForm.confirm}
+                  onChangeText={(val) => setPassForm(prev => ({ ...prev, confirm: val }))}
+                />
+              </View>
+
+              <TouchableOpacity 
+                style={[styles.modalActionBtn, isUpdatingPass && { opacity: 0.7 }]}
+                onPress={handleUpdatePassword}
+                disabled={isUpdatingPass}
+              >
+                {isUpdatingPass ? (
+                  <ActivityIndicator color="#FFF" size="small" />
+                ) : (
+                  <Text style={styles.modalActionText}>Update Password</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* ── Feedback Modal ── */}
+      <Modal visible={isFeedbackVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <View style={[styles.modalIconWrap, { backgroundColor: colors.accents.forestGreen + '20' }]}>
+                <MessageSquare color={colors.accents.forestGreen} size={24} />
+              </View>
+              <Text style={styles.modalTitle}>Your Feedback</Text>
+              <TouchableOpacity onPress={() => setIsFeedbackVisible(false)}><X color={colors.text.tertiary} size={24} /></TouchableOpacity>
+            </View>
+            <TextInput
+              style={[styles.textInput, { height: 120 }]}
+              placeholder="How can we improve MindBridge?"
+              placeholderTextColor={colors.text.disabled}
+              multiline
+              value={feedback}
+              onChangeText={setFeedback}
+            />
+            <TouchableOpacity style={styles.modalActionBtn} onPress={submitFeedback} disabled={isSendingFeedback}>
+              {isSendingFeedback ? <ActivityIndicator color="#FFF" /> : <Text style={styles.modalActionText}>Send Feedback</Text>}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── About Modal ── */}
+      <Modal visible={isAboutVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <View style={[styles.modalIconWrap, { backgroundColor: colors.plum + '20' }]}>
+                <Info color={colors.plum} size={24} />
+              </View>
+              <Text style={styles.modalTitle}>About MindBridge</Text>
+              <TouchableOpacity onPress={() => setIsAboutVisible(false)}><X color={colors.text.tertiary} size={24} /></TouchableOpacity>
+            </View>
+            <View style={{ gap: 16 }}>
+              <Text style={{ color: colors.text.primary, fontSize: 17, fontWeight: '700', lineHeight: 24 }}>
+                Supporting the mental well-being of tertiary students in Ghana.
+              </Text>
+              <Text style={{ color: colors.text.secondary, fontSize: 15, lineHeight: 22 }}>
+                MindBridge is a premium mental health navigator designed specifically for the unique academic and personal journeys of University and College students in Ghana.
+              </Text>
+              <View style={{ marginTop: 8, padding: 16, backgroundColor: colors.backgroundSecondary, borderRadius: 20, gap: 4 }}>
+                <Text style={{ color: colors.text.primary, fontSize: 14, fontWeight: '700' }}>MindBridge v1.2.0</Text>
+                <Text style={{ color: colors.text.tertiary, fontSize: 12 }}>Handcrafted for Ghanaian Tertiary Education 🇬🇭</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Help Center Modal ── */}
+      <Modal visible={isHelpVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <View style={[styles.modalIconWrap, { backgroundColor: colors.accents.slate + '20' }]}>
+                <HelpCircle color={colors.accents.slate} size={24} />
+              </View>
+              <Text style={styles.modalTitle}>Help Center</Text>
+              <TouchableOpacity onPress={() => setIsHelpVisible(false)}><X color={colors.text.tertiary} size={24} /></TouchableOpacity>
+            </View>
+            <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
+              <View style={{ gap: 16 }}>
+                <View>
+                  <Text style={{ color: colors.plum, fontWeight: '800', marginBottom: 4 }}>What is a Streak?</Text>
+                  <Text style={{ color: colors.text.secondary, lineHeight: 20 }}>A streak records your consecutive days of wellness activities. Complete at least one quest daily to keep it burning!</Text>
+                </View>
+                <View>
+                  <Text style={{ color: colors.plum, fontWeight: '800', marginBottom: 4 }}>Privacy & Data</Text>
+                  <Text style={{ color: colors.text.secondary, lineHeight: 20 }}>Your data is encrypted and private. We only use it to provide personalized wellness insights through the AI Oracle.</Text>
+                </View>
+                <View>
+                  <Text style={{ color: colors.plum, fontWeight: '800', marginBottom: 4 }}>Contact Support</Text>
+                  <Text style={{ color: colors.text.secondary, lineHeight: 20 }}>For urgent issues, please email support@mindbridge.edu.gh or visit the student clinic.</Text>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
-const createStyles = (themeContext: any) => StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: themeContext.colors.background, 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    padding: 24 
+    backgroundColor: theme.colors.backgroundSecondary, 
   },
-  title: { 
-    fontSize: 24, 
-    fontWeight: '800', 
-    color: themeContext.colors.plum, 
-    marginTop: 16, 
-    marginBottom: 8 
+  scrollContent: {
+    paddingHorizontal: 0,
   },
-  subtitle: { 
-    fontSize: 16, 
-    color: themeContext.colors.text.secondary, 
-    textAlign: 'center',
-    marginBottom: 48
+  section: {
+    marginBottom: 32,
+    paddingHorizontal: 24,
   },
-  themeSection: {
-    width: '100%',
-    backgroundColor: themeContext.colors.surface,
-    padding: 24,
-    borderRadius: 24,
+  sectionHeader: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: theme.colors.text.tertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 12,
+    marginLeft: 8,
+  },
+  card: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 28,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: themeContext.isDark ? 0.2 : 0.05,
-    shadowRadius: 12,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: themeContext.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    shadowOpacity: theme.isDark ? 0.2 : 0.03,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: themeContext.colors.text.primary,
-    marginBottom: 16,
-  },
-  optionsRow: {
+  row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
   },
-  optionBtn: {
-    flex: 1,
+  rowIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 16,
-    backgroundColor: themeContext.colors.backgroundSecondary,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    marginRight: 16,
   },
-  optionBtnActive: {
-    backgroundColor: themeContext.colors.plum,
-    borderColor: themeContext.colors.plumLight,
-  },
-  optionText: {
-    marginTop: 8,
-    fontSize: 14,
+  rowLabel: {
+    flex: 1,
+    fontSize: 16,
     fontWeight: '600',
-    color: themeContext.colors.text.secondary,
+    color: theme.colors.text.primary,
   },
-  optionTextActive: {
-    color: themeContext.colors.text.onPrimary || '#FFF',
+  rowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  rowValue: {
+    fontSize: 14,
+    color: theme.colors.text.tertiary,
+  },
+  themeCard: {
+    flexDirection: 'row',
+    backgroundColor: theme.colors.surface,
+    borderRadius: 28,
+    padding: 8,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+  },
+  themeOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 20,
+    backgroundColor: theme.colors.backgroundSecondary,
+  },
+  themeOptionActive: {
+    backgroundColor: theme.colors.plum,
+  },
+  themeOptionText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.text.secondary,
+  },
+  themeOptionTextActive: {
+    color: '#FFF',
+  },
+  logoutBtn: {
+    marginHorizontal: 24,
+    marginTop: 8,
+    marginBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 18,
+    borderRadius: 24,
+    backgroundColor: '#FF4444',
+    shadowColor: '#FF4444',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  logoutText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#FFF',
+  },
+  versionText: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: theme.colors.text.disabled,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 32,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.8)',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  modalTitle: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: '800',
+    color: theme.colors.text.primary,
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  modalBody: {
+    gap: 16,
+  },
+  inputGroup: {
+    gap: 8,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.text.tertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginLeft: 4,
+  },
+  textInput: {
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: 16,
+    padding: 16,
+    fontSize: 16,
+    color: theme.colors.text.primary,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+  },
+  modalActionBtn: {
+    backgroundColor: theme.colors.plum,
+    paddingVertical: 18,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: theme.colors.plum,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  modalActionText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '800',
   }
 });

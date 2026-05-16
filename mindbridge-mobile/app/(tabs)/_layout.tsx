@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useTheme } from '../../src/context/ThemeContext';
-import { LayoutDashboard, User, Flower2, MessageCircle, MoreHorizontal } from 'lucide-react-native';
+import { LayoutDashboard, User, Flower2, MessageCircle, Settings } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { StyleSheet, Platform, View } from 'react-native';
@@ -67,8 +67,8 @@ export default function TabLayout() {
       <Tabs.Screen 
         name="settings" 
         options={{ 
-          title: 'More',
-          tabBarIcon: ({ color }) => <MoreHorizontal color={color} size={24} strokeWidth={2} />
+          title: 'Settings',
+          tabBarIcon: ({ color }) => <Settings color={color} size={24} strokeWidth={2} />
         }} 
       />
       

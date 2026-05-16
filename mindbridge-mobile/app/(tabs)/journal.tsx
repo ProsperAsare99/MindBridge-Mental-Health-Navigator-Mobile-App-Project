@@ -60,6 +60,7 @@ export default function JournalScreen() {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
   const micScale = useSharedValue(1);
+  const animatedMicStyle = useAnimatedStyle(() => ({ transform: [{ scale: micScale.value }] }));
 
   const MOOD_OPTIONS = [
     { id: 'joy', icon: Sun, color: theme.colors.accents.gentlePeach, label: 'Joyful' },
@@ -395,7 +396,7 @@ export default function JournalScreen() {
                     onPress={isRecording ? stopRecording : startRecording}
                     style={[styles.micBtn, isRecording && styles.micBtnRecording]}
                   >
-                    <Animated.View style={useAnimatedStyle(() => ({ transform: [{ scale: micScale.value }] }))}>
+                    <Animated.View style={animatedMicStyle}>
                       {isRecording ? <StopCircle color="#FFF" size={28} /> : <Mic color="#FFF" size={28} />}
                     </Animated.View>
                   </TouchableOpacity>

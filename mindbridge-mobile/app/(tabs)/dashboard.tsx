@@ -333,6 +333,7 @@ export default function DashboardScreen() {
   const theme = useTheme();
   const { t } = theme;
   const { userData: authData } = useContext(AuthContext) as any;
+  const styles = createStyles(theme);
   
   const [rituals, setRituals] = useState({
     garden: false,

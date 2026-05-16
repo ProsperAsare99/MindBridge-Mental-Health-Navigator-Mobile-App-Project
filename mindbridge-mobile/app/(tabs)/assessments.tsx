@@ -176,24 +176,24 @@ export default function AssessmentsScreen() {
               <ActivityIndicator size="small" color={theme.colors.plum} style={{ padding: 40 }} />
             ) : results.length === 0 ? (
               <View style={{ padding: 40, alignItems: 'center' }}>
-                <Text style={{ color: themeContext.colors.text.secondary }}>No assessments taken yet.</Text>
+                <Text style={{ color: theme.colors.text.secondary }}>No assessments taken yet.</Text>
               </View>
             ) : (
               results.map((result: any, index: number) => (
                 <React.Fragment key={result.id}>
                   <TouchableOpacity style={styles.resultItem}>
-                    <View style={[styles.resultIconWrap, { backgroundColor: themeContext.colors.accents.powderBlue + (themeContext.isDark ? '25' : '15') }]}>
-                      {result.score > 10 ? <TrendingUp color={themeContext.colors.accents.terracotta} size={18} /> : <Minus color={themeContext.colors.accents.powderBlue} size={18} />}
+                    <View style={[styles.resultIconWrap, { backgroundColor: theme.colors.accents.powderBlue + (theme.isDark ? '25' : '15') }]}>
+                      {result.score > 10 ? <TrendingUp color={theme.colors.accents.terracotta} size={18} /> : <Minus color={theme.colors.accents.powderBlue} size={18} />}
                     </View>
                     <View style={styles.resultInfo}>
                       <Text style={styles.resultTest}>{result.type}</Text>
-                      <Text style={[styles.resultScore, { color: result.score > 15 ? themeContext.colors.accents.terracotta : themeContext.colors.text.primary }]}>
+                      <Text style={[styles.resultScore, { color: result.score > 15 ? theme.colors.accents.terracotta : theme.colors.text.primary }]}>
                         {result.severity} ({result.score})
                       </Text>
                     </View>
                     <View style={styles.resultRight}>
                       <Text style={styles.resultDate}>{formatDate(result.createdAt)}</Text>
-                      <ChevronRight color={themeContext.colors.text.disabled} size={18} />
+                      <ChevronRight color={theme.colors.text.disabled} size={18} />
                     </View>
                   </TouchableOpacity>
                   {index < results.length - 1 && <View style={styles.divider} />}
@@ -205,7 +205,7 @@ export default function AssessmentsScreen() {
 
         <Animated.View entering={FadeInUp.delay(700).duration(500)} style={styles.educationalCard}>
           <View style={styles.eduIconWrap}>
-            <Info color={themeContext.colors.plum} size={20} />
+            <Info color={theme.colors.plum} size={20} />
           </View>
           <View style={styles.eduContent}>
             <Text style={styles.eduTitle}>Why take assessments?</Text>

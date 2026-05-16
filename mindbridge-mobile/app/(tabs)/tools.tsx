@@ -67,9 +67,9 @@ export default function ToolsScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={themeContext.isDark ? "light-content" : "dark-content"} />
+      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
       <LinearGradient
-        colors={[themeContext.colors.background, themeContext.colors.backgroundSecondary, themeContext.colors.backgroundSecondary]}
+        colors={[theme.colors.background, theme.colors.backgroundSecondary, theme.colors.backgroundSecondary]}
         locations={[0, 0.4, 1]}
         style={StyleSheet.absoluteFillObject}
       />
@@ -82,7 +82,7 @@ export default function ToolsScreen() {
           subtitle={t('tools.subtitle')}
           rightAction={
             <TouchableOpacity>
-              <MoreVertical color={themeContext.colors.text.secondary} size={24} />
+              <MoreVertical color={theme.colors.text.secondary} size={24} />
             </TouchableOpacity>
           }
         />

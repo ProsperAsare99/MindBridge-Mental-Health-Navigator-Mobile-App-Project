@@ -71,7 +71,7 @@ const typingStyles = StyleSheet.create({
 });
 
 // ─── Individual Message ────────────────────────────────────────────────────────
-const MessageItem = ({ item, theme, router }: any) => {
+const MessageItem = ({ item, theme, router, t }: any) => {
   const onLongPress = () => {
     Clipboard.setString(item.text);
     Alert.alert('Copied', 'Message copied to clipboard.');
@@ -383,7 +383,7 @@ export default function AIGuideScreen() {
           ref={flatListRef}
           data={listData}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => <MessageItem item={item} theme={theme} router={router} />}
+          renderItem={({ item }) => <MessageItem item={item} theme={theme} router={router} t={t} />}
           contentContainerStyle={[S.listContent, { paddingBottom: bottomPad + INPUT_AREA_HEIGHT + 12 }]}
           showsVerticalScrollIndicator={false}
           onLayout={scrollToEnd}
@@ -406,7 +406,7 @@ export default function AIGuideScreen() {
             <TextInput
               ref={inputRef}
               style={[S.input, { color: theme.colors.text.primary }]}
-              placeholder={t.ai?.placeholder || "Share what's on your mind…"}
+              placeholder={t('ai.placeholder')}
               placeholderTextColor={theme.colors.text.disabled}
               value={input}
               onChangeText={setInput}

@@ -218,7 +218,7 @@ export default function JournalScreen() {
       
       {!isWriting ? (
         <ScrollView 
-        contentContainerStyle={[styles.scroll, { paddingTop: insets.top }]} 
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]} 
         showsVerticalScrollIndicator={false}
       >
         <ScreenHeader 
@@ -335,7 +335,7 @@ export default function JournalScreen() {
             <Text style={styles.composerTitle}>New Entry</Text>
             <TouchableOpacity 
             style={[styles.saveBtn, { backgroundColor: theme.colors.plum }]}
-            onPress={saveEntry}
+            onPress={handleSave}
           >
             <Text style={styles.saveBtnText}>{t('journal.save_entry')}</Text>
           </TouchableOpacity>
@@ -359,33 +359,30 @@ export default function JournalScreen() {
                     ]}
                   >
                     <mood.icon size={20} color={mood.color} />
-                    <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{t('journal.write_reflection')}</Text>
-            <TouchableOpacity onPress={() => setIsWriting(false)}>
-              <X color={theme.colors.text.primary} size={24} />
-            </TouchableOpacity>
-          </View>
-
-          <TextInput
-            style={styles.titleInput}
-            placeholder={t('journal.title_placeholder')}
-            placeholderTextColor={theme.colors.text.tertiary}
-            value={newTitle}
-            onChangeText={setNewTitle}
-          />
-
-          <TextInput
-            style={styles.contentInput}
-            placeholder={t('journal.content_placeholder')}
-            placeholderTextColor={theme.colors.text.tertiary}
-            multiline
-            value={newContent}
-            onChangeText={setNewContent}
-          />
+                    <Text style={[styles.moodOptionText, { color: mood.color }]}>{mood.label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
+
+            <View style={{ height: 24 }} />
+
+            <TextInput
+              style={styles.titleInput}
+              placeholder={t('journal.title_placeholder')}
+              placeholderTextColor={theme.colors.text.tertiary}
+              value={newTitle}
+              onChangeText={setNewTitle}
+            />
+
+            <TextInput
+              style={styles.contentInput}
+              placeholder={t('journal.content_placeholder')}
+              placeholderTextColor={theme.colors.text.tertiary}
+              multiline
+              value={newContent}
+              onChangeText={setNewContent}
+            />
 
             {/* Audio Recording UI */}
             <View style={styles.audioComposer}>
@@ -597,6 +594,27 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   moodSelector: {
     marginBottom: 24,
+  },
+  emptyContainer: {
+    padding: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: theme.colors.plum + '10',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: theme.colors.text.tertiary,
+    textAlign: 'center',
+    lineHeight: 24,
+    maxWidth: 240,
   },
   moodSelectorLabel: {
     fontSize: 13,

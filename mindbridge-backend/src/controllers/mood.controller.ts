@@ -21,7 +21,19 @@ export const getMoodLogs = async (req: Request, res: Response) => {
 export const createMoodLog = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
-    const { score, emotions, note } = req.body;
+    const { 
+      score, 
+      emotions, 
+      energyLevel, 
+      sleepHours, 
+      sleepQuality, 
+      socialSetting, 
+      physicalSymptoms, 
+      weather, 
+      location, 
+      audioUrl, 
+      note 
+    } = req.body;
     
     if (score === undefined || !emotions) {
       return res.status(400).json({ error: 'Score and emotions are required' });
@@ -32,6 +44,14 @@ export const createMoodLog = async (req: Request, res: Response) => {
         userId,
         score,
         emotions,
+        energyLevel,
+        sleepHours,
+        sleepQuality,
+        socialSetting,
+        physicalSymptoms,
+        weather,
+        location,
+        audioUrl,
         note,
       },
     });

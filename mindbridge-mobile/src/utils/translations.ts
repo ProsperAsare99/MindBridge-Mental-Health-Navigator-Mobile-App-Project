@@ -54,6 +54,12 @@ export interface TranslationSchema {
     supportNudge: string;
     successTitle: string;
     successSubtitle: string;
+    energyLevel: string;
+    sleepQuality: string;
+    socialInteraction: string;
+    physicalSymptoms: string;
+    audioNote: string;
+    nurtureBtn: string;
   };
   ai: {
     title: string;
@@ -252,7 +258,13 @@ export const translations: Record<Language, TranslationSchema> = {
       seedQuestion: 'How are you feeling right now?',
       supportNudge: "I'm sorry you're feeling this way. Would you like to try a quick breathing exercise?",
       successTitle: 'Seed Planted!',
-      successSubtitle: "Your garden is growing beautifully.\nTake a deep breath — you're doing great.",
+      successSubtitle: "Your garden is a little more vibrant now. Take this peace with you into the rest of your day.",
+      energyLevel: "How is your energy?",
+      sleepQuality: "How was your sleep?",
+      socialInteraction: "Who have you been with?",
+      physicalSymptoms: "Any physical symptoms?",
+      audioNote: "Voice Reflection",
+      nurtureBtn: "Nurture My Peace 🌱"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -449,7 +461,13 @@ export const translations: Record<Language, TranslationSchema> = {
       seedQuestion: 'Tebea bɛn na wowɔ mu seesei?',
       supportNudge: "Ɛyɛ me ya sɛ wote nka saa. Wopɛ sɛ wosɔ mframa gye bi hwɛ?",
       successTitle: 'Aba no adua!',
-      successSubtitle: "Wo turo no reyɛ fɛ.\nGye mframa papa — woreyɛ adwuma pa.",
+      successSubtitle: "Wo turo no ayɛ fɛ paa seesei. Fa saa asomdwoe yi kura wo wɔ wo da no nyinaa mu.",
+      energyLevel: "Wo ho yɛ den sɛn?",
+      sleepQuality: "Woada yiye?",
+      socialInteraction: "Hwan na wo ne no wɔ hɔ?",
+      physicalSymptoms: "Wo honam mu yɛ wo den?",
+      audioNote: "Nne nkaebɔ",
+      nurtureBtn: "Ma m'asomdwoe nnɔ 🌱"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -646,7 +664,13 @@ export const translations: Record<Language, TranslationSchema> = {
       seedQuestion: 'Comment vous sentez-vous en ce moment?',
       supportNudge: "Je suis désolé que vous vous sentiez ainsi. Voudriez-vous essayer un exercice de respiration rapide ?",
       successTitle: 'Graine plantée !',
-      successSubtitle: "Votre jardin grandit magnifiquement.\nRespirez profondément — vous allez bien.",
+      successSubtitle: "Votre jardin est un peu plus vibrant maintenant. Emportez cette paix avec vous pour le reste de votre journée.",
+      energyLevel: "Comment est votre énergie ?",
+      sleepQuality: "Comment était votre sommeil ?",
+      socialInteraction: "Avec qui étiez-vous ?",
+      physicalSymptoms: "Des symptômes physiques ?",
+      audioNote: "Réflexion vocale",
+      nurtureBtn: "Nourrir ma paix 🌱"
     },
     ai: {
       title: 'Oracle MindBridge',
@@ -843,7 +867,13 @@ export const translations: Record<Language, TranslationSchema> = {
       seedQuestion: 'Te onuɔ he tɛŋŋ bianɛ?',
       supportNudge: "Eshwerɛ mi akɛ onuɔ he nakai. Oosumɔ ni okee mu ko kwee?",
       successTitle: 'Dua lɛ edua!',
-      successSubtitle: "O-abɔɔ lɛ efɛɛ fɛfɛo.\nMuɔ kpakpa — oofee nitsumɔ kpakpa.",
+      successSubtitle: "Wò abɔ lolo vi aɖe fifia. Kpɔ fafa sia ɖe wò ŋukeke si susɔ la me.",
+      energyLevel: "Aleke wò ŋusẽ le?",
+      sleepQuality: "È dɔ alɔ̃ nyuiea?",
+      socialInteraction: "Amekawo gbɔ nèle?",
+      physicalSymptoms: "Lãmesẽkuxi aɖewo le wò hã?",
+      audioNote: "Gbeɖiɖi dzesi",
+      nurtureBtn: "Na nye fafa natsi 🌱"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -1040,7 +1070,13 @@ export const translations: Record<Language, TranslationSchema> = {
       seedQuestion: 'Aleke nèle sese me fifia?',
       supportNudge: "Eve m be nèle sese me nenema. Àdi be yeasɔ gbɔgbɔ ƒe dɔwɔnu aɖea?",
       successTitle: 'Ku la ƒe dodo!',
-      successSubtitle: "Wò abɔ la le tsitsim fɛfɛɛ.\nGbɔ ɖe eme — èle dɔ nyuie wɔm.",
+      successSubtitle: "Wò abɔ lolo vi aɖe fifia. Kpɔ fafa sia ɖe wò ŋukeke si susɔ la me.",
+      energyLevel: "Aleke wò ŋusẽ le?",
+      sleepQuality: "È dɔ alɔ̃ nyuiea?",
+      socialInteraction: "Amekawo gbɔ nèle?",
+      physicalSymptoms: "Lãmesẽkuxi aɖewo le wò hã?",
+      audioNote: "Gbeɖiɖi dzesi",
+      nurtureBtn: "Na nye fafa natsi 🌱"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -1237,7 +1273,13 @@ export const translations: Record<Language, TranslationSchema> = {
       seedQuestion: 'Yaya kake ji a yanzu?',
       supportNudge: "Yi haƙuri kuna jin haka. Za ku so ku gwada darasin numfashi?",
       successTitle: 'An dasa iri!',
-      successSubtitle: "Lambun ku yana girma da kyau.\nYi numfashi mai zurfi - kuna yin girma.",
+      successSubtitle: "Lambun ku ya ɗan ƙara girma yanzu. Ka tafi da wannan kwanciyar hankali cikin sauran ranar ka.",
+      energyLevel: "Yaya ƙarfin ka yake?",
+      sleepQuality: "Yaya barcin ka ya kasance?",
+      socialInteraction: "Da wa kake tare?",
+      physicalSymptoms: "Akwai wata matsalar lafiya?",
+      audioNote: "Muryar tunani",
+      nurtureBtn: "Haɓaka kwanciyar hankali na 🌱"
     },
     ai: {
       title: 'MindBridge Oracle',

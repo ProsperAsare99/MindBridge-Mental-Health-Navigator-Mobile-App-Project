@@ -126,7 +126,7 @@ export default function WelcomeScreen() {
       key: 'guide',
       overline: 'AI-POWERED CARE',
       headline: 'Guidance\nOn Your Terms.',
-      body: 'Personalised check-ins, mood tracking, and coping tools — always available.',
+      body: 'Access personalized check-ins, mood tracking, and coping tools at any time.',
       accentColor: theme.colors.accents.slate,
       IllustrationComponent: GuideIllustration,
     },

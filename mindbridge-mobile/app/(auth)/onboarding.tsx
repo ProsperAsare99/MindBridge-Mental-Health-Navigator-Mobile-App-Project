@@ -28,6 +28,7 @@ import {
   ChevronRight, ChevronLeft, ShieldCheck, User, CheckCircle2,
   Info
 } from 'lucide-react-native';
+import AuthCharacters from '../../src/components/AuthCharacters';
 
 const { width, height } = Dimensions.get('window');
 
@@ -242,73 +243,77 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const themeContext = useTheme();
-  const { userData: authData } = useContext(AuthContext);
-  const styles = createStyles(themeContext);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, any>>({
-    stressors: {}
-  });
-  const [showSkipModal, setShowSkipModal] = useState(false);
-  const [isFinishing, setIsFinishing] = useState(false);
-  const progressAnim = useRef(new Animated.Value(0)).current;
+    const { updateUserData, userData: authData } = useContext(AuthContext);
+    const styles = createStyles(themeContext);
+    const [currentStepIndex, setCurrentStepIndex] = useState(0);
+    const [answers, setAnswers] = useState<Record<string, any>>({
+      stressors: {}
+    });
+    const [showSkipModal, setShowSkipModal] = useState(false);
+    const [isFinishing, setIsFinishing] = useState(false);
+    const progressAnim = useRef(new Animated.Value(0)).current;
 
-  const preferredLanguage = (authData?.preferredLanguage as Language) || 'English';
-  const t: TranslationSchema = translations[preferredLanguage] || translations.English;
+    const preferredLanguage = (authData?.preferredLanguage as Language) || 'English';
+    const t: TranslationSchema = translations[preferredLanguage] || translations.English;
 
-  const step = ONBOARDING_STEPS[currentStepIndex];
+    const step = ONBOARDING_STEPS[currentStepIndex];
 
-  // Questions 1 to 10 mapped to index 1 to 10
-  const isQuestionStep = currentStepIndex > 0 && currentStepIndex < ONBOARDING_STEPS.length - 1;
-  const questionNumber = currentStepIndex;
+    // Questions 1 to 10 mapped to index 1 to 10
+    const isQuestionStep = currentStepIndex > 0 && currentStepIndex < ONBOARDING_STEPS.length - 1;
+    const questionNumber = currentStepIndex;
 
-  useEffect(() => {
-    let progress = 0;
-    if (isQuestionStep) {
-      progress = questionNumber / 10;
-    } else if (currentStepIndex === ONBOARDING_STEPS.length - 1) {
-      progress = 1;
-    }
-    Animated.spring(progressAnim, {
-      toValue: progress,
-      useNativeDriver: false,
-    }).start();
-  }, [currentStepIndex]);
+    useEffect(() => {
+      let progress = 0;
+      if (isQuestionStep) {
+        progress = questionNumber / 10;
+      } else if (currentStepIndex === ONBOARDING_STEPS.length - 1) {
+        progress = 1;
+      }
+      Animated.spring(progressAnim, {
+        toValue: progress,
+        useNativeDriver: false,
+      }).start();
+    }, [currentStepIndex]);
 
-  const finishOnboarding = async () => {
-    try {
-      setIsFinishing(true);
-      
-      // Map frontend answers to backend schema
-      const payload = {
-        firstName: answers['q1'],
-        university: answers['q2'],
-        level: answers['q3'],
-        program: answers['q4'],
-        primaryGoals: answers['q10'] || [],
-        interests: answers['q7'] || [],
-        // Simplified stress level mapping
-        stressLevel: answers.stressors ? Math.max(1, ...Object.values(answers.stressors).map(v => Number(v))) : 3,
-        stressSources: answers['q5'] || [],
-        supportTypes: answers['q7'] || [],
-        currentMood: 'Good', 
-        sleepPattern: 'Average',
-        preferredLanguage: preferredLanguage,
-      };
+    const finishOnboarding = async () => {
+      try {
+        setIsFinishing(true);
+        
+        // Map frontend answers to backend schema
+        const payload = {
+          firstName: answers['q1'],
+          university: answers['q2'],
+          level: answers['q3'],
+          program: answers['q4'],
+          primaryGoals: answers['q10'] || [],
+          interests: answers['q7'] || [],
+          // Simplified stress level mapping
+          stressLevel: answers.stressors ? Math.max(1, ...Object.values(answers.stressors).map(v => Number(v))) : 3,
+          stressSources: answers['q5'] || [],
+          supportTypes: answers['q7'] || [],
+          currentMood: 'Good', 
+          sleepPattern: 'Average',
+          preferredLanguage: preferredLanguage,
+        };
 
-      await api.post('/onboarding', payload);
-      await AsyncStorage.setItem('onboarding_completed', 'true');
-      await AsyncStorage.setItem('onboarding_answers', JSON.stringify(answers));
-      
-      // Delay slightly for effect
-      setTimeout(() => {
+        await api.post('/onboarding', payload);
+        await AsyncStorage.setItem('onboarding_completed', 'true');
+        await AsyncStorage.setItem('onboarding_answers', JSON.stringify(answers));
+        
+        // Update auth state so layout redirect happens
+        await updateUserData({ isOnboarded: true });
+
+        // Delay slightly for effect
+        setTimeout(() => {
+          router.replace('/(tabs)/dashboard');
+        }, 1500);
+      } catch (error) {
+        console.error('Failed to save onboarding:', error);
+        // Even if error, update local state to allow access (can try again later)
+        await updateUserData({ isOnboarded: true });
         router.replace('/(tabs)/dashboard');
-      }, 1500);
-    } catch (error) {
-      console.error('Failed to save onboarding:', error);
-      // Proceed anyway to not block user, they can try again or settings
-      router.replace('/(tabs)/dashboard');
-    }
-  };
+      }
+    };
 
   const handleNext = () => {
     if (currentStepIndex < ONBOARDING_STEPS.length - 1) {
@@ -379,44 +384,65 @@ export default function OnboardingScreen() {
         const userUni = authData?.academic?.institution || 'your university';
         
         return (
-          <View style={styles.centerContent}>
-            <View style={styles.iconCircle}>
-              <ShieldCheck color={themeContext.colors.plum} size={40} strokeWidth={1.5} />
-            </View>
-            <Text style={styles.title}>{step.title}</Text>
-            
-            <ScrollView showsVerticalScrollIndicator={false} style={{ width: '100%' }}>
+          <View style={styles.stepContainer}>
+            <ScrollView 
+              showsVerticalScrollIndicator={false} 
+              contentContainerStyle={{ paddingBottom: 100 }}
+              style={{ flex: 1 }}
+            >
+              <View style={[styles.centerContent, { marginTop: 10, marginBottom: 20 }]}>
+                <View style={{ height: 160, width: '100%', overflow: 'visible', alignItems: 'center', justifyContent: 'center' }}>
+                  <AuthCharacters focusedField="none" />
+                </View>
+                <View style={[styles.iconCircle, { marginTop: -20 }]}>
+                  <ShieldCheck color={themeContext.colors.plum} size={40} strokeWidth={1.5} />
+                </View>
+                <Text style={styles.title}>{step.title}</Text>
+              </View>
+
               <Text style={styles.consentGreeting}>Hello {userName},</Text>
               <Text style={styles.consentBody}>
-                To provide you with the best possible support, we'd like to use the information you shared—including your studies at {userUni}—to personalize your MindBridge experience.
+                To provide you with the best possible support, we'd like to use the information you shared, including your studies at {userUni}, to personalize your MindBridge experience.
               </Text>
               
               <View style={styles.consentPointsBox}>
                 <View style={styles.consentPointRow}>
-                  <CheckCircle2 color={themeContext.colors.accents.eucalyptus} size={18} />
+                  <View style={styles.consentCheckWrap}>
+                    <CheckCircle2 color={themeContext.colors.accents.eucalyptus} size={20} />
+                  </View>
                   <Text style={styles.consentPointText}>Your data is encrypted and stays between us.</Text>
                 </View>
                 <View style={styles.consentPointRow}>
-                  <CheckCircle2 color={themeContext.colors.accents.eucalyptus} size={18} />
+                  <View style={styles.consentCheckWrap}>
+                    <CheckCircle2 color={themeContext.colors.accents.eucalyptus} size={20} />
+                  </View>
                   <Text style={styles.consentPointText}>You have full control over what the Oracle knows.</Text>
                 </View>
                 <View style={styles.consentPointRow}>
-                  <CheckCircle2 color={themeContext.colors.accents.eucalyptus} size={18} />
+                  <View style={styles.consentCheckWrap}>
+                    <CheckCircle2 color={themeContext.colors.accents.eucalyptus} size={20} />
+                  </View>
                   <Text style={styles.consentPointText}>Our goal is to nurture your peace, not just track data.</Text>
                 </View>
               </View>
 
-              <Text style={styles.consentCommitmentTitle}>My Commitment to Self-Care</Text>
-              <Text style={styles.consentCommitmentText}>
-                I understand that MindBridge is a supportive tool and I agree to use it as part of my wellness journey. I will seek professional help if I ever feel I am in immediate danger.
-              </Text>
+              <View style={styles.commitmentCard}>
+                <Text style={styles.consentCommitmentTitle}>My Commitment to Self-Care</Text>
+                <Text style={styles.consentCommitmentText}>
+                  I understand that MindBridge is a supportive tool and I agree to use it as part of my wellness journey. I will seek professional help if I ever feel I am in immediate danger.
+                </Text>
+              </View>
 
-              <TouchableOpacity style={[styles.primaryBtn, { marginTop: 30, marginBottom: 20 }]} onPress={handleNext}>
+              <TouchableOpacity 
+                style={[styles.primaryBtn, { marginTop: 32, marginBottom: 20, shadowColor: themeContext.colors.plum, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 }]} 
+                onPress={handleNext}
+                activeOpacity={0.8}
+              >
                 <Text style={styles.primaryBtnText}>I Consent & Agree</Text>
               </TouchableOpacity>
               
-              <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 40, alignSelf: 'center' }}>
-                <Text style={styles.skipText}>Exit MindBridge</Text>
+              <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 20, alignSelf: 'center' }} activeOpacity={0.6}>
+                <Text style={styles.exitText}>Exit MindBridge</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -725,13 +751,16 @@ const createStyles = (theme: any) => StyleSheet.create({
   
   // Privacy / Consent
   privacyText: { fontSize: 15, color: theme.colors.text.primary, lineHeight: 28, textAlign: 'center', paddingHorizontal: 10 },
-  consentGreeting: { fontSize: 18, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, marginBottom: 12, marginTop: 10 },
-  consentBody: { fontSize: 15, fontFamily: theme.typography.fonts.content, color: theme.colors.text.secondary, lineHeight: 24, marginBottom: 24 },
-  consentPointsBox: { backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.05)' : 'rgba(0,0,0,0.02)', borderRadius: 20, padding: 20, gap: 16, marginBottom: 24 },
-  consentPointRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  consentPointText: { flex: 1, fontSize: 14, fontFamily: theme.typography.fonts.body, color: theme.colors.text.primary, fontWeight: '500' },
-  consentCommitmentTitle: { fontSize: 16, fontFamily: theme.typography.fonts.header, color: theme.colors.plum, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 },
-  consentCommitmentText: { fontSize: 14, fontFamily: theme.typography.fonts.humanist, color: theme.colors.text.tertiary, lineHeight: 22, fontStyle: 'italic' },
+  consentGreeting: { fontSize: 20, fontWeight: '800', color: theme.colors.text.primary, marginBottom: 12, marginTop: 8, letterSpacing: -0.5 },
+  consentBody: { fontSize: 15, color: theme.colors.text.secondary, lineHeight: 24, marginBottom: 24, fontWeight: '500' },
+  consentPointsBox: { backgroundColor: theme.isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(123, 97, 255, 0.04)', borderRadius: 24, padding: 20, marginBottom: 24, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(123, 97, 255, 0.1)' },
+  consentPointRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16, gap: 14 },
+  consentCheckWrap: { marginTop: 2, backgroundColor: theme.isDark ? 'rgba(95, 141, 123, 0.1)' : 'rgba(95, 141, 123, 0.08)', borderRadius: 10, padding: 4 },
+  consentPointText: { flex: 1, fontSize: 15, color: theme.colors.text.primary, fontWeight: '600', lineHeight: 22 },
+  commitmentCard: { backgroundColor: theme.isDark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)', borderRadius: 24, padding: 24, borderLeftWidth: 4, borderLeftColor: theme.colors.plum, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 1 },
+  consentCommitmentTitle: { fontSize: 14, fontWeight: '800', color: theme.colors.plum, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1.5 },
+  consentCommitmentText: { fontSize: 14, color: theme.colors.text.secondary, lineHeight: 22, fontStyle: 'italic', fontWeight: '500' },
+  exitText: { fontSize: 15, fontWeight: '700', color: theme.colors.text.tertiary, textDecorationLine: 'underline', marginTop: 10 },
   
   // Options
   optionBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.surface, paddingHorizontal: 20, paddingVertical: 18, borderRadius: 20, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.2 : 0.04, shadowRadius: 12, elevation: 2 },

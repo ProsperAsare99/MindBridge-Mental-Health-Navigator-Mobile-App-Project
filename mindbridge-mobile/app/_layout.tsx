@@ -18,7 +18,7 @@ import * as SplashScreen from 'expo-splash-screen';
 SplashScreen.preventAutoHideAsync();
 
 const InitialLayout = () => {
-  const { userToken, isLoading } = useContext(AuthContext);
+  const { userToken, userData, isLoading } = useContext(AuthContext);
   const theme = useTheme();
   const segments = useSegments();
   const router = useRouter();
@@ -46,13 +46,28 @@ const InitialLayout = () => {
   useEffect(() => {
     if (isLoading || !fontsLoaded) return;
     const inAuthGroup = segments[0] === '(auth)';
+    const isOnboarding = segments[1] === 'onboarding';
 
-    if (!userToken && !inAuthGroup) {
-      router.replace('/(auth)/welcome');
-    } else if (userToken && inAuthGroup) {
-      router.replace('/(tabs)/dashboard');
+    if (!userToken) {
+      // Not logged in, redirect to welcome if not in auth group
+      if (!inAuthGroup) {
+        router.replace('/(auth)/welcome');
+      }
+    } else {
+      // Logged in
+      if (!userData?.isOnboarded) {
+        // Not onboarded, redirect to onboarding if not already there
+        if (!isOnboarding) {
+          router.replace('/(auth)/onboarding');
+        }
+      } else {
+        // Onboarded, redirect to tabs if still in auth group
+        if (inAuthGroup) {
+          router.replace('/(tabs)/dashboard');
+        }
+      }
     }
-  }, [userToken, isLoading]);
+  }, [userToken, isLoading, userData, segments]);
 
   if (isLoading || !fontsLoaded) {
     return (

@@ -533,7 +533,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     elevation: 8 
   },
   logoImage: { width: '100%', height: '100%' },
-  characterPos: { position: 'absolute', bottom: -10, right: '25%' },
+  characterPos: { position: 'absolute', bottom: -10 },
   
   formContainer: { flex: 1, gap: 32 },
   titleContainer: { marginBottom: 8 },

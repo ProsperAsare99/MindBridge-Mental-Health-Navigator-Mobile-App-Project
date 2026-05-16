@@ -89,9 +89,9 @@ const tools = [
         name: "get_mood_history",
         description: "Retrieve the user's recent mood logs and emotional trends to provide personalised support and identify patterns.",
         parameters: {
-          type: "object",
+          type: "OBJECT",
           properties: {
-            limit: { type: "number", description: "Number of logs to fetch (max 10)." }
+            limit: { type: "NUMBER", description: "Number of logs to fetch (max 10)." }
           }
         }
       },
@@ -99,24 +99,23 @@ const tools = [
         name: "get_journal_history",
         description: "Retrieve snippets of the user's recent journal entries to inform context-aware responses.",
         parameters: {
-          type: "object",
+          type: "OBJECT",
           properties: {
-            limit: { type: "number", description: "Number of entries to fetch (max 5)." }
+            limit: { type: "NUMBER", description: "Number of entries to fetch (max 5)." }
           }
         }
       },
       {
         name: "get_ritual_status",
-        description: "Check if the user has completed their daily rituals today (Mood Seed, Journal, Breathing).",
-        parameters: { type: "object", properties: {} }
+        description: "Check if the user has completed their daily rituals today (Mood Seed, Journal, Breathing)."
       },
       {
         name: "get_recommended_resources",
         description: "Search for specific articles, audio exercises, or professional tools in the MindBridge library based on a category (e.g., 'Anxiety', 'Sleep').",
         parameters: {
-          type: "object",
+          type: "OBJECT",
           properties: {
-            category: { type: "string", description: "The mental health category to search for." }
+            category: { type: "STRING", description: "The mental health category to search for." }
           }
         }
       }
@@ -127,7 +126,7 @@ const tools = [
 export const generateOracleResponse = async (userMessage: string, context: any, userId: string) => {
   try {
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: SYSTEM_PROMPT,
       tools: tools as any
     });
@@ -155,10 +154,24 @@ export const generateOracleResponse = async (userMessage: string, context: any, 
 
     // Prepare history: reverse since DB gives descending
     const rawHistory = context.history || [];
-    const chatHistory = rawHistory.reverse().map((msg: any) => ({
+    let chatHistory = rawHistory.reverse().map((msg: any) => ({
       role: msg.role === 'user' ? 'user' : 'model',
       parts: [{ text: msg.content }]
     }));
+
+    // Ensure perfectly alternating history ending with model
+    let lastRole = 'model';
+    const validHistory: any[] = [];
+    for (const msg of chatHistory) {
+      if (msg.role !== lastRole) {
+        validHistory.push(msg);
+        lastRole = msg.role;
+      }
+    }
+    if (validHistory.length > 0 && validHistory[validHistory.length - 1].role === 'user') {
+      validHistory.pop();
+    }
+    chatHistory = validHistory;
 
     const chat = model.startChat({
       history: [
@@ -255,6 +268,6 @@ INSTRUCTIONS:
     return response.text();
   } catch (error) {
     console.error("Error in Oracle service:", error);
-    throw new Error("Failed to generate AI response");
+    throw error;
   }
 };

@@ -32,7 +32,11 @@ import {
   Mic,
   StopCircle,
   Play,
-  Pause
+  Pause,
+  Cloud,
+  Flame,
+  Smile,
+  Meh
 } from 'lucide-react-native';
 
 import api from '../../src/services/api';
@@ -67,6 +71,10 @@ export default function JournalScreen() {
     { id: 'joy', icon: Sun, color: theme.colors.accents.gentlePeach, label: 'Joyful' },
     { id: 'calm', icon: Wind, color: theme.colors.accents.eucalyptus, label: 'Calm' },
     { id: 'anxious', icon: CloudRain, color: theme.colors.accents.powderBlue, label: 'Anxious' },
+    { id: 'sad', icon: Cloud, color: theme.colors.accents.slate, label: 'Sad' },
+    { id: 'exhausted', icon: Meh, color: theme.colors.accents.dustyRose, label: 'Exhausted' },
+    { id: 'angry', icon: Flame, color: theme.colors.semantic.danger, label: 'Angry' },
+    { id: 'hopeful', icon: Smile, color: theme.colors.accents.softMint, label: 'Hopeful' },
   ];
 
   const getMoodIcon = (mood: string) => {
@@ -74,6 +82,10 @@ export default function JournalScreen() {
       case 'calm': return <Wind color={theme.colors.accents.eucalyptus} size={16} />;
       case 'anxious': return <CloudRain color={theme.colors.accents.powderBlue} size={16} />;
       case 'joy': return <Sun color={theme.colors.accents.gentlePeach} size={16} />;
+      case 'sad': return <Cloud color={theme.colors.accents.slate} size={16} />;
+      case 'exhausted': return <Meh color={theme.colors.accents.dustyRose} size={16} />;
+      case 'angry': return <Flame color={theme.colors.semantic.danger} size={16} />;
+      case 'hopeful': return <Smile color={theme.colors.accents.softMint} size={16} />;
       default: return <Sun color={theme.colors.accents.gentlePeach} size={16} />;
     }
   };
@@ -337,15 +349,21 @@ export default function JournalScreen() {
             style={[styles.saveBtn, { backgroundColor: theme.colors.plum }]}
             onPress={handleSave}
           >
-            <Text style={styles.saveBtnText}>{t('journal.save_entry')}</Text>
+            <Text style={[styles.saveBtnText, { color: '#FFF' }]}>{t('journal.save_entry')}</Text>
           </TouchableOpacity>
           </View>
           
           <KeyboardAvoidingView 
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.composerBody}
+            style={{ flex: 1 }}
           >
-            {/* Mood Selector in Composer */}
+            <ScrollView 
+              style={{ flex: 1 }}
+              contentContainerStyle={[styles.composerBody, { paddingBottom: 60 }]}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              {/* Mood Selector in Composer */}
             <View style={styles.moodSelector}>
               <Text style={styles.moodSelectorLabel}>How are you feeling?</Text>
               <View style={styles.moodOptionsRow}>
@@ -412,6 +430,7 @@ export default function JournalScreen() {
                 </View>
               )}
             </View>
+            </ScrollView>
           </KeyboardAvoidingView>
         </Animated.View>
       )}
@@ -559,10 +578,11 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginBottom: 16,
   },
   contentInput: {
-    flex: 1,
+    minHeight: 200,
     fontSize: 17,
     color: theme.colors.text.primary,
     lineHeight: 26,
+    textAlignVertical: 'top',
   },
   filterBar: {
     marginTop: 16,
@@ -626,6 +646,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   moodOptionsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
   },
   moodOption: {

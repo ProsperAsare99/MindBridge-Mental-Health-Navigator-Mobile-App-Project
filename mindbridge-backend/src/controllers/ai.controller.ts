@@ -169,7 +169,7 @@ export const chatWithOracle = async (req: Request, res: Response) => {
     res.json({ response: aiResponse });
   } catch (error) {
     console.error('Error in Oracle chat:', error);
-    res.status(500).json({ error: 'I am momentarily resting my thoughts. Please try talking to me again in a moment.' });
+    res.status(500).json({ message: error instanceof Error ? error.message : 'Unknown error' });
   }
 };
 

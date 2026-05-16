@@ -37,7 +37,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (savedMode && ['system', 'light', 'dark'].includes(savedMode)) {
           setModeState(savedMode as ThemeMode);
         }
-        if (savedLang && ['English', 'French', 'Twi', 'Ewe'].includes(savedLang)) {
+        if (savedLang && ['English', 'French', 'Twi', 'Ga', 'Ewe', 'Hausa'].includes(savedLang)) {
           setLanguageState(savedLang as Language);
         }
       } catch (error) {

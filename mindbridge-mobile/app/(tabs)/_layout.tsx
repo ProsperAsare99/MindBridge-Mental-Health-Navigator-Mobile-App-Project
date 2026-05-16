@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useTheme } from '../../src/context/ThemeContext';
-import { LayoutDashboard, User, Activity, MessageCircle, Settings } from 'lucide-react-native';
+import { LayoutDashboard, User, Activity, MessageCircle, Settings, Compass } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { StyleSheet, Platform, View } from 'react-native';
@@ -44,10 +44,10 @@ export default function TabLayout() {
         }} 
       />
       <Tabs.Screen 
-        name="garden" 
+        name="explore" 
         options={{ 
-          title: t('tabs.tracker'),
-          tabBarIcon: ({ color }) => <Activity color={color} size={24} strokeWidth={2} />
+          title: t('tabs.explore'),
+          tabBarIcon: ({ color }) => <Compass color={color} size={24} strokeWidth={2} />
         }} 
       />
       <Tabs.Screen 
@@ -58,26 +58,26 @@ export default function TabLayout() {
         }} 
       />
       <Tabs.Screen 
+        name="garden" 
+        options={{ 
+          title: t('tabs.tracker'),
+          tabBarIcon: ({ color }) => <Activity color={color} size={24} strokeWidth={2} />
+        }} 
+      />
+      <Tabs.Screen 
         name="profile" 
         options={{ 
           title: t('tabs.profile'),
           tabBarIcon: ({ color }) => <User color={color} size={24} strokeWidth={2} />
         }} 
       />
-      <Tabs.Screen 
-        name="settings" 
-        options={{ 
-          title: t('tabs.settings'),
-          tabBarIcon: ({ color }) => <Settings color={color} size={24} strokeWidth={2} />
-        }} 
-      />
       
       {/* Hidden Utility Screens */}
+      <Tabs.Screen name="settings" options={{ href: null }} />
       <Tabs.Screen name="journey" options={{ href: null }} />
       <Tabs.Screen name="crisis" options={{ href: null }} />
       <Tabs.Screen name="journal" options={{ href: null }} />
       <Tabs.Screen name="assessments" options={{ href: null }} />
-      <Tabs.Screen name="resources" options={{ href: null }} />
       <Tabs.Screen name="community" options={{ href: null }} />
       <Tabs.Screen name="tools" options={{ href: null }} />
     </Tabs>

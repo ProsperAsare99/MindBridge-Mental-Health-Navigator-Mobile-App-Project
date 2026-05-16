@@ -36,7 +36,9 @@ import {
   Cloud,
   Flame,
   Smile,
-  Meh
+  Meh,
+  Heart,
+  Frown
 } from 'lucide-react-native';
 
 import api from '../../src/services/api';
@@ -71,10 +73,11 @@ export default function JournalScreen() {
     { id: 'joy', icon: Sun, color: theme.colors.accents.gentlePeach, label: 'Joyful' },
     { id: 'calm', icon: Wind, color: theme.colors.accents.eucalyptus, label: 'Calm' },
     { id: 'anxious', icon: CloudRain, color: theme.colors.accents.powderBlue, label: 'Anxious' },
-    { id: 'sad', icon: Cloud, color: theme.colors.accents.slate, label: 'Sad' },
-    { id: 'exhausted', icon: Meh, color: theme.colors.accents.dustyRose, label: 'Exhausted' },
+    { id: 'sad', icon: Frown, color: theme.colors.accents.slate, label: 'Sad' },
     { id: 'angry', icon: Flame, color: theme.colors.semantic.danger, label: 'Angry' },
     { id: 'hopeful', icon: Smile, color: theme.colors.accents.softMint, label: 'Hopeful' },
+    { id: 'peaceful', icon: Heart, color: theme.colors.accents.blushPink, label: 'Peaceful' },
+    { id: 'exhausted', icon: Meh, color: theme.colors.accents.dustyRose, label: 'Tired' },
   ];
 
   const getMoodIcon = (mood: string) => {
@@ -82,10 +85,11 @@ export default function JournalScreen() {
       case 'calm': return <Wind color={theme.colors.accents.eucalyptus} size={16} />;
       case 'anxious': return <CloudRain color={theme.colors.accents.powderBlue} size={16} />;
       case 'joy': return <Sun color={theme.colors.accents.gentlePeach} size={16} />;
-      case 'sad': return <Cloud color={theme.colors.accents.slate} size={16} />;
+      case 'sad': return <Frown color={theme.colors.accents.slate} size={16} />;
       case 'exhausted': return <Meh color={theme.colors.accents.dustyRose} size={16} />;
       case 'angry': return <Flame color={theme.colors.semantic.danger} size={16} />;
       case 'hopeful': return <Smile color={theme.colors.accents.softMint} size={16} />;
+      case 'peaceful': return <Heart color={theme.colors.accents.blushPink} size={16} />;
       default: return <Sun color={theme.colors.accents.gentlePeach} size={16} />;
     }
   };
@@ -346,11 +350,12 @@ export default function JournalScreen() {
             </TouchableOpacity>
             <Text style={styles.composerTitle}>New Entry</Text>
             <TouchableOpacity 
-            style={[styles.saveBtn, { backgroundColor: theme.colors.plum }]}
-            onPress={handleSave}
-          >
-            <Text style={[styles.saveBtnText, { color: '#FFF' }]}>{t('journal.save_entry')}</Text>
-          </TouchableOpacity>
+              style={[styles.saveBtn, { backgroundColor: theme.colors.plum, flexDirection: 'row', alignItems: 'center', gap: 6 }]}
+              onPress={handleSave}
+            >
+              <PenLine color="#FFF" size={16} />
+              <Text style={[styles.saveBtnText, { color: '#FFF' }]}>{t('journal.save_entry')}</Text>
+            </TouchableOpacity>
           </View>
           
           <KeyboardAvoidingView 
@@ -359,7 +364,7 @@ export default function JournalScreen() {
           >
             <ScrollView 
               style={{ flex: 1 }}
-              contentContainerStyle={[styles.composerBody, { paddingBottom: 60 }]}
+              contentContainerStyle={[styles.composerBody, { paddingBottom: 140 }]}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
             >
@@ -567,7 +572,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 15,
   },
   composerBody: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 24,
     paddingTop: 24,
   },

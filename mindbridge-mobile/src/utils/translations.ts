@@ -12,6 +12,7 @@ export interface TranslationSchema {
   };
   tabs: {
     today: string;
+    explore: string;
     tracker: string;
     oracle: string;
     profile: string;
@@ -206,6 +207,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Today',
+      explore: 'Explore',
       tracker: 'Tracker',
       oracle: 'Oracle',
       profile: 'Profile',
@@ -409,6 +411,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Nnɛ',
+      explore: 'Explore',
       tracker: 'Suivi',
       oracle: 'Oracle',
       profile: 'Profile',
@@ -612,6 +615,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Aujourd\'hui',
+      explore: 'Explorer',
       tracker: 'Suivi',
       oracle: 'Oracle',
       profile: 'Profil',
@@ -815,6 +819,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Nnɛ',
+      explore: 'Explore',
       tracker: 'Abɔɔ',
       oracle: 'Oracle',
       profile: 'Profile',
@@ -1018,6 +1023,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Egbe',
+      explore: 'Explore',
       tracker: 'Abɔ',
       oracle: 'Oracle',
       profile: 'Profile',
@@ -1221,6 +1227,7 @@ export const translations: Record<Language, TranslationSchema> = {
     },
     tabs: {
       today: 'Yau',
+      explore: 'Explore',
       tracker: 'Lambu',
       oracle: 'Oracle',
       profile: 'Profile',

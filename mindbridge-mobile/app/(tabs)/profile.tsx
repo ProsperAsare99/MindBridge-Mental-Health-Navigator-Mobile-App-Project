@@ -8,12 +8,16 @@ import {
   TouchableOpacity, 
   Image,
   StatusBar,
-  Pressable
+  Pressable,
+  Modal,
+  TextInput,
+  Alert
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withSpring, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { 
   User, 
@@ -33,6 +37,8 @@ import {
   TrendingUp,
   Settings as SettingsIcon,
   PhoneCall,
+  X,
+  Camera
 } from 'lucide-react-native';
 
 import { AuthContext } from '../../src/context/AuthContext';
@@ -115,20 +121,62 @@ export default function ProfileScreen() {
   const isGuest = userToken?.startsWith('guest-token');
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState<any>({});
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/profile');
+      setProfile(res.data);
+      setEditData({
+        name: res.data.name,
+        phoneNumber: res.data.phoneNumber,
+        studentId: res.data.studentId,
+        university: res.data.onboarding?.university,
+        program: res.data.onboarding?.program,
+        level: res.data.onboarding?.level,
+      });
+    } catch (e) {
+      console.error('Error fetching profile:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await api.get('/ai/oracle-context');
-        setProfile(res.data.onboarding);
-      } catch (e) {
-        console.error('Error fetching profile:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchProfile();
   }, []);
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      const selectedUri = result.assets[0].uri;
+      try {
+        await api.put('/profile', { profileImage: selectedUri });
+        setProfile((prev: any) => ({ ...prev, profileImage: selectedUri }));
+      } catch (e) {
+        Alert.alert('Error', 'Could not upload image');
+      }
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await api.put('/profile', editData);
+      setIsEditing(false);
+      fetchProfile();
+      Alert.alert('Success', 'Profile updated successfully');
+    } catch (e) {
+      Alert.alert('Error', 'Could not update profile');
+    }
+  };
 
   const userEmail = isGuest ? "Anonymous Session" : (userData?.email || "prosper@mindbridge.ai");
   const userName = profile?.firstName || userData?.name || "Prosper Asare";
@@ -158,20 +206,23 @@ export default function ProfileScreen() {
         />
 
         <Animated.View entering={FadeInUp.duration(600)} style={styles.headerProfile}>
-          <TouchableOpacity style={styles.avatarContainer} activeOpacity={0.9}>
-            <Image 
-              source={require('../../assets/images/logo.png')} 
-              style={styles.avatarImage} 
-            />
+          <TouchableOpacity style={styles.avatarContainer} activeOpacity={0.9} onPress={pickImage}>
+            {profile?.profileImage ? (
+              <Image source={{ uri: profile.profileImage }} style={styles.avatarImage} />
+            ) : (
+              <View style={[styles.avatarImage, { backgroundColor: theme.colors.plum + '20', alignItems: 'center', justifyContent: 'center' }]}>
+                <User color={theme.colors.plum} size={48} />
+              </View>
+            )}
             <View style={styles.avatarEditBadge}>
               <Award color="#FFF" size={12} />
             </View>
           </TouchableOpacity>
-          <Text style={styles.userName}>{userName}</Text>
-          <Text style={styles.userEmail}>{userEmail}</Text>
+          <Text style={styles.userName}>{profile?.name || userData?.name}</Text>
+          <Text style={styles.userEmail}>{isGuest ? "Guest User" : profile?.email}</Text>
           
-          <TouchableOpacity style={styles.editBtn}>
-            <Text style={styles.editBtnText}>Manage Account</Text>
+          <TouchableOpacity style={styles.editBtn} onPress={() => setIsEditing(true)}>
+            <Text style={styles.editBtnText}>Edit Profile</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -201,24 +252,54 @@ export default function ProfileScreen() {
         </Animated.View>
 
         <ProfileListGroup delay={400} theme={theme}>
+          <View style={styles.sectionLabelRow}>
+            <User size={14} color={theme.colors.text.tertiary} />
+            <Text style={styles.sectionLabel}>IDENTITY & PERSONAL</Text>
+          </View>
           <ProfileListItem 
             theme={theme} 
-            icon={User} 
-            title="Identity & Personalize" 
+            icon={PhoneCall} 
+            title={profile?.phoneNumber || "Add Phone Number"} 
             color={theme.colors.plum} 
           />
           <ProfileListItem 
             theme={theme} 
-            icon={GraduationCap} 
-            title={`${profile?.program || 'Engineering'} • Level ${profile?.level || '400'}`} 
+            icon={Mail} 
+            title={profile?.email} 
             color={theme.colors.accents.powderBlue} 
           />
           <ProfileListItem 
             theme={theme} 
             icon={Heart} 
-            title={`${profile?.communicationStyle || 'Gentle'} • ${profile?.preferredLanguage || 'English'}`} 
+            title={`${profile?.onboarding?.communicationStyle || 'Gentle'} Style • ${profile?.onboarding?.preferredLanguage || 'English'}`} 
             color={theme.colors.accents.dustyRose} 
             isLast 
+          />
+        </ProfileListGroup>
+
+        <ProfileListGroup delay={500} theme={theme}>
+          <View style={styles.sectionLabelRow}>
+            <GraduationCap size={14} color={theme.colors.text.tertiary} />
+            <Text style={styles.sectionLabel}>ACADEMIC INFO</Text>
+          </View>
+          <ProfileListItem 
+            theme={theme} 
+            icon={GraduationCap} 
+            title={profile?.onboarding?.university || "University not set"} 
+            color={theme.colors.accents.powderBlue} 
+          />
+          <ProfileListItem 
+            theme={theme} 
+            icon={ClipboardEdit} 
+            title={`${profile?.onboarding?.program || 'Program'} • Level ${profile?.onboarding?.level || 'N/A'}`} 
+            color={theme.colors.accents.eucalyptus} 
+          />
+          <ProfileListItem 
+            theme={theme} 
+            icon={Shield} 
+            title={`ID: ${profile?.studentId || 'Not provided'}`} 
+            color={theme.colors.accents.slate} 
+            isLast
           />
         </ProfileListGroup>
 
@@ -241,9 +322,8 @@ export default function ProfileScreen() {
           />
         </Animated.View>
 
-        <ProfileListGroup delay={600} theme={theme}>
+        <ProfileListGroup delay={700} theme={theme}>
           <ProfileListItem theme={theme} icon={Bell} title="Reminders" color={theme.colors.accents.softMint} />
-          <ProfileListItem theme={theme} icon={Shield} title="Privacy & Security" color={theme.colors.accents.slate} />
           <ProfileListItem theme={theme} icon={HelpCircle} title="Help Center" color={theme.colors.text.secondary} />
           <ProfileListItem 
             theme={theme}
@@ -258,6 +338,78 @@ export default function ProfileScreen() {
             }}
           />
         </ProfileListGroup>
+
+        {/* Edit Profile Modal */}
+        <Modal visible={isEditing} animationType="slide" transparent>
+          <View style={styles.modalOverlay}>
+            <BlurView intensity={90} tint={theme.isDark ? 'dark' : 'light'} style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Update Profile</Text>
+                <TouchableOpacity onPress={() => setIsEditing(false)}>
+                  <X size={24} color={theme.colors.text.primary} />
+                </TouchableOpacity>
+              </View>
+              
+              <ScrollView style={styles.modalBody}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Full Name</Text>
+                  <TextInput 
+                    style={styles.input} 
+                    value={editData.name} 
+                    onChangeText={t => setEditData({...editData, name: t})}
+                    placeholder="Enter your name"
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Phone Number</Text>
+                  <TextInput 
+                    style={styles.input} 
+                    value={editData.phoneNumber} 
+                    onChangeText={t => setEditData({...editData, phoneNumber: t})}
+                    placeholder="Enter phone number"
+                    keyboardType="phone-pad"
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>University</Text>
+                  <TextInput 
+                    style={styles.input} 
+                    value={editData.university} 
+                    onChangeText={t => setEditData({...editData, university: t})}
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Program of Study</Text>
+                  <TextInput 
+                    style={styles.input} 
+                    value={editData.program} 
+                    onChangeText={t => setEditData({...editData, program: t})}
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Level</Text>
+                  <TextInput 
+                    style={styles.input} 
+                    value={editData.level} 
+                    onChangeText={t => setEditData({...editData, level: t})}
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Student ID</Text>
+                  <TextInput 
+                    style={styles.input} 
+                    value={editData.studentId} 
+                    onChangeText={t => setEditData({...editData, studentId: t})}
+                  />
+                </View>
+              </ScrollView>
+
+              <TouchableOpacity style={styles.saveBtn} onPress={handleUpdate}>
+                <Text style={styles.saveBtnText}>Save Changes</Text>
+              </TouchableOpacity>
+            </BlurView>
+          </View>
+        </Modal>
       </ScrollView>
     </View>
   );
@@ -293,5 +445,17 @@ const createStyles = (theme: any) => StyleSheet.create({
   listIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
   listTitle: { flex: 1, fontSize: 16, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, letterSpacing: -0.3 },
   divider: { height: StyleSheet.hairlineWidth, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', marginLeft: 72 },
+  sectionLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, marginTop: 16, marginBottom: 8 },
+  sectionLabel: { fontSize: 11, fontWeight: '800', color: theme.colors.text.tertiary, letterSpacing: 1 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  modalContent: { borderTopLeftRadius: 32, borderTopRightRadius: 32, height: '85%', padding: 24, overflow: 'hidden' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
+  modalTitle: { fontSize: 22, fontWeight: '800', color: theme.colors.text.primary },
+  modalBody: { flex: 1 },
+  inputGroup: { marginBottom: 20 },
+  inputLabel: { fontSize: 13, fontWeight: '700', color: theme.colors.text.tertiary, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  input: { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderRadius: 16, padding: 16, color: theme.colors.text.primary, fontSize: 16 },
+  saveBtn: { backgroundColor: theme.colors.plum, padding: 20, borderRadius: 20, alignItems: 'center', marginTop: 10 },
+  saveBtnText: { color: '#FFF', fontSize: 17, fontWeight: '800' },
 });
 

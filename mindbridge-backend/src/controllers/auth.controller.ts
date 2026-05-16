@@ -24,7 +24,7 @@ export const register = async (req: Request, res: Response) => {
       where: {
         OR: [
           { email },
-          { username: username || null }
+          ...(username ? [{ username }] : [])
         ]
       }
     });
@@ -49,7 +49,10 @@ export const register = async (req: Request, res: Response) => {
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '7d' });
     res.status(201).json({ user: { id: user.id, name: user.name, email: user.email, username: user.username }, token });
   } catch (error) {
-    console.error('Registration Error:', error);
+    console.error('Registration Error Details:', error);
+    if (error instanceof Error) {
+      console.error('Stack:', error.stack);
+    }
     res.status(500).json({ error: 'Server error' });
   }
 };

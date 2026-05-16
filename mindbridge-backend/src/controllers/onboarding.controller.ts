@@ -25,7 +25,6 @@ export const saveOnboarding = async (req: AuthRequest, res: Response) => {
       currentMood,
       sleepPattern,
       stressLevel,
-      crisisHistory,
       stressSources,
       supportTypes
     } = req.body;
@@ -46,7 +45,6 @@ export const saveOnboarding = async (req: AuthRequest, res: Response) => {
         currentMood,
         sleepPattern,
         stressLevel: stressLevel || 5,
-        crisisHistory: crisisHistory || false,
         stressSources,
         supportTypes,
         completedAt: new Date()
@@ -66,7 +64,6 @@ export const saveOnboarding = async (req: AuthRequest, res: Response) => {
         currentMood,
         sleepPattern,
         stressLevel: stressLevel || 5,
-        crisisHistory: crisisHistory || false,
         stressSources,
         supportTypes
       }

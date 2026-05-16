@@ -99,21 +99,27 @@ const FormSection = ({ title, icon: Icon, theme, children }: { title: string; ic
   );
 };
 
-const SelectGroup = ({ label, options, selectedValue, onSelect, theme }: { label: string; options: string[]; selectedValue: string; onSelect: (val: string) => void; theme: any }) => {
+const SelectGroup = ({ label, options, selectedValues, onToggle, theme, multiple = false }: { label: string; options: string[]; selectedValues: string | string[]; onToggle: (val: string) => void; theme: any; multiple?: boolean }) => {
   const styles = createStyles(theme);
   return (
     <View style={styles.inputWrapper}>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.chipContainer}>
-        {options.map((opt) => (
-          <TouchableOpacity
-            key={opt}
-            style={[styles.chip, selectedValue === opt && styles.chipActive]}
-            onPress={() => onSelect(opt)}
-          >
-            <Text style={[styles.chipText, selectedValue === opt && styles.chipTextActive]}>{opt}</Text>
-          </TouchableOpacity>
-        ))}
+        {options.map((opt) => {
+          const isSelected = multiple 
+            ? (selectedValues as string[]).includes(opt)
+            : selectedValues === opt;
+          
+          return (
+            <TouchableOpacity
+              key={opt}
+              style={[styles.chip, isSelected && styles.chipActive]}
+              onPress={() => onToggle(opt)}
+            >
+              <Text style={[styles.chipText, isSelected && styles.chipTextActive]}>{opt}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
@@ -210,8 +216,8 @@ export default function RegisterScreen() {
   const [status, setStatus] = useState('Full-time');
 
   // Mental Health Info
-  const [stressSource, setStressSource] = useState('Academics');
-  const [supportType, setSupportType] = useState('Self-help');
+  const [stressSources, setStressSources] = useState<string[]>(['Academics']);
+  const [supportTypes, setSupportTypes] = useState<string[]>(['Self-help']);
   const [reminders, setReminders] = useState('Yes');
 
   const [showPassword, setShowPassword] = useState(false);
@@ -236,6 +242,9 @@ export default function RegisterScreen() {
 
     if (!institution) { newErrors.institution = 'Please select your institution'; valid = false; }
 
+    if (!stressSources.length) { Alert.alert('Selection Required', 'Select at least one stress source'); return false; }
+    if (!supportTypes.length) { Alert.alert('Selection Required', 'Select at least one support type'); return false; }
+
     setErrors(newErrors);
     if (!valid) Alert.alert('Check Fields', 'Please correct the errors in the form.');
     return valid;
@@ -249,7 +258,7 @@ export default function RegisterScreen() {
       const payload = {
         name, username, email, phoneNumber, password,
         academic: { institution, faculty, level, status },
-        preferences: { stressSource, supportType, reminders: reminders === 'Yes' }
+        preferences: { stressSources, supportTypes, reminders: reminders === 'Yes' }
       };
       const response = await api.post('/auth/register', payload);
       await signIn(response.data.token, response.data.user);
@@ -420,42 +429,50 @@ export default function RegisterScreen() {
               <SelectGroup
                 label="Level / Year of Study"
                 options={['Level 100', 'Level 200', 'Level 300', 'Level 400', 'Postgrad']}
-                selectedValue={level}
-                onSelect={setLevel}
+                selectedValues={level}
+                onToggle={setLevel}
                 theme={themeContext}
               />
 
               <SelectGroup
                 label="Student Status"
                 options={['Full-time', 'Part-time']}
-                selectedValue={status}
-                onSelect={setStatus}
+                selectedValues={status}
+                onToggle={setStatus}
                 theme={themeContext}
               />
             </FormSection>
 
             <FormSection title="Support Preferences" icon={Heart} theme={themeContext}>
               <SelectGroup
-                label="Primary Source of Stress"
+                label="Primary Sources of Stress"
                 options={['Academics', 'Financial', 'Relationships', 'Social', 'Other']}
-                selectedValue={stressSource}
-                onSelect={setStressSource}
+                selectedValues={stressSources}
+                multiple
+                onToggle={(val) => {
+                  if (stressSources.includes(val)) setStressSources(stressSources.filter(s => s !== val));
+                  else setStressSources([...stressSources, val]);
+                }}
                 theme={themeContext}
               />
 
               <SelectGroup
-                label="Preferred Support Type"
+                label="Preferred Support Types"
                 options={['Self-help', 'Mood tracking', 'Chat', 'Crisis', 'All']}
-                selectedValue={supportType}
-                onSelect={setSupportType}
+                selectedValues={supportTypes}
+                multiple
+                onToggle={(val) => {
+                  if (supportTypes.includes(val)) setSupportTypes(supportTypes.filter(s => s !== val));
+                  else setSupportTypes([...supportTypes, val]);
+                }}
                 theme={themeContext}
               />
 
               <SelectGroup
                 label="Daily Reminder Preference"
                 options={['Yes', 'No']}
-                selectedValue={reminders}
-                onSelect={setReminders}
+                selectedValues={reminders}
+                onToggle={setReminders}
                 theme={themeContext}
               />
             </FormSection>

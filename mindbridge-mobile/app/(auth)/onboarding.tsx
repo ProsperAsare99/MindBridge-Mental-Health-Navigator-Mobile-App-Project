@@ -345,7 +345,7 @@ export default function OnboardingScreen() {
     if (currentList.includes(value)) {
       setAnswers({ ...answers, [step.id]: currentList.filter((v: string) => v !== value) });
     } else {
-      if (step.id === 'q10' && currentList.length >= 3) return; // Max 3 for goals
+      if (step.id === 'q10' && currentList.length >= 5) return; // Max 5 for goals
       setAnswers({ ...answers, [step.id]: [...currentList, value] });
     }
   };

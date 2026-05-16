@@ -25,7 +25,9 @@ export const saveOnboarding = async (req: AuthRequest, res: Response) => {
       currentMood,
       sleepPattern,
       stressLevel,
-      crisisHistory
+      crisisHistory,
+      stressSources,
+      supportTypes
     } = req.body;
 
     const onboarding = await prisma.onboarding.upsert({
@@ -45,6 +47,8 @@ export const saveOnboarding = async (req: AuthRequest, res: Response) => {
         sleepPattern,
         stressLevel: stressLevel || 5,
         crisisHistory: crisisHistory || false,
+        stressSources,
+        supportTypes,
         completedAt: new Date()
       },
       create: {
@@ -62,7 +66,9 @@ export const saveOnboarding = async (req: AuthRequest, res: Response) => {
         currentMood,
         sleepPattern,
         stressLevel: stressLevel || 5,
-        crisisHistory: crisisHistory || false
+        crisisHistory: crisisHistory || false,
+        stressSources,
+        supportTypes
       }
     });
 

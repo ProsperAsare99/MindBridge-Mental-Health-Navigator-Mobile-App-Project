@@ -33,6 +33,19 @@ export interface TranslationSchema {
     clarityTitle: string;
     toolsTitle: string;
     supportTitle: string;
+    motivations: { text: string; author: string }[];
+    startWithIntention: string;
+    checkInWithYourself: string;
+    windDownAndReflect: string;
+    howWasYourDay: string;
+    nurturePeaceToday: string;
+    yourJourney: string;
+    startJourneyToday: string;
+    dayStreak: string;
+    dailyQuests: string;
+    completeAllQuests: string;
+    wellnessHub: string;
+    wellnessToolkit: string;
   };
   garden: {
     title: string;
@@ -78,7 +91,13 @@ export interface TranslationSchema {
     joined: string;
     stats_reflections: string;
     stats_streak: string;
+    stats_points: string;
+    stats_seeds: string;
+    stats_badges: string;
     stats_level: string;
+    mood_insights: string;
+    identity_personal: string;
+    academic_info: string;
     emergency_contact: string;
     crisis_support: string;
     my_garden: string;
@@ -208,6 +227,24 @@ export const translations: Record<Language, TranslationSchema> = {
       clarityTitle: 'Moment of Clarity',
       toolsTitle: 'Mindful Tools',
       supportTitle: 'Community & Support',
+      motivations: [
+        { text: "What mental health needs is more sunlight, more candor, and more unashamed conversation.", author: "Glenn Close" },
+        { text: "There is hope, even when your brain tells you there isn’t.", author: "John Green" },
+        { text: "Healing takes time, and asking for help is a courageous step.", author: "Mariska Hargitay" },
+        { text: "Self-care is how you take your power back.", author: "Lalah Delia" },
+      ],
+      startWithIntention: 'Start with intention',
+      checkInWithYourself: 'Check in with yourself',
+      windDownAndReflect: 'Wind down and reflect',
+      howWasYourDay: 'How was your day?',
+      nurturePeaceToday: 'Nurture your peace today',
+      yourJourney: 'Your Journey',
+      startJourneyToday: 'Start your journey today',
+      dayStreak: 'Day Streak!',
+      dailyQuests: 'Daily Quests',
+      completeAllQuests: 'Complete all to keep your streak! 🔥',
+      wellnessHub: 'Wellness Hub',
+      wellnessToolkit: 'Wellness Toolkit',
     },
     garden: {
       title: 'Mood Garden',
@@ -253,7 +290,13 @@ export const translations: Record<Language, TranslationSchema> = {
       joined: 'Joined',
       stats_reflections: 'Reflections',
       stats_streak: 'Day Streak',
+      stats_points: 'Wellness XP',
+      stats_seeds: 'Mood Seeds',
+      stats_badges: 'Achievements',
       stats_level: 'Zen Level',
+      mood_insights: 'Mood Insights',
+      identity_personal: 'Identity & Personal',
+      academic_info: 'Academic Info',
       emergency_contact: 'Emergency Contact',
       crisis_support: 'Crisis Support',
       my_garden: 'My Garden',
@@ -381,6 +424,24 @@ export const translations: Record<Language, TranslationSchema> = {
       clarityTitle: 'Adwene Mu Paa',
       toolsTitle: 'Nnwuma Titiriw',
       supportTitle: 'Mmoa ne Mpuntuo',
+      motivations: [
+        { text: "Nea apɔwmuden adwene hia ne kanea, nokoredi, ne nkɔmmɔbɔ a aniwu nnim.", author: "Glenn Close" },
+        { text: "Anidasoɔ wɔ hɔ, sɛ w’adwene kyerɛ wo sɛ enni hɔ mpo a.", author: "John Green" },
+        { text: "Saa yadeɛ gye bere, na sɛ wobisa mmoa a, ɛyɛ akokoɔduo.", author: "Mariska Hargitay" },
+        { text: "Wo ho a wode bɛhwɛ yɛ ɔkwan a wode bɛgye wo tumi san.", author: "Lalah Delia" },
+      ],
+      startWithIntention: 'Fi ase ne botae',
+      checkInWithYourself: 'Hwɛ wo ho so',
+      windDownAndReflect: 'Gye wo bere na dwen ho',
+      howWasYourDay: 'Sɛnea wo da no kɔɔ yɛ nie?',
+      nurturePeaceToday: 'Hwɛ wo asomdwoe so nnɛ',
+      yourJourney: 'Wo Kwantu',
+      startJourneyToday: 'Fi wo kwantu ase nnɛ',
+      dayStreak: 'Nna Streak!',
+      dailyQuests: 'Daa Quests',
+      completeAllQuests: 'Wie ne nyinaa na sie wo streak! 🔥',
+      wellnessHub: 'Wellness Hub',
+      wellnessToolkit: 'Wellness Toolkit',
     },
     garden: {
       title: 'Tuo Garden',
@@ -426,7 +487,13 @@ export const translations: Record<Language, TranslationSchema> = {
       joined: 'Wode wo ho bɔɔ yɛn',
       stats_reflections: 'Nkaebɔ',
       stats_streak: 'Nna Streak',
+      stats_points: 'Apɔwmuden XP',
+      stats_seeds: 'Mood Aba',
+      stats_badges: 'Mpuntuo',
       stats_level: 'Zen Tebea',
+      mood_insights: 'Nkaebɔ Mu Nhwehwɛmu',
+      identity_personal: 'Wo Ho Asɛm Titiriw',
+      academic_info: 'Sukuu Ho Asɛm',
       emergency_contact: 'Mmoa a ɛhiahia',
       crisis_support: 'Ahoyera Mmoa',
       my_garden: 'Me Tuo',
@@ -554,6 +621,24 @@ export const translations: Record<Language, TranslationSchema> = {
       clarityTitle: 'Moment de Clarté',
       toolsTitle: 'Outils de pleine conscience',
       supportTitle: 'Communauté et soutien',
+      motivations: [
+        { text: "Ce dont la santé mentale a besoin, c'est de plus de lumière, de plus de franchise et de conversations plus décomplexées.", author: "Glenn Close" },
+        { text: "Il y a de l'espoir, même quand votre cerveau vous dit qu'il n'y en a pas.", author: "John Green" },
+        { text: "La guérison prend du temps, et demander de l'aide est une étape courageuse.", author: "Mariska Hargitay" },
+        { text: "Prendre soin de soi, c'est reprendre son pouvoir.", author: "Lalah Delia" },
+      ],
+      startWithIntention: 'Commencez avec intention',
+      checkInWithYourself: 'Faites le point avec vous-même',
+      windDownAndReflect: 'Détendez-vous et réfléchissez',
+      howWasYourDay: 'Comment s\'est passée votre journée ?',
+      nurturePeaceToday: 'Cultivez votre paix aujourd\'hui',
+      yourJourney: 'Votre Voyage',
+      startJourneyToday: 'Commencez votre voyage aujourd\'hui',
+      dayStreak: 'Série de Jours !',
+      dailyQuests: 'Quêtes Quotidiennes',
+      completeAllQuests: 'Complétez tout pour garder votre série ! 🔥',
+      wellnessHub: 'Centre de Bien-être',
+      wellnessToolkit: 'Boîte à Outils de Bien-être',
     },
     garden: {
       title: "Jardin d'humeur",
@@ -599,7 +684,13 @@ export const translations: Record<Language, TranslationSchema> = {
       joined: 'Rejoint',
       stats_reflections: 'Réflexions',
       stats_streak: 'Série de jours',
+      stats_points: 'XP Bien-être',
+      stats_seeds: 'Graines d\'humeur',
+      stats_badges: 'Réalisations',
       stats_level: 'Niveau Zen',
+      mood_insights: 'Aperçus de l\'humeur',
+      identity_personal: 'Identité et personnel',
+      academic_info: 'Infos académiques',
       emergency_contact: 'Contact d\'urgence',
       crisis_support: 'Soutien en cas de crise',
       my_garden: 'Mon jardin',
@@ -727,6 +818,24 @@ export const translations: Record<Language, TranslationSchema> = {
       clarityTitle: 'Jwɛŋmɔ mli kpaa',
       toolsTitle: 'Nitsumɔi titiri',
       supportTitle: 'Webii kɛ yelikɛbuamɔ',
+      motivations: [
+        { text: "Nɔ ni jwɛŋmɔ mli apɔwmuden hiaa ji kanea, anɔkwale, kɛ sanebɛi ni aniwu bɛ mli.", author: "Glenn Close" },
+        { text: "Hiɛnɔkamɔ yɛ, kɛji ojwɛŋmɔ kɛɛ bo akɛ ebɛ mpo.", author: "John Green" },
+        { text: "Tsamɔ he be, ni kɛji obi yelikɛbuamɔ lɛ, ekãa nitsumɔ ni.", author: "Mariska Hargitay" },
+        { text: "Ohe ni obɛkwɛ lɛ ji gbɛ ni obɛfa ni o-hewalɛ lɛ baku sɛɛ kba o-dɛŋ.", author: "Lalah Delia" },
+      ],
+      startWithIntention: 'Je kpo kɛ yiŋtoo',
+      checkInWithYourself: 'Kwɛmɔ ohe',
+      windDownAndReflect: 'Hejɔɔ ohe ni osusu he',
+      howWasYourDay: 'Te ogbɛkɛ lɛ ji tɛŋŋ?',
+      nurturePeaceToday: 'Kwɛmɔ ohejɔlɛ lɛ nɔ nnɛ',
+      yourJourney: 'O-Kwantu',
+      startJourneyToday: 'Je o-kwantu lɛ shishi nnɛ',
+      dayStreak: 'Nna Streak!',
+      dailyQuests: 'Daa Quests',
+      completeAllQuests: 'Gbe fɛɛ naa ni osie o-streak! 🔥',
+      wellnessHub: 'Wellness Hub',
+      wellnessToolkit: 'Wellness Toolkit',
     },
     garden: {
       title: 'Susuma Abɔɔ',
@@ -772,7 +881,13 @@ export const translations: Record<Language, TranslationSchema> = {
       joined: 'Obote mli',
       stats_reflections: 'Nkaebɔ',
       stats_streak: 'Nna Streak',
+      stats_points: 'Wellness XP',
+      stats_seeds: 'Mood Aba',
+      stats_badges: 'Achievements',
       stats_level: 'Zen Tebea',
+      mood_insights: 'Mood Insights',
+      identity_personal: 'Identity & Personal',
+      academic_info: 'Academic Info',
       emergency_contact: 'Mmoa ni hiahia',
       crisis_support: 'Ahoyera Mmoa',
       my_garden: 'Mi Abɔɔ',
@@ -900,6 +1015,24 @@ export const translations: Record<Language, TranslationSchema> = {
       clarityTitle: 'Kakaɖedzi ƒe ɣeyiɣi',
       toolsTitle: 'Nunyanya ƒe dɔwunuiwo',
       supportTitle: 'Habɔbɔ kple Kpedenanu',
+      motivations: [
+        { text: "Nu si jwɛŋmɔ me lãmesẽ hiaa nye kekeli, anukwareɖiɖi, kple dzeɖoɖo si me ŋukpe melé o.", author: "Glenn Close" },
+        { text: "Mɔkpɔkpɔ li, ne wò jwɛŋmɔ gblɔ na wò be melé o hã.", author: "John Green" },
+        { text: "Yɔyɔ exɔ ɣeyiɣi, eye kpekpedenu biabia nye dzinɔameƒe ƒe afɔɖeɖe.", author: "Mariska Hargitay" },
+        { text: "Wò ɖokui kpɔkpɔ nye mɔ si nàzã atsɔ agbugbɔ wò ŋusẽ axɔ.", author: "Lalah Delia" },
+      ],
+      startWithIntention: 'Dze egɔme kple jwɛŋmɔ',
+      checkInWithYourself: 'Kpɔ wò ɖokui gbɔ',
+      windDownAndReflect: 'Gbɔ ɖe eme eye nàbu tamme',
+      howWasYourDay: 'Aleke wò ŋkekea nɔ?',
+      nurturePeaceToday: 'Kpɔ wò ŋutifafa ta egbe',
+      yourJourney: 'Wò Mɔzɔzɔ',
+      startJourneyToday: 'Dze wò mɔzɔzɔ gɔme egbe',
+      dayStreak: 'Ŋkeke ƒe Streak!',
+      dailyQuests: 'Gbesiagbe Quests',
+      completeAllQuests: 'Wuwu wo fɛɛ enu be nàdzra wò streak ɖo! 🔥',
+      wellnessHub: 'Wellness Hub',
+      wellnessToolkit: 'Wellness Toolkit',
     },
     garden: {
       title: 'Seselelãme ƒe Abɔ',
@@ -945,7 +1078,13 @@ export const translations: Record<Language, TranslationSchema> = {
       joined: 'Èva kpe ɖe mía ŋu',
       stats_reflections: 'Ŋkuɖodzinyawo',
       stats_streak: 'Ŋkeke ƒe Streak',
+      stats_points: 'Wellness XP',
+      stats_seeds: 'Seselelãme Ku',
+      stats_badges: 'Achievements',
       stats_level: 'Zen ƒe Nɔnɔme',
+      mood_insights: 'Mood Insights',
+      identity_personal: 'Identity & Personal',
+      academic_info: 'Academic Info',
       emergency_contact: 'Kpedenanu si hiahia',
       crisis_support: 'Kpedenanu le nɔnɔme sesẽ me',
       my_garden: 'Nye Abɔ',
@@ -1073,6 +1212,24 @@ export const translations: Record<Language, TranslationSchema> = {
       clarityTitle: 'Lokacin Haske',
       toolsTitle: 'Kayan Aiki',
       supportTitle: "Al'umma da Taimako",
+      motivations: [
+        { text: "Abin da lafiyar hankali ke buƙata shi ne ƙarin haske, ƙarin gaskiya, da ƙarin tattaunawa ba tare da jin kunya ba.", author: "Glenn Close" },
+        { text: "Akwai fata, koda kwakwalwarka ta gaya maka babu.", author: "John Green" },
+        { text: "Warkarwa tana ɗaukar lokaci, kuma neman taimako mataki ne na jajircewa.", author: "Mariska Hargitay" },
+        { text: "Kula da kai shine yadda zaka dawo da ikonka.", author: "Lalah Delia" },
+      ],
+      startWithIntention: 'Fara da niyya',
+      checkInWithYourself: 'Bincika kanka',
+      windDownAndReflect: 'Huta ka yi tunani',
+      howWasYourDay: 'Yaya ranarka ta kasance?',
+      nurturePeaceToday: 'Kula da kwanciyar hankalin ku yau',
+      yourJourney: 'Tafiyar ku',
+      startJourneyToday: 'Fara tafiyar ku yau',
+      dayStreak: 'Ranar Streak!',
+      dailyQuests: 'Ayyukan Kullum',
+      completeAllQuests: 'Kammala duka don kiyaye streak ɗin ku! 🔥',
+      wellnessHub: 'Cibiyar Lafiya',
+      wellnessToolkit: 'Kayan Aikin Lafiya',
     },
     garden: {
       title: 'Lambun Zuciya',
@@ -1118,7 +1275,13 @@ export const translations: Record<Language, TranslationSchema> = {
       joined: 'An Shiga',
       stats_reflections: 'Tunani',
       stats_streak: 'Ranar Streak',
+      stats_points: 'Wellness XP',
+      stats_seeds: 'Mood Iri',
+      stats_badges: 'Achievements',
       stats_level: 'Zen Level',
+      mood_insights: 'Mood Insights',
+      identity_personal: 'Identity & Personal',
+      academic_info: 'Academic Info',
       emergency_contact: 'Tuntuɓi na Gaggawa',
       crisis_support: 'Taimakon Gaggawa',
       my_garden: 'Lambuna',

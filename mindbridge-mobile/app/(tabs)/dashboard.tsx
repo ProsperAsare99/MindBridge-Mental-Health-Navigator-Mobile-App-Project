@@ -136,20 +136,20 @@ const WeeklyPulse = ({ theme, styles, data }: any) => {
   );
 };
 
-const QUOTES = [
-  { text: "What mental health needs is more sunlight, more candor, and more unashamed conversation.", author: "Glenn Close" },
-  { text: "There is hope, even when your brain tells you there isn’t.", author: "John Green" },
-  { text: "Healing takes time, and asking for help is a courageous step.", author: "Mariska Hargitay" },
-  { text: "Self-care is how you take your power back.", author: "Lalah Delia" },
-];
+// QUOTES are now fetched from theme translations
 
 const QuoteSlideshow = ({ theme, styles }: any) => {
   const [index, setIndex] = useState(0);
+  const quotes = theme.t('dashboard.motivations') as any[];
+  
   useEffect(() => {
-    const timer = setInterval(() => { setIndex((prev) => (prev + 1) % QUOTES.length); }, 7000);
+    const timer = setInterval(() => { 
+      setIndex((prev) => (prev + 1) % (Array.isArray(quotes) ? quotes.length : 1)); 
+    }, 7000);
     return () => clearInterval(timer);
-  }, []);
-  const quote = QUOTES[index];
+  }, [quotes]);
+
+  const quote = Array.isArray(quotes) ? quotes[index] : { text: "...", author: "..." };
 
   return (
     <Animated.View entering={FadeInUp.delay(50).duration(500)} style={styles.quoteCardContainer}>
@@ -399,10 +399,10 @@ export default function DashboardScreen() {
 
   const getTimeContext = (t: any) => {
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return { greeting: t('dashboard.greetingMorning'), prompt: 'Start with intention' };
-    if (hour >= 12 && hour < 17) return { greeting: t('dashboard.greetingAfternoon'), prompt: 'Check in with yourself' };
-    if (hour >= 17 && hour < 21) return { greeting: t('dashboard.greetingEvening'), prompt: 'Wind down and reflect' };
-    return { greeting: t('dashboard.greetingEvening'), prompt: 'How was your day?' };
+    if (hour >= 5 && hour < 12) return { greeting: t('dashboard.greetingMorning'), prompt: t('dashboard.startWithIntention') };
+    if (hour >= 12 && hour < 17) return { greeting: t('dashboard.greetingAfternoon'), prompt: t('dashboard.checkInWithYourself') };
+    if (hour >= 17 && hour < 21) return { greeting: t('dashboard.greetingEvening'), prompt: t('dashboard.windDownAndReflect') };
+    return { greeting: t('dashboard.greetingEvening'), prompt: t('dashboard.howWasYourDay') };
   };
 
   const { greeting } = getTimeContext(t);
@@ -421,8 +421,8 @@ export default function DashboardScreen() {
           <View style={styles.premiumJourneyCard}>
             <View style={styles.sectionHeader}>
               <View>
-                <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Your Journey</Text>
-                <Text style={styles.sectionSubtitleText}>{(userData.streak > 0 || completedCount > 0) ? `${Math.max(userData.streak, completedCount > 0 ? 1 : 0)} Day Streak!` : "Start your journey today"}</Text>
+                <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.yourJourney')}</Text>
+                <Text style={styles.sectionSubtitleText}>{(userData.streak > 0 || completedCount > 0) ? `${Math.max(userData.streak, completedCount > 0 ? 1 : 0)} ${t('dashboard.dayStreak')}` : t('dashboard.startJourneyToday')}</Text>
               </View>
               <View style={styles.streakBadge}>
                 <Flame size={14} color="#FF9800" />
@@ -435,7 +435,7 @@ export default function DashboardScreen() {
 
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
-            <ScreenHeader title={`${greeting}, ${userData.name}`} subtitle="Nurture your peace today" noPadding />
+            <ScreenHeader title={`${greeting}, ${userData.name}`} subtitle={t('dashboard.nurturePeaceToday')} noPadding />
           </View>
           <ProgressRings completed={completedCount} total={3} theme={theme} styles={styles} />
         </View>
@@ -462,8 +462,8 @@ export default function DashboardScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View>
-              <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Daily Quests</Text>
-              <Text style={styles.sectionSubtitleText}>Complete all to keep your streak! 🔥</Text>
+              <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.dailyQuests')}</Text>
+              <Text style={styles.sectionSubtitleText}>{t('dashboard.completeAllQuests')}</Text>
             </View>
             <View style={[styles.questProgress, { backgroundColor: theme.colors.plum + '20' }]}>
               <Text style={[styles.questProgressText, { color: theme.colors.plum }]}>
@@ -581,7 +581,7 @@ export default function DashboardScreen() {
         {/* ── Wellness Hub Grid ── */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.wellness_hub') || 'Wellness Hub'}</Text>
+            <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.wellnessHub')}</Text>
           </View>
           <View style={styles.hubGrid}>
             <AppleWidget 
@@ -633,7 +633,7 @@ export default function DashboardScreen() {
 
         <View style={styles.sectionCompact}>
           <View style={[styles.sectionHeader, { paddingHorizontal: 24 }]}>
-            <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Wellness Toolkit</Text>
+            <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.wellnessToolkit')}</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll} snapToInterval={154} decelerationRate="fast">
             <AppleWidget title="Tools" subtitle="Therapeutic" icon={Activity} color={theme.colors.plum} size="fixed" delay={600} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/tools')} />

@@ -66,4 +66,49 @@ export class AiRepository {
       // We could add a Ritual model later for unified tracking
     };
   }
+
+  /**
+   * Fetches the last N chat messages for context.
+   */
+  static async getChatHistory(userId: string, limit: number = 10) {
+    return await prisma.chatMessage.findMany({
+      where: { userId },
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        role: true,
+        content: true,
+      }
+    });
+  }
+
+  /**
+   * Clears all chat messages for a user.
+   */
+  static async clearChatHistory(userId: string) {
+    return await prisma.chatMessage.deleteMany({
+      where: { userId }
+    });
+  }
+
+  /**
+   * Fetches the latest assessment results for clinical context.
+   */
+  static async getLatestAssessments(userId: string) {
+    return await prisma.assessmentResult.findMany({
+      where: { userId },
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /**
+   * Searches for resources by category or keyword.
+   */
+  static async searchResources(category?: string) {
+    return await prisma.resource.findMany({
+      where: category ? { category: { contains: category, mode: 'insensitive' } } : {},
+      take: 3,
+    });
+  }
 }

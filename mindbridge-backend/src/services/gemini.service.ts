@@ -110,6 +110,16 @@ const tools = [
         name: "get_ritual_status",
         description: "Check if the user has completed their daily rituals today (Mood Seed, Journal, Breathing).",
         parameters: { type: "object", properties: {} }
+      },
+      {
+        name: "get_recommended_resources",
+        description: "Search for specific articles, audio exercises, or professional tools in the MindBridge library based on a category (e.g., 'Anxiety', 'Sleep').",
+        parameters: {
+          type: "object",
+          properties: {
+            category: { type: "string", description: "The mental health category to search for." }
+          }
+        }
       }
     ]
   }
@@ -139,6 +149,18 @@ export const generateOracleResponse = async (userMessage: string, context: any, 
       ? recentJournal.map((j: any, i: number) => `${i + 1}. "${j.title || 'Untitled'}" (${j.mood || 'no mood tag'}) — ${new Date(j.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`).join('\n')
       : 'No journal entries yet.';
 
+    const assessments = context.assessments || [];
+    const assessmentSummary = assessments.length > 0
+      ? assessments.map((a: any) => `- ${a.type}: ${a.severity} (Score: ${a.score}) on ${new Date(a.createdAt).toLocaleDateString()}`).join('\n')
+      : 'No clinical assessments completed yet.';
+
+    // Prepare history: reverse since DB gives descending
+    const rawHistory = context.history || [];
+    const chatHistory = rawHistory.reverse().map((msg: any) => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.content }]
+    }));
+
     const chat = model.startChat({
       history: [
         {
@@ -163,20 +185,25 @@ PROFILE:
 EMOTIONAL DATA:
   ${moodSummary}
 
-RECENT JOURNAL ENTRIES (themes only):
+RECENT JOURNAL THEMES:
   ${journalSummary}
+
+CLINICAL ASSESSMENTS:
+  ${assessmentSummary}
 
 INSTRUCTIONS:
   - This context is your foundation. Use it to personalise every response.
   - Reference the user's name naturally.
-  - If their mood score is below 5, lead with extra warmth and check in before offering advice.
+  - If their mood score is below 5 or assessment shows 'Severe', lead with extra warmth.
+  - Suggest specific app tools like 'Mood Garden' or 'Box Breathing' if relevant.
   - Respond in: ${onboarding?.preferredLanguage || 'English'}
           ` }]
         },
         {
           role: "model",
-          parts: [{ text: `Understood. I have a clear picture of this user's world — their academic context, emotional state, preferences, and what matters to them. I'll respond with full cultural awareness, in their preferred language, and adapt my style to be ${onboarding?.communicationStyle || 'Gentle'}. I'm ready to support them.` }]
-        }
+          parts: [{ text: `Understood. I have a full picture of ${firstName}'s world, including their academic context, recent feelings, and clinical assessments. I will provide compassionate, culturally-aware support in ${onboarding?.preferredLanguage || 'English'}, adapting my style to be ${onboarding?.communicationStyle || 'Gentle'}. I'm ready.` }]
+        },
+        ...chatHistory
       ]
     });
 
@@ -198,6 +225,9 @@ INSTRUCTIONS:
           break;
         case "get_ritual_status":
           toolResponse = await AiRepository.getTodayRitualStatus(userId);
+          break;
+        case "get_recommended_resources":
+          toolResponse = await AiRepository.searchResources((call.args as any).category);
           break;
         default:
           toolResponse = { error: "Unknown tool" };

@@ -200,7 +200,17 @@ export default function AIGuideScreen() {
           greeting = t.ai.greetingWelcome.replace('{name}', firstName);
         }
 
-        setMessages([{ id: 'welcome', isAi: true, text: greeting, time: 'Now', suggestCrisis: false }]);
+        const historyMessages = (data.history || []).reverse().map((msg: any, idx: number) => ({
+          id: `hist-${idx}`,
+          isAi: msg.role === 'model',
+          text: msg.content,
+          time: 'Past'
+        }));
+
+        setMessages([
+          { id: 'welcome', isAi: true, text: greeting, time: 'Now', suggestCrisis: false },
+          ...historyMessages
+        ]);
       } catch {
         const userName = authData?.name || 'Friend';
         const firstName = userName.split(' ')[0];
@@ -267,13 +277,20 @@ export default function AIGuideScreen() {
       {
         text: 'Clear',
         style: 'destructive',
-        onPress: () => setMessages([{
-          id: 'reset',
-          isAi: true,
-          text: "Conversation cleared. I'm here whenever you're ready. What's on your mind?",
-          time: 'Now',
-          suggestCrisis: false,
-        }]),
+        onPress: async () => {
+          try {
+            await api.delete('/ai/history');
+            setMessages([{
+              id: 'reset',
+              isAi: true,
+              text: "Conversation cleared. I've refreshed my memory. What's on your mind?",
+              time: 'Now',
+              suggestCrisis: false,
+            }]);
+          } catch (error) {
+            Alert.alert('Error', 'Failed to clear history. Please try again.');
+          }
+        },
       },
     ]);
   };

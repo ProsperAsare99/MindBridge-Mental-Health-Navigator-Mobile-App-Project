@@ -19,6 +19,7 @@ model User {
   journalEntries Journal[]
   communityPosts CommunityPost[]
   assessmentResults AssessmentResult[]
+  chatMessages   ChatMessage[]
 }
 model Onboarding {
   id                    String   @id @default(uuid())
@@ -88,5 +89,14 @@ model Resource {
   author    String?
   url       String?
   color     String?
+  createdAt DateTime @default(now())
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   // "user" or "model"
+  content   String
   createdAt DateTime @default(now())
 }

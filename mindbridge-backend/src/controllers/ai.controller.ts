@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { generateOracleResponse } from '../services/gemini.service.js';
+import { AiRepository } from '../repositories/ai.repository.js';
 
 const prisma = new PrismaClient();
 
@@ -44,11 +45,19 @@ export const getOracleContext = async (req: Request, res: Response) => {
       where: { userId }
     });
 
+    // Get recent chat history
+    const history = await AiRepository.getChatHistory(userId, 15);
+
+    // Get clinical assessments
+    const assessments = await AiRepository.getLatestAssessments(userId);
+
     res.json({
       latestMood: latestMood || null,
       recentJournal: recentJournal || [],
       onboarding: onboarding || null,
       userName: user?.name || 'Friend',
+      history: history || [],
+      assessments: assessments || [],
       dbStatus: 'online'
     });
   } catch (error: any) {
@@ -101,27 +110,53 @@ export const chatWithOracle = async (req: Request, res: Response) => {
       orderBy: { createdAt: 'desc' },
     });
 
-    const onboarding = await prisma.onboarding.findUnique({
-      where: { userId }
-    });
-
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { name: true }
     });
 
-    // 3. Generate AI Response
+    const onboarding = await prisma.onboarding.findUnique({
+      where: { userId }
+    });
+
+    const history = await AiRepository.getChatHistory(userId, 10);
+    const assessments = await AiRepository.getLatestAssessments(userId);
+
+    // 3. Save User Message
+    await prisma.chatMessage.create({
+      data: { userId, role: 'user', content: message }
+    });
+
+    // 4. Generate AI Response
     const aiResponse = await generateOracleResponse(message, {
       latestMood,
       recentJournal,
       onboarding,
-      userName: user?.name || 'Friend'
+      userName: user?.name || 'Friend',
+      history,
+      assessments
     }, userId);
+
+    // 5. Save AI Response
+    await prisma.chatMessage.create({
+      data: { userId, role: 'model', content: aiResponse }
+    });
 
     res.json({ response: aiResponse });
   } catch (error) {
     console.error('Error in Oracle chat:', error);
     res.status(500).json({ error: 'I am momentarily resting my thoughts. Please try talking to me again in a moment.' });
+  }
+};
+
+export const clearChatHistory = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    await AiRepository.clearChatHistory(userId);
+    res.json({ success: true, message: 'Chat history cleared' });
+  } catch (error) {
+    console.error('Error clearing chat history:', error);
+    res.status(500).json({ error: 'Failed to clear chat history' });
   }
 };
 

@@ -520,12 +520,12 @@ export default function DashboardScreen() {
             >
               <View style={styles.reflectionHeader}>
                 <View style={[styles.reflectionMood, { backgroundColor: theme.colors.plum + '10' }]}>
-                  <Feather size={24} color={theme.colors.plum} strokeWidth={1.5} />
+                  <Sparkles size={22} color={theme.colors.plum} strokeWidth={1.5} />
                 </View>
                 <View style={{ flex: 1, marginLeft: 4 }}>
                   <View style={styles.reflectionTag}>
                     <BookOpen size={10} color={theme.colors.plum} />
-                    <Text style={styles.reflectionTagText}>JOURNAL ENTRY</Text>
+                    <Text style={styles.reflectionTagText}>{t('dashboard.clarityTitle').toUpperCase()}</Text>
                   </View>
                   <Text style={[styles.reflectionTitle, { color: theme.colors.text.primary }]} numberOfLines={1}>{journalHistory[0].title || 'Untitled Reflection'}</Text>
                   <Text style={[styles.reflectionDate, { color: theme.colors.text.tertiary }]}>{new Date(journalHistory[0].createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
@@ -618,7 +618,7 @@ export default function DashboardScreen() {
               delay={500}
               theme={theme} 
               styles={styles}
-              onPress={() => router.push('/(tabs)/resources')}
+              onPress={() => router.push('/(tabs)/explore')}
             />
             <AppleWidget 
               title="Crisis Support" 

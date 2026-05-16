@@ -30,28 +30,28 @@ import {
 
 const { width } = Dimensions.get('window');
 
-const getAssessments = (theme: any) => [
+const getAssessments = (theme: any, t: any) => [
   {
     id: 'phq9',
     title: 'PHQ-9',
-    subtitle: 'Depression Screening',
-    duration: '3 mins',
+    subtitle: t('assessments.depression_screening'),
+    duration: `3 ${t('assessments.minutes')}`,
     icon: Activity,
     color: theme.colors.accents.powderBlue,
   },
   {
     id: 'gad7',
     title: 'GAD-7',
-    subtitle: 'Anxiety Screening',
-    duration: '2 mins',
+    subtitle: t('assessments.anxiety_screening'),
+    duration: `2 ${t('assessments.minutes')}`,
     icon: BrainCircuit,
     color: theme.colors.accents.eucalyptus,
   },
   {
     id: 'burnout',
-    title: 'Academic Burnout',
+    title: t('assessments.burnout_test'),
     subtitle: 'Student Stress Test',
-    duration: '4 mins',
+    duration: `4 ${t('assessments.minutes')}`,
     icon: GraduationCap,
     color: theme.colors.accents.terracotta,
   }
@@ -99,9 +99,10 @@ const AssessmentCard = ({ assessment, delay, theme }: any) => {
 
 export default function AssessmentsScreen() {
   const insets = useSafeAreaInsets();
-  const themeContext = useTheme();
-  const styles = createStyles(themeContext);
-  const ASSESSMENTS = getAssessments(themeContext);
+  const theme = useTheme();
+  const { t } = theme;
+  const styles = createStyles(theme);
+  const assessments = getAssessments(theme, t);
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -126,11 +127,11 @@ export default function AssessmentsScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={themeContext.isDark ? "light-content" : "dark-content"} />
+      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={themeContext.isDark 
-          ? ['rgba(123, 97, 255, 0.1)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
-          : ['rgba(123, 97, 255, 0.08)', themeContext.colors.background, themeContext.colors.backgroundSecondary]
+        colors={theme.isDark 
+          ? ['rgba(123, 97, 255, 0.1)', theme.colors.background, theme.colors.backgroundSecondary]
+          : ['rgba(123, 97, 255, 0.08)', theme.colors.background, theme.colors.backgroundSecondary]
         } 
         locations={[0, 0.2, 1]}
         style={StyleSheet.absoluteFillObject} 
@@ -141,20 +142,20 @@ export default function AssessmentsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ScreenHeader 
-          title="Assessments" 
-          subtitle="Clinically validated tools to track your well-being."
+          title={t('assessments.title')} 
+          subtitle={t('assessments.subtitle')}
           rightAction={
             <TouchableOpacity 
               style={styles.infoBtn}
-              onPress={() => Alert.alert('Privacy Info', 'Your assessment results are private and used only to personalize your experience.')}
+              onPress={() => Alert.alert(t('assessments.privacy_title'), t('assessments.privacy_msg'))}
             >
-              <Info color={themeContext.colors.plum} size={24} />
+              <Info color={theme.colors.plum} size={24} />
             </TouchableOpacity>
           }
         />
 
         <Animated.View entering={FadeInUp.delay(100).duration(800)}>
-          <Text style={styles.sectionTitle}>Available Tests</Text>
+          <Text style={styles.sectionTitle}>{t('assessments.available_tests')}</Text>
           <ScrollView 
             horizontal 
             showsHorizontalScrollIndicator={false}
@@ -162,17 +163,17 @@ export default function AssessmentsScreen() {
             snapToInterval={width * 0.65 + 16}
             decelerationRate="fast"
           >
-            {ASSESSMENTS.map((assessment, index) => (
-              <AssessmentCard key={assessment.id} assessment={assessment} delay={200 + (index * 100)} theme={themeContext} />
+            {assessments.map((assessment, index) => (
+              <AssessmentCard key={assessment.id} assessment={assessment} delay={200 + (index * 100)} theme={theme} />
             ))}
           </ScrollView>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(500).duration(500)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Results</Text>
+          <Text style={styles.sectionTitle}>{t('assessments.recent_results')}</Text>
           <View style={styles.resultsContainer}>
             {loading ? (
-              <ActivityIndicator size="small" color={themeContext.colors.plum} style={{ padding: 40 }} />
+              <ActivityIndicator size="small" color={theme.colors.plum} style={{ padding: 40 }} />
             ) : results.length === 0 ? (
               <View style={{ padding: 40, alignItems: 'center' }}>
                 <Text style={{ color: themeContext.colors.text.secondary }}>No assessments taken yet.</Text>

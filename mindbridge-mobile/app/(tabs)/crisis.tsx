@@ -23,10 +23,10 @@ import {
   ShieldCheck
 } from 'lucide-react-native';
 
-const getEmergencyContacts = (theme: any) => [
+const getEmergencyContacts = (theme: any, t: any) => [
   {
     id: 'national',
-    title: 'National Emergency',
+    title: t('crisis.national_emergency'),
     number: '112',
     description: 'Police, Fire, Ambulance',
     icon: Phone,
@@ -35,7 +35,7 @@ const getEmergencyContacts = (theme: any) => [
   },
   {
     id: 'counseling',
-    title: 'University Counseling',
+    title: t('crisis.university_counseling'),
     number: '+233 24 123 4567',
     description: 'KNUST Counseling Center (24/7)',
     icon: HeartHandshake,
@@ -43,7 +43,7 @@ const getEmergencyContacts = (theme: any) => [
   },
   {
     id: 'mental_health_authority',
-    title: 'Mental Health Helpline',
+    title: t('crisis.mental_health_helpline'),
     number: '0800 678 678',
     description: 'Toll-free national psychological support',
     icon: MessageSquare,
@@ -61,8 +61,9 @@ const SAFETY_PLAN = [
 export default function CrisisSupportScreen() {
   const insets = useSafeAreaInsets();
   const themeContext = useTheme();
+  const { t } = themeContext;
   const styles = createStyles(themeContext);
-  const EMERGENCY_CONTACTS = getEmergencyContacts(themeContext);
+  const EMERGENCY_CONTACTS = getEmergencyContacts(themeContext, t);
 
   const handleCall = (number: string) => {
     Linking.openURL(`tel:${number.replace(/\s+/g, '')}`);
@@ -85,8 +86,8 @@ export default function CrisisSupportScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ScreenHeader 
-          title="Crisis Support" 
-          subtitle="You are not alone. Reach out for immediate help."
+          title={t('crisis.title')} 
+          subtitle={t('crisis.subtitle')}
           rightAction={
             <TouchableOpacity 
               style={styles.emergencyBtn}
@@ -98,7 +99,7 @@ export default function CrisisSupportScreen() {
         />
 
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Immediate Help</Text>
+          <Text style={styles.sectionTitle}>{t('crisis.immediate_help')}</Text>
           
           {EMERGENCY_CONTACTS.map((contact, index) => (
             <Animated.View key={contact.id} entering={FadeInUp.delay(200 + (index * 100)).duration(500)}>
@@ -127,16 +128,16 @@ export default function CrisisSupportScreen() {
 
         <Animated.View entering={FadeInUp.delay(600).duration(500)} style={styles.section}>
           <View style={styles.safetyHeader}>
-            <Text style={styles.sectionTitle}>My Safety Plan</Text>
+            <Text style={styles.sectionTitle}>{t('crisis.safety_plan')}</Text>
             <TouchableOpacity>
-              <Text style={styles.editPlanText}>Edit</Text>
+              <Text style={styles.editPlanText}>{t('crisis.edit')}</Text>
             </TouchableOpacity>
           </View>
           
           <View style={styles.safetyCard}>
             <View style={styles.safetyBanner}>
               <ShieldCheck color={themeContext.colors.accents.eucalyptus} size={20} />
-              <Text style={styles.safetyBannerText}>Steps to stay safe right now</Text>
+              <Text style={styles.safetyBannerText}>{t('crisis.safety_steps')}</Text>
             </View>
             
             {SAFETY_PLAN.map((step, index) => (
@@ -155,8 +156,8 @@ export default function CrisisSupportScreen() {
             <MapPin color={themeContext.colors.plum} size={24} />
           </View>
           <View style={styles.locationInfo}>
-            <Text style={styles.locationTitle}>Find Nearest Hospital</Text>
-            <Text style={styles.locationDesc}>Locate an emergency room near you.</Text>
+            <Text style={styles.locationTitle}>{t('crisis.find_hospital')}</Text>
+            <Text style={styles.locationDesc}>{t('crisis.find_hospital_desc')}</Text>
           </View>
           <ChevronRight color={themeContext.colors.text.disabled} size={20} />
         </Animated.View>

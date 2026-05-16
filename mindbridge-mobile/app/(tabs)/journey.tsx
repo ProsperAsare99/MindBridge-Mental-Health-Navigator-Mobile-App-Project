@@ -25,6 +25,7 @@ const INITIAL_TASKS = [
 export default function JourneyScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { t } = theme;
   const styles = createStyles(theme);
   const [tasks, setTasks] = useState(INITIAL_TASKS);
 
@@ -55,8 +56,8 @@ export default function JourneyScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={FadeInUp.duration(800)} style={styles.header}>
-          <Text style={styles.title}>Wellness Journey</Text>
-          <Text style={styles.subtitle}>Your progress for today, May 10th</Text>
+          <Text style={styles.title}>{t('journey.title')}</Text>
+          <Text style={styles.subtitle}>{t('journey.subtitle')}, {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}</Text>
         </Animated.View>
 
         {/* Stats Card */}
@@ -67,7 +68,7 @@ export default function JourneyScreen() {
                 <Flame color={theme.colors.accents.gentlePeach} size={20} />
               </View>
               <Text style={styles.statVal}>4 Day</Text>
-              <Text style={styles.statLabel}>Streak</Text>
+              <Text style={styles.statLabel}>{t('journey.streak')}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
@@ -75,7 +76,7 @@ export default function JourneyScreen() {
                 <Trophy color={theme.colors.accents.powderBlue} size={20} />
               </View>
               <Text style={styles.statVal}>{totalPoints}</Text>
-              <Text style={styles.statLabel}>Points</Text>
+              <Text style={styles.statLabel}>{t('journey.points')}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
@@ -83,7 +84,7 @@ export default function JourneyScreen() {
                 <CheckCircle2 color={theme.colors.accents.eucalyptus} size={20} />
               </View>
               <Text style={styles.statVal}>{completedCount}/{tasks.length}</Text>
-              <Text style={styles.statLabel}>Done</Text>
+              <Text style={styles.statLabel}>{t('journey.done')}</Text>
             </View>
           </View>
           
@@ -94,13 +95,13 @@ export default function JourneyScreen() {
                 style={[styles.progressBarFill, { width: `${progress}%` }]} 
               />
             </View>
-            <Text style={styles.progressText}>{Math.round(progress)}% of daily care plan</Text>
+            <Text style={styles.progressText}>{Math.round(progress)}% {t('journey.progress_label')}</Text>
           </View>
         </Animated.View>
 
         {/* Timeline */}
         <View style={styles.timelineContainer}>
-          <Text style={styles.sectionTitle}>Daily Care Plan</Text>
+          <Text style={styles.sectionTitle}>{t('journey.daily_plan')}</Text>
           
           {tasks.map((task, index) => (
             <Animated.View 

@@ -39,7 +39,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { SchedulableTriggerInputTypes } from 'expo-notifications';
 import { AuthContext } from '../../src/context/AuthContext';
-import { translations, Language, TranslationSchema } from '../../src/utils/translations';
+import { AuthContext } from '../../src/context/AuthContext';
 
 const { width } = Dimensions.get('window');
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
@@ -156,8 +156,8 @@ export default function GardenScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const theme = useTheme();
+  const { t } = theme;
   const { userData: authData } = useContext(AuthContext) as any;
-  const t: TranslationSchema = translations[authData?.preferredLanguage as Language] || translations.English;
 
   const [step, setStep] = useState<'question_0' | 'question_1' | 'mood' | 'planted'>('question_0');
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
@@ -268,7 +268,7 @@ export default function GardenScreen() {
       </View>
 
       <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: insets.top }]} showsVerticalScrollIndicator={false}>
-        <ScreenHeader title={t.garden.title} subtitle={t.garden.subtitle} />
+        <ScreenHeader title={t('garden.title')} subtitle={t('garden.subtitle')} />
 
         <GrowthHeader />
 
@@ -353,13 +353,13 @@ const StepMood = ({ timeCtx, moods, selected, setSelected, theme, t, router }: a
     </View>
     <View style={styles.moodHeader}>
       <Text style={styles.moodPromptTitle}>{timeCtx.prompt}</Text>
-      <Text style={styles.moodPromptSubtitle}>{t.garden.seedQuestion}</Text>
+      <Text style={styles.moodPromptSubtitle}>{t('garden.seedQuestion')}</Text>
     </View>
 
     {['tired', 'anxious', 'sad', 'stressed'].includes(selected || '') && (
       <Animated.View entering={FadeInUp} style={styles.nudge}>
         <View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: theme.colors.plum }} />
-        <Text style={styles.nudgeText}>{t.garden.supportNudge}</Text>
+        <Text style={styles.nudgeText}>{t('garden.supportNudge')}</Text>
         <TouchableOpacity onPress={() => router.push('/(tabs)/tools')}>
           <Text style={styles.nudgeLink}>Try Breathing</Text>
         </TouchableOpacity>
@@ -379,8 +379,8 @@ const StepSuccess = ({ theme, t }: any) => (
     <View style={styles.successIconWrap}>
       <Flower2 color={theme.colors.accents.eucalyptus} size={48} />
     </View>
-    <Text style={styles.successTitle}>{t.garden.successTitle}</Text>
-    <Text style={styles.successSubtitle}>{t.garden.successSubtitle}</Text>
+    <Text style={styles.successTitle}>{t('garden.successTitle')}</Text>
+    <Text style={styles.successSubtitle}>{t('garden.successSubtitle')}</Text>
   </Animated.View>
 );
 

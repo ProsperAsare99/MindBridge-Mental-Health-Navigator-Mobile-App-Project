@@ -14,7 +14,6 @@ import {
   Alert,
   Clipboard,
 } from 'react-native';
-import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -112,8 +111,8 @@ const MessageItem = ({ item, theme, router }: any) => {
                 borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
               }]}
             >
-              <Text style={[msgStyles.textAi, { color: theme.colors.text.primary }]}>
-                {item.text}
+              <Text style={[S.disclaimerText, { color: theme.colors.text.secondary }]}>
+                {t('ai.disclaimer')}
               </Text>
             </TouchableOpacity>
           )}
@@ -158,10 +157,9 @@ const msgStyles = StyleSheet.create({
 export default function AIGuideScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { t } = theme;
   const router = useRouter();
-  const { userData: authData } = useContext(AuthContext);
-  const preferredLanguage = (authData?.preferredLanguage as Language) || 'English';
-  const t: TranslationSchema = translations[preferredLanguage] || translations.English;
+  const { userData: authData } = useContext(AuthContext) as any;
 
   const flatListRef = useRef<FlatList>(null);
   const inputRef = useRef<TextInput>(null);
@@ -188,20 +186,20 @@ export default function AIGuideScreen() {
         }
         const firstName = rawName.split(' ')[0];
         
-        let greeting = t.ai.greetingStandard;
+        let greeting = t('ai.greetingStandard');
 
         if (data.latestMood) {
           const emotions = data.latestMood.emotions?.join(', ') || 'something meaningful';
           const score = data.latestMood.score;
           if (score <= 4) {
-            greeting = t.ai.greetingHeavy.replace('{name}', firstName).replace('{emotions}', emotions.toLowerCase());
+            greeting = t('ai.greetingHeavy').replace('{name}', firstName).replace('{emotions}', emotions.toLowerCase());
           } else if (score >= 8) {
-            greeting = t.ai.greetingGlowing.replace('{name}', firstName).replace('{emotions}', emotions.toLowerCase());
+            greeting = t('ai.greetingGlowing').replace('{name}', firstName).replace('{emotions}', emotions.toLowerCase());
           } else {
-            greeting = t.ai.greetingRecent.replace('{name}', firstName).replace('{emotions}', emotions.toLowerCase());
+            greeting = t('ai.greetingRecent').replace('{name}', firstName).replace('{emotions}', emotions.toLowerCase());
           }
         } else if (data.onboarding?.firstName || data.userName || authData?.name) {
-          greeting = t.ai.greetingWelcome.replace('{name}', firstName);
+          greeting = t('ai.greetingWelcome').replace('{name}', firstName);
         }
 
         const historyMessages = (data.history || []).reverse().map((msg: any, idx: number) => ({
@@ -217,13 +215,11 @@ export default function AIGuideScreen() {
         ]);
       } catch {
         const userName = authData?.name || 'Friend';
-        const firstName = userName.split(' ')[0];
-        setMessages([{ 
-          id: 'welcome', 
-          isAi: true, 
-          text: t.ai.greetingWelcome ? t.ai.greetingWelcome.replace('{name}', firstName) : t.ai.greetingStandard, 
-          time: 'Now', 
-          suggestCrisis: false 
+        setMessages([{
+          id: 'initial',
+          text: t('ai.greetingWelcome').replace('{name}', userName),
+          isAi: true,
+          timestamp: new Date()
         }]);
       }
     };
@@ -325,7 +321,7 @@ export default function AIGuideScreen() {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[S.headerTitle, { color: theme.colors.text.primary }]}>
-              {t.ai?.title || 'The Oracle'}
+              {t('ai.title')}
             </Text>
             <View style={S.statusRow}>
               <View style={S.dot} />
@@ -353,7 +349,7 @@ export default function AIGuideScreen() {
         }]}>
           <Info color={theme.isDark ? theme.colors.accents.powderBlue : theme.colors.plum} size={13} />
           <Text style={[S.disclaimerText, { color: theme.isDark ? theme.colors.text.secondary : theme.colors.text.tertiary }]}>
-            {t.ai?.disclaimer || 'The Oracle supports your wellbeing but is not a substitute for professional care.'}
+            {t('ai.disclaimer')}
           </Text>
         </View>
 
@@ -361,8 +357,8 @@ export default function AIGuideScreen() {
         {showPrompts && (
           <Animated.View entering={FadeInUp.delay(300).duration(500)} style={S.prompts}>
             <View style={S.promptsHeader}>
-              <MessageCircle color={theme.colors.text.tertiary} size={13} />
-              <Text style={[S.promptsLabel, { color: theme.colors.text.tertiary }]}>Quick starts</Text>
+              <Text style={[S.headerTitle, { color: theme.colors.text.primary }]}>{t('ai.title')}</Text>
+              <Text style={[S.headerSub, { color: theme.colors.text.secondary }]}>{t('ai.subtitle')}</Text>
             </View>
             <View style={S.promptsGrid}>
               {SUGGESTED_PROMPTS.map((p, i) => (

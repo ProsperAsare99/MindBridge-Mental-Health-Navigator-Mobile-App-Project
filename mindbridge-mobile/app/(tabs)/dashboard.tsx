@@ -54,7 +54,6 @@ import {
   ChevronDown,
   Flame
 } from 'lucide-react-native';
-import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 
 const { width } = Dimensions.get('window');
@@ -88,7 +87,7 @@ const ProgressRings = ({ completed, total, theme, styles }: any) => {
       </View>
       <View style={{ marginRight: 4 }}>
         <Text style={[styles.ringsCount, { color: theme.colors.text.primary }]}>{completed}/{total}</Text>
-        <Text style={[styles.ringsLabel, { color: theme.colors.text.secondary }]}>Rituals</Text>
+        <Text style={[styles.ringsLabel, { color: theme.colors.text.secondary }]}>{theme.t('streak')}</Text>
       </View>
     </View>
   );
@@ -332,7 +331,7 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const theme = useTheme();
-  const styles = createStyles(theme);
+  const { t } = theme;
   const { userData: authData } = useContext(AuthContext) as any;
   
   const [rituals, setRituals] = useState({
@@ -346,8 +345,7 @@ export default function DashboardScreen() {
   const [assessments, setAssessments] = useState<any[]>([]);
   const [latestPost, setLatestPost] = useState<any>(null);
   const [gardenStats, setGardenStats] = useState({ count: 0, stage: 'Empty Garden', icon: CircleDashed, color: '#94A3B8' });
-  const [userData, setUserData] = useState({ name: authData?.name || 'Friend', language: 'English' as Language, streak: 0 });
-  const t: TranslationSchema = translations[userData.language] || translations.English;
+  const [userData, setUserData] = useState({ name: authData?.name || 'Friend', language: 'English', streak: 0 });
   const completedCount = Object.values(rituals).filter(Boolean).length;
 
   const getGrowthStage = (count: number) => {
@@ -398,12 +396,15 @@ export default function DashboardScreen() {
     }, [checkStatus])
   );
 
-  const getGreeting = () => {
+  const getTimeContext = (t: any) => {
     const hour = new Date().getHours();
-    if (hour < 12) return t.dashboard.greetingMorning;
-    if (hour < 18) return t.dashboard.greetingAfternoon;
-    return t.dashboard.greetingEvening;
+    if (hour >= 5 && hour < 12) return { greeting: t('dashboard.greetingMorning'), prompt: 'Start with intention' };
+    if (hour >= 12 && hour < 17) return { greeting: t('dashboard.greetingAfternoon'), prompt: 'Check in with yourself' };
+    if (hour >= 17 && hour < 21) return { greeting: t('dashboard.greetingEvening'), prompt: 'Wind down and reflect' };
+    return { greeting: t('dashboard.greetingEvening'), prompt: 'How was your day?' };
   };
+
+  const { greeting } = getTimeContext(t);
 
   return (
     <View style={styles.container}>
@@ -433,7 +434,7 @@ export default function DashboardScreen() {
 
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
-            <ScreenHeader title={`${getGreeting()}, ${userData.name}`} subtitle="Nurture your peace today" noPadding />
+            <ScreenHeader title={`${greeting}, ${userData.name}`} subtitle="Nurture your peace today" noPadding />
           </View>
           <ProgressRings completed={completedCount} total={3} theme={theme} styles={styles} />
         </View>
@@ -579,7 +580,7 @@ export default function DashboardScreen() {
         {/* ── Wellness Hub Grid ── */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Wellness Hub</Text>
+            <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.wellness_hub') || 'Wellness Hub'}</Text>
           </View>
           <View style={styles.hubGrid}>
             <AppleWidget 

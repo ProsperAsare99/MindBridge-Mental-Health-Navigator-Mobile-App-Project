@@ -70,6 +70,102 @@ export interface TranslationSchema {
     select_language: string;
     language_desc: string;
   };
+  profile: {
+    title: string;
+    subtitle: string;
+    edit_profile: string;
+    university: string;
+    joined: string;
+    stats_reflections: string;
+    stats_streak: string;
+    stats_level: string;
+    emergency_contact: string;
+    crisis_support: string;
+    my_garden: string;
+    settings: string;
+    log_out: string;
+  };
+  journal: {
+    title: string;
+    subtitle: string;
+    new_entry: string;
+    write_reflection: string;
+    title_placeholder: string;
+    content_placeholder: string;
+    save_entry: string;
+    delete_entry: string;
+    no_entries: string;
+    recording: string;
+    voice_note: string;
+  };
+  crisis: {
+    title: string;
+    subtitle: string;
+    immediate_help: string;
+    emergency_contact: string;
+    national_emergency: string;
+    university_counseling: string;
+    mental_health_helpline: string;
+    safety_plan: string;
+    safety_steps: string;
+    find_hospital: string;
+    find_hospital_desc: string;
+    edit: string;
+  };
+  resources: {
+    title: string;
+    subtitle: string;
+    for_you: string;
+    explore_all: string;
+    coping_tools: string;
+    all: string;
+    audio: string;
+    techniques: string;
+    articles: string;
+    videos: string;
+    books: string;
+  };
+  community: {
+    title: string;
+    subtitle: string;
+    explore_groups: string;
+    members: string;
+    anonymous_feed: string;
+    send_hug: string;
+    comment: string;
+    just_now: string;
+    hours_ago: string;
+    days_ago: string;
+    share_thought: string;
+  };
+  assessments: {
+    title: string;
+    subtitle: string;
+    available_tests: string;
+    recent_results: string;
+    depression_screening: string;
+    anxiety_screening: string;
+    burnout_test: string;
+    start: string;
+    minutes: string;
+  };
+  tools: {
+    title: string;
+    subtitle: string;
+    daily_growth: string;
+    knowledge_checks: string;
+    support_connection: string;
+    app_preferences: string;
+  };
+  journey: {
+    title: string;
+    subtitle: string;
+    daily_plan: string;
+    progress_label: string;
+    streak: string;
+    points: string;
+    done: string;
+  };
 }
 
 export const translations: Record<Language, TranslationSchema> = {
@@ -149,6 +245,102 @@ export const translations: Record<Language, TranslationSchema> = {
       select_language: 'Select Language',
       language_desc: 'Choose your preferred language for the MindBridge experience.',
     },
+    profile: {
+      title: 'Your Space',
+      subtitle: 'Student Wellness Profile',
+      edit_profile: 'Edit Profile',
+      university: 'University',
+      joined: 'Joined',
+      stats_reflections: 'Reflections',
+      stats_streak: 'Day Streak',
+      stats_level: 'Zen Level',
+      emergency_contact: 'Emergency Contact',
+      crisis_support: 'Crisis Support',
+      my_garden: 'My Garden',
+      settings: 'Settings',
+      log_out: 'Log Out',
+    },
+    journal: {
+      title: 'Moments of Clarity',
+      subtitle: 'Your private safe space for reflection',
+      new_entry: 'New Entry',
+      write_reflection: 'Write a reflection',
+      title_placeholder: 'Give it a title...',
+      content_placeholder: "What's on your mind?",
+      save_entry: 'Save Reflection',
+      delete_entry: 'Delete Entry',
+      no_entries: 'No reflections yet. Start by planting a thought.',
+      recording: 'Recording...',
+      voice_note: 'Voice Reflection',
+    },
+    crisis: {
+      title: 'Crisis Support',
+      subtitle: 'You are not alone. Reach out for immediate help.',
+      immediate_help: 'Immediate Help',
+      emergency_contact: 'Emergency Contact',
+      national_emergency: 'National Emergency',
+      university_counseling: 'University Counseling',
+      mental_health_helpline: 'Mental Health Helpline',
+      safety_plan: 'My Safety Plan',
+      safety_steps: 'Steps to stay safe right now',
+      find_hospital: 'Find Nearest Hospital',
+      find_hospital_desc: 'Locate an emergency room near you.',
+      edit: 'Edit',
+    },
+    resources: {
+      title: 'Discovery Hub',
+      subtitle: 'Curated wellness resources for you',
+      for_you: 'For You',
+      explore_all: 'Explore All',
+      coping_tools: 'Evidence-Based Tools',
+      all: 'All',
+      audio: 'Audio',
+      techniques: 'Techniques',
+      articles: 'Articles',
+      videos: 'Videos',
+      books: 'Books',
+    },
+    community: {
+      title: 'Safe Space',
+      subtitle: 'Connect anonymously with your peer community',
+      explore_groups: 'Explore Groups',
+      members: 'members',
+      anonymous_feed: 'Peer Activity',
+      send_hug: 'Send Hug',
+      comment: 'Comment',
+      just_now: 'Just now',
+      hours_ago: 'h ago',
+      days_ago: 'd ago',
+      share_thought: 'Share a thought...',
+    },
+    assessments: {
+      title: 'Assessments',
+      subtitle: 'Scientifically validated clinical screenings',
+      available_tests: 'Available Screenings',
+      recent_results: 'Recent History',
+      depression_screening: 'Depression Screening',
+      anxiety_screening: 'Anxiety Screening',
+      burnout_test: 'Student Burnout Test',
+      start: 'Start',
+      minutes: 'mins',
+    },
+    tools: {
+      title: 'Explore',
+      subtitle: 'All your MindBridge tools in one place',
+      daily_growth: 'Daily Growth',
+      knowledge_checks: 'Knowledge & Checks',
+      support_connection: 'Support & Connection',
+      app_preferences: 'App Preferences',
+    },
+    journey: {
+      title: 'Wellness Journey',
+      subtitle: 'Your progress for today',
+      daily_plan: 'Daily Care Plan',
+      progress_label: 'of daily care plan',
+      streak: 'Streak',
+      points: 'Points',
+      done: 'Done',
+    },
   },
   Twi: {
     common: {
@@ -225,6 +417,102 @@ export const translations: Record<Language, TranslationSchema> = {
       log_out: 'Pue',
       select_language: 'Paw Kasa',
       language_desc: 'Paw kasa a wopɛ sɛ wode di dwuma wɔ MindBridge.',
+    },
+    profile: {
+      title: 'Wo Bea',
+      subtitle: 'Sukuufoɔ Apɔwmuden Profile',
+      edit_profile: 'Siesie wo Profile',
+      university: 'Suapɔn',
+      joined: 'Wode wo ho bɔɔ yɛn',
+      stats_reflections: 'Nkaebɔ',
+      stats_streak: 'Nna Streak',
+      stats_level: 'Zen Tebea',
+      emergency_contact: 'Mmoa a ɛhiahia',
+      crisis_support: 'Ahoyera Mmoa',
+      my_garden: 'Me Tuo',
+      settings: 'Settings',
+      log_out: 'Pue',
+    },
+    journal: {
+      title: 'Adwene Mu Paa',
+      subtitle: 'Wo banbɔbea a ɛwɔ kokoamsɛm',
+      new_entry: 'Nkaebɔ Foforo',
+      write_reflection: 'Twerɛ nkaebɔ',
+      title_placeholder: 'Fa din...',
+      content_placeholder: 'Dɛn na ɛwɔ w’adwene mu?',
+      save_entry: 'Sie Nkaebɔ',
+      delete_entry: 'Popa Nkaebɔ',
+      no_entries: 'Nkaebɔ nni hɔ. Dɛn na ɛsɛ sɛ wode firi aseɛ?',
+      recording: 'Eretwerɛ...',
+      voice_note: 'Nne Nkaebɔ',
+    },
+    crisis: {
+      title: 'Ahoyera Mmoa',
+      subtitle: 'Wonyɛ wo nko. Hwehwɛ mmoa seesei.',
+      immediate_help: 'Mmoa a ɛhiahia seesei',
+      emergency_contact: 'Mmoa a ɛhiahia',
+      national_emergency: 'Ɔman Mmoa',
+      university_counseling: 'Suapɔn Mmoa',
+      mental_health_helpline: 'Apɔwmuden Mmoa',
+      safety_plan: 'Me Banbɔ Nhyehyɛe',
+      safety_steps: 'Akwan a wobɛfa so abɔ wo ho ban seesei',
+      find_hospital: 'Hunu Ayaresabea a ɛbɛn wo',
+      find_hospital_desc: 'Hunu baabi a wobɛnya mmoa seesei.',
+      edit: 'Siesie',
+    },
+    resources: {
+      title: 'Hunu Ahofama',
+      subtitle: 'Apɔwmuden mmoa a yɛasiesie mmaa wo',
+      for_you: 'W’ankasa Deɛ',
+      explore_all: 'Hunu Ne Nyinaa',
+      coping_tools: 'Nnwuma a ɛboa',
+      all: 'Ne Nyinaa',
+      audio: 'Nne',
+      techniques: 'Akwan',
+      articles: 'Nkrataa',
+      videos: 'Videos',
+      books: 'Nwoma',
+    },
+    community: {
+      title: 'Bea a Ɛhɔ Yɛ Kronkron',
+      subtitle: 'Wo ne wo mfɛfoɔ nni nkitaho wɔ kokoamsɛm mu',
+      explore_groups: 'Hunu Akuo',
+      members: 'asɔrefoɔ',
+      anonymous_feed: 'Mfɛfoɔ Nnwuma',
+      send_hug: 'Atuu',
+      comment: 'Kyerɛ wo nsusuwii',
+      just_now: 'Seesei ara',
+      hours_ago: 'h a atwam',
+      days_ago: 'd a atwam',
+      share_thought: 'Kyerɛ biribi...',
+    },
+    assessments: {
+      title: 'Nhwehwɛmu',
+      subtitle: 'Abɔdeɛ mu nyansahu nhwehwɛmu a yɛagye atom',
+      available_tests: 'Nhwehwɛmu a ɛwɔ hɔ',
+      recent_results: 'Nhwehwɛmu a atwam',
+      depression_screening: 'Adwene mu Yadeɛ Nhwehwɛmu',
+      anxiety_screening: 'Ahoyera Nhwehwɛmu',
+      burnout_test: 'Sukuufoɔ Brɛ Nhwehwɛmu',
+      start: 'Fi aseɛ',
+      minutes: 'miniti',
+    },
+    tools: {
+      title: 'Hunu Ne Nyinaa',
+      subtitle: 'MindBridge nnwuma nyinaa wɔ bea baako',
+      daily_growth: 'Nnaseɛ Nnyigyeɛ',
+      knowledge_checks: 'Nunyanya & Nhwehwɛmu',
+      support_connection: 'Mmoa & Nkitaho',
+      app_preferences: 'App Nhyehyɛe',
+    },
+    journey: {
+      title: 'Apɔwmuden Kwantu',
+      subtitle: 'Wo nkɔsoɔ nnɛ',
+      daily_plan: 'Da biara Banbɔ Nhyehyɛe',
+      progress_label: 'wɔ da biara nhyehyɛe mu',
+      streak: 'Nna Streak',
+      points: 'Points',
+      done: 'Awie',
     },
   },
   French: {
@@ -303,6 +591,102 @@ export const translations: Record<Language, TranslationSchema> = {
       select_language: 'Choisir la langue',
       language_desc: 'Choisissez votre langue préférée pour l\'expérience MindBridge.',
     },
+    profile: {
+      title: 'Votre Espace',
+      subtitle: 'Profil de bien-être étudiant',
+      edit_profile: 'Modifier le profil',
+      university: 'Université',
+      joined: 'Rejoint',
+      stats_reflections: 'Réflexions',
+      stats_streak: 'Série de jours',
+      stats_level: 'Niveau Zen',
+      emergency_contact: 'Contact d\'urgence',
+      crisis_support: 'Soutien en cas de crise',
+      my_garden: 'Mon jardin',
+      settings: 'Paramètres',
+      log_out: 'Déconnexion',
+    },
+    journal: {
+      title: 'Moments de clarté',
+      subtitle: 'Votre espace sécurisé privé pour la réflexion',
+      new_entry: 'Nouvelle entrée',
+      write_reflection: 'Écrire une réflexion',
+      title_placeholder: 'Donnez-lui un titre...',
+      content_placeholder: 'Qu\'avez-vous à l\'esprit ?',
+      save_entry: 'Enregistrer la réflexion',
+      delete_entry: 'Supprimer l\'entrée',
+      no_entries: 'Pas encore de réflexions. Commencez par planter une pensée.',
+      recording: 'Enregistrement...',
+      voice_note: 'Réflexion vocale',
+    },
+    crisis: {
+      title: 'Soutien en cas de crise',
+      subtitle: 'Vous n\'êtes pas seul. Demandez de l\'aide immédiate.',
+      immediate_help: 'Aide immédiate',
+      emergency_contact: 'Contact d\'urgence',
+      national_emergency: 'Urgence nationale',
+      university_counseling: 'Conseil universitaire',
+      mental_health_helpline: 'Ligne d\'assistance en santé mentale',
+      safety_plan: 'Mon plan de sécurité',
+      safety_steps: 'Étapes pour rester en sécurité maintenant',
+      find_hospital: 'Trouver l\'hôpital le plus proche',
+      find_hospital_desc: 'Localisez une salle d\'urgence près de chez vous.',
+      edit: 'Modifier',
+    },
+    resources: {
+      title: 'Centre de découverte',
+      subtitle: 'Ressources de bien-être curatées pour vous',
+      for_you: 'Pour vous',
+      explore_all: 'Tout explorer',
+      coping_tools: 'Outils basés sur des preuves',
+      all: 'Tout',
+      audio: 'Audio',
+      techniques: 'Techniques',
+      articles: 'Articles',
+      videos: 'Vidéos',
+      books: 'Livres',
+    },
+    community: {
+      title: 'Espace sécurisé',
+      subtitle: 'Connectez-vous anonymement avec votre communauté de pairs',
+      explore_groups: 'Explorer les groupes',
+      members: 'membres',
+      anonymous_feed: 'Activité des pairs',
+      send_hug: 'Envoyer un câlin',
+      comment: 'Commentaire',
+      just_now: 'À l\'instant',
+      hours_ago: 'h ago',
+      days_ago: 'd ago',
+      share_thought: 'Partager une pensée...',
+    },
+    assessments: {
+      title: 'Évaluations',
+      subtitle: 'Dépistages cliniques validés scientifiquement',
+      available_tests: 'Dépistages disponibles',
+      recent_results: 'Historique récent',
+      depression_screening: 'Dépistage de la dépression',
+      anxiety_screening: 'Dépistage de l\'anxiété',
+      burnout_test: 'Test d\'épuisement étudiant',
+      start: 'Démarrer',
+      minutes: 'min',
+    },
+    tools: {
+      title: 'Explorer',
+      subtitle: 'Tous vos outils MindBridge en un seul endroit',
+      daily_growth: 'Croissance quotidienne',
+      knowledge_checks: 'Connaissance & vérifications',
+      support_connection: 'Soutien & connexion',
+      app_preferences: 'Préférences de l\'application',
+    },
+    journey: {
+      title: 'Voyage de bien-être',
+      subtitle: 'Votre progression pour aujourd\'hui',
+      daily_plan: 'Plan de soins quotidien',
+      progress_label: 'du plan de soins quotidien',
+      streak: 'Série',
+      points: 'Points',
+      done: 'Terminé',
+    },
   },
   Ga: {
     common: {
@@ -379,6 +763,61 @@ export const translations: Record<Language, TranslationSchema> = {
       log_out: 'Pue',
       select_language: 'Hala Kasa',
       language_desc: 'Hala kasa ni oosumɔ ni okɛtsu nii yɛ MindBridge.',
+    },
+    profile: {
+      title: 'O-hea',
+      subtitle: 'Sukuu bii a-wellness Profile',
+      edit_profile: 'Siesie o-profile',
+      university: 'Suapɔn',
+      joined: 'Obote mli',
+      stats_reflections: 'Nkaebɔ',
+      stats_streak: 'Nna Streak',
+      stats_level: 'Zen Tebea',
+      emergency_contact: 'Mmoa ni hiahia',
+      crisis_support: 'Ahoyera Mmoa',
+      my_garden: 'Mi Abɔɔ',
+      settings: 'Settings',
+      log_out: 'Pue',
+    },
+    journal: {
+      title: 'Kakaɖedzi ƒe ɣeyiɣi',
+      subtitle: 'Wò teƒe nyuie na wò ŋkuɖodzinyawo',
+      new_entry: 'Ŋkuɖodzinya Yeye',
+      write_reflection: 'Ŋlɔ ŋkuɖodzinya aɖe',
+      title_placeholder: 'Tia tanya nɛ...',
+      content_placeholder: 'Nu kae le wò jwɛŋmɔ me?',
+      save_entry: 'Dzra Ŋkuɖodzinya la ɖo',
+      delete_entry: 'Tutu Ŋkuɖodzinya la',
+      no_entries: 'Mèŋlɔ ŋkuɖodzinya aɖeke o. Dze egɔme kple jwɛŋmɔ aɖe.',
+      recording: 'Wole record wɔm...',
+      voice_note: 'Nne ƒe Ŋkuɖodzinya',
+    },
+    crisis: {
+      title: 'Taimakon Gaggawa',
+      subtitle: 'Ba kai kadai ba ne. Nemi taimako nan take.',
+      immediate_help: 'Taimakon Gaggawa',
+      emergency_contact: 'Tuntuɓi na Gaggawa',
+      national_emergency: 'Gaggawa na Kasa',
+      university_counseling: 'Nasiha na Jami\'a',
+      mental_health_helpline: 'Layin Taimakon Lafiyar Zuciya',
+      safety_plan: 'Tsarin Tsaro na',
+      safety_steps: 'Matakan tsira a yanzu',
+      find_hospital: 'Nemo Asibiti Mafi Kusa',
+      find_hospital_desc: 'Nemo dakin gaggawa kusa da ku.',
+      edit: 'Shirya',
+    },
+    resources: {
+      title: 'Nunyanya ƒe Teƒe',
+      subtitle: 'Lãmesẽ ƒe dɔwunuiwo na wò',
+      for_you: 'Wò tɔ',
+      explore_all: 'Di wo fɛɛ',
+      coping_tools: 'Dɔwunui siwo kpena',
+      all: 'Wo fɛɛ',
+      audio: 'Nne',
+      techniques: 'Mɔwo',
+      articles: 'Nyakpuiwo',
+      videos: 'Videonewo',
+      books: 'Agbalẽwo',
     },
   },
   Ewe: {
@@ -457,6 +896,102 @@ export const translations: Record<Language, TranslationSchema> = {
       select_language: 'Tia Gbegbɔgblɔ',
       language_desc: 'Tia gbegbɔgblɔ si nàdi be yeazã le MindBridge.',
     },
+    profile: {
+      title: 'Wò Teƒe',
+      subtitle: 'Sukuu Bii ƒe Lãmesẽ Profile',
+      edit_profile: 'Dzra Profile la ɖo',
+      university: 'Suapɔn',
+      joined: 'Èva kpe ɖe mía ŋu',
+      stats_reflections: 'Ŋkuɖodzinyawo',
+      stats_streak: 'Ŋkeke ƒe Streak',
+      stats_level: 'Zen ƒe Nɔnɔme',
+      emergency_contact: 'Kpedenanu si hiahia',
+      crisis_support: 'Kpedenanu le nɔnɔme sesẽ me',
+      my_garden: 'Nye Abɔ',
+      settings: 'Settings',
+      log_out: 'Do go',
+    },
+    journal: {
+      title: 'Kakaɖedzi ƒe ɣeyiɣi',
+      subtitle: 'Wò teƒe nyuie na wò ŋkuɖodzinyawo',
+      new_entry: 'Ŋkuɖodzinya Yeye',
+      write_reflection: 'Ŋlɔ ŋkuɖodzinya aɖe',
+      title_placeholder: 'Tia tanya nɛ...',
+      content_placeholder: 'Nu kae le wò jwɛŋmɔ me?',
+      save_entry: 'Dzra Ŋkuɖodzinya la ɖo',
+      delete_entry: 'Tutu Ŋkuɖodzinya la',
+      no_entries: 'Mèŋlɔ ŋkuɖodzinya aɖeke o. Dze egɔme kple jwɛŋmɔ aɖe.',
+      recording: 'Wole record wɔm...',
+      voice_note: 'Nne ƒe Ŋkuɖodzinya',
+    },
+    crisis: {
+      title: 'Kpedenanu le nɔnɔme sesẽ me',
+      subtitle: 'Mele wò ŋutɔ o. Di kpedenanu fifia.',
+      immediate_help: 'Kpedenanu si hiahia',
+      emergency_contact: 'Kpedenanu si hiahia',
+      national_emergency: 'Tɔnyɔnɔnɔ ƒe kpedenanu',
+      university_counseling: 'Sukuu ƒe Mɔfiala',
+      mental_health_helpline: 'Seselelãme ƒe Kpedenanu',
+      safety_plan: 'Nye Banbɔ Ðoɖo',
+      safety_steps: 'Mɔwo na ŋutifafa',
+      find_hospital: 'Di Dɔnɔdzi aɖe',
+      find_hospital_desc: 'Di dɔnɔdzi aɖe le wò gbɔ.',
+      edit: 'Dzra ɖo',
+    },
+    resources: {
+      title: 'Nunyanya ƒe Teƒe',
+      subtitle: 'Lãmesẽ ƒe dɔwunuiwo na wò',
+      for_you: 'Wò tɔ',
+      explore_all: 'Di wo fɛɛ',
+      coping_tools: 'Dɔwunui siwo kpena',
+      all: 'Wo fɛɛ',
+      audio: 'Nne',
+      techniques: 'Mɔwo',
+      articles: 'Nyakpuiwo',
+      videos: 'Videonewo',
+      books: 'Agbalẽwo',
+    },
+    community: {
+      title: 'Teƒe Manyagbee',
+      subtitle: 'Kpe ɖe wò mfɛfoɔwo ŋu le ɣeaɖuanyi me',
+      explore_groups: 'Di Akuowo',
+      members: 'asɔrefoɔ',
+      anonymous_feed: 'Mfɛfoɔ ƒe dɔwunuiwo',
+      send_hug: 'Atuu',
+      comment: 'Ŋlɔ nya aɖe',
+      just_now: 'Fifia ko',
+      hours_ago: 'gaƒoƒo h si va yi',
+      days_ago: 'ŋkeke d si va yi',
+      share_thought: 'Gblɔ nya aɖe...',
+    },
+    assessments: {
+      title: 'Dɔdɔkpɔwo',
+      subtitle: 'Lãmesẽ dɔdɔkpɔ siwo ŋu kpe ɖe',
+      available_tests: 'Dɔdɔkpɔ siwo li',
+      recent_results: 'Dɔdɔkpɔ siwo va yi',
+      depression_screening: 'Jwɛŋmɔ me hela dɔdɔkpɔ',
+      anxiety_screening: 'Ahoyera dɔdɔkpɔ',
+      burnout_test: 'Sukuu bii ƒe ɖeɖi dɔdɔkpɔ',
+      start: 'Dze egɔme',
+      minutes: 'miniti',
+    },
+    tools: {
+      title: 'Di Wo Fɛɛ',
+      subtitle: 'MindBridge dɔwunuiwo fɛɛ le teƒe ɖeka',
+      daily_growth: 'Nna Streak',
+      knowledge_checks: 'Nunyanya & D dɔkpɔwo',
+      support_connection: 'Kpedenanu & Kpekpeɖeŋu',
+      app_preferences: 'App ƒe Ðoɖowo',
+    },
+    journey: {
+      title: 'Lãmesẽ ƒe Mɔzɔzɔ',
+      subtitle: 'Wò ŋgɔyiyi na egbe',
+      daily_plan: 'Gbesiagbe Lãmesẽ Ðoɖo',
+      progress_label: 'le gbesiagbe ɖoɖoa me',
+      streak: 'Ŋkeke ƒe Streak',
+      points: 'Points',
+      done: 'Wowu enu',
+    },
   },
   Hausa: {
     common: {
@@ -533,6 +1068,102 @@ export const translations: Record<Language, TranslationSchema> = {
       log_out: 'Fita',
       select_language: 'Zaɓi Yare',
       language_desc: 'Zaɓi yaren da kuke so don MindBridge.',
+    },
+    profile: {
+      title: 'Wurin ku',
+      subtitle: 'Bayanan Lafiyar Dalibai',
+      edit_profile: 'Shirya Bayanan Martaba',
+      university: 'Jami\'a',
+      joined: 'An Shiga',
+      stats_reflections: 'Tunani',
+      stats_streak: 'Ranar Streak',
+      stats_level: 'Zen Level',
+      emergency_contact: 'Tuntuɓi na Gaggawa',
+      crisis_support: 'Taimakon Gaggawa',
+      my_garden: 'Lambuna',
+      settings: 'Saituna',
+      log_out: 'Fita',
+    },
+    journal: {
+      title: 'Lokacin Haske',
+      subtitle: 'Wurinku na sirri don tunani',
+      new_entry: 'Sabuwar Shiga',
+      write_reflection: 'Rubuta tunani',
+      title_placeholder: 'Ba shi lakabi...',
+      content_placeholder: 'Me ke ranka?',
+      save_entry: 'Ajiye Tunani',
+      delete_entry: 'Share Shigar',
+      no_entries: 'Babu sauran tunani tukunna. Fara da dasa tunani.',
+      recording: 'Riko...',
+      voice_note: 'Tunanin murya',
+    },
+    crisis: {
+      title: 'Taimakon Gaggawa',
+      subtitle: 'Ba kai kadai ba ne. Nemi taimako nan take.',
+      immediate_help: 'Taimakon Gaggawa',
+      emergency_contact: 'Tuntuɓi na Gaggawa',
+      national_emergency: 'Gaggawa na Kasa',
+      university_counseling: 'Nasiha na Jami\'a',
+      mental_health_helpline: 'Layin Taimakon Lafiyar Zuciya',
+      safety_plan: 'Tsarin Tsaro na',
+      safety_steps: 'Matakan tsira a yanzu',
+      find_hospital: 'Nemo Asibiti Mafi Kusa',
+      find_hospital_desc: 'Nemo dakin gaggawa kusa da ku.',
+      edit: 'Shirya',
+    },
+    resources: {
+      title: 'Cibiyar Gano',
+      subtitle: 'Kayan aikin lafiya gare ku',
+      for_you: 'Na ku',
+      explore_all: 'Bincika Duka',
+      coping_tools: 'Kayan Aikin Taimako',
+      all: 'Duka',
+      audio: 'Murya',
+      techniques: 'Hanyoyi',
+      articles: 'Kasidu',
+      videos: 'Bidiyo',
+      books: 'Littattafai',
+    },
+    community: {
+      title: 'Wurin Lafiya',
+      subtitle: 'Haɗa kai da tsara ku ba tare da sunan ku ba',
+      explore_groups: 'Bincika Kungiyoyi',
+      members: 'mambobi',
+      anonymous_feed: 'Ayyukan Tsara',
+      send_hug: 'Aika Runguma',
+      comment: 'Sharhi',
+      just_now: 'Yanzu nan',
+      hours_ago: 'h da ya wuce',
+      days_ago: 'd da ya wuce',
+      share_thought: 'Raba tunani...',
+    },
+    assessments: {
+      title: 'Auna Kai',
+      subtitle: 'Gwajin asibiti da aka tabbatar da su',
+      available_tests: 'Gwajin da Akwai',
+      recent_results: 'Tarihin Kusa',
+      depression_screening: 'Gwajin Bakin Ciki',
+      anxiety_screening: 'Gwajin Damuwa',
+      burnout_test: 'Gwajin Gajiya Dalibai',
+      start: 'Fara',
+      minutes: 'minti',
+    },
+    tools: {
+      title: 'Bincika',
+      subtitle: 'Duk kayan aikin ku na MindBridge a wuri guda',
+      daily_growth: 'Girma Kullum',
+      knowledge_checks: 'Ilimi & Gwaji',
+      support_connection: 'Taimako & Haɗin kai',
+      app_preferences: 'Saitunan App',
+    },
+    journey: {
+      title: 'Tafiyar Lafiya',
+      subtitle: 'Ci gaban ku na yau',
+      daily_plan: 'Tsarin Kula na Kullum',
+      progress_label: 'na tsarin kula na yau da kullun',
+      streak: 'Streak',
+      points: 'Points',
+      done: 'An yi',
     },
   },
 };

@@ -75,6 +75,7 @@ const FOR_YOU_MAP: Record<string, { title: string; subtitle: string; emoji: stri
 export default function ResourcesScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { t } = theme;
   const styles = createStyles(theme);
   
   const [resources, setResources] = useState<any>(null);
@@ -82,7 +83,14 @@ export default function ResourcesScreen() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [forYouCards, setForYouCards] = useState<any[]>([]);
 
-  const CATEGORIES = ['All', 'Audio', 'Techniques', 'Articles', 'Videos', 'Books'];
+  const CATEGORIES = [
+    t('resources.all'), 
+    t('resources.audio'), 
+    t('resources.techniques'), 
+    t('resources.articles'), 
+    t('resources.videos'), 
+    t('resources.books')
+  ];
 
   const COPING_TOOLS = [
     { id: 'breath', title: 'Box Breathing', subtitle: 'Calm your nervous system', icon: Wind, color: theme.colors.accents.eucalyptus },
@@ -183,12 +191,12 @@ export default function ResourcesScreen() {
       />
 
       <ScrollView 
-        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
         <ScreenHeader 
-          title="Discovery Hub" 
-          subtitle="Curated tools for your mental well-being."
+          title={t('resources.title')} 
+          subtitle={t('resources.subtitle')}
           rightAction={
             <TouchableOpacity style={styles.searchBtn}>
               <Search color={theme.colors.plum} size={24} />
@@ -198,26 +206,20 @@ export default function ResourcesScreen() {
 
         <View style={{ height: 20 }} />
 
-        {/* ── For You Section (MindDoc Discover pattern) ── */}
+        {/* ── For You Section ── */}
         {forYouCards.length > 0 && (
-          <Animated.View entering={FadeInUp.delay(80).duration(600)}>
-            <View style={styles.sectionHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: theme.colors.plum }} />
-                <Text style={styles.sectionTitle}>For You</Text>
-              </View>
-              <TouchableOpacity><Text style={styles.seeAllText}>See all</Text></TouchableOpacity>
-            </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('resources.for_you')}</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 24, gap: 14, paddingBottom: 8 }}
+              contentContainerStyle={styles.forYouScroll}
               snapToInterval={160 + 14}
               decelerationRate="fast"
             >
               {forYouCards.map((card, i) => <ForYouCard key={card.title} card={card} index={i} />)}
             </ScrollView>
-          </Animated.View>
+          </View>
         )}
 
         <View style={{ height: 24 }} />
@@ -294,9 +296,9 @@ export default function ResourcesScreen() {
 
         {/* Quick Tools */}
         {(activeCategory === 'All' || activeCategory === 'Techniques') && (
-          <Animated.View entering={FadeInUp.delay(300).duration(500)} style={styles.section}>
-            <Text style={styles.sectionTitle}>Coping Techniques</Text>
-            <View style={styles.toolsGrid}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('resources.coping_tools')}</Text>
+            <View style={styles.copingGrid}>
               {COPING_TOOLS.map((tool) => (
                 <TouchableOpacity key={tool.id} style={styles.toolCard} activeOpacity={0.8}>
                   <View style={[styles.toolIconWrap, { backgroundColor: tool.color + '20' }]}>

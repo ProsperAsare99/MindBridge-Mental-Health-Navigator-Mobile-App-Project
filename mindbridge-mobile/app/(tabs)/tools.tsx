@@ -26,33 +26,33 @@ import {
   MoreVertical,
 } from 'lucide-react-native';
 
-const getToolGroups = (theme: any) => [
+const getToolGroups = (theme: any, t: any) => [
   {
-    title: 'Daily Growth',
+    title: t('tools.daily_growth'),
     items: [
-      { id: 'ai-guide', title: 'MindBridge Oracle', subtitle: 'Your private safe space', icon: Bot, color: theme.colors.plum },
-      { id: 'garden', title: 'Mood Tracker', subtitle: 'Log your feelings', icon: Wind, color: theme.colors.accents.eucalyptus },
-      { id: 'journal', title: 'Unified Journal', subtitle: 'Write your thoughts', icon: BookOpen, color: theme.colors.accents.powderBlue },
+      { id: 'ai-guide', title: t('ai.title'), subtitle: t('ai.subtitle'), icon: Bot, color: theme.colors.plum },
+      { id: 'garden', title: t('garden.title'), subtitle: t('garden.subtitle'), icon: Wind, color: theme.colors.accents.eucalyptus },
+      { id: 'journal', title: t('journal.title'), subtitle: t('journal.subtitle'), icon: BookOpen, color: theme.colors.accents.powderBlue },
     ]
   },
   {
-    title: 'Knowledge & Checks',
+    title: t('tools.knowledge_checks'),
     items: [
-      { id: 'assessments', title: 'Clinical Assessments', subtitle: 'Check your wellness', icon: ClipboardList, color: theme.colors.accents.slate },
-      { id: 'resources', title: 'Resource Library', subtitle: 'Articles & audio guides', icon: Library, color: theme.colors.accents.forestGreen },
+      { id: 'assessments', title: t('assessments.title'), subtitle: t('assessments.subtitle'), icon: ClipboardList, color: theme.colors.accents.slate },
+      { id: 'resources', title: t('resources.title'), subtitle: t('resources.subtitle'), icon: Library, color: theme.colors.accents.forestGreen },
     ]
   },
   {
-    title: 'Support & Connection',
+    title: t('tools.support_connection'),
     items: [
-      { id: 'community', title: 'Support Community', subtitle: 'Connect anonymously', icon: Users, color: theme.colors.plum },
-      { id: 'crisis', title: 'Crisis Support', subtitle: 'Get immediate help', icon: ShieldAlert, color: theme.colors.accents.terracotta },
+      { id: 'community', title: t('community.title'), subtitle: t('community.subtitle'), icon: Users, color: theme.colors.plum },
+      { id: 'crisis', title: t('crisis.title'), subtitle: t('crisis.subtitle'), icon: ShieldAlert, color: theme.colors.accents.terracotta },
     ]
   },
   {
-    title: 'App',
+    title: t('tools.app_preferences'),
     items: [
-      { id: 'settings', title: 'Settings', subtitle: 'App preferences & account', icon: Settings, color: theme.colors.text.secondary },
+      { id: 'settings', title: t('settings.title'), subtitle: t('settings.subtitle'), icon: Settings, color: theme.colors.text.secondary },
     ]
   }
 ];
@@ -60,9 +60,10 @@ const getToolGroups = (theme: any) => [
 export default function ToolsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const themeContext = useTheme();
-  const styles = createStyles(themeContext);
-  const TOOL_GROUPS = getToolGroups(themeContext);
+  const theme = useTheme();
+  const { t } = theme;
+  const styles = createStyles(theme);
+  const TOOL_GROUPS = getToolGroups(theme, t);
 
   return (
     <View style={styles.container}>
@@ -77,8 +78,8 @@ export default function ToolsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ScreenHeader 
-          title="Explore" 
-          subtitle="All your MindBridge tools in one place."
+          title={t('tools.title')} 
+          subtitle={t('tools.subtitle')}
           rightAction={
             <TouchableOpacity>
               <MoreVertical color={themeContext.colors.text.secondary} size={24} />

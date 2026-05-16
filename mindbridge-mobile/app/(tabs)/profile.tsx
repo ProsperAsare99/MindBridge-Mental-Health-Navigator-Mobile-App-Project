@@ -126,10 +126,11 @@ const ProfileListGroup = ({ children, delay, theme }: any) => {
 // ─── Main Profile Screen ───────────────────────────────────────────────────
 
 export default function ProfileScreen() {
-  const { signOut, userToken, userData } = useContext(AuthContext) as any;
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const theme = useTheme();
+  const { t } = theme;
+  const router = useRouter();
+  const { signOut, userToken, userData, userData: authData } = useContext(AuthContext) as any;
   const styles = createStyles(theme);
 
   const isGuest = userToken?.startsWith('guest-token');
@@ -193,8 +194,10 @@ export default function ProfileScreen() {
     }
   };
 
-  const userEmail = isGuest ? "Anonymous Session" : (userData?.email || "prosper@mindbridge.ai");
-  const userName = profile?.firstName || userData?.name || "Prosper Asare";
+  const handleLogout = () => {
+    signOut();
+    router.replace('/(auth)/welcome');
+  };
 
   return (
     <View style={styles.container}>
@@ -216,8 +219,8 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ScreenHeader 
-          title="My Space" 
-          subtitle="Reflect on your growth and journey"
+          title={t('profile.title')} 
+          subtitle={t('profile.subtitle')}
         />
 
         <Animated.View entering={FadeInUp.duration(600)} style={styles.headerProfile}>
@@ -236,24 +239,24 @@ export default function ProfileScreen() {
           <Text style={styles.userName}>{profile?.name || userData?.name}</Text>
           <Text style={styles.userEmail}>{isGuest ? "Guest User" : profile?.email}</Text>
           
-          <TouchableOpacity style={styles.editBtn} onPress={() => setIsEditing(true)}>
-            <Text style={styles.editBtnText}>Edit Profile</Text>
+          <TouchableOpacity style={styles.editBtn} activeOpacity={0.8} onPress={() => setIsEditing(true)}>
+            <Text style={styles.editBtnText}>{t('profile.edit_profile')}</Text>
           </TouchableOpacity>
         </Animated.View>
 
         {/* Stats Grid */}
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.statsGrid}>
-          <StatsCard theme={theme} icon={Flame} value={profile?.stats?.streak || "0"} label="Day Streak" color={theme.colors.accents.gentlePeach} />
-          <StatsCard theme={theme} icon={Trophy} value={profile?.stats?.points || "0"} label="Points" color={theme.colors.accents.powderBlue} />
-          <StatsCard theme={theme} icon={CheckCircle2} value={profile?.stats?.seeds || "0"} label="Seeds" color={theme.colors.accents.eucalyptus} />
-          <StatsCard theme={theme} icon={Award} value={profile?.stats?.badges || "0"} label="Badges" color={theme.colors.plum} />
+          <StatsCard theme={theme} icon={Flame} value={profile?.stats?.streak || "0"} label={t('profile.stats_streak')} color={theme.colors.accents.gentlePeach} />
+          <StatsCard theme={theme} icon={Trophy} value={profile?.stats?.points || "0"} label={t('profile.stats_points')} color={theme.colors.accents.powderBlue} />
+          <StatsCard theme={theme} icon={CheckCircle2} value={profile?.stats?.seeds || "0"} label={t('profile.stats_seeds')} color={theme.colors.accents.eucalyptus} />
+          <StatsCard theme={theme} icon={Award} value={profile?.stats?.badges || "0"} label={t('profile.stats_badges')} color={theme.colors.plum} />
         </Animated.View>
 
         {/* Mood Visualization */}
         <Animated.View entering={FadeInUp.delay(200).duration(800)} style={styles.insightsCard}>
           <View style={styles.insightsHeader}>
             <TrendingUp color={theme.colors.plum} size={18} />
-            <Text style={styles.insightsTitle}>Mood Insights (7 Days)</Text>
+            <Text style={styles.insightsTitle}>{t('profile.mood_insights')}</Text>
           </View>
           <View style={styles.moodTrendContainer}>
             {(profile?.stats?.trend || Array.from({length: 7}).map((_, i) => ({day: ['M','T','W','T','F','S','S'][i], score: 0}))).map((item: any, i: number) => (
@@ -271,7 +274,7 @@ export default function ProfileScreen() {
         <ProfileListGroup delay={400} theme={theme}>
           <View style={styles.sectionLabelRow}>
             <User size={14} color={theme.colors.text.tertiary} />
-            <Text style={styles.sectionLabel}>IDENTITY & PERSONAL</Text>
+            <Text style={styles.sectionLabel}>{t('profile.identity_personal')}</Text>
           </View>
           <ProfileListItem 
             theme={theme} 
@@ -297,7 +300,7 @@ export default function ProfileScreen() {
         <ProfileListGroup delay={500} theme={theme}>
           <View style={styles.sectionLabelRow}>
             <GraduationCap size={14} color={theme.colors.text.tertiary} />
-            <Text style={styles.sectionLabel}>ACADEMIC INFO</Text>
+            <Text style={styles.sectionLabel}>{t('profile.academic_info')}</Text>
           </View>
           <ProfileListItem 
             theme={theme} 
@@ -319,25 +322,6 @@ export default function ProfileScreen() {
             isLast
           />
         </ProfileListGroup>
-
-        {/* Crisis & Support — always pinned (MindDoc pattern) */}
-        <Animated.View entering={FadeInUp.delay(500)} style={[
-          styles.listGroup,
-          {
-            borderWidth: 1.5,
-            borderColor: theme.isDark ? 'rgba(239,68,68,0.2)' : 'rgba(239,68,68,0.1)',
-            backgroundColor: theme.isDark ? 'rgba(239,68,68,0.05)' : 'rgba(255,241,241,0.8)',
-          }
-        ]}>
-          <ProfileListItem
-            theme={theme}
-            icon={PhoneCall}
-            title="Crisis Hotline & Support"
-            color="#EF4444"
-            isLast
-            onPress={() => router.push('/(tabs)/crisis')}
-          />
-        </Animated.View>
 
         <ProfileListGroup delay={700} theme={theme}>
           <ProfileListItem theme={theme} icon={Bell} title="Reminders" color={theme.colors.accents.softMint} />

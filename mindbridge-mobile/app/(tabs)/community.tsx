@@ -29,6 +29,7 @@ const { width } = Dimensions.get('window');
 export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { t } = theme;
   const styles = createStyles(theme);
   
   const [feed, setFeed] = useState<any[]>([]);
@@ -69,9 +70,9 @@ export default function CommunityScreen() {
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
     
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    return `${Math.floor(diffInHours / 24)}d ago`;
+    if (diffInHours < 1) return t('community.just_now');
+    if (diffInHours < 24) return `${diffInHours}${t('community.hours_ago')}`;
+    return `${Math.floor(diffInHours / 24)}${t('community.days_ago')}`;
   };
 
   return (
@@ -91,8 +92,8 @@ export default function CommunityScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ScreenHeader 
-          title="Safe Space" 
-          subtitle="Connect anonymously with your peer community."
+          title={t('community.title')} 
+          subtitle={t('community.subtitle')}
           rightAction={
             <TouchableOpacity 
               style={styles.searchBtn}
@@ -105,34 +106,25 @@ export default function CommunityScreen() {
 
         {/* My Groups */}
         <Animated.View entering={FadeInUp.delay(50).duration(500)}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>My Support Groups</Text>
-            <TouchableOpacity><Text style={styles.seeAllText}>Explore</Text></TouchableOpacity>
-          </View>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalScrollPadding}
-            snapToInterval={width * 0.4 + 16}
-            decelerationRate="fast"
-          >
-            {GROUPS.map((group, index) => (
-              <Animated.View key={group.id} entering={FadeInUp.delay(100 + (index * 50)).duration(500)}>
-                <TouchableOpacity style={[styles.groupCard, { backgroundColor: group.color + (theme.isDark ? '25' : '15'), borderColor: group.color + (theme.isDark ? '40' : '30') }]} activeOpacity={0.8}>
-                  <View style={[styles.groupIconWrap, { backgroundColor: group.color }]}>
-                    <Users color={theme.colors.text.onPrimary || '#FFF'} size={20} />
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('community.explore_groups')}</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.groupsScroll}>
+              {GROUPS.map(group => (
+                <TouchableOpacity key={group.id} style={[styles.groupCard, { borderColor: group.color + '30' }]}>
+                  <View style={[styles.groupIcon, { backgroundColor: group.color + '20' }]}>
+                    <Users color={group.color} size={20} />
                   </View>
-                  <Text style={styles.groupTitle} numberOfLines={2}>{group.title}</Text>
-                  <Text style={styles.groupMembers}>{group.members} members</Text>
+                  <Text style={styles.groupTitle}>{group.title}</Text>
+                  <Text style={styles.groupMembers}>{group.members} {t('community.members')}</Text>
                 </TouchableOpacity>
-              </Animated.View>
-            ))}
-          </ScrollView>
+              ))}
+            </ScrollView>
+          </View>
         </Animated.View>
 
         {/* Discussion Feed */}
         <Animated.View entering={FadeInUp.delay(150).duration(500)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { paddingHorizontal: 24, marginBottom: 16 }]}>Recent Discussions</Text>
+          <Text style={[styles.sectionTitle, { paddingHorizontal: 24, marginBottom: 16 }]}>{t('community.recent_discussions')}</Text>
           
           {loading ? (
             <ActivityIndicator size="large" color={theme.colors.plum} style={{ marginTop: 40 }} />
@@ -159,14 +151,14 @@ export default function CommunityScreen() {
                   
                   <Text style={styles.postContent}>{post.content}</Text>
                   
-                  <View style={styles.postFooter}>
+                  <View style={styles.postActions}>
                     <TouchableOpacity style={styles.actionBtn} onPress={() => handleHug(post.id)}>
-                      <Heart color={post.hugs > 0 ? theme.colors.accents.dustyRose : theme.colors.text.secondary} fill={post.hugs > 0 ? theme.colors.accents.dustyRose : 'transparent'} size={20} />
-                      <Text style={styles.actionText}>Send Hug ({post.hugs})</Text>
+                      <Heart color={theme.colors.accents.dustyRose} size={18} fill={theme.colors.accents.dustyRose + '20'} />
+                      <Text style={styles.actionText}>{post.hugs} {t('community.send_hug')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.actionBtn}>
-                      <MessageCircle color={theme.colors.text.secondary} size={20} />
-                      <Text style={styles.actionText}>Reply</Text>
+                      <MessageCircle color={theme.colors.text.secondary} size={18} />
+                      <Text style={styles.actionText}>{post.comments || 0} {t('community.comment')}</Text>
                     </TouchableOpacity>
                   </View>
                 </Animated.View>

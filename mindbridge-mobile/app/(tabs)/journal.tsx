@@ -42,6 +42,7 @@ const { width } = Dimensions.get('window');
 export default function JournalScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { t } = theme;
   const styles = createStyles(theme);
   
   const [entries, setEntries] = useState<any[]>([]);
@@ -217,12 +218,12 @@ export default function JournalScreen() {
       
       {!isWriting ? (
         <ScrollView 
-          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
-          showsVerticalScrollIndicator={false}
-        >
-          <ScreenHeader 
-            title="Journal" 
-            subtitle={`${entries.length} reflections captured`}
+        contentContainerStyle={[styles.scroll, { paddingTop: insets.top }]} 
+        showsVerticalScrollIndicator={false}
+      >
+        <ScreenHeader 
+          title={t('journal.title')} 
+          subtitle={t('journal.subtitle')}
             rightAction={
               <TouchableOpacity 
                 activeOpacity={0.8} 
@@ -259,12 +260,14 @@ export default function JournalScreen() {
           {loading ? (
             <ActivityIndicator size="large" color={theme.colors.plum} style={{ marginTop: 40 }} />
           ) : filteredEntries.length === 0 ? (
-            <View style={{ padding: 24, alignItems: 'center', marginTop: 40 }}>
-              <BookOpen color={theme.colors.text.disabled} size={48} style={{ marginBottom: 16 }} />
-              <Text style={{ color: theme.colors.text.secondary, textAlign: 'center' }}>
-                {filterMood === 'all' ? 'Your journal is empty. Tap the + button to capture your thoughts.' : `No ${filterMood} entries found.`}
-              </Text>
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconWrap}>
+              <BookOpen color={theme.colors.plum} size={32} />
             </View>
+            <Text style={styles.emptyText}>
+              {t('journal.no_entries')}
+            </Text>
+          </View>
           ) : (
             <View style={styles.entriesList}>
               {filteredEntries.map((entry, index) => (
@@ -330,9 +333,12 @@ export default function JournalScreen() {
               <X color={theme.colors.plum} size={24} />
             </TouchableOpacity>
             <Text style={styles.composerTitle}>New Entry</Text>
-            <TouchableOpacity onPress={handleSave} style={[styles.saveBtn, !newContent.trim() && styles.saveBtnDisabled]}>
-              <Text style={styles.saveBtnText}>Save</Text>
-            </TouchableOpacity>
+            <TouchableOpacity 
+            style={[styles.saveBtn, { backgroundColor: theme.colors.plum }]}
+            onPress={saveEntry}
+          >
+            <Text style={styles.saveBtnText}>{t('journal.save_entry')}</Text>
+          </TouchableOpacity>
           </View>
           
           <KeyboardAvoidingView 
@@ -353,30 +359,33 @@ export default function JournalScreen() {
                     ]}
                   >
                     <mood.icon size={20} color={mood.color} />
-                    <Text style={[styles.moodOptionText, { color: mood.color }]}>{mood.label}</Text>
+                    <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{t('journal.write_reflection')}</Text>
+            <TouchableOpacity onPress={() => setIsWriting(false)}>
+              <X color={theme.colors.text.primary} size={24} />
+            </TouchableOpacity>
+          </View>
+
+          <TextInput
+            style={styles.titleInput}
+            placeholder={t('journal.title_placeholder')}
+            placeholderTextColor={theme.colors.text.tertiary}
+            value={newTitle}
+            onChangeText={setNewTitle}
+          />
+
+          <TextInput
+            style={styles.contentInput}
+            placeholder={t('journal.content_placeholder')}
+            placeholderTextColor={theme.colors.text.tertiary}
+            multiline
+            value={newContent}
+            onChangeText={setNewContent}
+          />
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
-
-            <TextInput
-              style={styles.titleInput}
-              placeholder="Title (Optional)"
-              placeholderTextColor={theme.colors.text.disabled}
-              value={newTitle}
-              onChangeText={setNewTitle}
-              maxLength={50}
-            />
-            <TextInput
-              style={styles.contentInput}
-              placeholder="What's on your mind?"
-              placeholderTextColor={theme.colors.text.secondary}
-              value={newContent}
-              onChangeText={setNewContent}
-              multiline
-              autoFocus
-              textAlignVertical="top"
-            />
 
             {/* Audio Recording UI */}
             <View style={styles.audioComposer}>

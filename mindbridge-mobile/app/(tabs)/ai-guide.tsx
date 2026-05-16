@@ -181,8 +181,12 @@ export default function AIGuideScreen() {
       try {
         const response = await api.get('/ai/oracle-context');
         const data = response.data;
-        const userName = data.onboarding?.firstName || data.userName || authData?.name || 'Friend';
-        const firstName = userName.split(' ')[0];
+        let rawName = data.onboarding?.firstName || data.userName || authData?.name || 'Friend';
+        // Handle test name edge case
+        if (rawName === 'TESTKW' && authData?.name) {
+          rawName = authData.name;
+        }
+        const firstName = rawName.split(' ')[0];
         
         let greeting = t.ai.greetingStandard;
 

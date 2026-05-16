@@ -20,7 +20,7 @@ export const getEntries = async (req: Request, res: Response) => {
 export const createEntry = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
-    const { title, content, mood } = req.body;
+    const { title, content, mood, audioUrl } = req.body;
     
     if (!content) {
       return res.status(400).json({ error: 'Content is required' });
@@ -32,12 +32,37 @@ export const createEntry = async (req: Request, res: Response) => {
         title,
         content,
         mood,
+        audioUrl,
       } as any,
     });
 
     res.status(201).json(newEntry);
   } catch (error) {
     console.error('Error creating journal entry:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const deleteEntry = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const id = req.params.id as string;
+
+    const entry = await prisma.journal.findFirst({
+      where: { id, userId }
+    });
+
+    if (!entry) {
+      return res.status(404).json({ error: 'Journal entry not found' });
+    }
+
+    await prisma.journal.delete({
+      where: { id }
+    });
+
+    res.json({ message: 'Entry deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting journal entry:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };

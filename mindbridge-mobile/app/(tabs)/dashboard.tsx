@@ -45,7 +45,10 @@ import {
   TrendingUp,
   Activity,
   Heart,
-  ExternalLink
+  ExternalLink,
+  MessageCircle,
+  BarChart2,
+  BrainCircuit
 } from 'lucide-react-native';
 import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
@@ -91,46 +94,42 @@ const ProgressRings = ({ completed, total, theme, styles }: any) => {
 
 const WeeklyPulse = ({ theme, styles, data }: any) => {
   const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
+  const pulseData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
-    return d.toDateString();
-  });
-
-  const scores = last7Days.map(dayStr => {
-    const entries = data.filter((d: any) => new Date(d.createdAt).toDateString() === dayStr);
-    if (entries.length === 0) return 0.4;
-    const avg = entries.reduce((sum: number, e: any) => sum + e.score, 0) / entries.length;
-    return Math.min(Math.max(avg / 10, 0.1), 1);
+    const dayLog = data.find((log: any) => new Date(log.createdAt).toDateString() === d.toDateString());
+    return dayLog ? dayLog.score * 10 : 0; // Score is 1-10, scale to 0-100
   });
 
   return (
-    <Animated.View entering={FadeInUp.delay(200)} style={styles.pulseCard}>
-      <BlurView intensity={theme.isDark ? 30 : 60} tint={theme.isDark ? 'dark' : 'light'} style={styles.pulseGlass}>
+    <View style={styles.pulseCard}>
+      <BlurView intensity={theme.isDark ? 40 : 80} tint={theme.isDark ? 'dark' : 'light'} style={[styles.pulseGlass, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)', borderColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.8)' }]}>
         <View style={styles.pulseHeader}>
           <View>
             <Text style={[styles.pulseTitle, { color: theme.colors.text.primary }]}>Weekly Pulse</Text>
-            <Text style={[styles.pulseSubtitle, { color: theme.colors.text.secondary }]}>
-              {scores.every(s => s === 0.4) ? "Plant seeds to see your emotional trend" : "Your emotional journey this week"}
-            </Text>
+            <Text style={[styles.pulseSubtitle, { color: theme.colors.text.tertiary }]}>Emotional rhythm this week</Text>
           </View>
-          <Activity color={theme.colors.plum} size={18} />
+          <Activity color={theme.colors.plum} size={20} />
         </View>
+
         <View style={styles.pulseGraph}>
-          {scores.map((score, i) => (
+          {pulseData.map((val: number, i: number) => (
             <View key={i} style={styles.pulseCol}>
-              <View style={[styles.pulseBarBg, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-                <LinearGradient
-                  colors={[theme.colors.plum, theme.colors.accents.powderBlue]}
-                  style={[styles.pulseBarFill, { height: `${score * 100}%` }]}
+              <View style={[styles.pulseBarBg, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(123,97,255,0.08)' }]}>
+                <Animated.View 
+                  entering={FadeInUp.delay(i * 100).duration(800)}
+                  style={[styles.pulseBarFill, { 
+                    height: `${val}%`, 
+                    backgroundColor: val > 70 ? theme.colors.accents.eucalyptus : (val > 40 ? theme.colors.plum : theme.colors.accents.terracotta)
+                  }]} 
                 />
               </View>
-              <Text style={[styles.pulseDayLabel, { color: theme.colors.text.tertiary }]}>{days[new Date(last7Days[i]).getDay()]}</Text>
+              <Text style={[styles.pulseDayLabel, { color: theme.colors.text.tertiary }]}>{days[i]}</Text>
             </View>
           ))}
         </View>
       </BlurView>
-    </Animated.View>
+    </View>
   );
 };
 
@@ -258,10 +257,13 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const theme = useTheme();
+  const styles = createStyles(theme);
   const { userData: authData } = useContext(AuthContext) as any;
   
   const [rituals, setRituals] = useState({ garden: false, journal: false, breathing: false });
   const [moodHistory, setMoodHistory] = useState<any[]>([]);
+  const [journalHistory, setJournalHistory] = useState<any[]>([]);
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [assessments, setAssessments] = useState<any[]>([]);
   const [latestPost, setLatestPost] = useState<any>(null);
   const [gardenStats, setGardenStats] = useState({ count: 0, stage: 'Empty Garden', icon: CircleDashed, color: '#94A3B8' });
@@ -283,8 +285,12 @@ export default function DashboardScreen() {
       try {
         const todayStr = new Date().toDateString();
         const res = await api.get('/ai/oracle-context');
+        const moodsRes = await api.get('/mood');
+        
         const logs = res.data.recentJournal || [];
-        setMoodHistory(logs);
+        setJournalHistory(logs);
+        setMoodHistory(moodsRes.data || []);
+        setChatHistory(res.data.history || []);
         
         const growth = getGrowthStage(logs.length);
         setGardenStats({ count: logs.length, stage: growth.label, icon: growth.icon, color: growth.color });
@@ -297,7 +303,12 @@ export default function DashboardScreen() {
           journal: logs.some((log: any) => new Date(log.createdAt).toDateString() === todayStr),
           breathing: await AsyncStorage.getItem(`breathing_${todayStr}`) === 'true'
         });
-        if (res.data.onboarding?.firstName) setUserData(prev => ({ ...prev, name: res.data.onboarding.firstName }));
+        if (res.data.onboarding?.firstName) {
+          const onboardingName = res.data.onboarding.firstName;
+          // Avoid showing internal test names if the user has a real name in authData
+          const finalName = (onboardingName === 'TESTKW' && authData?.name) ? authData.name : onboardingName;
+          setUserData(prev => ({ ...prev, name: finalName }));
+        }
       } catch (e) {}
     };
     checkStatus();
@@ -311,145 +322,176 @@ export default function DashboardScreen() {
   };
 
   return (
-    <View style={dashStyles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
       <View style={StyleSheet.absoluteFillObject}>
         <LinearGradient colors={theme.isDark ? ['#121212', '#1A1A1A', '#0D0D0D'] : ['#FDFCFB', '#F4F7F9', '#E6E9EF']} style={StyleSheet.absoluteFillObject} />
-        <View style={[dashStyles.bgBlob, { top: -50, right: -50, backgroundColor: theme.colors.plum + '08' }]} />
-        <View style={[dashStyles.bgBlob, { bottom: 100, left: -50, backgroundColor: theme.colors.accents.powderBlue + '05' }]} />
+        <View style={[styles.bgBlob, { top: -100, right: -100, backgroundColor: theme.colors.plum + '08' }]} />
+        <View style={[styles.bgBlob, { bottom: 100, left: -50, backgroundColor: theme.colors.accents.powderBlue + '05' }]} />
       </View>
 
-      <ScrollView contentContainerStyle={[dashStyles.scrollContent, { paddingTop: insets.top }]} showsVerticalScrollIndicator={false}>
-        <View style={dashStyles.headerRow}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]} showsVerticalScrollIndicator={false}>
+        <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
             <ScreenHeader title={`${getGreeting()}, ${userData.name}`} subtitle="Nurture your peace today" noPadding />
           </View>
-          <ProgressRings completed={completedCount} total={3} theme={theme} styles={dashStyles} />
+          <ProgressRings completed={completedCount} total={3} theme={theme} styles={styles} />
         </View>
 
-        <View style={dashStyles.section}><QuoteSlideshow theme={theme} styles={dashStyles} /></View>
-        <View style={dashStyles.section}><WeeklyPulse theme={theme} styles={dashStyles} data={moodHistory} /></View>
+        <View style={styles.section}><QuoteSlideshow theme={theme} styles={styles} /></View>
+        <View style={styles.section}><WeeklyPulse theme={theme} styles={styles} data={moodHistory} /></View>
 
-        <Animated.View entering={FadeInUp.delay(300)} style={[dashStyles.ritualsContainer, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.6)', borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' }]}>
-          <View style={dashStyles.ritualHeader}>
+        <Animated.View entering={FadeInUp.delay(300)} style={[styles.ritualsContainer, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.6)', borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' }]}>
+          <View style={styles.ritualHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <Leaf color={theme.colors.plum} size={20} strokeWidth={2.5} />
-              <Text style={[dashStyles.ritualTitle, { color: theme.colors.text.primary }]}>Daily Rituals</Text>
+              <Text style={[styles.ritualTitle, { color: theme.colors.text.primary }]}>Daily Rituals</Text>
             </View>
             <TouchableOpacity onPress={() => router.push('/(tabs)/journey')}><Text style={{ color: theme.colors.plum, fontSize: 13, fontWeight: '700' }}>View Journey</Text></TouchableOpacity>
           </View>
-          <View style={dashStyles.ritualRow}>
-            <RitualItem label="Mood Seed" done={rituals.garden} icon={Leaf} color={theme.colors.accents.eucalyptus} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/garden')} />
-            <RitualItem label="Reflect" done={rituals.journal} icon={BookOpen} color={theme.colors.accents.powderBlue} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/journal')} />
-            <RitualItem label="Breathe" done={rituals.breathing} icon={Wind} color={theme.colors.accents.softLilac} theme={theme} styles={dashStyles} onPress={() => router.push('/breathing')} />
+          <View style={styles.ritualRow}>
+            <RitualItem label="Mood Seed" done={rituals.garden} icon={Leaf} color={theme.colors.accents.eucalyptus} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/garden')} />
+            <RitualItem label="Reflect" done={rituals.journal} icon={BookOpen} color={theme.colors.accents.powderBlue} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/journal')} />
+            <RitualItem label="Breathe" done={rituals.breathing} icon={Wind} color={theme.colors.accents.softLilac} theme={theme} styles={styles} onPress={() => router.push('/breathing')} />
           </View>
         </Animated.View>
 
-        {/* ── Detailed Overviews ── */}
-        <View style={dashStyles.section}>
-          <Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary, marginBottom: 16 }]}>Daily Overview</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingRight: 24 }}>
-            <DetailedOverviewCard 
-              title="GARDEN" 
-              value={gardenStats.count} 
-              label="Seeds" 
+        {/* ── Latest Reflection ── */}
+        {journalHistory.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Latest Reflection</Text>
+              <TouchableOpacity onPress={() => router.push('/(tabs)/journal')}><Text style={{ color: theme.colors.plum, fontSize: 13, fontWeight: '700' }}>View All</Text></TouchableOpacity>
+            </View>
+            <TouchableOpacity 
+              activeOpacity={0.9} 
+              onPress={() => router.push('/(tabs)/journal')}
+              style={[styles.reflectionCard, { backgroundColor: theme.colors.surface }]}
+            >
+              <View style={styles.reflectionHeader}>
+                <View style={[styles.reflectionMood, { backgroundColor: theme.colors.plum + '10' }]}>
+                  <Text style={{ fontSize: 26 }}>{journalHistory[0].mood || '📝'}</Text>
+                </View>
+                <View style={{ flex: 1, marginLeft: 4 }}>
+                  <View style={styles.reflectionTag}>
+                    <BookOpen size={10} color={theme.colors.plum} />
+                    <Text style={styles.reflectionTagText}>JOURNAL ENTRY</Text>
+                  </View>
+                  <Text style={[styles.reflectionTitle, { color: theme.colors.text.primary }]} numberOfLines={1}>{journalHistory[0].title || 'Untitled Reflection'}</Text>
+                  <Text style={[styles.reflectionDate, { color: theme.colors.text.tertiary }]}>{new Date(journalHistory[0].createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
+                </View>
+                <View style={[styles.reflectionArrow, { backgroundColor: theme.colors.plum + '08' }]}>
+                  <ChevronRight color={theme.colors.plum} size={18} />
+                </View>
+              </View>
+              <View style={[styles.reflectionContentBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(123,97,255,0.03)', borderColor: theme.colors.plum + '20' }]}>
+                <Text style={[styles.reflectionContent, { color: theme.colors.text.secondary }]} numberOfLines={3}>
+                  {journalHistory[0].content}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ── Latest Oracle Interaction ── */}
+        {chatHistory.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Oracle Insights</Text>
+              <TouchableOpacity onPress={() => router.push('/(tabs)/ai-guide')}><Text style={{ color: theme.colors.plum, fontSize: 13, fontWeight: '700' }}>Chat Now</Text></TouchableOpacity>
+            </View>
+            <TouchableOpacity 
+              activeOpacity={0.9} 
+              onPress={() => router.push('/(tabs)/ai-guide')}
+              style={[styles.reflectionCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.plum + '20' }]}
+            >
+              <View style={styles.reflectionHeader}>
+                <View style={[styles.reflectionMood, { backgroundColor: theme.colors.plum }]}>
+                  <Bot color="#FFF" size={24} />
+                </View>
+                <View style={{ flex: 1, marginLeft: 4 }}>
+                  <View style={styles.reflectionTag}>
+                    <MessageCircle size={10} color={theme.colors.plum} />
+                    <Text style={styles.reflectionTagText}>RECENT CONVERSATION</Text>
+                  </View>
+                  <Text style={[styles.reflectionTitle, { color: theme.colors.text.primary }]} numberOfLines={1}>Latest Guidance</Text>
+                  <Text style={[styles.reflectionDate, { color: theme.colors.text.tertiary }]}>Personalized advice from your Oracle</Text>
+                </View>
+                <View style={[styles.reflectionArrow, { backgroundColor: theme.colors.plum + '08' }]}>
+                  <ChevronRight color={theme.colors.plum} size={18} />
+                </View>
+              </View>
+              <View style={[styles.reflectionContentBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(123,97,255,0.03)', borderColor: theme.colors.accents.powderBlue + '40' }]}>
+                <Text style={[styles.reflectionContent, { color: theme.colors.text.secondary, fontStyle: 'italic', lineHeight: 20 }]} numberOfLines={3}>
+                  "{chatHistory[chatHistory.length - 1].content}"
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ── Wellness Hub Grid ── */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Wellness Hub</Text>
+          </View>
+          <View style={styles.hubGrid}>
+            <AppleWidget 
+              title="Mood Garden" 
               subtitle={gardenStats.stage}
-              icon={gardenStats.icon} 
-              color={gardenStats.color} 
-              progress={Math.min(gardenStats.count / 20, 1)}
+              value={gardenStats.count}
+              label="Seeds"
+              icon={Leaf} 
+              color={theme.colors.accents.eucalyptus} 
+              delay={400}
               theme={theme} 
-              styles={dashStyles}
+              styles={styles}
               onPress={() => router.push('/(tabs)/garden')}
             />
-            <DetailedOverviewCard 
-              title="ASSESSMENTS" 
-              value={assessments.length} 
-              label="Done" 
+            <AppleWidget 
+              title="Assessments" 
               subtitle={assessments.length > 0 ? assessments[0].type : "Ready"}
+              value={assessments.length}
+              label="Done"
               icon={ClipboardList} 
               color={theme.colors.accents.slate} 
-              progress={Math.min(assessments.length / 5, 1)}
+              delay={450}
               theme={theme} 
-              styles={dashStyles}
+              styles={styles}
               onPress={() => router.push('/(tabs)/assessments')}
             />
-            <DetailedOverviewCard 
-              title="COMMUNITY" 
-              value={latestPost ? latestPost.hugs : 0} 
-              label="Hugs" 
-              subtitle={latestPost ? latestPost.group : "Stay Connected"}
-              icon={Users} 
-              color={theme.colors.accents.dustyRose} 
-              progress={latestPost ? 0.8 : 0}
+            <AppleWidget 
+              title="Resources" 
+              subtitle="Discovery Hub"
+              icon={Library} 
+              color={theme.colors.accents.forestGreen} 
+              delay={500}
               theme={theme} 
-              styles={dashStyles}
-              onPress={() => router.push('/(tabs)/community')}
+              styles={styles}
+              onPress={() => router.push('/(tabs)/resources')}
             />
-          </ScrollView>
+            <AppleWidget 
+              title="Crisis Support" 
+              subtitle="24/7 Help"
+              icon={ShieldAlert} 
+              color={theme.colors.accents.terracotta} 
+              delay={550}
+              theme={theme} 
+              styles={styles}
+              onPress={() => router.push('/(tabs)/crisis')}
+            />
+          </View>
         </View>
 
-        <View style={dashStyles.sectionCompact}>
-          <View style={dashStyles.sectionHeader}><Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary, paddingHorizontal: 24 }]}>Recommended for You</Text></View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={dashStyles.horizontalScroll} snapToInterval={width * 0.75 + 16} decelerationRate="fast">
-            <TouchableOpacity activeOpacity={0.9} style={[dashStyles.resourceCardWide, { backgroundColor: theme.colors.surface }]}>
-              <LinearGradient colors={['rgba(123, 97, 255, 0.1)', 'transparent']} style={StyleSheet.absoluteFillObject} />
-              <View style={dashStyles.resourceInfo}>
-                <View style={[dashStyles.resourceTag, { backgroundColor: theme.colors.accents.powderBlue + '20' }]}><Text style={[dashStyles.resourceTagText, { color: theme.colors.accents.powderBlue }]}>TECHNIQUE</Text></View>
-                <Text style={[dashStyles.resourceTitle, { color: theme.colors.text.primary }]}>Box Breathing</Text>
-                <Text style={[dashStyles.resourceSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={2}>Calm your nervous system in 2 minutes.</Text>
-              </View>
-              <Wind color={theme.colors.accents.powderBlue} size={32} strokeWidth={1.5} style={{ opacity: 0.6 }} />
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.9} style={[dashStyles.resourceCardWide, { backgroundColor: theme.colors.surface }]}>
-              <LinearGradient colors={['rgba(52, 211, 153, 0.1)', 'transparent']} style={StyleSheet.absoluteFillObject} />
-              <View style={dashStyles.resourceInfo}>
-                <View style={[dashStyles.resourceTag, { backgroundColor: theme.colors.accents.eucalyptus + '20' }]}><Text style={[dashStyles.resourceTagText, { color: theme.colors.accents.eucalyptus }]}>MINDFULNESS</Text></View>
-                <Text style={[dashStyles.resourceTitle, { color: theme.colors.text.primary }]}>Self-Compassion</Text>
-                <Text style={[dashStyles.resourceSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={2}>Quiet your inner critic with this audio.</Text>
-              </View>
-              <Heart color={theme.colors.accents.eucalyptus} size={32} strokeWidth={1.5} style={{ opacity: 0.6 }} />
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.9} style={[dashStyles.resourceCardWide, { backgroundColor: theme.colors.surface }]}>
-              <LinearGradient colors={['rgba(216, 164, 143, 0.1)', 'transparent']} style={StyleSheet.absoluteFillObject} />
-              <View style={dashStyles.resourceInfo}>
-                <View style={[dashStyles.resourceTag, { backgroundColor: theme.colors.accents.gentlePeach + '20' }]}><Text style={[dashStyles.resourceTagText, { color: theme.colors.accents.gentlePeach }]}>DEEP DIVE</Text></View>
-                <Text style={[dashStyles.resourceTitle, { color: theme.colors.text.primary }]}>Digital Detox</Text>
-                <Text style={[dashStyles.resourceSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={2}>Reclaim your attention on campus.</Text>
-              </View>
-              <Bot color={theme.colors.accents.gentlePeach} size={32} strokeWidth={1.5} style={{ opacity: 0.6 }} />
-            </TouchableOpacity>
+        <View style={styles.sectionCompact}>
+          <View style={[styles.sectionHeader, { paddingHorizontal: 24 }]}>
+            <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Wellness Toolkit</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll} snapToInterval={154} decelerationRate="fast">
+            <AppleWidget title="Tools" subtitle="Therapeutic" icon={Activity} color={theme.colors.plum} size="fixed" delay={600} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/tools')} />
+            <AppleWidget title="Journal" subtitle="Reflections" icon={BookOpen} color={theme.colors.accents.powderBlue} size="fixed" delay={650} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/journal')} />
+            <AppleWidget title="Community" subtitle="Connect" icon={Users} color={theme.colors.accents.dustyRose} size="fixed" delay={700} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/community')} />
           </ScrollView>
-        </View>
-
-        <View style={dashStyles.section}><AppleWidget title="The Oracle" subtitle="AI Personal Guide" icon={Bot} color={theme.colors.plum} size="wide" delay={450} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/ai-guide')} /></View>
-
-        <View style={dashStyles.sectionCompact}>
-          <View style={dashStyles.sectionHeader}><Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary }]}>Your Wellness Toolkit</Text></View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={dashStyles.horizontalScroll} snapToInterval={154} decelerationRate="fast">
-            <AppleWidget title="Tools" subtitle="Therapeutic" icon={Activity} color={theme.colors.plum} size="fixed" delay={480} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/tools')} />
-            <AppleWidget title="Journal" subtitle="Reflections" icon={BookOpen} color={theme.colors.accents.powderBlue} size="fixed" delay={500} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/journal')} />
-            <AppleWidget title="Resources" subtitle="Discovery Hub" icon={Library} color={theme.colors.accents.forestGreen} size="fixed" delay={550} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/resources')} />
-            <AppleWidget title="Community" subtitle="Connect" icon={Users} color={theme.colors.accents.dustyRose} size="fixed" delay={600} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/community')} />
-            <AppleWidget title="Profile" subtitle="Settings" icon={Clock} color={theme.colors.accents.slate} size="fixed" delay={650} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/profile')} />
-          </ScrollView>
-        </View>
-
-        <View style={dashStyles.section}>
-          <Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary, marginBottom: 16 }]}>Safety & Support</Text>
-          <TouchableOpacity 
-            activeOpacity={0.9} 
-            onPress={() => router.push('/(tabs)/crisis')}
-            style={[dashStyles.crisisCard, { backgroundColor: theme.colors.accents.terracotta + '15', borderColor: theme.colors.accents.terracotta + '30' }]}
-          >
-            <View style={[dashStyles.crisisIconWrap, { backgroundColor: theme.colors.accents.terracotta }]}>
-              <ShieldAlert color="#FFF" size={24} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[dashStyles.crisisTitle, { color: theme.colors.accents.terracotta }]}>Crisis Support</Text>
-              <Text style={[dashStyles.crisisSubtitle, { color: theme.colors.text.secondary }]}>Talk to a professional or access emergency resources 24/7.</Text>
-            </View>
-            <ChevronRight color={theme.colors.accents.terracotta} size={24} />
-          </TouchableOpacity>
         </View>
 
         <View style={{ height: 20 }} />
@@ -458,13 +500,13 @@ export default function DashboardScreen() {
   );
 }
 
-const dashStyles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { paddingBottom: 120 },
   bgBlob: { position: 'absolute', width: 400, height: 400, borderRadius: 200 },
   headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, marginBottom: 24 },
   section: { marginBottom: 32, paddingHorizontal: 24 },
-  sectionHeader: { paddingHorizontal: 0, marginBottom: 16 },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   sectionTitleText: { fontSize: 20, fontWeight: '800' },
   sectionCompact: { marginBottom: 32 },
   horizontalScroll: { paddingLeft: 24, paddingRight: 8 },
@@ -515,8 +557,27 @@ const dashStyles = StyleSheet.create({
   listTitle: { fontSize: 16, fontWeight: '800' },
   listSubtitle: { fontSize: 13 },
   divider: { height: StyleSheet.hairlineWidth, marginLeft: 72 },
-
-  // Detailed Card Styles
+  reflectionCard: { 
+    borderRadius: 32, 
+    padding: 24, 
+    borderWidth: 1, 
+    borderColor: 'rgba(0,0,0,0.05)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  reflectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, gap: 16 },
+  reflectionMood: { width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  reflectionTag: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 },
+  reflectionTagText: { fontSize: 9, fontWeight: '800', color: theme.colors.plum, letterSpacing: 1 },
+  reflectionTitle: { fontSize: 18, fontWeight: '800', letterSpacing: -0.5 },
+  reflectionDate: { fontSize: 11, fontWeight: '600', marginTop: 2, opacity: 0.6 },
+  reflectionArrow: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  reflectionContentBox: { borderRadius: 16, padding: 16, marginTop: 4, borderLeftWidth: 4 },
+  reflectionContent: { fontSize: 13, lineHeight: 20, opacity: 0.8 },
+  hubGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 16 },
   detailedCard: { flex: 1, borderRadius: 28, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 },
   detailedHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   detailedIconWrap: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
@@ -527,8 +588,6 @@ const dashStyles = StyleSheet.create({
   detailedSubtitle: { fontSize: 11, fontWeight: '600', marginBottom: 12 },
   detailedProgressBg: { height: 4, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 2, overflow: 'hidden' },
   detailedProgressFill: { height: '100%', borderRadius: 2 },
-
-  // Resource Card Styles
   resourceCardWide: { 
     width: width * 0.75, 
     borderRadius: 32, 
@@ -553,8 +612,6 @@ const dashStyles = StyleSheet.create({
   resourceMetaText: { fontSize: 12, fontWeight: '600' },
   dotSeparator: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: 'rgba(0,0,0,0.2)', marginHorizontal: 4 },
   resourceAction: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(123, 97, 255, 0.08)', alignItems: 'center', justifyContent: 'center', marginLeft: 16 },
-
-  // Crisis Card Styles
   crisisCard: { flexDirection: 'row', alignItems: 'center', padding: 24, borderRadius: 32, borderWidth: 1.5 },
   crisisIconWrap: { width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 20 },
   crisisTitle: { fontSize: 20, fontWeight: '800', marginBottom: 4 },

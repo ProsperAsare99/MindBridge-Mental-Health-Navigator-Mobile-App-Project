@@ -10,7 +10,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,7 +26,8 @@ import {
   Wind,
   Sun,
   CloudRain,
-  PenLine
+  PenLine,
+  Trash2
 } from 'lucide-react-native';
 
 import api from '../../src/services/api';
@@ -103,6 +105,29 @@ export default function JournalScreen() {
     } catch (error) {
       console.error('Error saving journal entry:', error);
     }
+  };
+
+  const handleDelete = async (id: string) => {
+    Alert.alert(
+      "Delete Entry",
+      "Are you sure you want to remove this reflection? This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await api.delete(`/journal/${id}`);
+              setEntries(entries.filter(e => e.id !== id));
+            } catch (error) {
+              console.error('Error deleting journal entry:', error);
+              Alert.alert("Error", "Could not delete entry. Please try again.");
+            }
+          }
+        }
+      ]
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -190,8 +215,17 @@ export default function JournalScreen() {
                       <Calendar color={theme.colors.text.tertiary} size={14} />
                       <Text style={styles.dateText}>{formatDate(entry.createdAt)}</Text>
                     </View>
-                    <View style={styles.moodBadge}>
-                      {getMoodIcon(entry.mood || 'calm')}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                      <TouchableOpacity 
+                        activeOpacity={0.7} 
+                        onPress={() => handleDelete(entry.id)}
+                        style={styles.deleteBtn}
+                      >
+                        <Trash2 color={theme.colors.accents.terracotta} size={16} />
+                      </TouchableOpacity>
+                      <View style={styles.moodBadge}>
+                        {getMoodIcon(entry.mood || 'calm')}
+                      </View>
                     </View>
                   </View>
                   <Text style={styles.entryTitle}>{entry.title}</Text>
@@ -332,6 +366,14 @@ const createStyles = (theme: any) => StyleSheet.create({
     height: 32,
     borderRadius: 16,
     backgroundColor: theme.colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,0,0,0.03)',
     alignItems: 'center',
     justifyContent: 'center',
   },

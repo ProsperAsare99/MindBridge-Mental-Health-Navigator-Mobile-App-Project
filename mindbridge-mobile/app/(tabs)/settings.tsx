@@ -468,8 +468,8 @@ export default function SettingsScreen() {
                   <Text style={{ color: colors.text.secondary, lineHeight: 20 }}>A streak records your consecutive days of wellness activities. Complete at least one quest daily to keep it burning!</Text>
                 </View>
                 <View>
-                  <Text style={{ color: colors.plum, fontWeight: '800', marginBottom: 4 }}>Privacy & Data</Text>
-                  <Text style={{ color: colors.text.secondary, lineHeight: 20 }}>Your data is encrypted and private. We only use it to provide personalized wellness insights through the AI Oracle.</Text>
+                  <Text style={{ color: colors.plum, fontWeight: '800', marginBottom: 4 }}>Privacy & Data Security</Text>
+                  <Text style={{ color: colors.text.secondary, lineHeight: 20 }}>Your data is protected with industry-standard encryption and remains confidential. We use your information only to provide personalized wellness insights and improve your experience.</Text>
                 </View>
                 <View>
                   <Text style={{ color: colors.plum, fontWeight: '800', marginBottom: 4 }}>Contact Support</Text>
@@ -676,9 +676,9 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     marginTop: 8,
-    shadowColor: theme.colors.plum,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: theme.isDark ? 0.3 : 0.2,
     shadowRadius: 8,
     elevation: 4,
   },

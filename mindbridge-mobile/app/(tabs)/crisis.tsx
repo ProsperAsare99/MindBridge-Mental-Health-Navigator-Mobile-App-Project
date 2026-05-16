@@ -274,8 +274,8 @@ const createStyles = (theme: any) => StyleSheet.create({
   contactCardPrimary: {
     backgroundColor: theme.colors.semantic.danger,
     borderColor: theme.colors.semantic.danger,
-    shadowColor: theme.colors.semantic.danger,
-    shadowOpacity: theme.isDark ? 0.4 : 0.2,
+    shadowColor: '#000',
+    shadowOpacity: theme.isDark ? 0.3 : 0.2,
     shadowRadius: 16,
     elevation: 8,
   },

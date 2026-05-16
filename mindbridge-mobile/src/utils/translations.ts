@@ -215,13 +215,13 @@ export const translations: Record<Language, TranslationSchema> = {
       skipConfirm: 'This information helps us personalize your support. Are you sure you want to skip?',
       skipConfirmAction: 'Skip Anyway',
       skipConfirmCancel: 'Go Back',
-      privacyTitle: 'Your Privacy Matters 🔒',
+      privacyTitle: 'Privacy & Data Commitment',
       privacyPoints: [
-        'Your data is encrypted and secure',
-        'Conversations are confidential',
-        'You control what you share',
-        'Delete your account anytime',
-        'No data shared without permission'
+        'Your data is secured with industry-standard encryption',
+        'Personal conversations remain strictly confidential',
+        'You maintain full control over your shared information',
+        'Account and data deletion is available at any time',
+        'Information is used exclusively for your wellness support'
       ],
       summaryTitle: 'Your Mindful Summary',
     },
@@ -271,7 +271,7 @@ export const translations: Record<Language, TranslationSchema> = {
       subtitle: 'Your safe space',
       placeholder: 'Type your message...',
       goToSupport: 'Get Support Now',
-      disclaimer: "I'm here to listen and support, but I'm not a replacement for clinical care. If you're in immediate danger, please use our Crisis Support tab.",
+      disclaimer: "The MindBridge Oracle provides wellness support but is not a replacement for professional clinical care. If you are in immediate danger, please use the Crisis Support tab.",
       greetingStandard: "Hello! I'm the MindBridge Oracle. I'm here to listen, support, and help you navigate your feelings. How are you doing today?",
       greetingHeavy: "Hi {name}. I noticed your last check-in felt heavy, reflecting {emotions}. That takes courage to name. What's been weighing on you most?",
       greetingGlowing: "Hello {name}! Your last seed was glowing with {emotions} 🌱 What's been contributing to that good energy?",

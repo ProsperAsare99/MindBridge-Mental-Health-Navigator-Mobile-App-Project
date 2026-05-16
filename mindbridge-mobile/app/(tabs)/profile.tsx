@@ -515,7 +515,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   scrollContent: { paddingBottom: 120 },
   bgBlob: { position: 'absolute', width: 400, height: 400, borderRadius: 200, opacity: 0.5 },
   headerProfile: { alignItems: 'center', marginBottom: 32, paddingHorizontal: 20 },
-  avatarContainer: { width: 100, height: 100, borderRadius: 50, backgroundColor: theme.colors.surface, padding: 4, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 10, marginBottom: 16 },
+  avatarContainer: { width: 100, height: 100, borderRadius: 50, backgroundColor: theme.colors.surface, padding: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 12 }, shadowOpacity: theme.isDark ? 0.3 : 0.15, shadowRadius: 20, elevation: 10, marginBottom: 16 },
   avatarImage: { width: '100%', height: '100%', borderRadius: 46 },
   avatarEditBadge: { position: 'absolute', bottom: 0, right: 0, backgroundColor: theme.colors.plum, width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: theme.colors.surface },
   userName: { fontSize: 24, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, marginBottom: 2 },

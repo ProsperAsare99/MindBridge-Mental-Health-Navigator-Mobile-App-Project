@@ -526,7 +526,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: 40, 
     overflow: 'hidden', 
     backgroundColor: theme.colors.surface, 
-    shadowColor: theme.colors.plum, 
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 8 }, 
     shadowOpacity: theme.isDark ? 0.3 : 0.1, 
     shadowRadius: 16, 
@@ -583,7 +583,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   personalizationNote: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.05)', padding: 16, borderRadius: 20, marginTop: 8, gap: 16, borderWidth: 1, borderColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.1)' },
   personalizationText: { flex: 1, fontSize: 14, color: theme.colors.plum, fontWeight: '600', lineHeight: 20 },
   
-  primaryButton: { backgroundColor: theme.colors.plum, height: 60, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginTop: 16, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 8 }, shadowOpacity: theme.isDark ? 0.4 : 0.2, shadowRadius: 16, elevation: 6 },
+  primaryButton: { backgroundColor: theme.colors.plum, height: 60, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginTop: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: theme.isDark ? 0.3 : 0.2, shadowRadius: 16, elevation: 6 },
   primaryButtonText: { color: theme.colors.text.onPrimary || '#FFF', fontWeight: '800', fontSize: 17, letterSpacing: 0.2 },
   signUpContainer: { marginTop: 16, alignItems: 'center', marginBottom: 20 },
   signUpText: { color: theme.colors.text.secondary, fontSize: 15, fontWeight: '500' },

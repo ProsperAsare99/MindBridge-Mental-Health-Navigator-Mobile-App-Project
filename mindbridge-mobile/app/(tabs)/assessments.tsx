@@ -375,7 +375,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
-    shadowColor: theme.colors.plum,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: theme.isDark ? 0.2 : 0.1,
     shadowRadius: 8,

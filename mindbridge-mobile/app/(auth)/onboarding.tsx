@@ -390,19 +390,16 @@ export default function OnboardingScreen() {
               contentContainerStyle={{ paddingBottom: 100 }}
               style={{ flex: 1 }}
             >
-              <View style={[styles.centerContent, { marginTop: 10, marginBottom: 20 }]}>
-                <View style={{ height: 160, width: '100%', overflow: 'visible', alignItems: 'center', justifyContent: 'center' }}>
-                  <AuthCharacters focusedField="none" />
-                </View>
-                <View style={[styles.iconCircle, { marginTop: -20 }]}>
+              <View style={[styles.centerContent, { marginTop: 40, marginBottom: 20 }]}>
+                <View style={styles.iconCircle}>
                   <ShieldCheck color={themeContext.colors.plum} size={40} strokeWidth={1.5} />
                 </View>
-                <Text style={styles.title}>{step.title}</Text>
+                <Text style={styles.title}>Privacy & Data Commitment</Text>
               </View>
 
-              <Text style={styles.consentGreeting}>Hello {userName},</Text>
+              <Text style={styles.consentGreeting}>Your Privacy Matters</Text>
               <Text style={styles.consentBody}>
-                To provide you with the best possible support, we'd like to use the information you shared, including your studies at {userUni}, to personalize your MindBridge experience.
+                MindBridge uses your personal and academic information, including your studies at {userUni}, to provide a tailored mental health and academic support experience. Your privacy is protected according to university standards.
               </Text>
               
               <View style={styles.consentPointsBox}>
@@ -410,39 +407,39 @@ export default function OnboardingScreen() {
                   <View style={styles.consentCheckWrap}>
                     <CheckCircle2 color={themeContext.colors.accents.eucalyptus} size={20} />
                   </View>
-                  <Text style={styles.consentPointText}>Your data is encrypted and stays between us.</Text>
+                  <Text style={styles.consentPointText}>Your data is secured with industry-standard encryption to ensure total confidentiality.</Text>
                 </View>
                 <View style={styles.consentPointRow}>
                   <View style={styles.consentCheckWrap}>
                     <CheckCircle2 color={themeContext.colors.accents.eucalyptus} size={20} />
                   </View>
-                  <Text style={styles.consentPointText}>You have full control over what the Oracle knows.</Text>
+                  <Text style={styles.consentPointText}>You maintain full control and can manage or remove your data permissions at any time.</Text>
                 </View>
                 <View style={styles.consentPointRow}>
                   <View style={styles.consentCheckWrap}>
                     <CheckCircle2 color={themeContext.colors.accents.eucalyptus} size={20} />
                   </View>
-                  <Text style={styles.consentPointText}>Our goal is to nurture your peace, not just track data.</Text>
+                  <Text style={styles.consentPointText}>We only use your information to improve your wellness and academic experience.</Text>
                 </View>
               </View>
 
               <View style={styles.commitmentCard}>
-                <Text style={styles.consentCommitmentTitle}>My Commitment to Self-Care</Text>
+                <Text style={styles.consentCommitmentTitle}>Important Safety Note</Text>
                 <Text style={styles.consentCommitmentText}>
-                  I understand that MindBridge is a supportive tool and I agree to use it as part of my wellness journey. I will seek professional help if I ever feel I am in immediate danger.
+                  MindBridge is a supportive wellness tool and should not be used as a replacement for professional clinical care. If you ever feel you are in immediate danger or distress, please reach out to emergency services or campus support.
                 </Text>
               </View>
 
               <TouchableOpacity 
-                style={[styles.primaryBtn, { marginTop: 32, marginBottom: 20, shadowColor: themeContext.colors.plum, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 }]} 
+                style={[styles.primaryBtn, { marginTop: 32, marginBottom: 20, shadowOpacity: themeContext.isDark ? 0.3 : 0.15, shadowRadius: 10, elevation: 5 }]} 
                 onPress={handleNext}
                 activeOpacity={0.8}
               >
-                <Text style={styles.primaryBtnText}>I Consent & Agree</Text>
+                <Text style={styles.primaryBtnText}>Agree and Continue</Text>
               </TouchableOpacity>
               
               <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 20, alignSelf: 'center' }} activeOpacity={0.6}>
-                <Text style={styles.exitText}>Exit MindBridge</Text>
+                <Text style={styles.exitText}>Decline and Exit</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -745,7 +742,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   stepContainer: { flex: 1, paddingTop: 10 },
   
   // Shared
-  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: theme.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: 24, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 8 }, shadowOpacity: theme.isDark ? 0.3 : 0.1, shadowRadius: 16, elevation: 8 },
+  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: theme.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: theme.isDark ? 0.2 : 0.08, shadowRadius: 16, elevation: 8 },
   title: { fontSize: 30, fontWeight: '800', color: theme.colors.text.primary, marginBottom: 12, textAlign: 'center', letterSpacing: -0.5 },
   subtitle: { fontSize: 16, color: theme.colors.text.secondary, textAlign: 'center', lineHeight: 24, marginBottom: 32 },
   
@@ -759,9 +756,8 @@ const createStyles = (theme: any) => StyleSheet.create({
   consentPointText: { flex: 1, fontSize: 15, color: theme.colors.text.primary, fontWeight: '600', lineHeight: 22 },
   commitmentCard: { backgroundColor: theme.isDark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)', borderRadius: 24, padding: 24, borderLeftWidth: 4, borderLeftColor: theme.colors.plum, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 1 },
   consentCommitmentTitle: { fontSize: 14, fontWeight: '800', color: theme.colors.plum, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1.5 },
-  consentCommitmentText: { fontSize: 14, color: theme.colors.text.secondary, lineHeight: 22, fontStyle: 'italic', fontWeight: '500' },
+  consentCommitmentText: { fontSize: 14, color: theme.colors.text.secondary, lineHeight: 22, fontWeight: '500' },
   exitText: { fontSize: 15, fontWeight: '700', color: theme.colors.text.tertiary, textDecorationLine: 'underline', marginTop: 10 },
-  
   // Options
   optionBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.surface, paddingHorizontal: 20, paddingVertical: 18, borderRadius: 20, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.2 : 0.04, shadowRadius: 12, elevation: 2 },
   optionBtnActive: { backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.05)', borderColor: theme.isDark ? 'rgba(140, 160, 185, 0.3)' : 'rgba(123, 97, 255, 0.15)' },
@@ -819,6 +815,6 @@ const createStyles = (theme: any) => StyleSheet.create({
   nextBtnText: { fontSize: 16, fontWeight: '700', color: theme.colors.text.onPrimary || '#FFF', marginRight: 8 },
   
   // Primary Action
-  primaryBtn: { backgroundColor: theme.colors.plum, paddingVertical: 16, paddingHorizontal: 40, borderRadius: 30, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.4 : 0.3, shadowRadius: 8, elevation: 6 },
-  primaryBtnText: { color: theme.colors.text.onPrimary || '#FFF', fontSize: 18, fontWeight: '700' },
+  primaryBtn: { backgroundColor: theme.colors.plum, paddingVertical: 18, borderRadius: 20, alignItems: 'center', justifyContent: 'center', width: '100%', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.3 : 0.15, shadowRadius: 8, elevation: 6 },
+  primaryBtnText: { color: theme.colors.text.onPrimary || '#FFF', fontSize: 17, fontWeight: '800', textAlign: 'center' },
 });

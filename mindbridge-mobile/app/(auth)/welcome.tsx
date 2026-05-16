@@ -45,7 +45,7 @@ function MindIllustration({ color, theme }: { color: string, theme: any }) {
     <View style={{ width: 220, height: 220, alignItems: 'center', justifyContent: 'center' }}>
       <Animated.View style={[{ position: 'absolute', width: 200, height: 200, borderRadius: 100, borderWidth: 2, borderColor: color, opacity: ringOpacity, transform: [{ scale: pulse }] }]} />
       <Animated.View style={[{ position: 'absolute', width: 175, height: 175, borderRadius: 87.5, borderWidth: 1.5, borderColor: theme.colors.plum, opacity: 0.3, transform: [{ scale: pulse }] }]} />
-      <View style={[{ width: 148, height: 148, borderRadius: 74, overflow: 'hidden', backgroundColor: theme.colors.surface, shadowColor: color, shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.3 : 0.1, shadowRadius: 10, elevation: 8 }]}>
+      <View style={[{ width: 148, height: 148, borderRadius: 74, overflow: 'hidden', backgroundColor: theme.colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.3 : 0.1, shadowRadius: 10, elevation: 8 }]}>
         <Image source={require('../../assets/images/logo.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
       </View>
     </View>

@@ -104,14 +104,14 @@ export default function ToolsScreen() {
                     style={styles.listItem}
                     onPress={() => router.push(`/(tabs)/${page.id}` as any)}
                   >
-                    <View style={[styles.iconWrap, { backgroundColor: page.color + (themeContext.isDark ? '25' : '15') }]}>
+                    <View style={[styles.iconWrap, { backgroundColor: page.color + (theme.isDark ? '25' : '15') }]}>
                       <page.icon color={page.color} size={22} />
                     </View>
                     <View style={styles.textWrap}>
                       <Text style={styles.itemTitle}>{page.title}</Text>
                       <Text style={styles.itemSubtitle}>{page.subtitle}</Text>
                     </View>
-                    <ChevronRight color={themeContext.colors.text.disabled} size={20} />
+                    <ChevronRight color={theme.colors.text.disabled} size={20} />
                   </TouchableOpacity>
                   {index < group.items.length - 1 && <View style={styles.divider} />}
                 </View>

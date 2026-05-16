@@ -311,7 +311,7 @@ export default function ResourcesScreen() {
                 </TouchableOpacity>
               ))}
             </View>
-          </Animated.View>
+          </View>
         )}
 
         {/* Articles */}

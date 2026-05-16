@@ -15,9 +15,10 @@ import {
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withSpring, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withSpring, FadeIn, SlideInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
+import { BlurView } from 'expo-blur';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { 
   User, 
@@ -45,6 +46,19 @@ import { AuthContext } from '../../src/context/AuthContext';
 import { useRouter } from 'expo-router';
 
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
+
+const UNIVERSITIES = [
+  "KNUST",
+  "University of Ghana (UG)",
+  "University of Cape Coast (UCC)",
+  "Ashesi University",
+  "Academic City",
+  "Lancaster University Ghana",
+  "Valley View University",
+  "UPSA",
+  "GIMPA",
+  "Other"
+];
 
 const StatsCard = ({ icon: Icon, value, label, color, theme }: any) => {
   const styles = createStyles(theme);
@@ -123,6 +137,7 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<any>({});
+  const [showUniPicker, setShowUniPicker] = useState(false);
 
   const fetchProfile = async () => {
     try {
@@ -228,10 +243,10 @@ export default function ProfileScreen() {
 
         {/* Stats Grid */}
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.statsGrid}>
-          <StatsCard theme={theme} icon={Flame} value="4" label="Day Streak" color={theme.colors.accents.gentlePeach} />
-          <StatsCard theme={theme} icon={Trophy} value="1250" label="Points" color={theme.colors.accents.powderBlue} />
-          <StatsCard theme={theme} icon={CheckCircle2} value="12" label="Seeds" color={theme.colors.accents.eucalyptus} />
-          <StatsCard theme={theme} icon={Award} value="3" label="Badges" color={theme.colors.plum} />
+          <StatsCard theme={theme} icon={Flame} value={profile?.stats?.streak || "0"} label="Day Streak" color={theme.colors.accents.gentlePeach} />
+          <StatsCard theme={theme} icon={Trophy} value={profile?.stats?.points || "0"} label="Points" color={theme.colors.accents.powderBlue} />
+          <StatsCard theme={theme} icon={CheckCircle2} value={profile?.stats?.seeds || "0"} label="Seeds" color={theme.colors.accents.eucalyptus} />
+          <StatsCard theme={theme} icon={Award} value={profile?.stats?.badges || "0"} label="Badges" color={theme.colors.plum} />
         </Animated.View>
 
         {/* Mood Visualization */}
@@ -241,13 +256,15 @@ export default function ProfileScreen() {
             <Text style={styles.insightsTitle}>Mood Insights (7 Days)</Text>
           </View>
           <View style={styles.moodTrendContainer}>
-            <MoodTrendBar theme={theme} day="M" score={8} color={theme.colors.accents.eucalyptus} />
-            <MoodTrendBar theme={theme} day="T" score={6} color={theme.colors.accents.powderBlue} />
-            <MoodTrendBar theme={theme} day="W" score={4} color={theme.colors.accents.softLilac} />
-            <MoodTrendBar theme={theme} day="T" score={7} color={theme.colors.accents.eucalyptus} />
-            <MoodTrendBar theme={theme} day="F" score={9} color={theme.colors.accents.gentlePeach} />
-            <MoodTrendBar theme={theme} day="S" score={5} color={theme.colors.accents.slate} />
-            <MoodTrendBar theme={theme} day="S" score={8} color={theme.colors.accents.eucalyptus} />
+            {(profile?.stats?.trend || Array.from({length: 7}).map((_, i) => ({day: ['M','T','W','T','F','S','S'][i], score: 0}))).map((item: any, i: number) => (
+              <MoodTrendBar 
+                key={i}
+                theme={theme} 
+                day={item.day} 
+                score={item.score} 
+                color={item.score > 7 ? theme.colors.accents.eucalyptus : item.score > 4 ? theme.colors.accents.powderBlue : theme.colors.accents.softLilac} 
+              />
+            ))}
           </View>
         </Animated.View>
 
@@ -340,17 +357,23 @@ export default function ProfileScreen() {
         </ProfileListGroup>
 
         {/* Edit Profile Modal */}
-        <Modal visible={isEditing} animationType="slide" transparent>
+        <Modal visible={isEditing} animationType="fade" transparent statusBarTranslucent>
           <View style={styles.modalOverlay}>
-            <BlurView intensity={90} tint={theme.isDark ? 'dark' : 'light'} style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Update Profile</Text>
-                <TouchableOpacity onPress={() => setIsEditing(false)}>
-                  <X size={24} color={theme.colors.text.primary} />
-                </TouchableOpacity>
-              </View>
-              
-              <ScrollView style={styles.modalBody}>
+            <Pressable style={StyleSheet.absoluteFill} onPress={() => setIsEditing(false)}>
+              <BlurView intensity={theme.isDark ? 30 : 15} tint={theme.isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+            </Pressable>
+            
+            <Animated.View entering={SlideInDown.duration(400)} style={styles.modalContentWrap}>
+              <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+                <View style={styles.modalHandle} />
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Update Profile</Text>
+                  <TouchableOpacity onPress={() => setIsEditing(false)} style={styles.closeBtn}>
+                    <X size={20} color={theme.colors.text.tertiary} />
+                  </TouchableOpacity>
+                </View>
+                
+                <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Full Name</Text>
                   <TextInput 
@@ -372,11 +395,32 @@ export default function ProfileScreen() {
                 </View>
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>University</Text>
-                  <TextInput 
-                    style={styles.input} 
-                    value={editData.university} 
-                    onChangeText={t => setEditData({...editData, university: t})}
-                  />
+                  <TouchableOpacity 
+                    style={styles.pickerTrigger} 
+                    onPress={() => setShowUniPicker(!showUniPicker)}
+                  >
+                    <Text style={[styles.pickerTriggerText, !editData.university && { color: theme.colors.text.disabled }]}>
+                      {editData.university || "Select University"}
+                    </Text>
+                    <ChevronRight size={20} color={theme.colors.text.tertiary} style={{ transform: [{ rotate: showUniPicker ? '90deg' : '0deg' }] }} />
+                  </TouchableOpacity>
+                  
+                  {showUniPicker && (
+                    <Animated.View entering={FadeInUp} style={styles.uniList}>
+                      {UNIVERSITIES.map(uni => (
+                        <TouchableOpacity 
+                          key={uni} 
+                          style={styles.uniOption} 
+                          onPress={() => {
+                            setEditData({...editData, university: uni});
+                            setShowUniPicker(false);
+                          }}
+                        >
+                          <Text style={[styles.uniOptionText, editData.university === uni && { color: theme.colors.plum, fontWeight: '700' }]}>{uni}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </Animated.View>
+                  )}
                 </View>
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Program of Study</Text>
@@ -392,14 +436,16 @@ export default function ProfileScreen() {
                     style={styles.input} 
                     value={editData.level} 
                     onChangeText={t => setEditData({...editData, level: t})}
+                    keyboardType="numeric"
                   />
                 </View>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Student ID</Text>
+                  <Text style={styles.inputLabel}>Student ID (Optional)</Text>
                   <TextInput 
                     style={styles.input} 
                     value={editData.studentId} 
                     onChangeText={t => setEditData({...editData, studentId: t})}
+                    placeholder="Enter student ID"
                   />
                 </View>
               </ScrollView>
@@ -407,7 +453,8 @@ export default function ProfileScreen() {
               <TouchableOpacity style={styles.saveBtn} onPress={handleUpdate}>
                 <Text style={styles.saveBtnText}>Save Changes</Text>
               </TouchableOpacity>
-            </BlurView>
+              </View>
+            </Animated.View>
           </View>
         </Modal>
       </ScrollView>
@@ -447,15 +494,44 @@ const createStyles = (theme: any) => StyleSheet.create({
   divider: { height: StyleSheet.hairlineWidth, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', marginLeft: 72 },
   sectionLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, marginTop: 16, marginBottom: 8 },
   sectionLabel: { fontSize: 11, fontWeight: '800', color: theme.colors.text.tertiary, letterSpacing: 1 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  modalContent: { borderTopLeftRadius: 32, borderTopRightRadius: 32, height: '85%', padding: 24, overflow: 'hidden' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.2)', justifyContent: 'flex-end' },
+  modalContentWrap: { height: '85%', width: '100%' },
+  modalContent: { flex: 1, borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: 24, paddingTop: 12, shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 20 },
+  modalHandle: { width: 40, height: 5, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', borderRadius: 2.5, alignSelf: 'center', marginBottom: 20 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   modalTitle: { fontSize: 22, fontWeight: '800', color: theme.colors.text.primary },
+  closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', alignItems: 'center', justifyContent: 'center' },
   modalBody: { flex: 1 },
   inputGroup: { marginBottom: 20 },
   inputLabel: { fontSize: 13, fontWeight: '700', color: theme.colors.text.tertiary, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   input: { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderRadius: 16, padding: 16, color: theme.colors.text.primary, fontSize: 16 },
-  saveBtn: { backgroundColor: theme.colors.plum, padding: 20, borderRadius: 20, alignItems: 'center', marginTop: 10 },
+  saveBtn: { backgroundColor: theme.colors.plum, padding: 20, borderRadius: 20, alignItems: 'center', marginTop: 10, marginBottom: 20 },
   saveBtnText: { color: '#FFF', fontSize: 17, fontWeight: '800' },
+  pickerTrigger: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    borderRadius: 16,
+    padding: 16,
+  },
+  pickerTriggerText: {
+    fontSize: 16,
+    color: theme.colors.text.primary,
+  },
+  uniList: {
+    marginTop: 8,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+    borderRadius: 16,
+    padding: 8,
+  },
+  uniOption: {
+    padding: 12,
+    borderRadius: 12,
+  },
+  uniOptionText: {
+    fontSize: 14,
+    color: theme.colors.text.secondary,
+  }
 });
 

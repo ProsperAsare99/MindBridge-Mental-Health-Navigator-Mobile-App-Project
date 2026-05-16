@@ -19,7 +19,60 @@ export const getProfile = async (req: Request, res: Response) => {
 
     // Don't send password
     const { password, ...userProfile } = user;
-    res.json(userProfile);
+
+    // Calculate Stats
+    const moodLogs = await prisma.moodLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const journals = await prisma.journal.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Simple Streak Logic
+    let streak = 0;
+    const today = new Date().toDateString();
+    const uniqueDays = new Set([...moodLogs, ...journals].map(l => new Date(l.createdAt).toDateString()));
+    const sortedDays = Array.from(uniqueDays).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    
+    if (sortedDays.includes(today)) {
+      streak = 1;
+      for (let i = 0; i < sortedDays.length - 1; i++) {
+        const d1Str = sortedDays[i] as string;
+        const d2Str = sortedDays[i+1] as string;
+        const d1 = new Date(d1Str);
+        const d2 = new Date(d2Str);
+        const diff = (d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24);
+        if (diff === 1) streak++;
+        else break;
+      }
+    }
+
+    // Simple Points Logic: 100 per mood, 200 per journal
+    const points = (moodLogs.length * 100) + (journals.length * 200);
+
+    // 7 Day Mood Trend
+    const last7Days = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      const dayStr = d.toDateString();
+      const dayLogs = moodLogs.filter(l => new Date(l.createdAt).toDateString() === dayStr);
+      const avgScore = dayLogs.length > 0 ? dayLogs.reduce((acc, curr) => acc + curr.score, 0) / dayLogs.length : 0;
+      return { day: d.toLocaleDateString('en-US', { weekday: 'narrow' }), score: avgScore };
+    });
+
+    res.json({
+      ...userProfile,
+      stats: {
+        streak,
+        points,
+        seeds: journals.length,
+        badges: Math.floor(points / 500),
+        trend: last7Days
+      }
+    });
   } catch (error) {
     console.error('Error fetching profile:', error);
     res.status(500).json({ error: 'Server error' });
@@ -39,7 +92,7 @@ export const updateProfile = async (req: Request, res: Response) => {
         phoneNumber,
         profileImage,
         studentId,
-      },
+      } as any,
     });
 
     // Update Onboarding table if university/program/level provided

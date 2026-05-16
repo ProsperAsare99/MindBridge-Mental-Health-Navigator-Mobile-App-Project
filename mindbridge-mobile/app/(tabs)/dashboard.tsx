@@ -49,7 +49,9 @@ import {
   MessageCircle,
   BarChart2,
   BrainCircuit,
-  Info
+  Info,
+  PenLine,
+  ChevronDown
 } from 'lucide-react-native';
 import { translations, Language, TranslationSchema } from '../../src/utils/translations';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
@@ -254,6 +256,55 @@ const DetailedOverviewCard = ({ title, value, label, icon: Icon, color, progress
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 
+const QuestItem = ({ icon: Icon, title, subtitle, done, theme, isLast, onPress }: any) => (
+  <TouchableOpacity 
+    style={[styles.questItem, isLast && { borderBottomWidth: 0 }]} 
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
+    <View style={[styles.questIconWrap, { backgroundColor: done ? theme.colors.accents.eucalyptus + '15' : theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)' }]}>
+      <Icon size={20} color={done ? theme.colors.accents.eucalyptus : theme.colors.text.tertiary} />
+    </View>
+    <View style={{ flex: 1 }}>
+      <Text style={[styles.questTitle, done && { textDecorationLine: 'line-through', color: theme.colors.text.disabled }]}>{title}</Text>
+      <Text style={styles.questSubtitle}>{subtitle}</Text>
+    </View>
+    <View style={[styles.questCheck, done && { backgroundColor: theme.colors.accents.eucalyptus, borderColor: theme.colors.accents.eucalyptus }]}>
+      {done && <CheckCircle2 size={16} color="#FFF" />}
+    </View>
+  </TouchableOpacity>
+);
+
+const StreakJourney = ({ streak, theme, styles }: any) => (
+  <View style={styles.journeyContainer}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.journeyScroll}>
+      {Array.from({ length: 14 }).map((_, i) => {
+        const isReached = i < streak;
+        const isCurrent = i === streak - 1;
+        return (
+          <View key={i} style={styles.journeyStepWrap}>
+            {i > 0 && (
+              <View style={[styles.journeyLine, { backgroundColor: isReached ? theme.colors.plum : theme.colors.text.disabled + '20' }]} />
+            )}
+            <View style={[
+              styles.journeyDot, 
+              { backgroundColor: isReached ? theme.colors.plum : theme.colors.surface, borderColor: isReached ? theme.colors.plum : theme.colors.text.disabled + '40' },
+              isCurrent && styles.currentJourneyDot
+            ]}>
+              {isCurrent ? (
+                <Flame size={16} color="#FFF" />
+              ) : (
+                <Text style={[styles.journeyDotText, { color: isReached ? "#FFF" : theme.colors.text.disabled }]}>{i + 1}</Text>
+              )}
+            </View>
+            <Text style={styles.journeyDayLabel}>Day {i + 1}</Text>
+          </View>
+        );
+      })}
+    </ScrollView>
+  </View>
+);
+
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -261,7 +312,12 @@ export default function DashboardScreen() {
   const styles = createStyles(theme);
   const { userData: authData } = useContext(AuthContext) as any;
   
-  const [rituals, setRituals] = useState({ garden: false, journal: false, breathing: false });
+  const [rituals, setRituals] = useState({
+    garden: false,
+    journal: false,
+    breathing: false,
+    community: false
+  });
   const [moodHistory, setMoodHistory] = useState<any[]>([]);
   const [journalHistory, setJournalHistory] = useState<any[]>([]);
   const [chatHistory, setChatHistory] = useState<any[]>([]);
@@ -292,6 +348,9 @@ export default function DashboardScreen() {
       setMoodHistory(moodsRes.data || []);
       setChatHistory(res.data.history || []);
       
+      const currentStreak = res.data.streak || 0;
+      setUserData(prev => ({ ...prev, streak: currentStreak }));
+      
       const growth = getGrowthStage(logs.length);
       setGardenStats({ count: logs.length, stage: growth.label, icon: growth.icon, color: growth.color });
       
@@ -301,7 +360,8 @@ export default function DashboardScreen() {
       setRituals({
         garden: res.data.latestMood && new Date(res.data.latestMood.createdAt).toDateString() === todayStr,
         journal: logs.some((log: any) => new Date(log.createdAt).toDateString() === todayStr),
-        breathing: await AsyncStorage.getItem(`breathing_${todayStr}`) === 'true'
+        breathing: await AsyncStorage.getItem(`breathing_${todayStr}`) === 'true',
+        community: res.data.latestCommunityPost && new Date(res.data.latestCommunityPost.createdAt).toDateString() === todayStr
       });
       if (res.data.onboarding?.firstName) {
         const onboardingName = res.data.onboarding.firstName;
@@ -334,6 +394,20 @@ export default function DashboardScreen() {
       </View>
 
       <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]} showsVerticalScrollIndicator={false}>
+        <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>Streak Journey</Text>
+              <Text style={styles.sectionSubtitle}>You're on fire! Keep it going. ⚡️</Text>
+            </View>
+            <View style={styles.streakBadge}>
+              <Flame size={16} color={theme.colors.plum} />
+              <Text style={[styles.streakText, { color: theme.colors.plum }]}>{userData.streak} Days</Text>
+            </View>
+          </View>
+          <StreakJourney streak={userData.streak} theme={theme} styles={styles} />
+        </Animated.View>
+
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
             <ScreenHeader title={`${getGreeting()}, ${userData.name}`} subtitle="Nurture your peace today" noPadding />
@@ -359,7 +433,58 @@ export default function DashboardScreen() {
           </View>
         </Animated.View>
 
-        {/* ── Latest Reflection ── */}
+        {/* ── Daily Quests (Duolingo Style) ── */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>Daily Quests</Text>
+              <Text style={styles.sectionSubtitle}>Complete all to keep your streak! 🔥</Text>
+            </View>
+            <View style={[styles.questProgress, { backgroundColor: theme.colors.plum + '20' }]}>
+              <Text style={[styles.questProgressText, { color: theme.colors.plum }]}>
+                {Object.values(rituals).filter(Boolean).length}/{Object.keys(rituals).length}
+              </Text>
+            </View>
+          </View>
+          
+          <View style={styles.questsCard}>
+            <QuestItem 
+              theme={theme} 
+              icon={Leaf} 
+              title="Plant a Seed" 
+              subtitle="Check-in your mood" 
+              done={rituals.garden} 
+              onPress={() => router.push('/(tabs)/garden')}
+            />
+            <QuestItem 
+              theme={theme} 
+              icon={PenLine} 
+              title="Daily Reflection" 
+              subtitle="Write a journal entry" 
+              done={rituals.journal} 
+              onPress={() => router.push('/(tabs)/journal')}
+            />
+            <QuestItem 
+              theme={theme} 
+              icon={Wind} 
+              title="Breathe" 
+              subtitle="Complete 2m breathing" 
+              done={rituals.breathing} 
+              onPress={() => router.push('/(tabs)/tools')}
+            />
+            <QuestItem 
+              theme={theme} 
+              icon={Users} 
+              title="Connect" 
+              subtitle="Share in Community" 
+              done={rituals.community} 
+              onPress={() => router.push('/(tabs)/community')}
+              isLast
+            />
+          </View>
+        </View>
+
+        {/* ── Mood Garden Snapshot ── */}
         {journalHistory.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -655,4 +780,120 @@ const createStyles = (theme: any) => StyleSheet.create({
     lineHeight: 20,
     opacity: 0.8,
   },
+  questsCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 32,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    marginTop: 16,
+  },
+  questItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+  },
+  questIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  questTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: theme.colors.text.primary,
+    marginBottom: 2,
+  },
+  questSubtitle: {
+    fontSize: 12,
+    color: theme.colors.text.tertiary,
+    fontWeight: '600',
+  },
+  questCheck: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  questProgress: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  questProgressText: {
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  journeyContainer: {
+    marginTop: 16,
+    paddingVertical: 8,
+  },
+  journeyScroll: {
+    paddingHorizontal: 4,
+    alignItems: 'center',
+    gap: 0,
+  },
+  journeyStepWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  journeyDot: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  currentJourneyDot: {
+    transform: [{ scale: 1.2 }],
+    shadowColor: theme.colors.plum,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  journeyDotText: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  journeyLine: {
+    width: 30,
+    height: 4,
+    marginHorizontal: -2,
+    zIndex: 1,
+  },
+  journeyDayLabel: {
+    position: 'absolute',
+    bottom: -22,
+    width: 60,
+    textAlign: 'center',
+    fontSize: 10,
+    fontWeight: '700',
+    color: theme.colors.text.tertiary,
+    left: -10,
+  },
+  streakBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: theme.colors.plum + '15',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  streakText: {
+    fontSize: 14,
+    fontWeight: '900',
+  }
 });

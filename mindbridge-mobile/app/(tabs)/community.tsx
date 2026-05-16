@@ -219,7 +219,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontWeight: '600',
     color: theme.colors.plum,
   },
-  horizontalScrollPadding: {
+  groupsScroll: {
     paddingHorizontal: 24,
     gap: 16,
     paddingBottom: 24,
@@ -232,7 +232,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'space-between',
   },
-  groupIconWrap: {
+  groupIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -300,7 +300,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     lineHeight: 24,
     marginBottom: 20,
   },
-  postFooter: {
+  postActions: {
     flexDirection: 'row',
     alignItems: 'center',
     borderTopWidth: StyleSheet.hairlineWidth,

@@ -467,6 +467,11 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontWeight: '600',
     color: theme.colors.plum,
   },
+  forYouScroll: {
+    paddingHorizontal: 24,
+    gap: 14,
+    paddingBottom: 24,
+  },
   horizontalScrollPadding: {
     paddingHorizontal: 24,
     gap: 16,
@@ -517,7 +522,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     height: '100%',
     borderRadius: 2,
   },
-  toolsGrid: {
+  copingGrid: {
     gap: 16,
   },
   toolCard: {

@@ -39,7 +39,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { SchedulableTriggerInputTypes } from 'expo-notifications';
 import { AuthContext } from '../../src/context/AuthContext';
-import { AuthContext } from '../../src/context/AuthContext';
 
 const { width } = Dimensions.get('window');
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };

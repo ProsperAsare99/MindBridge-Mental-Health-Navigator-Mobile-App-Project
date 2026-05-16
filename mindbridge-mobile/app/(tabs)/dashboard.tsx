@@ -262,6 +262,8 @@ export default function DashboardScreen() {
   
   const [rituals, setRituals] = useState({ garden: false, journal: false, breathing: false });
   const [moodHistory, setMoodHistory] = useState<any[]>([]);
+  const [assessments, setAssessments] = useState<any[]>([]);
+  const [latestPost, setLatestPost] = useState<any>(null);
   const [gardenStats, setGardenStats] = useState({ count: 0, stage: 'Empty Garden', icon: CircleDashed, color: '#94A3B8' });
   const [userData, setUserData] = useState({ name: authData?.name || 'Friend', language: 'English' as Language });
   const t: TranslationSchema = translations[userData.language] || translations.English;
@@ -286,6 +288,9 @@ export default function DashboardScreen() {
         
         const growth = getGrowthStage(logs.length);
         setGardenStats({ count: logs.length, stage: growth.label, icon: growth.icon, color: growth.color });
+        
+        setAssessments(res.data.assessments || []);
+        setLatestPost(res.data.latestCommunityPost || null);
 
         setRituals({
           garden: res.data.latestMood && new Date(res.data.latestMood.createdAt).toDateString() === todayStr,
@@ -343,7 +348,7 @@ export default function DashboardScreen() {
         {/* ── Detailed Overviews ── */}
         <View style={dashStyles.section}>
           <Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary, marginBottom: 16 }]}>Daily Overview</Text>
-          <View style={{ flexDirection: 'row', gap: 12 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingRight: 24 }}>
             <DetailedOverviewCard 
               title="GARDEN" 
               value={gardenStats.count} 
@@ -358,39 +363,62 @@ export default function DashboardScreen() {
             />
             <DetailedOverviewCard 
               title="ASSESSMENTS" 
-              value="85" 
-              label="Ready" 
-              subtitle="Mindfulness Check"
+              value={assessments.length} 
+              label="Done" 
+              subtitle={assessments.length > 0 ? assessments[0].type : "Ready"}
               icon={ClipboardList} 
               color={theme.colors.accents.slate} 
-              progress={0.85}
+              progress={Math.min(assessments.length / 5, 1)}
               theme={theme} 
               styles={dashStyles}
               onPress={() => router.push('/(tabs)/assessments')}
             />
-          </View>
+            <DetailedOverviewCard 
+              title="COMMUNITY" 
+              value={latestPost ? latestPost.hugs : 0} 
+              label="Hugs" 
+              subtitle={latestPost ? latestPost.group : "Stay Connected"}
+              icon={Users} 
+              color={theme.colors.accents.dustyRose} 
+              progress={latestPost ? 0.8 : 0}
+              theme={theme} 
+              styles={dashStyles}
+              onPress={() => router.push('/(tabs)/community')}
+            />
+          </ScrollView>
         </View>
 
-        <View style={dashStyles.section}>
-          <Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary, marginBottom: 16 }]}>Featured Resource</Text>
-          <TouchableOpacity activeOpacity={0.9} style={[dashStyles.resourceCard, { backgroundColor: theme.colors.surface }]}>
-            <LinearGradient colors={['rgba(123, 97, 255, 0.1)', 'transparent']} style={StyleSheet.absoluteFillObject} />
-            <View style={dashStyles.resourceInfo}>
-              <View style={dashStyles.resourceTag}><Text style={dashStyles.resourceTagText}>RECOMMENDED</Text></View>
-              <Text style={[dashStyles.resourceTitle, { color: theme.colors.text.primary }]}>The Art of Box Breathing</Text>
-              <Text style={[dashStyles.resourceSubtitle, { color: theme.colors.text.secondary }]}>Master the 4-4-4 technique to calm your nervous system instantly.</Text>
-              <View style={dashStyles.resourceMeta}>
-                <Clock size={14} color={theme.colors.text.tertiary} />
-                <Text style={dashStyles.resourceMetaText}>5 min read</Text>
-                <View style={dashStyles.dotSeparator} />
-                <Heart size={14} color={theme.colors.text.tertiary} />
-                <Text style={dashStyles.resourceMetaText}>Practical</Text>
+        <View style={dashStyles.sectionCompact}>
+          <View style={dashStyles.sectionHeader}><Text style={[dashStyles.sectionTitleText, { color: theme.colors.text.primary, paddingHorizontal: 24 }]}>Recommended for You</Text></View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={dashStyles.horizontalScroll} snapToInterval={width * 0.75 + 16} decelerationRate="fast">
+            <TouchableOpacity activeOpacity={0.9} style={[dashStyles.resourceCardWide, { backgroundColor: theme.colors.surface }]}>
+              <LinearGradient colors={['rgba(123, 97, 255, 0.1)', 'transparent']} style={StyleSheet.absoluteFillObject} />
+              <View style={dashStyles.resourceInfo}>
+                <View style={[dashStyles.resourceTag, { backgroundColor: theme.colors.accents.powderBlue + '20' }]}><Text style={[dashStyles.resourceTagText, { color: theme.colors.accents.powderBlue }]}>TECHNIQUE</Text></View>
+                <Text style={[dashStyles.resourceTitle, { color: theme.colors.text.primary }]}>Box Breathing</Text>
+                <Text style={[dashStyles.resourceSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={2}>Calm your nervous system in 2 minutes.</Text>
               </View>
-            </View>
-            <View style={dashStyles.resourceAction}>
-              <ExternalLink color={theme.colors.plum} size={20} />
-            </View>
-          </TouchableOpacity>
+              <Wind color={theme.colors.accents.powderBlue} size={32} strokeWidth={1.5} style={{ opacity: 0.6 }} />
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.9} style={[dashStyles.resourceCardWide, { backgroundColor: theme.colors.surface }]}>
+              <LinearGradient colors={['rgba(52, 211, 153, 0.1)', 'transparent']} style={StyleSheet.absoluteFillObject} />
+              <View style={dashStyles.resourceInfo}>
+                <View style={[dashStyles.resourceTag, { backgroundColor: theme.colors.accents.eucalyptus + '20' }]}><Text style={[dashStyles.resourceTagText, { color: theme.colors.accents.eucalyptus }]}>MINDFULNESS</Text></View>
+                <Text style={[dashStyles.resourceTitle, { color: theme.colors.text.primary }]}>Self-Compassion</Text>
+                <Text style={[dashStyles.resourceSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={2}>Quiet your inner critic with this audio.</Text>
+              </View>
+              <Heart color={theme.colors.accents.eucalyptus} size={32} strokeWidth={1.5} style={{ opacity: 0.6 }} />
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.9} style={[dashStyles.resourceCardWide, { backgroundColor: theme.colors.surface }]}>
+              <LinearGradient colors={['rgba(216, 164, 143, 0.1)', 'transparent']} style={StyleSheet.absoluteFillObject} />
+              <View style={dashStyles.resourceInfo}>
+                <View style={[dashStyles.resourceTag, { backgroundColor: theme.colors.accents.gentlePeach + '20' }]}><Text style={[dashStyles.resourceTagText, { color: theme.colors.accents.gentlePeach }]}>DEEP DIVE</Text></View>
+                <Text style={[dashStyles.resourceTitle, { color: theme.colors.text.primary }]}>Digital Detox</Text>
+                <Text style={[dashStyles.resourceSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={2}>Reclaim your attention on campus.</Text>
+              </View>
+              <Bot color={theme.colors.accents.gentlePeach} size={32} strokeWidth={1.5} style={{ opacity: 0.6 }} />
+            </TouchableOpacity>
+          </ScrollView>
         </View>
 
         <View style={dashStyles.section}><AppleWidget title="The Oracle" subtitle="AI Personal Guide" icon={Bot} color={theme.colors.plum} size="wide" delay={450} theme={theme} styles={dashStyles} onPress={() => router.push('/(tabs)/ai-guide')} /></View>
@@ -424,7 +452,7 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: 20 }} />
       </ScrollView>
     </View>
   );
@@ -501,6 +529,20 @@ const dashStyles = StyleSheet.create({
   detailedProgressFill: { height: '100%', borderRadius: 2 },
 
   // Resource Card Styles
+  resourceCardWide: { 
+    width: width * 0.75, 
+    borderRadius: 32, 
+    padding: 24, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginRight: 16,
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 4 }, 
+    shadowOpacity: 0.05, 
+    shadowRadius: 12, 
+    elevation: 3, 
+    overflow: 'hidden' 
+  },
   resourceCard: { borderRadius: 32, padding: 24, flexDirection: 'row', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 3, overflow: 'hidden' },
   resourceInfo: { flex: 1 },
   resourceTag: { alignSelf: 'flex-start', backgroundColor: 'rgba(123, 97, 255, 0.1)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginBottom: 12 },

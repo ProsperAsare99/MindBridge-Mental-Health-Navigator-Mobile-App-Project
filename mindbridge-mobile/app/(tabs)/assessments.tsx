@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -6,13 +6,16 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Dimensions,
-  StatusBar
+  StatusBar,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
+import api from '../../src/services/api';
 import { 
   ClipboardList, 
   Activity, 
@@ -99,7 +102,27 @@ export default function AssessmentsScreen() {
   const themeContext = useTheme();
   const styles = createStyles(themeContext);
   const ASSESSMENTS = getAssessments(themeContext);
-  const RECENT_RESULTS = getRecentResults(themeContext);
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        const response = await api.get('/ai/oracle-context');
+        setResults(response.data.assessments || []);
+      } catch (error) {
+        console.error('Error fetching assessment results:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchResults();
+  }, []);
+
+  const formatDate = (dateString: string) => {
+    const d = new Date(dateString);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
 
   return (
     <View style={styles.container}>
@@ -148,26 +171,34 @@ export default function AssessmentsScreen() {
         <Animated.View entering={FadeInUp.delay(500).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Recent Results</Text>
           <View style={styles.resultsContainer}>
-            {RECENT_RESULTS.map((result, index) => (
-              <React.Fragment key={result.id}>
-                <TouchableOpacity style={styles.resultItem}>
-                  <View style={[styles.resultIconWrap, { backgroundColor: result.color + (themeContext.isDark ? '25' : '15') }]}>
-                    {result.trend === 'down' ? <TrendingDown color={result.color} size={18} /> :
-                     result.trend === 'up' ? <TrendingUp color={result.color} size={18} /> :
-                     <Minus color={result.color} size={18} />}
-                  </View>
-                  <View style={styles.resultInfo}>
-                    <Text style={styles.resultTest}>{result.test}</Text>
-                    <Text style={[styles.resultScore, { color: result.color }]}>{result.score}</Text>
-                  </View>
-                  <View style={styles.resultRight}>
-                    <Text style={styles.resultDate}>{result.date}</Text>
-                    <ChevronRight color={themeContext.colors.text.disabled} size={18} />
-                  </View>
-                </TouchableOpacity>
-                {index < RECENT_RESULTS.length - 1 && <View style={styles.divider} />}
-              </React.Fragment>
-            ))}
+            {loading ? (
+              <ActivityIndicator size="small" color={themeContext.colors.plum} style={{ padding: 40 }} />
+            ) : results.length === 0 ? (
+              <View style={{ padding: 40, alignItems: 'center' }}>
+                <Text style={{ color: themeContext.colors.text.secondary }}>No assessments taken yet.</Text>
+              </View>
+            ) : (
+              results.map((result: any, index: number) => (
+                <React.Fragment key={result.id}>
+                  <TouchableOpacity style={styles.resultItem}>
+                    <View style={[styles.resultIconWrap, { backgroundColor: themeContext.colors.accents.powderBlue + (themeContext.isDark ? '25' : '15') }]}>
+                      {result.score > 10 ? <TrendingUp color={themeContext.colors.accents.terracotta} size={18} /> : <Minus color={themeContext.colors.accents.powderBlue} size={18} />}
+                    </View>
+                    <View style={styles.resultInfo}>
+                      <Text style={styles.resultTest}>{result.type}</Text>
+                      <Text style={[styles.resultScore, { color: result.score > 15 ? themeContext.colors.accents.terracotta : themeContext.colors.text.primary }]}>
+                        {result.severity} ({result.score})
+                      </Text>
+                    </View>
+                    <View style={styles.resultRight}>
+                      <Text style={styles.resultDate}>{formatDate(result.createdAt)}</Text>
+                      <ChevronRight color={themeContext.colors.text.disabled} size={18} />
+                    </View>
+                  </TouchableOpacity>
+                  {index < results.length - 1 && <View style={styles.divider} />}
+                </React.Fragment>
+              ))
+            )}
           </View>
         </Animated.View>
 

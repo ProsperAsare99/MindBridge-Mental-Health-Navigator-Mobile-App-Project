@@ -51,6 +51,11 @@ export const getOracleContext = async (req: Request, res: Response) => {
     // Get clinical assessments
     const assessments = await AiRepository.getLatestAssessments(userId);
 
+    // Get latest community post for dashboard snapshot
+    const latestCommunityPost = await prisma.communityPost.findFirst({
+      orderBy: { createdAt: 'desc' }
+    });
+
     res.json({
       latestMood: latestMood || null,
       recentJournal: recentJournal || [],
@@ -58,6 +63,7 @@ export const getOracleContext = async (req: Request, res: Response) => {
       userName: user?.name || 'Friend',
       history: history || [],
       assessments: assessments || [],
+      latestCommunityPost: latestCommunityPost || null,
       dbStatus: 'online'
     });
   } catch (error: any) {

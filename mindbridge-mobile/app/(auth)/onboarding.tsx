@@ -288,6 +288,8 @@ export default function OnboardingScreen() {
         interests: answers['q7'] || [],
         // Simplified stress level mapping
         stressLevel: answers.stressors ? Math.max(1, ...Object.values(answers.stressors).map(v => Number(v))) : 3,
+        stressSources: answers['q5'] || [],
+        supportTypes: answers['q7'] || [],
         currentMood: 'Good', 
         sleepPattern: 'Average',
         preferredLanguage: preferredLanguage,

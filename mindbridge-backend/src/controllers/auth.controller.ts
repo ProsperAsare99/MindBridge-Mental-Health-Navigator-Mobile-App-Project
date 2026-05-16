@@ -9,19 +9,22 @@ const prisma = new PrismaClient();
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, password, name, studentId, username } = req.body as {
+    const { email, password, name, studentId, username, phoneNumber } = req.body as {
       email: string;
       password: string;
       name: string;
       studentId?: string;
       username?: string;
+      phoneNumber?: string;
     };
+
+    console.log('[AUTH] Registration attempt for:', email, username);
 
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
           { email },
-          { username: username || undefined }
+          { username: username || null }
         ]
       }
     });
@@ -37,7 +40,8 @@ export const register = async (req: Request, res: Response) => {
         email, 
         password: hashedPassword, 
         name, 
-        username,
+        username: username || null,
+        phoneNumber: phoneNumber || null,
         ...(studentId ? { studentId } : {}) 
       },
     });

@@ -26,7 +26,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../src/context/ThemeContext';
 import { 
   ChevronRight, ChevronLeft, ShieldCheck, User, CheckCircle2,
-  Info, GraduationCap, BookOpen, Brain, MessageSquare, Activity, Sparkles, Heart, Users, Zap
+  Info, GraduationCap, BookOpen, Brain, MessageSquare, Activity, Heart, Users, Zap
 } from 'lucide-react-native';
 import AuthCharacters from '../../src/components/AuthCharacters';
 

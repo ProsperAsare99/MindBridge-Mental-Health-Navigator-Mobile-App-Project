@@ -710,10 +710,7 @@ export default function WellnessTrackerScreen() {
                       spacing={CHART_W / (activeData.length + 1)}
                       initialSpacing={16}
                       color={theme.colors.plum}
-                      thickness={2.5}
-                      startFillColor={theme.colors.plum + '25'}
-                      endFillColor={theme.colors.plum + '00'}
-                      areaChart
+                      thickness={3}
                       curved
                       dataPointsColor={theme.colors.plum}
                       dataPointsRadius={4}

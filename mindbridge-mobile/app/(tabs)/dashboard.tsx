@@ -54,7 +54,6 @@ import {
   ChevronDown,
   Flame,
   Feather,
-  Sparkles,
   Calendar
 } from 'lucide-react-native';
 import { ScreenHeader } from '../../src/components/ScreenHeader';

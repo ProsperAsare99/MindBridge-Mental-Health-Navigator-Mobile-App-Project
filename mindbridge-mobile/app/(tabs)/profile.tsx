@@ -140,10 +140,7 @@ const MoodChart = ({ trend, theme }: any) => {
           spacing={CHART_WIDTH / (chartData.length + 1)}
           initialSpacing={20}
           color={theme.colors.plum}
-          thickness={2.5}
-          startFillColor={theme.colors.plum + '30'}
-          endFillColor={theme.colors.plum + '00'}
-          areaChart
+          thickness={3}
           curved
           hideDataPoints={false}
           dataPointsColor={theme.colors.plum}

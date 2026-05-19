@@ -59,11 +59,11 @@ import api from '../../src/services/api';
 import { AuthContext } from '../../src/context/AuthContext';
 import { Audio } from 'expo-av';
 import * as Location from 'expo-location';
-import { 
-  EnergySelector, 
-  SleepTracker, 
-  SocialPicker, 
-  SymptomCloud 
+import {
+  EnergySelector,
+  SleepTracker,
+  SocialPicker,
+  SymptomCloud
 } from '../../src/components/TrackingComponents';
 
 const { width } = Dimensions.get('window');
@@ -73,8 +73,8 @@ const CHART_W = width - 96;
 const TrackerHeader = ({ totalCount, avgMood, theme }: any) => {
   return (
     <Animated.View entering={FadeIn.duration(800)} style={styles.headerGrid}>
-      <LinearGradient 
-        colors={theme.isDark ? ['#1E293B', '#0F172A'] : ['#F8FAFC', '#F1F5F9']} 
+      <LinearGradient
+        colors={theme.isDark ? ['#1E293B', '#0F172A'] : ['#F8FAFC', '#F1F5F9']}
         style={styles.statsCard}
       >
         <View style={[styles.statsIcon, { backgroundColor: theme.colors.plum + '15' }]}>
@@ -84,8 +84,8 @@ const TrackerHeader = ({ totalCount, avgMood, theme }: any) => {
         <Text style={[styles.statsLabel, { color: theme.colors.text.tertiary }]}>Total Records</Text>
       </LinearGradient>
 
-      <LinearGradient 
-        colors={theme.isDark ? ['#1E293B', '#0F172A'] : ['#F8FAFC', '#F1F5F9']} 
+      <LinearGradient
+        colors={theme.isDark ? ['#1E293B', '#0F172A'] : ['#F8FAFC', '#F1F5F9']}
         style={styles.statsCard}
       >
         <View style={[styles.statsIcon, { backgroundColor: '#34D39915' }]}>
@@ -101,9 +101,9 @@ const TrackerHeader = ({ totalCount, avgMood, theme }: any) => {
 export default function WellnessTrackerScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  
+
   const getMoodIcon = (emotion: string, size = 20, color = theme.colors.plum) => {
-    switch(emotion?.toLowerCase()) {
+    switch (emotion?.toLowerCase()) {
       case 'radiant':
       case 'elated': return <Sun size={size} color={color} />;
       case 'serene':
@@ -123,7 +123,7 @@ export default function WellnessTrackerScreen() {
   };
   const { t } = theme;
   const router = useRouter();
-  
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -131,7 +131,7 @@ export default function WellnessTrackerScreen() {
   const [moodLogs, setMoodLogs] = useState<any[]>([]);
   const [insights, setInsights] = useState<any>(null);
   const [timeRange, setTimeRange] = useState<'7d' | '30d'>('7d');
-  
+
   const [mood, setMood] = useState<number | null>(null);
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
   const [energy, setEnergy] = useState(6);
@@ -142,7 +142,7 @@ export default function WellnessTrackerScreen() {
   const [note, setNote] = useState('');
   const [location, setLocation] = useState<string | null>(null);
   const [weather, setWeather] = useState<string | null>(null);
-  
+
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [audioUri, setAudioUri] = useState<string | null>(null);
@@ -180,7 +180,7 @@ export default function WellnessTrackerScreen() {
         setLocation('University Campus');
         setWeather('Clear');
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const nextStep = () => setStep(s => s + 1);
@@ -189,12 +189,12 @@ export default function WellnessTrackerScreen() {
   const StepProgress = ({ current }: { current: number }) => (
     <View style={styles.progressRow}>
       {[1, 2, 3, 4].map((i) => (
-        <View 
-          key={i} 
+        <View
+          key={i}
           style={[
-            styles.progressBar, 
+            styles.progressBar,
             { backgroundColor: i <= current ? theme.colors.plum : theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
-          ]} 
+          ]}
         />
       ))}
     </View>
@@ -300,7 +300,7 @@ export default function WellnessTrackerScreen() {
         weather,
         location,
         note,
-        audioUrl: audioUri, 
+        audioUrl: audioUri,
       });
       setStep(5);
       setTotalCount(prev => prev + 1);
@@ -324,7 +324,7 @@ export default function WellnessTrackerScreen() {
       <Animated.View entering={FadeInRight.springify().damping(18).mass(0.8)} style={styles.stepContainer}>
         <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Core Energy</Text>
         <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>How is your spirit pulsating right now?</Text>
-        <View style={styles.moodGrid}>
+        <View style={styles.moodRow}>
           {moodsList.map((m) => {
             const Icon = m.icon;
             const isSelected = mood === m.value;
@@ -336,22 +336,20 @@ export default function WellnessTrackerScreen() {
                   setMood(m.value);
                   setTimeout(() => nextStep(), 200);
                 }}
-                style={styles.moodItemContainer}
+                style={styles.moodCol}
               >
                 <LinearGradient
                   colors={isSelected ? (m.colors as unknown as readonly [string, string, ...string[]]) : (theme.isDark ? ['rgba(255,255,255,0.03)', 'rgba(255,255,255,0.03)'] : ['rgba(0,0,0,0.015)', 'rgba(0,0,0,0.015)'])}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={[
-                    styles.moodItem,
+                    styles.moodCircle,
                     isSelected ? { borderColor: m.colors[0], shadowColor: m.colors[0], shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 } : { borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }
                   ]}
                 >
-                  <View style={[styles.moodIconWrap, { backgroundColor: isSelected ? 'rgba(255,255,255,0.15)' : (theme.isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)') }]}>
-                    <Icon size={32} color={isSelected ? '#FFF' : theme.colors.text.secondary} />
-                  </View>
-                  <Text style={[styles.moodLabelText, { color: isSelected ? '#FFF' : theme.colors.text.secondary }]}>{m.label}</Text>
+                  <Icon size={28} color={isSelected ? '#FFF' : theme.colors.text.secondary} />
                 </LinearGradient>
+                <Text style={[styles.moodText, { color: isSelected ? theme.colors.text.primary : theme.colors.text.secondary }]}>{m.label}</Text>
               </TouchableOpacity>
             );
           })}
@@ -362,50 +360,94 @@ export default function WellnessTrackerScreen() {
 
   const renderStep2 = () => {
     const emotionsList = [
-      { label: 'Radiant', desc: 'Joy & Energy', colors: ['#FBBF24', '#D97706'], icon: Sun },
-      { label: 'Serene', desc: 'Peace & Calm', colors: ['#10B981', '#0F766E'], icon: Wind },
-      { label: 'Melancholy', desc: 'Reflection', colors: ['#6366F1', '#4F46E5'], icon: CloudRain },
-      { label: 'Anxious', desc: 'Tension', colors: ['#F97316', '#C2410C'], icon: AlertCircle },
-      { label: 'Frustrated', desc: 'Impatience', colors: ['#EF4444', '#B91C1C'], icon: Flame },
-      { label: 'Grateful', desc: 'Warmth', colors: ['#EC4899', '#BE185D'], icon: Heart },
-      { label: 'Empty', desc: 'Low Drive', colors: ['#64748B', '#334155'], icon: Moon },
-      { label: 'Empowered', desc: 'Strength', colors: ['#8B5CF6', '#6D28D9'], icon: Zap },
+      { label: 'Radiant', desc: 'Joy', color: '#FBBF24', angle: 0 },
+      { label: 'Serene', desc: 'Calm', color: '#10B981', angle: 45 },
+      { label: 'Melancholy', desc: 'Sad', color: '#6366F1', angle: 90 },
+      { label: 'Anxious', desc: 'Fear', color: '#F97316', angle: 135 },
+      { label: 'Frustrated', desc: 'Anger', color: '#EF4444', angle: 180 },
+      { label: 'Grateful', desc: 'Love', color: '#EC4899', angle: 225 },
+      { label: 'Empty', desc: 'Apathy', color: '#64748B', angle: 270 },
+      { label: 'Empowered', desc: 'Power', color: '#8B5CF6', angle: 315 },
     ];
+
+    const R = 85; 
+    const cx = 135; 
+    const cy = 135; 
+    const selectedObj = emotionsList.find(e => e.label === selectedEmotion);
+
     return (
       <Animated.View entering={FadeInRight.springify().damping(18).mass(0.8)} style={styles.stepContainer}>
-        <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Emotion Selection</Text>
-        <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>Select a specific emotional texture</Text>
-        <View style={styles.emotionGrid}>
+        <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Emotion Wheel</Text>
+        <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>Tap a color segment to select your emotion</Text>
+        
+        <View style={styles.wheelContainer}>
+          <View style={[styles.wheelInnerBg, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]} />
+          
+          <View style={[
+            styles.wheelCenter, 
+            { 
+              backgroundColor: theme.colors.surface,
+              borderColor: selectedObj ? selectedObj.color : (theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'),
+              shadowColor: selectedObj ? selectedObj.color : 'transparent',
+              shadowOpacity: selectedObj ? 0.3 : 0,
+              shadowRadius: 10,
+              elevation: selectedObj ? 4 : 0
+            }
+          ]}>
+            <Text style={[styles.wheelCenterLabel, { color: selectedObj ? selectedObj.color : theme.colors.text.tertiary }]}>
+              {selectedObj ? selectedObj.label : 'Select'}
+            </Text>
+            <Text style={[styles.wheelCenterDesc, { color: theme.colors.text.tertiary }]}>
+              {selectedObj ? selectedObj.desc : 'Vibe'}
+            </Text>
+          </View>
+
           {emotionsList.map((e) => {
-            const Icon = e.icon;
+            const rad = (e.angle * Math.PI) / 180;
+            const left = cx + R * Math.cos(rad) - 27;
+            const top = cy + R * Math.sin(rad) - 27;
             const isSelected = selectedEmotion === e.label;
+
             return (
               <TouchableOpacity
                 key={e.label}
                 activeOpacity={0.8}
-                onPress={() => {
-                  setSelectedEmotion(e.label);
-                  setTimeout(() => nextStep(), 200);
-                }}
-                style={styles.emotionCardContainer}
-              >
-                <LinearGradient
-                  colors={isSelected ? (e.colors as unknown as readonly [string, string, ...string[]]) : (theme.isDark ? ['rgba(255,255,255,0.03)', 'rgba(255,255,255,0.03)'] : ['rgba(0,0,0,0.015)', 'rgba(0,0,0,0.015)'])}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={[
-                    styles.emotionCard,
-                    isSelected ? { borderColor: e.colors[0], shadowColor: e.colors[0], shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 } : { borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }
-                  ]}
-                >
-                  <Icon size={24} color={isSelected ? '#FFF' : theme.colors.text.secondary} style={{ marginBottom: 4 }} />
-                  <Text style={[styles.emotionLabelText, { color: isSelected ? '#FFF' : theme.colors.text.primary }]}>{e.label}</Text>
-                  <Text style={[styles.emotionDescText, { color: isSelected ? 'rgba(255,255,255,0.8)' : theme.colors.text.tertiary }]}>{e.desc}</Text>
-                </LinearGradient>
-              </TouchableOpacity>
+                onPress={() => setSelectedEmotion(e.label)}
+                style={[
+                  styles.wheelSegment,
+                  {
+                    left,
+                    top,
+                    backgroundColor: e.color,
+                    borderColor: isSelected ? (theme.isDark ? '#FFFFFF' : '#000000') : 'transparent',
+                    borderWidth: isSelected ? 3 : 0,
+                    transform: [{ scale: isSelected ? 1.25 : 1.0 }],
+                    shadowColor: e.color,
+                    shadowOpacity: isSelected ? 0.4 : 0.1,
+                    shadowRadius: isSelected ? 8 : 3,
+                    shadowOffset: { width: 0, height: isSelected ? 4 : 2 },
+                    elevation: isSelected ? 6 : 2
+                  }
+                ]}
+              />
             );
           })}
         </View>
+
+        <TouchableOpacity 
+          disabled={!selectedEmotion}
+          style={[
+            styles.nextBtn, 
+            { 
+              backgroundColor: selectedEmotion ? theme.colors.plum : theme.colors.text.disabled,
+              opacity: selectedEmotion ? 1 : 0.6,
+              marginTop: 24 
+            }
+          ]} 
+          onPress={nextStep}
+        >
+          <Text style={styles.nextBtnText}>Continue</Text>
+        </TouchableOpacity>
       </Animated.View>
     );
   };
@@ -433,7 +475,7 @@ export default function WellnessTrackerScreen() {
       <Animated.View entering={FadeInRight.springify().damping(18).mass(0.8)} style={styles.stepContainer}>
         <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Journaling</Text>
         <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>Capture your voice and surroundings</Text>
-        
+
         <View style={styles.journalBox}>
           <TextInput
             style={[styles.noteInput, { color: theme.colors.text.primary, borderColor: theme.colors.text.tertiary + '30', backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.01)', borderRadius: 16, padding: 12, minHeight: 100 }]}
@@ -447,8 +489,8 @@ export default function WellnessTrackerScreen() {
 
         <View style={styles.mediaRow}>
           {isRecording ? (
-            <TouchableOpacity 
-              onPress={stopRecording} 
+            <TouchableOpacity
+              onPress={stopRecording}
               style={[styles.mediaBtn, { backgroundColor: '#EF4444' }]}
             >
               <StopCircle size={20} color="#FFF" />
@@ -456,23 +498,23 @@ export default function WellnessTrackerScreen() {
             </TouchableOpacity>
           ) : audioUri ? (
             <View style={styles.playbackContainer}>
-              <TouchableOpacity 
-                onPress={playSound} 
+              <TouchableOpacity
+                onPress={playSound}
                 style={[styles.mediaBtn, { backgroundColor: theme.colors.plum, flex: 1 }]}
               >
                 <Activity size={20} color="#FFF" />
                 <Text style={[styles.mediaBtnText, { color: '#FFF' }]}>{isPlaying ? 'Pause Voice Note' : 'Play Voice Note'}</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={deleteSound} 
+              <TouchableOpacity
+                onPress={deleteSound}
                 style={styles.deleteAudioBtn}
               >
                 <Text style={{ color: '#EF4444', fontWeight: '800' }}>Delete</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity 
-              onPress={startRecording} 
+            <TouchableOpacity
+              onPress={startRecording}
               style={[styles.mediaBtn, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }]}
             >
               <Mic size={20} color={theme.colors.text.secondary} />
@@ -502,8 +544,8 @@ export default function WellnessTrackerScreen() {
         </Animated.View>
         <Text style={[styles.successTitle, { color: theme.colors.text.primary }]}>{t('tracker.successTitle')}</Text>
         <Text style={[styles.successSubtitle, { color: theme.colors.text.secondary }]}>{t('tracker.successSubtitle')}</Text>
-        
-        <Animated.View 
+
+        <Animated.View
           entering={FadeInUp.springify().damping(15).delay(150)}
           style={[styles.streakCard, { backgroundColor: theme.isDark ? 'rgba(239, 108, 0, 0.1)' : '#FFF3E0', borderColor: 'rgba(239, 108, 0, 0.2)' }]}
         >
@@ -512,8 +554,8 @@ export default function WellnessTrackerScreen() {
           <Text style={[styles.streakLabel, { color: theme.colors.text.secondary }]}>Day Streak</Text>
         </Animated.View>
 
-        <TouchableOpacity 
-          style={[styles.nextBtn, { backgroundColor: theme.colors.plum, marginTop: 32 }]} 
+        <TouchableOpacity
+          style={[styles.nextBtn, { backgroundColor: theme.colors.plum, marginTop: 32 }]}
           onPress={() => {
             setStep(1);
             setMood(null);
@@ -534,12 +576,12 @@ export default function WellnessTrackerScreen() {
       <StatusBar barStyle={theme.isDark ? 'light-content' : 'dark-content'} />
       <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: insets.top }]}>
         <ScreenHeader title={t('tracker.title')} subtitle={t('tracker.subtitle')} />
-        
+
         <TrackerHeader totalCount={totalCount} theme={theme} />
 
         <View style={styles.cardContainer}>
           <BlurView intensity={theme.isDark ? 30 : 80} tint={theme.isDark ? 'dark' : 'light'} style={styles.glassCard}>
-            
+
             {step < 5 && (
               <View style={styles.wizardHeader}>
                 <StepProgress current={step} />
@@ -601,12 +643,12 @@ export default function WellnessTrackerScreen() {
 
             {/* 7-Day / 30-Day Trend Chart */}
             {(() => {
-              const activeData = timeRange === '7d' 
+              const activeData = timeRange === '7d'
                 ? (insights?.trend || [])
                 : moodLogs.slice(0, 30).reverse().map((l: any) => ({
-                    value: l.score,
-                    label: new Date(l.createdAt).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })
-                  }));
+                  value: l.score,
+                  label: new Date(l.createdAt).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })
+                }));
 
               if (activeData.length === 0) return null;
 
@@ -643,13 +685,13 @@ export default function WellnessTrackerScreen() {
                       <Text style={[styles.analysisCardSub, { color: theme.colors.text.tertiary }]}>Showing last {activeData.length} records</Text>
                     </View>
                     <View style={[styles.toggleContainer, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={[styles.toggleBtn, timeRange === '7d' && [styles.toggleActiveBtn, { backgroundColor: theme.colors.plum }]]}
                         onPress={() => setTimeRange('7d')}
                       >
                         <Text style={[styles.toggleBtnText, timeRange === '7d' ? { color: '#FFF' } : { color: theme.colors.text.secondary }]}>Weekly</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={[styles.toggleBtn, timeRange === '30d' && [styles.toggleActiveBtn, { backgroundColor: theme.colors.plum }]]}
                         onPress={() => setTimeRange('30d')}
                       >
@@ -660,9 +702,9 @@ export default function WellnessTrackerScreen() {
 
                   <View style={{ marginLeft: -8, marginTop: 16 }}>
                     <LineChart
-                      data={activeData.map((d: any) => ({ 
-                        value: d.value ?? d.score, 
-                        label: d.label ?? d.day 
+                      data={activeData.map((d: any) => ({
+                        value: d.value ?? d.score,
+                        label: d.label ?? d.day
                       }))}
                       width={CHART_W}
                       height={120}
@@ -766,7 +808,7 @@ export default function WellnessTrackerScreen() {
               moodLogs.forEach((l: any) => { (l.emotions || []).forEach((e: string) => { freq[e] = (freq[e] || 0) + 1; }); });
               const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5);
               const max = sorted[0]?.[1] || 1;
-              const moodColors: Record<string,string> = { elated:'#EAB308', joyful:'#EC4899', calm:'#10B981', okay:'#14B8A6', neutral:'#64748B', tired:'#8B5CF6', anxious:'#475569', sad:'#3B82F6', stressed:'#EF4444' };
+              const moodColors: Record<string, string> = { elated: '#EAB308', joyful: '#EC4899', calm: '#10B981', okay: '#14B8A6', neutral: '#64748B', tired: '#8B5CF6', anxious: '#475569', sad: '#3B82F6', stressed: '#EF4444' };
               if (sorted.length === 0) return null;
               return (
                 <View style={[styles.analysisCard, { backgroundColor: theme.colors.surface }]}>
@@ -856,16 +898,16 @@ const styles = StyleSheet.create({
   statsVal: { fontSize: 24, fontFamily: 'Outfit-Bold' },
   statsLabel: { fontSize: 13, fontFamily: 'Outfit-Medium', marginTop: 2 },
   cardContainer: { paddingHorizontal: 24, marginTop: 8 },
-  glassCard: { borderRadius: 36, overflow: 'hidden', padding: 24, minHeight: 560, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
+  glassCard: { borderRadius: 36, overflow: 'hidden', padding: 24, minHeight: 360, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
   stepContainer: { flex: 1, width: '100%' },
-  wizardHeader: { width: '100%', marginBottom: 28 },
+  wizardHeader: { width: '100%', marginBottom: 20 },
   progressRow: { flexDirection: 'row', gap: 6, marginBottom: 20 },
   progressBar: { flex: 1, height: 4, borderRadius: 2 },
   wizardNav: { height: 32, justifyContent: 'center' },
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   backText: { fontSize: 14, fontFamily: 'Outfit-Bold' },
   stepTitle: { fontSize: 28, fontFamily: 'Outfit-Bold', marginBottom: 8 },
-  stepSub: { fontSize: 15, fontFamily: 'Outfit-Regular', marginBottom: 32, lineHeight: 22 },
+  stepSub: { fontSize: 15, fontFamily: 'Outfit-Regular', marginBottom: 16, lineHeight: 22 },
   qBox: { width: '100%', marginBottom: 24 },
   qText: { fontSize: 16, fontWeight: '700', marginBottom: 12 },
   choiceRow: { flexDirection: 'row', gap: 12 },
@@ -873,16 +915,16 @@ const styles = StyleSheet.create({
   choiceTxt: { fontWeight: '700', fontSize: 16 },
   nextBtn: { width: '100%', height: 64, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginTop: 40 },
   nextBtnText: { color: '#FFF', fontSize: 17, fontWeight: '800' },
-  moodGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', marginVertical: 12 },
-  moodItemContainer: { width: (width - 70) / 2, aspectRatio: 1.15, borderRadius: 20, overflow: 'hidden', borderWidth: 1.5, borderStyle: 'solid', borderColor: 'transparent', marginVertical: 4 },
-  moodItem: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 12 },
-  moodIconWrap: { width: 50, height: 50, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
-  moodLabelText: { fontSize: 14, fontFamily: 'Outfit-Bold', textAlign: 'center' },
-  emotionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', marginVertical: 12 },
-  emotionCardContainer: { width: (width - 70) / 2, aspectRatio: 1.35, borderRadius: 18, overflow: 'hidden', borderWidth: 1.5, borderStyle: 'solid', borderColor: 'transparent', marginBottom: 8 },
-  emotionCard: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 12 },
-  emotionLabelText: { fontSize: 14, fontFamily: 'Outfit-Bold', textAlign: 'center' },
-  emotionDescText: { fontSize: 10, fontFamily: 'Outfit-Regular', textAlign: 'center', marginTop: 2 },
+  moodRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginVertical: 20 },
+  moodCol: { alignItems: 'center', width: (width - 96) / 5 },
+  moodCircle: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderStyle: 'solid' },
+  moodText: { fontSize: 11, fontFamily: 'Outfit-Bold', marginTop: 8, textAlign: 'center' },
+  wheelContainer: { width: 270, height: 270, alignSelf: 'center', position: 'relative', marginVertical: 16 },
+  wheelInnerBg: { width: 180, height: 180, borderRadius: 90, borderWidth: 1.5, borderStyle: 'dashed', position: 'absolute', top: 45, left: 45 },
+  wheelCenter: { width: 110, height: 110, borderRadius: 55, borderWidth: 2, position: 'absolute', top: 80, left: 80, alignItems: 'center', justifyContent: 'center', shadowOffset: { width: 0, height: 4 } },
+  wheelCenterLabel: { fontSize: 16, fontFamily: 'Outfit-Bold' },
+  wheelCenterDesc: { fontSize: 11, fontFamily: 'Outfit-Medium', marginTop: 2, textTransform: 'uppercase', letterSpacing: 0.5 },
+  wheelSegment: { width: 54, height: 54, borderRadius: 27, position: 'absolute' },
   mediaRow: { width: '100%', marginVertical: 16 },
   mediaBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 14, borderRadius: 16, width: '100%' },
   mediaBtnText: { fontSize: 14, fontWeight: '700' },
@@ -901,8 +943,8 @@ const styles = StyleSheet.create({
   successIconWrap: { width: 100, height: 100, borderRadius: 50, backgroundColor: 'rgba(52, 211, 153, 0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 32 },
   successTitle: { fontSize: 32, fontFamily: 'Outfit-Bold', marginBottom: 12, textAlign: 'center' },
   successSubtitle: { fontSize: 16, textAlign: 'center', lineHeight: 26, paddingHorizontal: 20, fontFamily: 'Outfit-Regular' },
-  
-  historySection: { paddingHorizontal: 24, marginTop: 48 },
+
+  historySection: { paddingHorizontal: 24, marginTop: 20 },
   historyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   historyTitle: { fontSize: 22, fontFamily: 'Outfit-Bold' },
   historyItem: { flexDirection: 'row', alignItems: 'center', padding: 18, borderRadius: 24, marginBottom: 14, borderWidth: 1, gap: 16 },

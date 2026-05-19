@@ -47,7 +47,7 @@ export default function TabLayout() {
         name="tools" 
         options={{ 
           title: t('tools.title') || 'Explore',
-          tabBarIcon: ({ color, focused }) => <Compass color={color} size={24} strokeWidth={focused ? 2.2 : 1.8} />
+          tabBarIcon: ({ color, focused }) => <LayoutGrid color={color} size={24} strokeWidth={focused ? 2.2 : 1.8} />
         }} 
       />
       <Tabs.Screen 

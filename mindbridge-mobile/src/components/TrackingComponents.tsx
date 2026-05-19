@@ -13,7 +13,11 @@ import {
   Thermometer,
   Activity,
   Waves,
-  Brain
+  Brain,
+  Droplet,
+  Wind,
+  Sparkles,
+  AlertCircle
 } from 'lucide-react-native';
 import Animated, { FadeInUp, FadeInRight } from 'react-native-reanimated';
 
@@ -24,37 +28,46 @@ import { Meh, Smile, Frown, Flame } from 'lucide-react-native';
 
 export const EnergySelector = ({ value, onChange, theme }: any) => {
   const levels = [
-    { val: 2, icon: Frown, label: 'Drained', color: theme.colors.accents.slate || '#64748B' },
-    { val: 4, icon: Meh, label: 'Low', color: theme.colors.accents.powderBlue || '#0EA5E9' },
-    { val: 6, icon: Smile, label: 'Neutral', color: theme.colors.accents.eucalyptus || '#10B981' },
-    { val: 8, icon: Zap, label: 'Active', color: theme.colors.accents.softMint || '#34D399' },
-    { val: 10, icon: Flame, label: 'Peak', color: theme.colors.semantic.danger || '#EF4444' },
+    { val: 2, icon: Frown, label: 'Drained', color: theme.colors.accents?.slate || '#64748B' },
+    { val: 4, icon: Meh, label: 'Low', color: theme.colors.accents?.powderBlue || '#0EA5E9' },
+    { val: 6, icon: Smile, label: 'Neutral', color: theme.colors.accents?.eucalyptus || '#10B981' },
+    { val: 8, icon: Zap, label: 'Active', color: theme.colors.accents?.softMint || '#34D399' },
+    { val: 10, icon: Flame, label: 'Peak', color: '#EF4444' },
   ];
 
   return (
     <View style={styles.section}>
       <Text style={[styles.label, { color: theme.colors.text.primary }]}>Energy Level</Text>
-      <View style={styles.energyRow}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.energyScroll}>
         {levels.map((l) => {
           const IconComponent = l.icon;
           const isSelected = value === l.val;
           return (
             <TouchableOpacity
               key={l.val}
+              activeOpacity={0.8}
               onPress={() => onChange(l.val)}
               style={[
                 styles.energyItem,
-                isSelected && { backgroundColor: l.color + '20', borderColor: l.color }
+                { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' },
+                isSelected && { backgroundColor: l.color + '15', borderColor: l.color }
               ]}
             >
-              <View style={[styles.energyIconWrap, isSelected && { backgroundColor: l.color + '15' }]}>
-                <IconComponent color={isSelected ? l.color : theme.colors.text.tertiary} size={22} />
+              <View style={[
+                styles.energyIconWrap, 
+                { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' },
+                isSelected && { backgroundColor: l.color }
+              ]}>
+                <IconComponent color={isSelected ? '#FFF' : theme.colors.text.tertiary} size={20} />
               </View>
-              <Text style={[styles.energyLabel, { color: theme.colors.text.secondary }]}>{l.label}</Text>
+              <Text style={[
+                styles.energyLabel, 
+                { color: isSelected ? theme.colors.text.primary : theme.colors.text.secondary }
+              ]}>{l.label}</Text>
             </TouchableOpacity>
           );
         })}
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -78,7 +91,8 @@ export const SleepTracker = ({ quality, hours, onQualityChange, onHoursChange, t
             onPress={() => onQualityChange(q.id)}
             style={[
               styles.qualityItem,
-              quality === q.id && { backgroundColor: q.color + '20', borderColor: q.color }
+              { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' },
+              quality === q.id && { backgroundColor: q.color + '15', borderColor: q.color }
             ]}
           >
             <q.icon color={quality === q.id ? q.color : theme.colors.text.tertiary} size={20} />
@@ -87,14 +101,14 @@ export const SleepTracker = ({ quality, hours, onQualityChange, onHoursChange, t
         ))}
       </View>
       
-      <View style={styles.hoursRow}>
+      <View style={[styles.hoursRow, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }]}>
         <Text style={[styles.subLabel, { color: theme.colors.text.secondary }]}>Hours Slept</Text>
         <View style={styles.hoursControls}>
-          <TouchableOpacity onPress={() => onHoursChange(Math.max(0, hours - 0.5))} style={styles.hourBtn}>
+          <TouchableOpacity onPress={() => onHoursChange(Math.max(0, hours - 0.5))} style={[styles.hourBtn, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}>
             <Text style={{ fontSize: 20, color: theme.colors.text.primary }}>-</Text>
           </TouchableOpacity>
           <Text style={[styles.hoursValue, { color: theme.colors.text.primary }]}>{hours}h</Text>
-          <TouchableOpacity onPress={() => onHoursChange(Math.min(15, hours + 0.5))} style={styles.hourBtn}>
+          <TouchableOpacity onPress={() => onHoursChange(Math.min(15, hours + 0.5))} style={[styles.hourBtn, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}>
             <Text style={{ fontSize: 20, color: theme.colors.text.primary }}>+</Text>
           </TouchableOpacity>
         </View>
@@ -123,6 +137,10 @@ export const SocialPicker = ({ value, onChange, theme }: any) => {
             onPress={() => onChange(opt.id)}
             style={[
               styles.socialItem,
+              { 
+                backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : '#FFF',
+                borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'
+              },
               value === opt.id && { backgroundColor: theme.colors.plum, borderColor: theme.colors.plum }
             ]}
           >
@@ -140,9 +158,16 @@ export const SymptomCloud = ({ selected, onToggle, theme }: any) => {
   const symptoms = [
     { id: 'headache', icon: Brain, label: 'Headache' },
     { id: 'fatigue', icon: Coffee, label: 'Fatigue' },
+    { id: 'cramps', icon: Droplet, label: 'Cramps' },
+    { id: 'bloating', icon: Wind, label: 'Bloating' },
+    { id: 'breakouts', icon: AlertCircle, label: 'Breakouts' },
+    { id: 'backpain', icon: Thermometer, label: 'Back Pain' },
+    { id: 'brainfog', icon: Brain, label: 'Brain Fog' },
+    { id: 'insomnia', icon: Moon, label: 'Insomnia' },
     { id: 'tension', icon: Activity, label: 'Tension' },
     { id: 'nausea', icon: Waves, label: 'Nausea' },
-    { id: 'pain', icon: Thermometer, label: 'Body Pain' },
+    { id: 'flutter', icon: Heart, label: 'Heart Flutter' },
+    { id: 'restless', icon: Zap, label: 'Restless' },
   ];
 
   return (
@@ -172,33 +197,33 @@ export const SymptomCloud = ({ selected, onToggle, theme }: any) => {
 };
 
 const styles = StyleSheet.create({
-  section: { marginBottom: 28, width: '100%' },
-  label: { fontSize: 18, fontWeight: '700', marginBottom: 16, letterSpacing: -0.5 },
-  subLabel: { fontSize: 14, fontWeight: '600' },
+  section: { marginBottom: 24, width: '100%' },
+  label: { fontSize: 16, fontFamily: 'Outfit-Bold', marginBottom: 12, letterSpacing: -0.3 },
+  subLabel: { fontSize: 13, fontFamily: 'Outfit-Bold' },
   
   // Energy
-  energyRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  energyItem: { alignItems: 'center', padding: 10, borderRadius: 16, borderWidth: 1.5, borderColor: 'transparent', width: (width - 64) / 5 },
-  energyIconWrap: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
-  energyLabel: { fontSize: 9, fontWeight: '700', textTransform: 'uppercase' },
+  energyScroll: { gap: 10, paddingRight: 20 },
+  energyItem: { width: 80, alignItems: 'center', paddingVertical: 10, borderRadius: 16, borderWidth: 1.5, borderColor: 'transparent' },
+  energyIconWrap: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  energyLabel: { fontSize: 9, fontFamily: 'Outfit-Bold', textTransform: 'uppercase', textAlign: 'center' },
 
   // Quality
-  qualityRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  qualityItem: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 16, borderWidth: 1.5, borderColor: 'transparent', backgroundColor: 'rgba(0,0,0,0.02)' },
-  qualityLabel: { fontSize: 12, fontWeight: '700', marginTop: 6 },
+  qualityRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+  qualityItem: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 16, borderWidth: 1.5, borderColor: 'transparent' },
+  qualityLabel: { fontSize: 12, fontFamily: 'Outfit-Bold', marginTop: 6 },
   
-  hoursRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(0,0,0,0.03)', padding: 12, borderRadius: 16 },
+  hoursRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12, borderRadius: 16 },
   hoursControls: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  hourBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.05)', alignItems: 'center', justifyContent: 'center' },
-  hoursValue: { fontSize: 18, fontWeight: '800' },
+  hourBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  hoursValue: { fontSize: 18, fontFamily: 'Outfit-Bold' },
 
   // Social
-  socialScroll: { gap: 12, paddingRight: 20 },
-  socialItem: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.05)', gap: 8 },
-  socialLabel: { fontSize: 14, fontWeight: '600' },
+  socialScroll: { gap: 10, paddingRight: 20 },
+  socialItem: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, borderWidth: 1.5, gap: 8 },
+  socialLabel: { fontSize: 14, fontFamily: 'Outfit-Bold' },
 
   // Symptoms
-  symptomGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  symptomGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   symptomChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, borderWidth: 1.5, borderColor: 'transparent', gap: 6 },
-  symptomLabel: { fontSize: 13, fontWeight: '600' },
+  symptomLabel: { fontSize: 13, fontFamily: 'Outfit-Bold' },
 });

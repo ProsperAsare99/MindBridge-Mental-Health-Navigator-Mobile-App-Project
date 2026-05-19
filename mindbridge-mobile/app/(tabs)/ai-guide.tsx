@@ -339,6 +339,32 @@ export default function AIGuideScreen() {
     ]);
   };
 
+  const handleDeleteGroup = (groupLabel: string, messageIds: string[]) => {
+    if (messageIds.length === 0) {
+      Alert.alert('No messages', 'There are no messages in this group to delete.');
+      return;
+    }
+    Alert.alert(
+      'Delete Group',
+      `Are you sure you want to delete all messages under "${groupLabel}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete All',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.delete('/ai/history/bulk-delete', { data: { ids: messageIds } });
+              setHistory(prev => prev.filter(msg => !messageIds.includes(msg.id)));
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete message group.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const getGroupedHistory = () => {
     const groups: { [key: string]: any[] } = {
       'Today': [],
@@ -515,6 +541,14 @@ export default function AIGuideScreen() {
                         <View style={S.groupLabelRow}>
                           <Text style={[S.groupLabelText, { color: theme.isDark ? theme.colors.accents.powderBlue : theme.colors.plum }]}>{category}</Text>
                           <View style={[S.groupLabelLine, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
+                          <TouchableOpacity 
+                            onPress={() => handleDeleteGroup(category, sortedItems.map(item => item.id).filter(id => !id.toString().startsWith('hist-')))} 
+                            style={S.groupDeleteBtn}
+                            activeOpacity={0.7}
+                          >
+                            <Trash2 color={theme.isDark ? theme.colors.accents.blushPink : '#EF4444'} size={12} />
+                            <Text style={[S.groupDeleteText, { color: theme.isDark ? theme.colors.accents.blushPink : '#EF4444' }]}>Delete Group</Text>
+                          </TouchableOpacity>
                         </View>
 
                         {sortedItems.map((msg, index) => {

@@ -45,7 +45,11 @@ import {
   AlertCircle,
   CloudRain,
   Flame,
-  Lightbulb
+  Lightbulb,
+  Frown,
+  Meh,
+  Smile,
+  Zap
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -99,23 +103,28 @@ export default function WellnessTrackerScreen() {
   const theme = useTheme();
   
   const getMoodIcon = (emotion: string, size = 20, color = theme.colors.plum) => {
-    switch(emotion) {
+    switch(emotion?.toLowerCase()) {
+      case 'radiant':
       case 'elated': return <Sun size={size} color={color} />;
-      case 'joyful': return <Sparkles size={size} color={color} />;
+      case 'serene':
       case 'calm': return <Wind size={size} color={color} />;
-      case 'okay': return <Heart size={size} color={color} />;
-      case 'neutral': return <Activity size={size} color={color} />;
-      case 'tired': return <Moon size={size} color={color} />;
-      case 'anxious': return <AlertCircle size={size} color={color} />;
+      case 'melancholy':
       case 'sad': return <CloudRain size={size} color={color} />;
+      case 'anxious': return <AlertCircle size={size} color={color} />;
+      case 'frustrated':
       case 'stressed': return <Flame size={size} color={color} />;
+      case 'grateful':
+      case 'joyful': return <Heart size={size} color={color} />;
+      case 'empty':
+      case 'tired': return <Moon size={size} color={color} />;
+      case 'empowered': return <Zap size={size} color={color} />;
       default: return <Activity size={size} color={color} />;
     }
   };
   const { t } = theme;
   const router = useRouter();
   
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [history, setHistory] = useState<any[]>([]);
@@ -123,8 +132,8 @@ export default function WellnessTrackerScreen() {
   const [insights, setInsights] = useState<any>(null);
   const [timeRange, setTimeRange] = useState<'7d' | '30d'>('7d');
   
-  const [answers, setAnswers] = useState({ sleptWell: true, overwhelmed: false });
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [mood, setMood] = useState<number | null>(null);
+  const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
   const [energy, setEnergy] = useState(6);
   const [sleepHours, setSleepHours] = useState(7);
   const [sleepQuality, setSleepQuality] = useState('good');
@@ -135,11 +144,20 @@ export default function WellnessTrackerScreen() {
   const [weather, setWeather] = useState<string | null>(null);
   
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
   const [audioUri, setAudioUri] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (sound) sound.unloadAsync();
+    };
+  }, [sound]);
 
   const fetchData = async () => {
     try {
@@ -166,11 +184,11 @@ export default function WellnessTrackerScreen() {
   };
 
   const nextStep = () => setStep(s => s + 1);
-  const prevStep = () => setStep(s => s > 0 ? s - 1 : 0);
+  const prevStep = () => setStep(s => s > 1 ? s - 1 : 1);
 
   const StepProgress = ({ current }: { current: number }) => (
     <View style={styles.progressRow}>
-      {[0, 1, 2, 3].map((i) => (
+      {[1, 2, 3, 4].map((i) => (
         <View 
           key={i} 
           style={[
@@ -182,19 +200,98 @@ export default function WellnessTrackerScreen() {
     </View>
   );
 
+  const calculateClientStreak = (logs: any[]) => {
+    if (logs.length === 0) return 0;
+    const sorted = [...logs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    let streak = 0;
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let lastDate = new Date(today);
+    lastDate.setDate(lastDate.getDate() + 1);
+    for (let i = 0; i < sorted.length; i++) {
+      const logDate = new Date(sorted[i].createdAt);
+      logDate.setHours(0, 0, 0, 0);
+      const diffTime = lastDate.getTime() - logDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays === 0) {
+        continue;
+      } else if (diffDays === 1) {
+        streak++;
+        lastDate = logDate;
+      } else {
+        break;
+      }
+    }
+    const mostRecent = sorted[0] ? new Date(sorted[0].createdAt) : null;
+    if (mostRecent) {
+      mostRecent.setHours(0, 0, 0, 0);
+      const diff = today.getTime() - mostRecent.getTime();
+      const days = diff / (1000 * 60 * 60 * 24);
+      if (days > 1) {
+        return 0;
+      }
+    }
+    return streak || 1;
+  };
+
+  const startRecording = async () => {
+    try {
+      const permission = await Audio.requestPermissionsAsync();
+      if (permission.status === 'granted') {
+        await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+        const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+        setRecording(recording);
+        setIsRecording(true);
+      }
+    } catch (err) {
+      console.error('Failed to start recording', err);
+    }
+  };
+
+  const stopRecording = async () => {
+    setIsRecording(false);
+    setRecording(null);
+    await recording?.stopAndUnloadAsync();
+    const uri = recording?.getURI();
+    setAudioUri(uri || null);
+  };
+
+  const playSound = async () => {
+    if (!audioUri) return;
+    if (isPlaying) {
+      if (sound) {
+        await sound.pauseAsync();
+      }
+      setIsPlaying(false);
+      return;
+    }
+    if (sound) {
+      await sound.unloadAsync();
+    }
+    const { sound: newSound } = await Audio.Sound.createAsync({ uri: audioUri });
+    setSound(newSound);
+    setIsPlaying(true);
+    await newSound.playAsync();
+    newSound.setOnPlaybackStatusUpdate((status: any) => {
+      if (status.didJustFinish) setIsPlaying(false);
+    });
+  };
+
+  const deleteSound = async () => {
+    if (sound) {
+      await sound.unloadAsync();
+    }
+    setAudioUri(null);
+    setIsPlaying(false);
+  };
+
   const handleLog = async () => {
     setLoading(true);
     try {
-      const moods = [
-        { id: 'elated', score: 10 }, { id: 'joyful', score: 9 }, { id: 'calm', score: 8 },
-        { id: 'okay', score: 7 }, { id: 'neutral', score: 6 }, { id: 'tired', score: 5 },
-        { id: 'anxious', score: 4 }, { id: 'sad', score: 3 }, { id: 'stressed', score: 2 }
-      ];
-      const moodScore = moods.find(m => m.id === selectedMood)?.score || 6;
-
+      const score = mood ? mood * 2 : 6;
       await api.post('/mood', {
-        score: moodScore,
-        emotions: [selectedMood],
+        score,
+        emotions: selectedEmotion ? [selectedEmotion] : [],
         energyLevel: energy,
         sleepHours,
         sleepQuality,
@@ -205,9 +302,9 @@ export default function WellnessTrackerScreen() {
         note,
         audioUrl: audioUri, 
       });
-      
-      setStep(4);
+      setStep(5);
       setTotalCount(prev => prev + 1);
+      fetchData();
     } catch (error) {
       Alert.alert('Error', 'Failed to save log.');
     } finally {
@@ -215,59 +312,220 @@ export default function WellnessTrackerScreen() {
     }
   };
 
-  const EmotionLandscape = () => {
-    const moods = [
-      { id: 'elated', icon: Sun, colors: theme.isDark ? ['#EAB308', '#CA8A04'] : ['#FEF08A', '#FDE047'], label: 'Elated', vibe: 'High energy & glowing positivity', category: 'Vibrant' },
-      { id: 'joyful', icon: Sparkles, colors: theme.isDark ? ['#EC4899', '#C084FC'] : ['#FCE7F3', '#F472B6'], label: 'Joyful', vibe: 'Warm connection & pure happiness', category: 'Bright' },
-      { id: 'calm', icon: Wind, colors: theme.isDark ? ['#10B981', '#059669'] : ['#D1FAE5', '#A7F3D0'], label: 'Calm', vibe: 'Inner peace & tranquility', category: 'Serene' },
-      { id: 'okay', icon: Heart, colors: theme.isDark ? ['#14B8A6', '#0F766E'] : ['#CCFBF1', '#2DD4BF'], label: 'Okay', vibe: 'Steady, content & balanced', category: 'Stable' },
-      { id: 'neutral', icon: Activity, colors: theme.isDark ? ['#64748B', '#475569'] : ['#F1F5F9', '#CBD5E1'], label: 'Neutral', vibe: 'Observant & even-tempered', category: 'Balanced' },
-      { id: 'tired', icon: Moon, colors: theme.isDark ? ['#8B5CF6', '#6D28D9'] : ['#EDE9FE', '#C084FC'], label: 'Tired', vibe: 'Low energy & needing recovery', category: 'Rest' },
-      { id: 'anxious', icon: AlertCircle, colors: theme.isDark ? ['#475569', '#1E293B'] : ['#E2E8F0', '#94A3B8'], label: 'Anxious', vibe: 'High cognitive load & tension', category: 'Heavy' },
-      { id: 'sad', icon: CloudRain, colors: theme.isDark ? ['#3B82F6', '#1D4ED8'] : ['#DBEAFE', '#93C5FD'], label: 'Sad', vibe: 'Reflective & processing feelings', category: 'Reflective' },
-      { id: 'stressed', icon: Flame, colors: theme.isDark ? ['#EF4444', '#991B1B'] : ['#FEE2E2', '#F87171'], label: 'Stressed', vibe: 'Under pressure & overloaded', category: 'Overload' },
+  const renderStep1 = () => {
+    const moodsList = [
+      { value: 1, icon: CloudRain, label: 'Awful', colors: ['#64748B', '#475569'] },
+      { value: 2, icon: Frown, label: 'Bad', colors: ['#EF4444', '#B91C1C'] },
+      { value: 3, icon: Meh, label: 'Okay', colors: ['#FBBF24', '#D97706'] },
+      { value: 4, icon: Smile, label: 'Good', colors: [theme.colors.plum, '#701A75'] },
+      { value: 5, icon: Sun, label: 'Great', colors: ['#10B981', '#047857'] },
     ];
-
     return (
-      <View style={styles.landscapeGrid}>
-        {moods.map((m) => {
-          const isSelected = selectedMood === m.id;
-          return (
-            <TouchableOpacity
-              key={m.id}
-              onPress={() => setSelectedMood(m.id)}
-              style={styles.landscapeCardContainer}
-              activeOpacity={0.85}
-            >
-              <LinearGradient
-                colors={(isSelected ? m.colors : (theme.isDark ? ['#1E293B', '#0F172A'] : ['#FFFFFF', '#F8FAFC'])) as unknown as readonly [string, string, ...string[]]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={[
-                  styles.landscapeCard,
-                  isSelected && styles.landscapeCardSelected,
-                  { borderColor: isSelected ? m.colors[0] : (theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)') }
-                ]}
+      <Animated.View entering={FadeInRight.springify().damping(18).mass(0.8)} style={styles.stepContainer}>
+        <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Core Energy</Text>
+        <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>How is your spirit pulsating right now?</Text>
+        <View style={styles.moodGrid}>
+          {moodsList.map((m) => {
+            const Icon = m.icon;
+            const isSelected = mood === m.value;
+            return (
+              <TouchableOpacity
+                key={m.value}
+                activeOpacity={0.8}
+                onPress={() => {
+                  setMood(m.value);
+                  setTimeout(() => nextStep(), 200);
+                }}
+                style={styles.moodItemContainer}
               >
-                {isSelected && (
-                  <View style={[styles.selectedVibeBadge, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.08)' }]}>
-                    <Text style={[styles.vibeBadgeText, { color: theme.isDark ? '#FFF' : theme.colors.text.primary }]}>{m.category}</Text>
+                <LinearGradient
+                  colors={isSelected ? (m.colors as unknown as readonly [string, string, ...string[]]) : (theme.isDark ? ['rgba(255,255,255,0.03)', 'rgba(255,255,255,0.03)'] : ['rgba(0,0,0,0.015)', 'rgba(0,0,0,0.015)'])}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={[
+                    styles.moodItem,
+                    isSelected ? { borderColor: m.colors[0], shadowColor: m.colors[0], shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 } : { borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }
+                  ]}
+                >
+                  <View style={[styles.moodIconWrap, { backgroundColor: isSelected ? 'rgba(255,255,255,0.15)' : (theme.isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)') }]}>
+                    <Icon size={32} color={isSelected ? '#FFF' : theme.colors.text.secondary} />
                   </View>
-                )}
-                <View style={styles.moodHeaderRow}>
-                  <m.icon size={28} color={isSelected ? (theme.isDark ? '#FFF' : theme.colors.plum) : theme.colors.text.secondary} />
-                </View>
-                <Text style={[styles.landscapeLabel, { color: isSelected && theme.isDark ? '#FFF' : theme.colors.text.primary }]}>
-                  {m.label}
-                </Text>
-                <Text style={[styles.landscapeVibe, { color: isSelected && theme.isDark ? 'rgba(255,255,255,0.7)' : theme.colors.text.tertiary }]}>
-                  {m.vibe}
-                </Text>
-              </LinearGradient>
+                  <Text style={[styles.moodLabelText, { color: isSelected ? '#FFF' : theme.colors.text.secondary }]}>{m.label}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </Animated.View>
+    );
+  };
+
+  const renderStep2 = () => {
+    const emotionsList = [
+      { label: 'Radiant', desc: 'Joy & Energy', colors: ['#FBBF24', '#D97706'], icon: Sun },
+      { label: 'Serene', desc: 'Peace & Calm', colors: ['#10B981', '#0F766E'], icon: Wind },
+      { label: 'Melancholy', desc: 'Reflection', colors: ['#6366F1', '#4F46E5'], icon: CloudRain },
+      { label: 'Anxious', desc: 'Tension', colors: ['#F97316', '#C2410C'], icon: AlertCircle },
+      { label: 'Frustrated', desc: 'Impatience', colors: ['#EF4444', '#B91C1C'], icon: Flame },
+      { label: 'Grateful', desc: 'Warmth', colors: ['#EC4899', '#BE185D'], icon: Heart },
+      { label: 'Empty', desc: 'Low Drive', colors: ['#64748B', '#334155'], icon: Moon },
+      { label: 'Empowered', desc: 'Strength', colors: ['#8B5CF6', '#6D28D9'], icon: Zap },
+    ];
+    return (
+      <Animated.View entering={FadeInRight.springify().damping(18).mass(0.8)} style={styles.stepContainer}>
+        <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Emotion Selection</Text>
+        <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>Select a specific emotional texture</Text>
+        <View style={styles.emotionGrid}>
+          {emotionsList.map((e) => {
+            const Icon = e.icon;
+            const isSelected = selectedEmotion === e.label;
+            return (
+              <TouchableOpacity
+                key={e.label}
+                activeOpacity={0.8}
+                onPress={() => {
+                  setSelectedEmotion(e.label);
+                  setTimeout(() => nextStep(), 200);
+                }}
+                style={styles.emotionCardContainer}
+              >
+                <LinearGradient
+                  colors={isSelected ? (e.colors as unknown as readonly [string, string, ...string[]]) : (theme.isDark ? ['rgba(255,255,255,0.03)', 'rgba(255,255,255,0.03)'] : ['rgba(0,0,0,0.015)', 'rgba(0,0,0,0.015)'])}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={[
+                    styles.emotionCard,
+                    isSelected ? { borderColor: e.colors[0], shadowColor: e.colors[0], shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 } : { borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }
+                  ]}
+                >
+                  <Icon size={24} color={isSelected ? '#FFF' : theme.colors.text.secondary} style={{ marginBottom: 4 }} />
+                  <Text style={[styles.emotionLabelText, { color: isSelected ? '#FFF' : theme.colors.text.primary }]}>{e.label}</Text>
+                  <Text style={[styles.emotionDescText, { color: isSelected ? 'rgba(255,255,255,0.8)' : theme.colors.text.tertiary }]}>{e.desc}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </Animated.View>
+    );
+  };
+
+  const renderStep3 = () => {
+    return (
+      <Animated.View entering={FadeInRight.springify().damping(18).mass(0.8)} style={styles.stepContainer}>
+        <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Vital Dimensions</Text>
+        <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>Rest, energy, and physical symptoms</Text>
+        <ScrollView style={{ width: '100%', maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+          <EnergySelector value={energy} onChange={setEnergy} theme={theme} />
+          <SleepTracker quality={sleepQuality} hours={sleepHours} onQualityChange={setSleepQuality} onHoursChange={setSleepHours} theme={theme} />
+          <SocialPicker value={social} onChange={setSocial} theme={theme} />
+          <SymptomCloud selected={symptoms} onToggle={(id: string) => setSymptoms(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])} theme={theme} />
+        </ScrollView>
+        <TouchableOpacity style={[styles.nextBtn, { backgroundColor: theme.colors.plum, marginTop: 16 }]} onPress={nextStep}>
+          <Text style={styles.nextBtnText}>Continue</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
+  const renderStep4 = () => {
+    return (
+      <Animated.View entering={FadeInRight.springify().damping(18).mass(0.8)} style={styles.stepContainer}>
+        <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Journaling</Text>
+        <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>Capture your voice and surroundings</Text>
+        
+        <View style={styles.journalBox}>
+          <TextInput
+            style={[styles.noteInput, { color: theme.colors.text.primary, borderColor: theme.colors.text.tertiary + '30', backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.01)', borderRadius: 16, padding: 12, minHeight: 100 }]}
+            placeholder="Pour your heart out here..."
+            placeholderTextColor={theme.colors.text.tertiary}
+            multiline
+            value={note}
+            onChangeText={setNote}
+          />
+        </View>
+
+        <View style={styles.mediaRow}>
+          {isRecording ? (
+            <TouchableOpacity 
+              onPress={stopRecording} 
+              style={[styles.mediaBtn, { backgroundColor: '#EF4444' }]}
+            >
+              <StopCircle size={20} color="#FFF" />
+              <Text style={[styles.mediaBtnText, { color: '#FFF' }]}>Stop Recording</Text>
             </TouchableOpacity>
-          );
-        })}
-      </View>
+          ) : audioUri ? (
+            <View style={styles.playbackContainer}>
+              <TouchableOpacity 
+                onPress={playSound} 
+                style={[styles.mediaBtn, { backgroundColor: theme.colors.plum, flex: 1 }]}
+              >
+                <Activity size={20} color="#FFF" />
+                <Text style={[styles.mediaBtnText, { color: '#FFF' }]}>{isPlaying ? 'Pause Voice Note' : 'Play Voice Note'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={deleteSound} 
+                style={styles.deleteAudioBtn}
+              >
+                <Text style={{ color: '#EF4444', fontWeight: '800' }}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity 
+              onPress={startRecording} 
+              style={[styles.mediaBtn, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }]}
+            >
+              <Mic size={20} color={theme.colors.text.secondary} />
+              <Text style={[styles.mediaBtnText, { color: theme.colors.text.secondary }]}>Record Voice</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.envRow}>
+          <View style={styles.envTag}><MapPin size={14} color={theme.colors.plum} /><Text style={[styles.envText, { color: theme.colors.text.secondary }]}>{location || 'Locating...'}</Text></View>
+          <View style={styles.envTag}><Cloud size={14} color={theme.colors.plum} /><Text style={[styles.envText, { color: theme.colors.text.secondary }]}>{weather || 'Syncing...'}</Text></View>
+        </View>
+
+        <TouchableOpacity style={[styles.plantBtn, { backgroundColor: theme.colors.plum, marginTop: 16 }]} onPress={handleLog}>
+          {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.nextBtnText}>{t('tracker.submitBtn')}</Text>}
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
+  const renderStep5 = () => {
+    const streak = calculateClientStreak(moodLogs);
+    return (
+      <Animated.View entering={FadeIn.duration(500)} style={styles.successContainer}>
+        <Animated.View entering={FadeInUp.springify().damping(12).mass(0.8)} style={styles.successIconWrap}>
+          <CheckCircle2 color={theme.colors.accents?.eucalyptus || '#34D399'} size={48} />
+        </Animated.View>
+        <Text style={[styles.successTitle, { color: theme.colors.text.primary }]}>{t('tracker.successTitle')}</Text>
+        <Text style={[styles.successSubtitle, { color: theme.colors.text.secondary }]}>{t('tracker.successSubtitle')}</Text>
+        
+        <Animated.View 
+          entering={FadeInUp.springify().damping(15).delay(150)}
+          style={[styles.streakCard, { backgroundColor: theme.isDark ? 'rgba(239, 108, 0, 0.1)' : '#FFF3E0', borderColor: 'rgba(239, 108, 0, 0.2)' }]}
+        >
+          <Flame size={40} color="#EF6C00" style={{ marginBottom: 4 }} />
+          <Text style={[styles.streakCount, { color: theme.colors.text.primary }]}>{streak}</Text>
+          <Text style={[styles.streakLabel, { color: theme.colors.text.secondary }]}>Day Streak</Text>
+        </Animated.View>
+
+        <TouchableOpacity 
+          style={[styles.nextBtn, { backgroundColor: theme.colors.plum, marginTop: 32 }]} 
+          onPress={() => {
+            setStep(1);
+            setMood(null);
+            setSelectedEmotion(null);
+            setNote('');
+            setAudioUri(null);
+            router.push('/(tabs)/dashboard');
+          }}
+        >
+          <Text style={styles.nextBtnText}>Return to Home</Text>
+        </TouchableOpacity>
+      </Animated.View>
     );
   };
 
@@ -282,11 +540,11 @@ export default function WellnessTrackerScreen() {
         <View style={styles.cardContainer}>
           <BlurView intensity={theme.isDark ? 30 : 80} tint={theme.isDark ? 'dark' : 'light'} style={styles.glassCard}>
             
-            {step < 4 && (
+            {step < 5 && (
               <View style={styles.wizardHeader}>
                 <StepProgress current={step} />
                 <View style={styles.wizardNav}>
-                  {step > 0 ? (
+                  {step > 1 ? (
                     <TouchableOpacity onPress={prevStep} style={styles.backBtn}>
                       <ArrowRight size={20} color={theme.colors.text.tertiary} style={{ transform: [{ rotate: '180deg' }] }} />
                       <Text style={[styles.backText, { color: theme.colors.text.tertiary }]}>{t('common.back')}</Text>
@@ -296,132 +554,11 @@ export default function WellnessTrackerScreen() {
               </View>
             )}
 
-            {step === 0 && (
-              <Animated.View entering={FadeInRight} style={styles.stepContainer}>
-                <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Quick Pulse</Text>
-                <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>Let's start with a few basics about your day.</Text>
-                <View style={styles.qBox}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                    <Moon size={20} color={theme.colors.plum} />
-                    <Text style={[styles.qText, { color: theme.colors.text.secondary, marginBottom: 0 }]}>Did you sleep well?</Text>
-                  </View>
-                  <View style={styles.choiceRow}>
-                    <TouchableOpacity 
-                      onPress={() => setAnswers({...answers, sleptWell: false})} 
-                      style={[
-                        styles.choiceBtn, 
-                        !answers.sleptWell 
-                          ? { backgroundColor: theme.isDark ? '#EF4444' : '#FEE2E2', borderColor: '#EF4444', borderWidth: 1.5 } 
-                          : { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor: 'transparent', borderWidth: 1.5 }
-                      ]}
-                    >
-                      <Text style={[styles.choiceTxt, { color: !answers.sleptWell ? (theme.isDark ? '#FFF' : '#EF4444') : theme.colors.text.tertiary }]}>No</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      onPress={() => setAnswers({...answers, sleptWell: true})} 
-                      style={[
-                        styles.choiceBtn, 
-                        answers.sleptWell 
-                          ? { backgroundColor: theme.isDark ? theme.colors.plum : theme.colors.plum + '20', borderColor: theme.colors.plum, borderWidth: 1.5 } 
-                          : { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor: 'transparent', borderWidth: 1.5 }
-                      ]}
-                    >
-                      <Text style={[styles.choiceTxt, { color: answers.sleptWell ? (theme.isDark ? '#FFF' : theme.colors.plum) : theme.colors.text.tertiary }]}>Yes</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                <View style={styles.qBox}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                    <AlertCircle size={20} color={theme.colors.plum} />
-                    <Text style={[styles.qText, { color: theme.colors.text.secondary, marginBottom: 0 }]}>Feeling overwhelmed?</Text>
-                  </View>
-                  <View style={styles.choiceRow}>
-                    <TouchableOpacity 
-                      onPress={() => setAnswers({...answers, overwhelmed: false})} 
-                      style={[
-                        styles.choiceBtn, 
-                        !answers.overwhelmed 
-                          ? { backgroundColor: theme.isDark ? theme.colors.plum : theme.colors.plum + '20', borderColor: theme.colors.plum, borderWidth: 1.5 } 
-                          : { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor: 'transparent', borderWidth: 1.5 }
-                      ]}
-                    >
-                      <Text style={[styles.choiceTxt, { color: !answers.overwhelmed ? (theme.isDark ? '#FFF' : theme.colors.plum) : theme.colors.text.tertiary }]}>No</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      onPress={() => setAnswers({...answers, overwhelmed: true})} 
-                      style={[
-                        styles.choiceBtn, 
-                        answers.overwhelmed 
-                          ? { backgroundColor: theme.isDark ? '#EF4444' : '#FEE2E2', borderColor: '#EF4444', borderWidth: 1.5 } 
-                          : { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor: 'transparent', borderWidth: 1.5 }
-                      ]}
-                    >
-                      <Text style={[styles.choiceTxt, { color: answers.overwhelmed ? (theme.isDark ? '#FFF' : '#EF4444') : theme.colors.text.tertiary }]}>Yes</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                <TouchableOpacity style={[styles.nextBtn, { backgroundColor: theme.colors.plum }]} onPress={nextStep}><Text style={styles.nextBtnText}>Continue Tracking</Text></TouchableOpacity>
-              </Animated.View>
-            )}
-
-            {step === 1 && (
-              <Animated.View entering={FadeInRight} style={styles.stepContainer}>
-                <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Your Emotion</Text>
-                <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>Select the emotion that best matches your current state.</Text>
-                <EmotionLandscape />
-                <TouchableOpacity disabled={!selectedMood} style={[styles.nextBtn, { backgroundColor: theme.colors.plum }, !selectedMood && { opacity: 0.5 }]} onPress={nextStep}><Text style={styles.nextBtnText}>Next Step</Text></TouchableOpacity>
-              </Animated.View>
-            )}
-
-            {step === 2 && (
-              <Animated.View entering={FadeInRight} style={styles.stepContainer}>
-                <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Vitals</Text>
-                <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>Tracking energy and sleep helps us find patterns.</Text>
-                <View style={{ width: '100%', gap: 12 }}>
-                  <EnergySelector value={energy} onChange={setEnergy} theme={theme} />
-                  <SleepTracker quality={sleepQuality} hours={sleepHours} onQualityChange={setSleepQuality} onHoursChange={setSleepHours} theme={theme} />
-                </View>
-                <TouchableOpacity style={[styles.nextBtn, { backgroundColor: theme.colors.plum }]} onPress={nextStep}><Text style={styles.nextBtnText}>Add Context</Text></TouchableOpacity>
-              </Animated.View>
-            )}
-
-            {step === 3 && (
-              <Animated.View entering={FadeInRight} style={styles.stepContainer}>
-                <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>Final Context</Text>
-                <Text style={[styles.stepSub, { color: theme.colors.text.tertiary }]}>Who are you with and what symptoms are you noticing?</Text>
-                <SocialPicker value={social} onChange={setSocial} theme={theme} />
-                <SymptomCloud selected={symptoms} onToggle={(id: string) => setSymptoms(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])} theme={theme} />
-                
-                <View style={styles.envRow}>
-                  <View style={styles.envTag}><MapPin size={14} color={theme.colors.plum} /><Text style={[styles.envText, { color: theme.colors.text.secondary }]}>{location || 'Locating...'}</Text></View>
-                  <View style={styles.envTag}><Cloud size={14} color={theme.colors.plum} /><Text style={[styles.envText, { color: theme.colors.text.secondary }]}>{weather || 'Syncing...'}</Text></View>
-                </View>
-
-                <View style={styles.journalBox}>
-                  <TextInput
-                    style={[styles.noteInput, { color: theme.colors.text.primary, borderColor: theme.colors.text.tertiary + '20' }]}
-                    placeholder="Briefly reflect on your day..."
-                    placeholderTextColor={theme.colors.text.tertiary}
-                    multiline
-                    value={note}
-                    onChangeText={setNote}
-                  />
-                </View>
-
-                <TouchableOpacity style={[styles.plantBtn, { backgroundColor: theme.colors.plum }]} onPress={handleLog}>
-                  {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.nextBtnText}>{t('tracker.submitBtn')}</Text>}
-                </TouchableOpacity>
-              </Animated.View>
-            )}
-
-            {step === 4 && (
-              <Animated.View entering={FadeIn} style={styles.successContainer}>
-                <View style={styles.successIconWrap}><CheckCircle2 color={theme.colors.accents.eucalyptus} size={48} /></View>
-                <Text style={[styles.successTitle, { color: theme.colors.text.primary }]}>{t('tracker.successTitle')}</Text>
-                <Text style={[styles.successSubtitle, { color: theme.colors.text.secondary }]}>{t('tracker.successSubtitle')}</Text>
-                <TouchableOpacity style={[styles.nextBtn, { backgroundColor: theme.colors.plum, marginTop: 40 }]} onPress={() => router.push('/(tabs)/dashboard')}><Text style={styles.nextBtnText}>Return to Home</Text></TouchableOpacity>
-              </Animated.View>
-            )}
+            {step === 1 && renderStep1()}
+            {step === 2 && renderStep2()}
+            {step === 3 && renderStep3()}
+            {step === 4 && renderStep4()}
+            {step === 5 && renderStep5()}
           </BlurView>
         </View>
 
@@ -736,15 +873,24 @@ const styles = StyleSheet.create({
   choiceTxt: { fontWeight: '700', fontSize: 16 },
   nextBtn: { width: '100%', height: 64, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginTop: 40 },
   nextBtnText: { color: '#FFF', fontSize: 17, fontWeight: '800' },
-  landscapeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', marginVertical: 12 },
-  landscapeCardContainer: { width: (width - 110) / 3, aspectRatio: 0.82 },
-  landscapeCard: { flex: 1, borderRadius: 20, padding: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2, position: 'relative', overflow: 'hidden' },
-  landscapeCardSelected: { shadowOpacity: 0.15, shadowRadius: 12, elevation: 4 },
-  selectedVibeBadge: { position: 'absolute', top: 6, right: 6, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
-  vibeBadgeText: { fontSize: 8, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 0.3 },
-  moodHeaderRow: { marginBottom: 4 },
-  landscapeLabel: { fontSize: 13, fontFamily: 'Outfit-Bold', textAlign: 'center', marginTop: 4 },
-  landscapeVibe: { fontSize: 9, fontFamily: 'Outfit-Medium', textAlign: 'center', marginTop: 2, lineHeight: 11, opacity: 0.8 },
+  moodGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', marginVertical: 12 },
+  moodItemContainer: { width: (width - 70) / 2, aspectRatio: 1.15, borderRadius: 20, overflow: 'hidden', borderWidth: 1.5, borderStyle: 'solid', borderColor: 'transparent', marginVertical: 4 },
+  moodItem: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 12 },
+  moodIconWrap: { width: 50, height: 50, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  moodLabelText: { fontSize: 14, fontFamily: 'Outfit-Bold', textAlign: 'center' },
+  emotionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', marginVertical: 12 },
+  emotionCardContainer: { width: (width - 70) / 2, aspectRatio: 1.35, borderRadius: 18, overflow: 'hidden', borderWidth: 1.5, borderStyle: 'solid', borderColor: 'transparent', marginBottom: 8 },
+  emotionCard: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 12 },
+  emotionLabelText: { fontSize: 14, fontFamily: 'Outfit-Bold', textAlign: 'center' },
+  emotionDescText: { fontSize: 10, fontFamily: 'Outfit-Regular', textAlign: 'center', marginTop: 2 },
+  mediaRow: { width: '100%', marginVertical: 16 },
+  mediaBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 14, borderRadius: 16, width: '100%' },
+  mediaBtnText: { fontSize: 14, fontWeight: '700' },
+  playbackContainer: { flexDirection: 'row', gap: 8, width: '100%' },
+  deleteAudioBtn: { paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center', borderRadius: 16, borderWidth: 1.5, borderColor: 'rgba(239, 68, 68, 0.2)' },
+  streakCard: { alignItems: 'center', justifyContent: 'center', padding: 24, borderRadius: 24, borderWidth: 1.5, marginTop: 24, width: '80%', alignSelf: 'center' },
+  streakCount: { fontSize: 40, fontFamily: 'Outfit-Bold', marginTop: 4 },
+  streakLabel: { fontSize: 12, fontFamily: 'Outfit-Bold', textTransform: 'uppercase', letterSpacing: 0.5 },
   envRow: { flexDirection: 'row', gap: 10, marginVertical: 20, alignSelf: 'flex-start' },
   envTag: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(128,128,128,0.08)', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14 },
   envText: { fontSize: 12, fontWeight: '700' },

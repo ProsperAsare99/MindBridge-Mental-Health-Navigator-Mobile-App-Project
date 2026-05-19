@@ -38,7 +38,6 @@ import {
   ArrowRight,
   Clock,
   Sun,
-  Sparkles,
   Wind,
   Heart,
   Moon,
@@ -762,7 +761,7 @@ export default function WellnessTrackerScreen() {
 
               let insightTitle = 'Emotional Reservoir Stable';
               let insightDesc = 'Your emotional trends show strong resilience. Maintain this momentum by writing down one intention each morning.';
-              let IconComponent = Sparkles;
+              let IconComponent = Lightbulb;
               let iconColor = theme.colors.plum;
 
               if (avgScore < 6.0) {
@@ -875,7 +874,7 @@ export default function WellnessTrackerScreen() {
                 <Text style={[styles.analysisCardTitle, { color: theme.colors.text.primary }]}>Social Patterns</Text>
                 <Text style={[styles.analysisCardSub, { color: theme.colors.text.tertiary }]}>Your mood across different social settings</Text>
                 <View style={[styles.insightBanner, { backgroundColor: theme.colors.accents?.gentlePeach ? theme.colors.accents.gentlePeach + '15' : '#FDE68A20', marginTop: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
-                  <Sparkles size={16} color={theme.colors.plum} />
+                  <Lightbulb size={16} color={theme.colors.plum} />
                   <Text style={[styles.insightBannerText, { color: theme.colors.text.primary, flex: 1 }]}>You tend to feel best when <Text style={{ fontWeight: '900', color: theme.colors.plum }}>{insights.bestSocialSetting.setting}</Text>.</Text>
                 </View>
               </View>

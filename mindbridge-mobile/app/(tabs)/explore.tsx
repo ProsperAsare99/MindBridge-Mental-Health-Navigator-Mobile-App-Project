@@ -36,7 +36,6 @@ import {
   Globe,
   TrendingUp,
   PenTool,
-  Sparkles,
   Moon,
   Heart,
   Activity,

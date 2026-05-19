@@ -16,7 +16,6 @@ import {
   Brain,
   Droplet,
   Wind,
-  Sparkles,
   AlertCircle
 } from 'lucide-react-native';
 import Animated, { FadeInUp, FadeInRight } from 'react-native-reanimated';

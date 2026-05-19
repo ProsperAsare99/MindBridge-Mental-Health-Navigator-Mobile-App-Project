@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import api from '../../src/services/api';
+import { Linking } from 'react-native';
 import { 
   View, 
   Text, 
@@ -11,8 +12,10 @@ import {
   Pressable,
   Modal,
   TextInput,
-  Alert
+  Alert,
+  Dimensions
 } from 'react-native';
+import { LineChart } from 'react-native-gifted-charts';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withSpring, FadeIn, SlideInDown } from 'react-native-reanimated';
@@ -76,14 +79,116 @@ const StatsCard = ({ icon: Icon, value, label, color, theme }: any) => {
   );
 };
 
-const MoodTrendBar = ({ day, score, color, theme }: any) => {
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CHART_WIDTH = SCREEN_WIDTH - 80; // 20px margin each side + 20px card padding each side
+
+const getMoodColor = (score: number, theme: any) => {
+  if (score >= 8) return theme.colors.accents.eucalyptus;  // great
+  if (score >= 6) return theme.colors.accents.powderBlue;  // good
+  if (score >= 4) return theme.colors.plum;                // okay
+  if (score >= 2) return theme.colors.accents.dustyRose;   // low
+  return theme.colors.semantic.danger;                     // very low
+};
+
+const getMoodLabel = (score: number) => {
+  if (score >= 8) return 'Great';
+  if (score >= 6) return 'Good';
+  if (score >= 4) return 'Okay';
+  if (score >= 2) return 'Low';
+  return 'Very Low';
+};
+
+const MoodChart = ({ trend, theme }: any) => {
   const styles = createStyles(theme);
-  return (
-    <View style={styles.moodTrendCol}>
-      <View style={styles.moodTrendBarBg}>
-        <View style={[styles.moodTrendBarFill, { height: `${(score/10)*100}%`, backgroundColor: color }]} />
+
+  if (!trend || trend.length === 0) {
+    return (
+      <View style={styles.emptyChart}>
+        <Text style={styles.emptyChartText}>No mood data yet. Start your first check-in to see your trends here.</Text>
       </View>
-      <Text style={styles.moodTrendDay}>{day}</Text>
+    );
+  }
+
+  const chartData = trend.map((item: any) => ({
+    value: item.score,
+    label: item.day,
+    dataPointColor: getMoodColor(item.score, theme),
+    dataPointRadius: 5,
+  }));
+
+  const latestScore = trend[trend.length - 1]?.score || 0;
+  const latestColor = getMoodColor(latestScore, theme);
+
+  return (
+    <View>
+      {/* Current mood badge */}
+      <View style={styles.chartBadgeRow}>
+        <View style={[styles.chartBadge, { backgroundColor: latestColor + '18' }]}>
+          <View style={[styles.chartBadgeDot, { backgroundColor: latestColor }]} />
+          <Text style={[styles.chartBadgeText, { color: latestColor }]}>
+            Latest: {getMoodLabel(latestScore)} ({latestScore}/10)
+          </Text>
+        </View>
+      </View>
+
+      {/* Line Chart */}
+      <View style={styles.chartWrapper}>
+        <LineChart
+          data={chartData}
+          width={CHART_WIDTH}
+          height={140}
+          spacing={CHART_WIDTH / (chartData.length + 1)}
+          initialSpacing={20}
+          color={theme.colors.plum}
+          thickness={2.5}
+          startFillColor={theme.colors.plum + '30'}
+          endFillColor={theme.colors.plum + '00'}
+          areaChart
+          curved
+          hideDataPoints={false}
+          dataPointsColor={theme.colors.plum}
+          dataPointsRadius={5}
+          yAxisColor={'transparent'}
+          xAxisColor={theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}
+          hideYAxisText
+          maxValue={10}
+          noOfSections={5}
+          yAxisThickness={0}
+          rulesColor={theme.isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}
+          rulesType="solid"
+          xAxisLabelTextStyle={{ color: theme.colors.text.tertiary, fontSize: 10, fontWeight: '700' }}
+          backgroundColor={'transparent'}
+          pointerConfig={{
+            pointerStripHeight: 120,
+            pointerStripColor: theme.colors.plum + '30',
+            pointerStripWidth: 1.5,
+            pointerColor: theme.colors.plum,
+            radius: 6,
+            pointerLabelWidth: 80,
+            pointerLabelHeight: 40,
+            activatePointersOnLongPress: false,
+            autoAdjustPointerLabelPosition: true,
+            pointerLabelComponent: (items: any[]) => (
+              <View style={[styles.pointerLabel, { backgroundColor: theme.colors.surface }]}>
+                <Text style={[styles.pointerScore, { color: getMoodColor(items[0].value, theme) }]}>
+                  {items[0].value}/10
+                </Text>
+                <Text style={styles.pointerMoodLabel}>{getMoodLabel(items[0].value)}</Text>
+              </View>
+            ),
+          }}
+        />
+      </View>
+
+      {/* Score scale legend */}
+      <View style={styles.chartLegend}>
+        {[{label:'Very Low',color:theme.colors.semantic.danger},{label:'Low',color:theme.colors.accents.dustyRose},{label:'Okay',color:theme.colors.plum},{label:'Good',color:theme.colors.accents.powderBlue},{label:'Great',color:theme.colors.accents.eucalyptus}].map((l) => (
+          <View key={l.label} style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: l.color }]} />
+            <Text style={styles.legendText}>{l.label}</Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 };
@@ -143,6 +248,7 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<any>({});
   const [showUniPicker, setShowUniPicker] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   const fetchProfile = async () => {
     try {
@@ -281,41 +387,48 @@ export default function ProfileScreen() {
 
         {/* Stats Grid */}
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.statsGrid}>
-          <StatsCard theme={theme} icon={Flame} value={profile?.stats?.streak || "0"} label={t('profile.stats_streak')} color={theme.colors.accents.gentlePeach} />
-          <StatsCard theme={theme} icon={Trophy} value={profile?.stats?.points || "0"} label={t('profile.stats_points')} color={theme.colors.accents.powderBlue} />
-          <StatsCard theme={theme} icon={CheckCircle2} value={profile?.stats?.seeds || "0"} label={t('profile.stats_seeds')} color={theme.colors.accents.eucalyptus} />
-          <StatsCard theme={theme} icon={Award} value={profile?.stats?.badges || "0"} label={t('profile.stats_badges')} color={theme.colors.plum} />
+          <StatsCard theme={theme} icon={Flame} value={String(profile?.stats?.streak ?? 0)} label={t('profile.stats_streak')} color={theme.colors.accents.gentlePeach} />
+          <StatsCard theme={theme} icon={Trophy} value={String(profile?.stats?.points ?? 0)} label={t('profile.stats_points')} color={theme.colors.accents.powderBlue} />
+          <StatsCard theme={theme} icon={CheckCircle2} value={String(profile?.stats?.seeds ?? 0)} label={t('profile.stats_seeds')} color={theme.colors.accents.eucalyptus} />
+          <StatsCard theme={theme} icon={Award} value={String(profile?.stats?.badges ?? 0)} label={t('profile.stats_badges')} color={theme.colors.plum} />
         </Animated.View>
 
         {/* Mood Visualization */}
         <Animated.View entering={FadeInUp.delay(200).duration(800)} style={styles.insightsCard}>
           <View style={styles.insightsHeader}>
             <TrendingUp color={theme.colors.plum} size={18} />
-            <Text style={styles.insightsTitle}>{t('profile.mood_insights')}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.insightsTitle}>{t('profile.mood_insights')}</Text>
+              <Text style={styles.insightsSubtitle}>Your last {insights?.trend?.length || 0} check-ins</Text>
+            </View>
+            {insights?.hasData && (
+              <View style={[styles.avgBadge, { backgroundColor: theme.colors.plum + '12' }]}>
+                <Text style={[styles.avgBadgeNum, { color: theme.colors.plum }]}>{insights.avgMood}</Text>
+                <Text style={[styles.avgBadgeLabel, { color: theme.colors.plum }]}>avg</Text>
+              </View>
+            )}
           </View>
-          <View style={styles.moodTrendContainer}>
-            {(insights?.trend || Array.from({length: 7}).map((_, i) => ({day: ['M','T','W','T','F','S','S'][i], score: 0}))).map((item: any, i: number) => (
-              <MoodTrendBar 
-                key={i}
-                theme={theme} 
-                day={item.day} 
-                score={item.score} 
-                color={item.score > 7 ? theme.colors.accents.eucalyptus : item.score > 4 ? theme.colors.accents.powderBlue : theme.colors.accents.softLilac} 
-              />
-            ))}
-          </View>
-          
+
+          <MoodChart trend={insights?.trend} theme={theme} />
+
           {insights?.hasData && (
             <View style={styles.correlationGrid}>
+              <View style={[styles.correlationCard, { backgroundColor: theme.colors.accents.eucalyptus + '10' }]}>
+                <TrendingUp size={16} color={theme.colors.accents.eucalyptus} />
+                <Text style={styles.correlationVal}>{insights.totalLogs}</Text>
+                <Text style={styles.correlationLab}>Total Check-ins</Text>
+              </View>
               <View style={[styles.correlationCard, { backgroundColor: theme.colors.accents.gentlePeach + '10' }]}>
                 <Heart size={16} color={theme.colors.accents.gentlePeach} />
-                <Text style={styles.correlationVal}>{insights.bestSocialSetting?.setting || 'N/A'}</Text>
-                <Text style={styles.correlationLab}>Best Social Setting</Text>
+                <Text style={[styles.correlationVal, { fontSize: 13 }]} numberOfLines={1}>
+                  {insights.bestSocialSetting?.setting || 'N/A'}
+                </Text>
+                <Text style={styles.correlationLab}>Best Setting</Text>
               </View>
               <View style={[styles.correlationCard, { backgroundColor: theme.colors.accents.powderBlue + '10' }]}>
                 <Mic size={16} color={theme.colors.accents.powderBlue} />
                 <Text style={styles.correlationVal}>{insights.voiceJournals || '0'}</Text>
-                <Text style={styles.correlationLab}>Voice Reflections</Text>
+                <Text style={styles.correlationLab}>Voice Logs</Text>
               </View>
             </View>
           )}
@@ -329,21 +442,30 @@ export default function ProfileScreen() {
           <ProfileListItem 
             theme={theme} 
             icon={PhoneCall} 
-            title={profile?.phoneNumber || "Add Phone Number"} 
-            color={theme.colors.plum} 
+            title={profile?.phoneNumber || 'Add Phone Number'} 
+            color={theme.colors.plum}
+            onPress={() => {
+              if (profile?.phoneNumber) {
+                Linking.openURL(`tel:${profile.phoneNumber}`);
+              } else {
+                setIsEditing(true);
+              }
+            }}
           />
           <ProfileListItem 
             theme={theme} 
             icon={Mail} 
-            title={profile?.email} 
-            color={theme.colors.accents.powderBlue} 
+            title={profile?.email || 'No email'} 
+            color={theme.colors.accents.powderBlue}
+            onPress={() => profile?.email && Linking.openURL(`mailto:${profile.email}`)}
           />
           <ProfileListItem 
             theme={theme} 
             icon={Heart} 
             title={`${profile?.onboarding?.communicationStyle || 'Gentle'} Style • ${profile?.onboarding?.preferredLanguage || 'English'}`} 
             color={theme.colors.accents.dustyRose} 
-            isLast 
+            isLast
+            onPress={() => setIsEditing(true)}
           />
         </ProfileListGroup>
 
@@ -375,40 +497,101 @@ export default function ProfileScreen() {
           <ProfileListItem 
             theme={theme} 
             icon={GraduationCap} 
-            title={profile?.onboarding?.university || "University not set"} 
-            color={theme.colors.accents.powderBlue} 
+            title={profile?.onboarding?.university || 'University not set'} 
+            color={theme.colors.accents.powderBlue}
+            onPress={() => setIsEditing(true)}
           />
           <ProfileListItem 
             theme={theme} 
             icon={ClipboardEdit} 
             title={`${profile?.onboarding?.program || 'Program'} • Level ${profile?.onboarding?.level || 'N/A'}`} 
-            color={theme.colors.accents.eucalyptus} 
+            color={theme.colors.accents.eucalyptus}
+            onPress={() => setIsEditing(true)}
           />
           <ProfileListItem 
             theme={theme} 
             icon={Shield} 
             title={`ID: ${profile?.studentId || 'Not provided'}`} 
-            color={theme.colors.accents.slate} 
+            color={theme.colors.accents.slate}
             isLast
+            onPress={() => setIsEditing(true)}
           />
         </ProfileListGroup>
 
         <ProfileListGroup delay={700} theme={theme}>
-          <ProfileListItem theme={theme} icon={Bell} title="Reminders" color={theme.colors.accents.softMint} />
-          <ProfileListItem theme={theme} icon={HelpCircle} title="Help Center" color={theme.colors.text.secondary} />
+          <ProfileListItem
+            theme={theme}
+            icon={Bell}
+            title="Reminders"
+            color={theme.colors.accents.softMint}
+            onPress={() => router.push('/(tabs)/settings')}
+          />
+          <ProfileListItem
+            theme={theme}
+            icon={HelpCircle}
+            title="Help & Support"
+            color={theme.colors.text.secondary}
+            onPress={() => setShowHelp(true)}
+          />
           <ProfileListItem 
             theme={theme}
             icon={LogOut} 
-            title={isGuest ? "End Session" : "Sign Out"} 
+            title={isGuest ? 'End Session' : 'Sign Out'} 
             color={theme.colors.text.secondary} 
             destructive 
             isLast 
             onPress={() => {
-              signOut();
-              router.replace('/(auth)/welcome');
+              Alert.alert(
+                isGuest ? 'End Session' : 'Sign Out',
+                isGuest ? 'Are you sure you want to end your guest session?' : 'Are you sure you want to sign out?',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: isGuest ? 'End' : 'Sign Out', style: 'destructive', onPress: () => { signOut(); router.replace('/(auth)/welcome'); } }
+                ]
+              );
             }}
           />
         </ProfileListGroup>
+
+        {/* Help Center Modal */}
+        <Modal visible={showHelp} animationType="slide" transparent statusBarTranslucent>
+          <View style={styles.modalOverlay}>
+            <Pressable style={StyleSheet.absoluteFill} onPress={() => setShowHelp(false)}>
+              <BlurView intensity={theme.isDark ? 30 : 15} tint={theme.isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+            </Pressable>
+            <Animated.View entering={SlideInDown.duration(400)} style={styles.modalContentWrap}>
+              <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+                <View style={styles.modalHandle} />
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Help & Support</Text>
+                  <TouchableOpacity onPress={() => setShowHelp(false)} style={styles.closeBtn}>
+                    <X size={20} color={theme.colors.text.tertiary} />
+                  </TouchableOpacity>
+                </View>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  {[
+                    { q: 'How does MindBridge work?', a: 'MindBridge uses AI to provide personalized mental health and academic support. Track your mood, journal your thoughts, and chat with the Oracle for guidance.' },
+                    { q: 'Is my data private?', a: 'Yes. All your data is encrypted and stored securely. We never share your personal information with third parties. You can delete your data at any time.' },
+                    { q: 'What is the Oracle?', a: 'The Oracle is your AI-powered mental wellness companion. It reads your mood history and journal entries to give you context-aware, personalized responses.' },
+                    { q: 'How do I earn points?', a: 'You earn 100 points for each mood check-in and 200 points for each journal entry. Points unlock badges and milestones on your wellness journey.' },
+                    { q: 'What if I am in crisis?', a: 'Please visit the Crisis Support section in the app immediately or call your local emergency services. MindBridge is not a replacement for professional help.' },
+                  ].map((item, i) => (
+                    <View key={i} style={[styles.helpItem, { borderBottomColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
+                      <Text style={[styles.helpQ, { color: theme.colors.text.primary }]}>{item.q}</Text>
+                      <Text style={[styles.helpA, { color: theme.colors.text.secondary }]}>{item.a}</Text>
+                    </View>
+                  ))}
+                  <TouchableOpacity
+                    style={[styles.saveBtn, { marginTop: 16, marginBottom: 32, backgroundColor: theme.colors.semantic.danger + 'DD' }]}
+                    onPress={() => { setShowHelp(false); router.push('/(tabs)/crisis'); }}
+                  >
+                    <Text style={styles.saveBtnText}>Go to Crisis Support</Text>
+                  </TouchableOpacity>
+                </ScrollView>
+              </View>
+            </Animated.View>
+          </View>
+        </Modal>
 
         {/* Edit Profile Modal */}
         <Modal visible={isEditing} animationType="fade" transparent statusBarTranslucent>
@@ -544,18 +727,33 @@ const createStyles = (theme: any) => StyleSheet.create({
   statsIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
   statsValue: { fontSize: 20, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary },
   statsLabel: { fontSize: 12, fontFamily: theme.typography.fonts.body, color: theme.colors.text.tertiary, marginTop: 2 },
-  insightsCard: { backgroundColor: theme.colors.surface, padding: 24, borderRadius: 32, marginBottom: 24, marginHorizontal: 20, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' },
-  insightsHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24 },
+  insightsCard: { backgroundColor: theme.colors.surface, padding: 24, borderRadius: 32, marginBottom: 24, marginHorizontal: 20, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)', overflow: 'hidden' },
+  insightsHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
   insightsTitle: { fontSize: 17, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary },
-  moodTrendContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', height: 100 },
-  moodTrendCol: { alignItems: 'center', gap: 8 },
-  moodTrendBarBg: { width: 8, height: 80, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', borderRadius: 4, justifyContent: 'flex-end' },
-  moodTrendBarFill: { width: '100%', borderRadius: 4 },
-  moodTrendDay: { fontSize: 10, fontFamily: theme.typography.fonts.header, color: theme.colors.text.tertiary },
-  correlationGrid: { flexDirection: 'row', gap: 12, marginTop: 24, borderTopWidth: 1, borderTopColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', paddingTop: 20 },
-  correlationCard: { flex: 1, padding: 16, borderRadius: 20, alignItems: 'center', gap: 4 },
-  correlationVal: { fontSize: 16, fontWeight: '800', color: theme.colors.text.primary, textTransform: 'capitalize' },
-  correlationLab: { fontSize: 11, fontWeight: '600', color: theme.colors.text.tertiary, textAlign: 'center' },
+  insightsSubtitle: { fontSize: 12, color: theme.colors.text.tertiary, marginTop: 1 },
+  avgBadge: { alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14 },
+  avgBadgeNum: { fontSize: 20, fontWeight: '900', lineHeight: 22 },
+  avgBadgeLabel: { fontSize: 9, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  // Chart styles
+  emptyChart: { paddingVertical: 32, alignItems: 'center' },
+  emptyChartText: { fontSize: 14, color: theme.colors.text.tertiary, textAlign: 'center', lineHeight: 22, maxWidth: 240 },
+  chartBadgeRow: { flexDirection: 'row', marginBottom: 16 },
+  chartBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+  chartBadgeDot: { width: 7, height: 7, borderRadius: 3.5 },
+  chartBadgeText: { fontSize: 12, fontWeight: '700' },
+  chartWrapper: { marginLeft: -24, marginRight: -24 },
+  chartLegend: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16, justifyContent: 'center' },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  legendDot: { width: 6, height: 6, borderRadius: 3 },
+  legendText: { fontSize: 10, fontWeight: '600', color: theme.colors.text.tertiary },
+  pointerLabel: { borderRadius: 10, padding: 6, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6, elevation: 4 },
+  pointerScore: { fontSize: 14, fontWeight: '900', lineHeight: 16 },
+  pointerMoodLabel: { fontSize: 9, fontWeight: '700', color: theme.colors.text.tertiary, textTransform: 'uppercase' },
+  // Correlation
+  correlationGrid: { flexDirection: 'row', gap: 10, marginTop: 24, borderTopWidth: 1, borderTopColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', paddingTop: 20 },
+  correlationCard: { flex: 1, padding: 12, borderRadius: 18, alignItems: 'center', gap: 4 },
+  correlationVal: { fontSize: 16, fontWeight: '800', color: theme.colors.text.primary, textTransform: 'capitalize', textAlign: 'center' },
+  correlationLab: { fontSize: 10, fontWeight: '600', color: theme.colors.text.tertiary, textAlign: 'center' },
   listGroup: { backgroundColor: theme.colors.surface, borderRadius: 32, marginBottom: 24, marginHorizontal: 20, overflow: 'hidden', borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)' },
   listItem: { flexDirection: 'row', alignItems: 'center', padding: 18, backgroundColor: theme.colors.surface },
   listIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
@@ -627,6 +825,21 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 12, 
     fontFamily: theme.typography.fonts.body, 
     color: theme.colors.text.secondary 
+  },
+  helpItem: {
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    marginBottom: 4,
+  },
+  helpQ: {
+    fontSize: 15,
+    fontWeight: '800',
+    marginBottom: 6,
+    letterSpacing: -0.2,
+  },
+  helpA: {
+    fontSize: 14,
+    lineHeight: 22,
   },
 });
 

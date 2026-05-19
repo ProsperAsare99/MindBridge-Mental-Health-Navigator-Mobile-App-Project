@@ -54,7 +54,8 @@ import {
   ChevronDown,
   Flame,
   Feather,
-  Sparkles
+  Sparkles,
+  Calendar
 } from 'lucide-react-native';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 
@@ -62,6 +63,78 @@ const { width } = Dimensions.get('window');
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
 
 // ─── Sub-Components ─────────────────────────────────────────────────────────
+
+// ─── Calendar Strip ──────────────────────────────────────────────────────────
+const CalendarStrip = ({ theme, styles }: any) => {
+  const today = new Date();
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const todayDayIndex = today.getDay();
+
+  // Build 7 days: 3 before today, today, 3 after
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - 3 + i);
+    return {
+      date: d.getDate(),
+      dayName: dayNames[d.getDay()].slice(0, 1),
+      isToday: d.toDateString() === today.toDateString(),
+      isPast: d < new Date(today.setHours(0,0,0,0)),
+    };
+  });
+  // reset today reference after mutation above
+  const nowAgain = new Date();
+
+  return (
+    <Animated.View entering={FadeInUp.delay(50).duration(600)} style={styles.calendarCard}>
+      {/* Date Header */}
+      <View style={styles.calendarHeader}>
+        <View style={styles.calendarDateBlock}>
+          <Text style={styles.calendarDayName}>
+            {dayNames[nowAgain.getDay()].toUpperCase()}
+          </Text>
+          <Text style={styles.calendarDayNumber}>
+            {nowAgain.getDate()}
+          </Text>
+        </View>
+        <View style={styles.calendarMonthBlock}>
+          <Text style={styles.calendarMonthText}>
+            {monthNames[nowAgain.getMonth()]}
+          </Text>
+          <Text style={styles.calendarYearText}>
+            {nowAgain.getFullYear()}
+          </Text>
+        </View>
+        <View style={styles.calendarIconWrap}>
+          <Calendar color={theme.colors.plum} size={20} strokeWidth={2} />
+        </View>
+      </View>
+
+      {/* Week Strip */}
+      <View style={styles.calendarWeekStrip}>
+        {days.map((day, i) => (
+          <View key={i} style={styles.calendarDayCol}>
+            <Text style={[
+              styles.calendarWeekDayName,
+              { color: day.isToday ? theme.colors.plum : theme.colors.text.tertiary }
+            ]}>{day.dayName}</Text>
+            <View style={[
+              styles.calendarDayCircle,
+              day.isToday && { backgroundColor: theme.colors.plum },
+              !day.isToday && day.isPast && { opacity: 0.4 },
+            ]}>
+              <Text style={[
+                styles.calendarDayNum,
+                { color: day.isToday ? '#FFF' : theme.colors.text.primary }
+              ]}>{day.date}</Text>
+            </View>
+            {day.isToday && <View style={[styles.calendarTodayDot, { backgroundColor: theme.colors.plum }]} />}
+          </View>
+        ))}
+      </View>
+    </Animated.View>
+  );
+};
 
 const ProgressRings = ({ completed, total, theme, styles }: any) => {
   const size = 52;
@@ -440,6 +513,10 @@ export default function DashboardScreen() {
             <ScreenHeader title={`${greeting}, ${userData.name}`} subtitle={t('dashboard.nurturePeaceToday')} noPadding />
           </View>
           <ProgressRings completed={completedCount} total={3} theme={theme} styles={styles} />
+        </View>
+
+        <View style={styles.section}>
+          <CalendarStrip theme={theme} styles={styles} />
         </View>
 
         <View style={styles.section}><QuoteSlideshow theme={theme} styles={styles} /></View>
@@ -1013,5 +1090,105 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  // Calendar Strip
+  calendarCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 28,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: theme.isDark ? 0.15 : 0.06,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  calendarHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    gap: 12,
+  },
+  calendarDateBlock: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.plum,
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+  },
+  calendarDayName: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: 'rgba(255,255,255,0.75)',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+  calendarDayNumber: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#FFF',
+    lineHeight: 26,
+  },
+  calendarMonthBlock: {
+    flex: 1,
+  },
+  calendarMonthText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: theme.colors.text.primary,
+    letterSpacing: -0.3,
+  },
+  calendarYearText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.text.tertiary,
+    marginTop: 1,
+  },
+  calendarIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: theme.colors.plum + '12',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calendarWeekStrip: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingTop: 4,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+  },
+  calendarDayCol: {
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+    paddingTop: 14,
+  },
+  calendarWeekDayName: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  calendarDayCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calendarDayNum: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  calendarTodayDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    marginTop: 2,
   },
 });

@@ -350,11 +350,11 @@ export default function JournalScreen() {
             </TouchableOpacity>
             <Text style={styles.composerTitle}>New Entry</Text>
             <TouchableOpacity 
-              style={[styles.saveBtn, { backgroundColor: theme.colors.plum, flexDirection: 'row', alignItems: 'center', gap: 6 }]}
+              style={[styles.saveBtn, { backgroundColor: theme.colors.plum }]}
               onPress={handleSave}
             >
               <PenLine color="#FFF" size={16} />
-              <Text style={[styles.saveBtnText, { color: '#FFF' }]}>{t('journal.save_entry')}</Text>
+              <Text style={styles.saveBtnText}>{t('journal.save_entry')}</Text>
             </TouchableOpacity>
           </View>
           
@@ -364,7 +364,7 @@ export default function JournalScreen() {
           >
             <ScrollView 
               style={{ flex: 1 }}
-              contentContainerStyle={[styles.composerBody, { paddingBottom: 140 }]}
+              contentContainerStyle={[styles.composerBody, { paddingBottom: 60 }]}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
             >
@@ -558,16 +558,18 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.text.primary,
   },
   saveBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.2)' : 'rgba(123, 97, 255, 0.1)',
-    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   saveBtnDisabled: {
     opacity: 0.4,
   },
   saveBtnText: {
-    color: theme.colors.plum,
+    color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 15,
   },
@@ -693,12 +695,19 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: 1,
   },
   audioComposer: {
-    marginTop: 20,
+    marginTop: 32,
+    marginBottom: 20,
     alignItems: 'center',
+    paddingVertical: 24,
+    borderRadius: 24,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+    borderStyle: 'dashed',
   },
   recordingSection: {
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
   },
   micBtn: {
     width: 64,

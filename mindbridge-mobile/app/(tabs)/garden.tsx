@@ -44,7 +44,8 @@ import {
   Moon,
   AlertCircle,
   CloudRain,
-  Flame
+  Flame,
+  Lightbulb
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -680,8 +681,9 @@ export default function WellnessTrackerScreen() {
                     </View>
                   </View>
                   {good.length > 0 && poor.length > 0 && Number(avgGood) > Number(avgPoor) && (
-                    <View style={[styles.insightBanner, { backgroundColor: theme.colors.plum + '10' }]}>
-                      <Text style={[styles.insightBannerText, { color: theme.colors.plum }]}>💡 You feel {(Number(avgGood) - Number(avgPoor)).toFixed(1)} points better on nights you sleep well.</Text>
+                    <View style={[styles.insightBanner, { backgroundColor: theme.colors.plum + '10', flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
+                      <Lightbulb size={16} color={theme.colors.plum} />
+                      <Text style={[styles.insightBannerText, { color: theme.colors.plum, flex: 1 }]}>You feel {(Number(avgGood) - Number(avgPoor)).toFixed(1)} points better on nights you sleep well.</Text>
                     </View>
                   )}
                 </View>
@@ -693,8 +695,9 @@ export default function WellnessTrackerScreen() {
               <View style={[styles.analysisCard, { backgroundColor: theme.colors.surface }]}>
                 <Text style={[styles.analysisCardTitle, { color: theme.colors.text.primary }]}>Social Patterns</Text>
                 <Text style={[styles.analysisCardSub, { color: theme.colors.text.tertiary }]}>Your mood across different social settings</Text>
-                <View style={[styles.insightBanner, { backgroundColor: theme.colors.accents?.gentlePeach ? theme.colors.accents.gentlePeach + '15' : '#FDE68A20', marginTop: 16 }]}>
-                  <Text style={[styles.insightBannerText, { color: theme.colors.text.primary }]}>✨ You tend to feel best when <Text style={{ fontWeight: '900', color: theme.colors.plum }}>{insights.bestSocialSetting.setting}</Text>.</Text>
+                <View style={[styles.insightBanner, { backgroundColor: theme.colors.accents?.gentlePeach ? theme.colors.accents.gentlePeach + '15' : '#FDE68A20', marginTop: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
+                  <Sparkles size={16} color={theme.colors.plum} />
+                  <Text style={[styles.insightBannerText, { color: theme.colors.text.primary, flex: 1 }]}>You tend to feel best when <Text style={{ fontWeight: '900', color: theme.colors.plum }}>{insights.bestSocialSetting.setting}</Text>.</Text>
                 </View>
               </View>
             )}

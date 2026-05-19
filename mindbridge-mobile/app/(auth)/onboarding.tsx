@@ -26,7 +26,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../src/context/ThemeContext';
 import { 
   ChevronRight, ChevronLeft, ShieldCheck, User, CheckCircle2,
-  Info
+  Info, GraduationCap, BookOpen, Brain, MessageSquare, Activity, Sparkles, Heart, Users, Zap
 } from 'lucide-react-native';
 import AuthCharacters from '../../src/components/AuthCharacters';
 
@@ -43,27 +43,30 @@ interface OnboardingStep {
   options?: { label: string; value: string; }[];
   sliderQuestions?: { label: string; key: string }[];
   required?: boolean;
+  icon?: any;
 }
 
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'consent',
     type: 'consent',
-    title: 'Consent & Commitment 🤝',
+    title: 'Consent & Commitment',
     required: true,
+    icon: ShieldCheck,
   },
   {
     id: 'q1',
     type: 'text',
-    title: "Let's get to know you! 👋",
+    title: "Let's get to know you!",
     subtitle: "What should we call you?",
     whyWeAsk: "We'll use this to make our conversations feel personal",
     required: false,
+    icon: User,
   },
   {
     id: 'q2',
     type: 'single-choice',
-    title: "Welcome! 🎓",
+    title: "Welcome!",
     subtitle: "Which university are you attending?",
     whyWeAsk: "We'll connect you with campus-specific resources and support",
     options: [
@@ -75,11 +78,12 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       { label: "Other", value: "Other" },
     ],
     required: true,
+    icon: GraduationCap,
   },
   {
     id: 'q3',
     type: 'single-choice',
-    title: "What year are you in? 📚",
+    title: "What year are you in?",
     subtitle: "Select your current level:",
     whyWeAsk: "Different years bring different stressors. Level 400? We know about thesis pressure!",
     options: [
@@ -90,11 +94,12 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       { label: "Postgraduate", value: "500" },
     ],
     required: true,
+    icon: BookOpen,
   },
   {
     id: 'q4',
     type: 'single-choice',
-    title: "What are you studying? 🔬",
+    title: "What are you studying?",
     subtitle: "Select from common programs:",
     whyWeAsk: "Some programs have unique pressures we want to understand",
     options: [
@@ -108,11 +113,12 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       { label: "Other", value: "Other" },
     ],
     required: false,
+    icon: Brain,
   },
   {
     id: 'q5',
     type: 'multiple-choice',
-    title: "What brings you to MindBridge? 💭",
+    title: "What brings you to MindBridge?",
     subtitle: "Select all that apply:",
     whyWeAsk: "This helps us prioritize what matters most to you",
     options: [
@@ -127,11 +133,12 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       { label: "Other", value: "other" },
     ],
     required: false,
+    icon: MessageSquare,
   },
   {
     id: 'q6',
     type: 'sliders',
-    title: "Current Stressors 📊",
+    title: "Current Stressors",
     subtitle: "On a scale of 1-5, how much are these affecting you right now?",
     whyWeAsk: "We'll watch for patterns and offer support when these spike",
     sliderQuestions: [
@@ -143,11 +150,12 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       { label: "Future uncertainty", key: "future" },
     ],
     required: false,
+    icon: Activity,
   },
   {
     id: 'q7',
     type: 'multiple-choice',
-    title: "What helps you feel better? 🌿",
+    title: "What helps you feel better?",
     subtitle: "Select what you already do or want to try:",
     whyWeAsk: "We'll ONLY suggest coping strategies you're comfortable with",
     options: [
@@ -161,11 +169,12 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       { label: "Other", value: "other" },
     ],
     required: true,
+    icon: Sparkles,
   },
   {
     id: 'q8',
     type: 'single-choice',
-    title: "How important is faith in your life? 🙏",
+    title: "How important is faith in your life?",
     subtitle: "Select your preference:",
     whyWeAsk: "We respect your beliefs and will tailor our support accordingly",
     options: [
@@ -174,11 +183,12 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       { label: "Not important", value: "NOT_IMPORTANT" },
     ],
     required: false,
+    icon: Heart,
   },
   {
     id: 'q9',
     type: 'single-choice',
-    title: "Who do you have in your corner? 💪",
+    title: "Who do you have in your corner?",
     subtitle: "Right now, I feel:",
     whyWeAsk: "If you're feeling alone, we'll connect you with peer support",
     options: [
@@ -187,11 +197,12 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       { label: "Very alone", value: "ALONE" },
     ],
     required: false,
+    icon: Users,
   },
   {
     id: 'q10',
     type: 'multiple-choice',
-    title: "What are you hoping to achieve? 🎯",
+    title: "What are you hoping to achieve?",
     subtitle: "Select your top goals (choose up to 3):",
     whyWeAsk: "We'll help you track progress toward what matters to you",
     options: [
@@ -207,12 +218,14 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       { label: "Improve my academic performance", value: "academic_performance" },
     ],
     required: false,
+    icon: Zap,
   },
   {
     id: 'summary',
     type: 'summary',
-    title: "Your Personalized Profile 📋",
+    title: "Your Personalized Profile",
     required: true,
+    icon: CheckCircle2,
   }
 ];
 
@@ -448,6 +461,11 @@ export default function OnboardingScreen() {
       case 'text':
         return (
           <View style={styles.stepContainer}>
+            {step.icon && (
+              <View style={styles.stepIconWrap}>
+                <step.icon color={themeContext.colors.plum} size={26} strokeWidth={2} />
+              </View>
+            )}
             <Text style={styles.title}>{step.title}</Text>
             <Text style={styles.subtitle}>{step.subtitle}</Text>
             <TextInput
@@ -470,11 +488,16 @@ export default function OnboardingScreen() {
       case 'single-choice':
       case 'multiple-choice':
         const titleWithContext = step.id === 'q2' && answers['q1'] 
-          ? `Welcome, ${answers['q1']}! 🎓` 
+          ? `Welcome, ${answers['q1']}!` 
           : step.title;
 
         return (
           <View style={styles.stepContainer}>
+            {step.icon && (
+              <View style={styles.stepIconWrap}>
+                <step.icon color={themeContext.colors.plum} size={26} strokeWidth={2} />
+              </View>
+            )}
             <Text style={styles.title}>{titleWithContext}</Text>
             <Text style={styles.subtitle}>{step.subtitle}</Text>
             
@@ -523,6 +546,11 @@ export default function OnboardingScreen() {
       case 'sliders':
         return (
           <View style={styles.stepContainer}>
+            {step.icon && (
+              <View style={styles.stepIconWrap}>
+                <step.icon color={themeContext.colors.plum} size={26} strokeWidth={2} />
+              </View>
+            )}
             <Text style={styles.title}>{step.title}</Text>
             <Text style={styles.subtitle}>{step.subtitle}</Text>
             
@@ -602,7 +630,7 @@ export default function OnboardingScreen() {
             </View>
 
             <TouchableOpacity style={[styles.primaryBtn, { marginTop: 30 }]} onPress={handleNext}>
-              <Text style={styles.primaryBtnText}>Let's Begin! 🚀</Text>
+              <Text style={styles.primaryBtnText}>Let's Begin!</Text>
             </TouchableOpacity>
           </View>
         );
@@ -743,6 +771,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   
   // Shared
   iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: theme.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: theme.isDark ? 0.2 : 0.08, shadowRadius: 16, elevation: 8 },
+  stepIconWrap: { width: 52, height: 52, borderRadius: 18, backgroundColor: theme.colors.plum + '12', alignItems: 'center', justifyContent: 'center', marginBottom: 16, alignSelf: 'center' },
   title: { fontSize: 30, fontWeight: '800', color: theme.colors.text.primary, marginBottom: 12, textAlign: 'center', letterSpacing: -0.5 },
   subtitle: { fontSize: 16, color: theme.colors.text.secondary, textAlign: 'center', lineHeight: 24, marginBottom: 32 },
   

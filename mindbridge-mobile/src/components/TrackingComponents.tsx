@@ -20,32 +20,40 @@ import Animated, { FadeInUp, FadeInRight } from 'react-native-reanimated';
 const { width } = Dimensions.get('window');
 
 // ─── Energy Level Selector ───────────────────────────────────────────────────
+import { Meh, Smile, Frown, Flame } from 'lucide-react-native';
+
 export const EnergySelector = ({ value, onChange, theme }: any) => {
   const levels = [
-    { val: 2, emoji: '😴', label: 'Drained' },
-    { val: 4, emoji: '🥱', label: 'Low' },
-    { val: 6, emoji: '🙂', label: 'Neutral' },
-    { val: 8, emoji: '⚡', label: 'Active' },
-    { val: 10, emoji: '🔥', label: 'Peak' },
+    { val: 2, icon: Frown, label: 'Drained', color: theme.colors.accents.slate || '#64748B' },
+    { val: 4, icon: Meh, label: 'Low', color: theme.colors.accents.powderBlue || '#0EA5E9' },
+    { val: 6, icon: Smile, label: 'Neutral', color: theme.colors.accents.eucalyptus || '#10B981' },
+    { val: 8, icon: Zap, label: 'Active', color: theme.colors.accents.softMint || '#34D399' },
+    { val: 10, icon: Flame, label: 'Peak', color: theme.colors.semantic.danger || '#EF4444' },
   ];
 
   return (
     <View style={styles.section}>
       <Text style={[styles.label, { color: theme.colors.text.primary }]}>Energy Level</Text>
       <View style={styles.energyRow}>
-        {levels.map((l) => (
-          <TouchableOpacity
-            key={l.val}
-            onPress={() => onChange(l.val)}
-            style={[
-              styles.energyItem,
-              value === l.val && { backgroundColor: theme.colors.plum + '15', borderColor: theme.colors.plum }
-            ]}
-          >
-            <Text style={styles.energyEmoji}>{l.emoji}</Text>
-            <Text style={[styles.energyLabel, { color: theme.colors.text.secondary }]}>{l.label}</Text>
-          </TouchableOpacity>
-        ))}
+        {levels.map((l) => {
+          const IconComponent = l.icon;
+          const isSelected = value === l.val;
+          return (
+            <TouchableOpacity
+              key={l.val}
+              onPress={() => onChange(l.val)}
+              style={[
+                styles.energyItem,
+                isSelected && { backgroundColor: l.color + '20', borderColor: l.color }
+              ]}
+            >
+              <View style={[styles.energyIconWrap, isSelected && { backgroundColor: l.color + '15' }]}>
+                <IconComponent color={isSelected ? l.color : theme.colors.text.tertiary} size={22} />
+              </View>
+              <Text style={[styles.energyLabel, { color: theme.colors.text.secondary }]}>{l.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
@@ -170,9 +178,9 @@ const styles = StyleSheet.create({
   
   // Energy
   energyRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  energyItem: { alignItems: 'center', padding: 12, borderRadius: 16, borderWidth: 1.5, borderColor: 'transparent', width: (width - 100) / 5 },
-  energyEmoji: { fontSize: 24, marginBottom: 4 },
-  energyLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase' },
+  energyItem: { alignItems: 'center', padding: 10, borderRadius: 16, borderWidth: 1.5, borderColor: 'transparent', width: (width - 64) / 5 },
+  energyIconWrap: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  energyLabel: { fontSize: 9, fontWeight: '700', textTransform: 'uppercase' },
 
   // Quality
   qualityRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },

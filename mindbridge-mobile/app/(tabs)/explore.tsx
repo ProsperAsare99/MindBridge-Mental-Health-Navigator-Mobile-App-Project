@@ -44,6 +44,7 @@ import {
 } from 'lucide-react-native';
 import api from '../../src/services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -92,6 +93,7 @@ const FOR_YOU_MAP: Record<string, { title: string; subtitle: string; icon: any; 
 export default function ResourcesScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const router = useRouter();
   const { t } = theme;
   const styles = createStyles(theme);
   
@@ -322,7 +324,18 @@ export default function ResourcesScreen() {
             <Text style={styles.sectionTitle}>{t('resources.coping_tools')}</Text>
             <View style={styles.copingGrid}>
               {COPING_TOOLS.map((tool) => (
-                <TouchableOpacity key={tool.id} style={styles.toolCard} activeOpacity={0.8}>
+                <TouchableOpacity 
+                  key={tool.id} 
+                  style={styles.toolCard} 
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    if (tool.id === 'breath') {
+                      router.push('/breathing');
+                    } else if (tool.id === 'ground') {
+                      router.push('/grounding');
+                    }
+                  }}
+                >
                   <View style={[styles.toolIconWrap, { backgroundColor: tool.color + '20' }]}>
                     <tool.icon color={tool.color} size={24} />
                   </View>

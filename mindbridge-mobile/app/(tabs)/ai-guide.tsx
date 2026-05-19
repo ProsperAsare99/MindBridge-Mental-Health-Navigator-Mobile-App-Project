@@ -509,7 +509,7 @@ export default function AIGuideScreen() {
                 <History color="#7B61FF" size={20} />
                 <View style={{ marginLeft: 8 }}>
                   <Text style={[S.modalTitle, { color: theme.colors.text.primary }]}>Chat History</Text>
-                  <Text style={[S.modalSubtitle, { color: theme.colors.text.tertiary }]}>Past interactions with Oracle</Text>
+                  <Text style={[S.modalSubtitle, { color: theme.colors.text.secondary }]}>Past interactions with Oracle</Text>
                 </View>
               </View>
               <TouchableOpacity onPress={() => setIsHistoryVisible(false)} style={[S.closeBtn, { backgroundColor: '#7B61FF15' }]}>
@@ -521,7 +521,7 @@ export default function AIGuideScreen() {
               <View style={S.emptyHistory}>
                 <MessageCircle color={theme.colors.text.disabled} size={40} strokeWidth={1.5} />
                 <Text style={[S.emptyText, { color: theme.colors.text.secondary }]}>No past conversations found.</Text>
-                <Text style={[S.emptySub, { color: theme.colors.text.tertiary }]}>Your messages will appear here as history.</Text>
+                <Text style={[S.emptySub, { color: theme.colors.text.secondary }]}>Your messages will appear here as history.</Text>
               </View>
             ) : (
               <ScrollView 
@@ -539,15 +539,15 @@ export default function AIGuideScreen() {
                     return (
                       <View key={category} style={S.historyGroup}>
                         <View style={S.groupLabelRow}>
-                          <Text style={[S.groupLabelText, { color: theme.isDark ? theme.colors.accents.powderBlue : theme.colors.plum }]}>{category}</Text>
+                          <Text style={[S.groupLabelText, { color: theme.colors.plum }]}>{category}</Text>
                           <View style={[S.groupLabelLine, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
                           <TouchableOpacity 
                             onPress={() => handleDeleteGroup(category, sortedItems.map(item => item.id).filter(id => !id.toString().startsWith('hist-')))} 
                             style={S.groupDeleteBtn}
                             activeOpacity={0.7}
                           >
-                            <Trash2 color={theme.isDark ? theme.colors.accents.blushPink : '#EF4444'} size={12} />
-                            <Text style={[S.groupDeleteText, { color: theme.isDark ? theme.colors.accents.blushPink : '#EF4444' }]}>Delete Group</Text>
+                            <Trash2 color="#EF4444" size={12} />
+                            <Text style={[S.groupDeleteText, { color: '#EF4444' }]}>Delete Group</Text>
                           </TouchableOpacity>
                         </View>
 
@@ -668,4 +668,6 @@ const S = StyleSheet.create({
   groupLabelRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 12, gap: 10 },
   groupLabelText: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   groupLabelLine: { flex: 1, height: 1 },
+  groupDeleteBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, backgroundColor: 'rgba(239,68,68,0.06)' },
+  groupDeleteText: { fontSize: 11, fontWeight: '700' },
 });

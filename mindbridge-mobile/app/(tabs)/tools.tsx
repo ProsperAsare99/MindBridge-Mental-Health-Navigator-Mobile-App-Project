@@ -24,6 +24,7 @@ import {
   Wind,
   ChevronRight,
   MoreVertical,
+  Activity,
 } from 'lucide-react-native';
 
 const getToolGroups = (theme: any, t: any) => [
@@ -34,13 +35,14 @@ const getToolGroups = (theme: any, t: any) => [
       { id: 'garden', title: t('garden.title'), subtitle: t('garden.subtitle'), icon: Wind, color: theme.colors.accents.eucalyptus },
       { id: 'journal', title: t('journal.title'), subtitle: t('journal.subtitle'), icon: BookOpen, color: theme.colors.accents.powderBlue },
       { id: 'breathing', title: 'Deep Breathing', subtitle: '4-7-8 relaxing breathwork session', icon: Wind, color: theme.colors.accents.gentlePeach, isNotTab: true },
+      { id: 'grounding', title: '5-4-3-2-1 Grounding', subtitle: 'Sensory grounding exercise', icon: Activity, color: theme.colors.accents.powderBlue, isNotTab: true },
     ]
   },
   {
     title: t('tools.knowledge_checks'),
     items: [
       { id: 'assessments', title: t('assessments.title'), subtitle: t('assessments.subtitle'), icon: ClipboardList, color: theme.colors.accents.slate },
-      { id: 'resources', title: t('resources.title'), subtitle: t('resources.subtitle'), icon: Library, color: theme.colors.accents.forestGreen },
+      { id: 'explore', title: t('resources.title'), subtitle: t('resources.subtitle'), icon: Library, color: theme.colors.accents.forestGreen },
     ]
   },
   {
@@ -105,7 +107,7 @@ export default function ToolsScreen() {
                     style={styles.listItem}
                     onPress={() => {
                       if (page.isNotTab) {
-                        router.push('/breathing');
+                        router.push(`/${page.id}` as any);
                       } else {
                         router.push(`/(tabs)/${page.id}` as any);
                       }

@@ -184,3 +184,35 @@ export const clearChatHistory = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteChatMessage = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const { id } = req.params;
+    if (!id || typeof id !== 'string') {
+      res.status(400).json({ error: 'Message ID is required' });
+      return;
+    }
+    await AiRepository.deleteChatMessage(userId, id);
+    res.json({ success: true, message: 'Message deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting chat message:', error);
+    res.status(500).json({ error: 'Failed to delete message' });
+  }
+};
+
+export const deleteBulkChatMessages = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      res.status(400).json({ error: 'Message IDs list is required' });
+      return;
+    }
+    await AiRepository.deleteChatMessages(userId, ids);
+    res.json({ success: true, message: 'Messages deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting bulk chat messages:', error);
+    res.status(500).json({ error: 'Failed to delete messages' });
+  }
+};
+

@@ -76,9 +76,26 @@ export class AiRepository {
       take: limit,
       orderBy: { createdAt: 'desc' },
       select: {
+        id: true,
         role: true,
         content: true,
+        createdAt: true,
       }
+    });
+  }
+
+  static async deleteChatMessage(userId: string, messageId: string) {
+    return await prisma.chatMessage.delete({
+      where: { id: messageId, userId }
+    });
+  }
+
+  /**
+   * Deletes multiple chat messages in bulk.
+   */
+  static async deleteChatMessages(userId: string, messageIds: string[]) {
+    return await prisma.chatMessage.deleteMany({
+      where: { id: { in: messageIds }, userId }
     });
   }
 

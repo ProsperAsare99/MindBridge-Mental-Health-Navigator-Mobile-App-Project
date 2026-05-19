@@ -36,6 +36,7 @@ import {
   RefreshCw,
   History,
   X,
+  Trash2,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { Audio } from 'expo-av';
@@ -136,9 +137,15 @@ const MessageItem = ({ item, theme, router, t }: any) => {
       <TouchableOpacity
         activeOpacity={0.9}
         onLongPress={onLongPress}
-        style={[msgStyles.bubbleUser, { backgroundColor: theme.colors.plum }]}
       >
-        <Text style={msgStyles.textUser}>{item.text}</Text>
+        <LinearGradient
+          colors={theme.isDark ? ['#8E6BE6', '#6941C6'] : ['#7F56D9', '#5B37B3']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={msgStyles.bubbleUser}
+        >
+          <Text style={msgStyles.textUser}>{item.text}</Text>
+        </LinearGradient>
       </TouchableOpacity>
       <Text style={[msgStyles.timeUser, { color: theme.colors.text.tertiary }]}>{item.time}</Text>
     </Animated.View>
@@ -179,6 +186,8 @@ export default function AIGuideScreen() {
   const inputRef = useRef<TextInput>(null);
   const [inputHeight, setInputHeight] = useState(44);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
+  const [isHistoryVisible, setIsHistoryVisible] = useState(false);
 
   useEffect(() => {
     const showSub = Keyboard.addListener(
@@ -222,15 +231,18 @@ export default function AIGuideScreen() {
         }
 
         const historyMessages = (data.history || []).reverse().map((msg: any, idx: number) => ({
-          id: `hist-${idx}`,
+          id: msg.id || `hist-${idx}`,
           isAi: msg.role === 'model',
           text: msg.content,
-          time: 'Past'
+          createdAt: msg.createdAt,
+          time: msg.createdAt 
+            ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : 'Past'
         }));
 
+        setHistory(historyMessages);
         setMessages([
-          { id: 'welcome', isAi: true, text: greeting, time: 'Now', suggestCrisis: false },
-          ...historyMessages
+          { id: 'welcome', isAi: true, text: greeting, time: 'Now', suggestCrisis: false }
         ]);
       } catch {
         setMessages([{ id: 'initial', text: t('ai.greetingWelcome').replace('{name}', authData?.name || 'Friend'), isAi: true, time: 'Now' }]);
@@ -299,6 +311,7 @@ export default function AIGuideScreen() {
         onPress: async () => {
           try {
             await api.delete('/ai/history');
+            setHistory([]);
             setMessages([{ id: 'reset', isAi: true, text: "Conversation cleared. I've refreshed my memory. What's on your mind?", time: 'Now' }]);
           } catch (error) {
             Alert.alert('Error', 'Failed to clear history.');
@@ -306,6 +319,65 @@ export default function AIGuideScreen() {
         },
       },
     ]);
+  };
+
+  const handleDeleteMessage = (messageId: string) => {
+    Alert.alert('Delete Message', 'Are you sure you want to delete this message from history?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await api.delete(`/ai/history/${messageId}`);
+            setHistory(prev => prev.filter(msg => msg.id !== messageId));
+          } catch (error) {
+            Alert.alert('Error', 'Failed to delete message.');
+          }
+        },
+      },
+    ]);
+  };
+
+  const getGroupedHistory = () => {
+    const groups: { [key: string]: any[] } = {
+      'Today': [],
+      'Yesterday': [],
+      'Previous 7 Days': [],
+      'Older': [],
+    };
+    const now = new Date();
+    
+    const isToday = (d: Date) => d.toDateString() === now.toDateString();
+    const isYesterday = (d: Date) => {
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      return d.toDateString() === yesterday.toDateString();
+    };
+    const isWithin7Days = (d: Date) => {
+      const sevenDaysAgo = new Date(now);
+      sevenDaysAgo.setDate(now.getDate() - 7);
+      return d > sevenDaysAgo;
+    };
+
+    history.forEach(msg => {
+      let dateKey = 'Older';
+      if (msg.createdAt) {
+        const msgDate = new Date(msg.createdAt);
+        if (isToday(msgDate)) {
+          dateKey = 'Today';
+        } else if (isYesterday(msgDate)) {
+          dateKey = 'Yesterday';
+        } else if (isWithin7Days(msgDate)) {
+          dateKey = 'Previous 7 Days';
+        }
+      } else {
+        dateKey = 'Today';
+      }
+      groups[dateKey].push(msg);
+    });
+
+    return groups;
   };
 
   const listData = loading ? [...messages, { id: '__typing__', type: 'typing' }] : messages;
@@ -332,6 +404,9 @@ export default function AIGuideScreen() {
               <Text style={[S.headerSub, { color: theme.colors.text.secondary }]}>{loading ? 'Reflecting…' : 'Always here for you'}</Text>
             </View>
           </View>
+          <TouchableOpacity style={[S.headerBtn, { marginRight: 4 }]} onPress={() => setIsHistoryVisible(true)}>
+            <History color={theme.colors.text.tertiary} size={19} />
+          </TouchableOpacity>
           <TouchableOpacity style={S.headerBtn} onPress={handleClearChat}>
             <RefreshCw color={theme.colors.text.tertiary} size={19} />
           </TouchableOpacity>
@@ -371,7 +446,7 @@ export default function AIGuideScreen() {
         />
 
         <View style={[S.inputPanel, { paddingBottom: isKeyboardVisible ? 8 : (bottomPad + 8), backgroundColor: theme.isDark ? 'rgba(18,18,18,0.97)' : 'rgba(255,255,255,0.97)' }]}>
-          <View style={[S.inputRow, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)', borderColor: message.trim() ? theme.colors.plum : (theme.isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)') }]}>
+          <View style={[S.inputRow, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)', borderColor: message.trim() ? '#7B61FF' : (theme.isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)') }]}>
             <TextInput
               ref={inputRef}
               style={[S.input, { color: theme.colors.text.primary }]}
@@ -384,15 +459,131 @@ export default function AIGuideScreen() {
             />
             <View style={S.inputActions}>
               <TouchableOpacity style={[S.micBtn, isRecording && { backgroundColor: '#EF4444' }]} onPress={isRecording ? stopRecording : startRecording}>
-                {isRecording ? <StopCircle color="#FFF" size={20} /> : <Mic color={theme.colors.plum} size={20} />}
+                {isRecording ? <StopCircle color="#FFF" size={20} /> : <Mic color={theme.isDark ? theme.colors.accents.powderBlue : '#7B61FF'} size={20} />}
               </TouchableOpacity>
-              <TouchableOpacity style={[S.sendBtn, { backgroundColor: theme.colors.plum }, !message.trim() && !isRecording && { opacity: 0.5 }]} onPress={() => handleSend()} disabled={!message.trim() || loading}>
+              <TouchableOpacity style={[S.sendBtn, { backgroundColor: '#7B61FF' }, !message.trim() && !isRecording && { opacity: 0.5 }]} onPress={() => handleSend()} disabled={!message.trim() || loading}>
                 <Send color="#FFF" size={20} />
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      {/* ── Chat History Modal ── */}
+      <Modal
+        visible={isHistoryVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsHistoryVisible(false)}
+      >
+        <View style={S.modalOverlay}>
+          <BlurView intensity={100} tint={theme.isDark ? 'dark' : 'light'} style={S.modalContainer}>
+            <View style={[S.modalHeader, { borderBottomColor: '#7B61FF20' }]}>
+              <View style={S.modalHeaderLeft}>
+                <History color="#7B61FF" size={20} />
+                <View style={{ marginLeft: 8 }}>
+                  <Text style={[S.modalTitle, { color: theme.colors.text.primary }]}>Chat History</Text>
+                  <Text style={[S.modalSubtitle, { color: theme.colors.text.tertiary }]}>Past interactions with Oracle</Text>
+                </View>
+              </View>
+              <TouchableOpacity onPress={() => setIsHistoryVisible(false)} style={[S.closeBtn, { backgroundColor: '#7B61FF15' }]}>
+                <X color="#7B61FF" size={18} />
+              </TouchableOpacity>
+            </View>
+
+            {history.length === 0 ? (
+              <View style={S.emptyHistory}>
+                <MessageCircle color={theme.colors.text.disabled} size={40} strokeWidth={1.5} />
+                <Text style={[S.emptyText, { color: theme.colors.text.secondary }]}>No past conversations found.</Text>
+                <Text style={[S.emptySub, { color: theme.colors.text.tertiary }]}>Your messages will appear here as history.</Text>
+              </View>
+            ) : (
+              <ScrollView 
+                contentContainerStyle={S.modalScrollContent}
+                showsVerticalScrollIndicator={false}
+              >
+                {(() => {
+                  const grouped = getGroupedHistory();
+                  return ['Today', 'Yesterday', 'Previous 7 Days', 'Older'].map(category => {
+                    const items = grouped[category];
+                    if (!items || items.length === 0) return null;
+                    
+                    const sortedItems = [...items].reverse();
+
+                    return (
+                      <View key={category} style={S.historyGroup}>
+                        <View style={S.groupLabelRow}>
+                          <Text style={[S.groupLabelText, { color: theme.isDark ? theme.colors.accents.powderBlue : theme.colors.plum }]}>{category}</Text>
+                          <View style={[S.groupLabelLine, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
+                        </View>
+
+                        {sortedItems.map((msg, index) => {
+                          if (msg.isAi) {
+                            return (
+                              <View 
+                                key={msg.id || index} 
+                                style={[
+                                  S.historyBubble, 
+                                  S.historyAiBubble,
+                                  { 
+                                    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : '#FFFFFF',
+                                    borderColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+                                    borderWidth: 1,
+                                    marginVertical: 4
+                                  }
+                                ]}
+                              >
+                                <View style={S.historyBubbleHeader}>
+                                  <Text style={[S.historySender, { color: theme.isDark ? theme.colors.accents.powderBlue : theme.colors.plum }]}>Oracle</Text>
+                                  {msg.id && !msg.id.toString().startsWith('hist-') && (
+                                    <TouchableOpacity onPress={() => handleDeleteMessage(msg.id)} style={{ padding: 4 }}>
+                                      <Trash2 color={theme.colors.text.tertiary} size={12} />
+                                    </TouchableOpacity>
+                                  )}
+                                </View>
+                                <Text style={[S.historyText, { color: theme.colors.text.primary }]}>
+                                  {msg.text}
+                                </Text>
+                              </View>
+                            );
+                          }
+
+                          return (
+                            <TouchableOpacity 
+                              key={msg.id || index}
+                              activeOpacity={0.95}
+                              style={{ alignSelf: 'flex-end', maxWidth: '85%', marginVertical: 4 }}
+                            >
+                              <LinearGradient
+                                colors={theme.isDark ? ['#8E6BE6', '#6941C6'] : ['#7F56D9', '#5B37B3']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={S.historyBubble}
+                              >
+                                <View style={S.historyBubbleHeader}>
+                                  <Text style={[S.historySender, { color: '#FFF' }]}>You</Text>
+                                  {msg.id && !msg.id.toString().startsWith('hist-') && (
+                                    <TouchableOpacity onPress={() => handleDeleteMessage(msg.id)} style={{ padding: 4 }}>
+                                      <Trash2 color="rgba(255,255,255,0.7)" size={12} />
+                                    </TouchableOpacity>
+                                  )}
+                                </View>
+                                <Text style={[S.historyText, { color: '#FFF' }]}>
+                                  {msg.text}
+                                </Text>
+                              </LinearGradient>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                    );
+                  });
+                })()}
+              </ScrollView>
+            )}
+          </BlurView>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -422,4 +613,25 @@ const S = StyleSheet.create({
   inputActions: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
   micBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.03)', alignItems: 'center', justifyContent: 'center' },
   sendBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalContainer: { height: '80%', borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: 'hidden', padding: 24 },
+  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottomWidth: 1, marginBottom: 20 },
+  modalHeaderLeft: { flexDirection: 'row', alignItems: 'center' },
+  modalTitle: { fontSize: 18, fontWeight: '800' },
+  modalSubtitle: { fontSize: 12, marginTop: 2 },
+  closeBtn: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  emptyHistory: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 60 },
+  emptyText: { fontSize: 16, fontWeight: '700', marginTop: 12 },
+  emptySub: { fontSize: 13, marginTop: 4, textAlign: 'center', opacity: 0.8 },
+  modalScrollContent: { paddingBottom: 40, gap: 14 },
+  historyBubble: { borderRadius: 20, padding: 16, maxWidth: '85%' },
+  historyAiBubble: { alignSelf: 'flex-start', backgroundColor: 'rgba(123,97,255,0.06)' },
+  historyUserBubble: { alignSelf: 'flex-end' },
+  historyBubbleHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, gap: 12 },
+  historySender: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
+  historyText: { fontSize: 14, lineHeight: 20 },
+  historyGroup: { marginVertical: 8 },
+  groupLabelRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 12, gap: 10 },
+  groupLabelText: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  groupLabelLine: { flex: 1, height: 1 },
 });

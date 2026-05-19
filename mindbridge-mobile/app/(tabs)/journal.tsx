@@ -27,7 +27,7 @@ import {
   Wind,
   Sun,
   CloudRain,
-  PenLine,
+  Check,
   Trash2,
   Mic,
   StopCircle,
@@ -353,7 +353,7 @@ export default function JournalScreen() {
               style={[styles.saveBtn, { backgroundColor: theme.colors.plum }]}
               onPress={handleSave}
             >
-              <PenLine color="#FFF" size={16} />
+              <Check color="#FFF" size={16} />
               <Text style={styles.saveBtnText}>{t('journal.save_entry')}</Text>
             </TouchableOpacity>
           </View>

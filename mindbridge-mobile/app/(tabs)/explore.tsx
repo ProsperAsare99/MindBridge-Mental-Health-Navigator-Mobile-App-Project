@@ -79,10 +79,10 @@ const FOR_YOU_MAP: Record<string, { title: string; subtitle: string; icon: any; 
   ],
   tracking: [
     { title: 'Understanding Your Mood', subtitle: 'Read your emotional patterns', icon: TrendingUp, color: '#7C3AED', tag: 'For You' },
-    { title: 'Journaling for Clarity', subtitle: 'Write to understand yourself', icon: PenTool, color: '#6D28D9', tag: 'Reflective' },
+    { title: 'Journaling for Clarity', subtitle: 'Write to understand yourself', icon: BookOpen, color: '#6D28D9', tag: 'Reflective' },
   ],
   default: [
-    { title: 'Getting Started with Mindfulness', subtitle: 'Your 5-min daily practice', icon: Sparkles, color: '#14B8A6', tag: 'Start Here' },
+    { title: 'Getting Started with Mindfulness', subtitle: 'Your 5-min daily practice', icon: Compass, color: '#14B8A6', tag: 'Start Here' },
     { title: 'Sleep Better Tonight', subtitle: 'Science-backed sleep hygiene', icon: Moon, color: '#6366F1', tag: 'Popular' },
     { title: 'Self-Compassion 101', subtitle: 'Be kind to yourself', icon: Heart, color: '#F59E0B', tag: 'For You' },
   ],

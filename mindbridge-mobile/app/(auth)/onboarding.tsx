@@ -169,7 +169,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       { label: "Other", value: "other" },
     ],
     required: true,
-    icon: Sparkles,
+    icon: Heart,
   },
   {
     id: 'q8',

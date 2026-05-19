@@ -250,7 +250,7 @@ export const translations: Record<Language, TranslationSchema> = {
       startJourneyToday: 'Start your journey today',
       dayStreak: 'Day Streak!',
       dailyQuests: 'Daily Quests',
-      completeAllQuests: 'Complete all to keep your streak! 🔥',
+      completeAllQuests: 'Complete all to keep your streak!',
       wellnessHub: 'Wellness Hub',
       wellnessToolkit: 'Wellness Toolkit',
     },
@@ -276,7 +276,7 @@ export const translations: Record<Language, TranslationSchema> = {
       disclaimer: "The MindBridge Oracle provides wellness support but is not a replacement for professional clinical care. If you are in immediate danger, please use the Crisis Support tab.",
       greetingStandard: "Hello! I'm the MindBridge Oracle. I'm here to listen, support, and help you navigate your feelings. How are you doing today?",
       greetingHeavy: "Hi {name}. I noticed your last check-in felt heavy, reflecting {emotions}. That takes courage to name. What's been weighing on you most?",
-      greetingGlowing: "Hello {name}! Your last seed was glowing with {emotions} 🌱 What's been contributing to that good energy?",
+      greetingGlowing: "Hello {name}! Your last seed was glowing with {emotions} What's been contributing to that good energy?",
       greetingRecent: "Hi {name}. I see your recent mood reflected {emotions}. How are you really doing today?",
       greetingWelcome: "Welcome, {name}. I am the MindBridge Oracle, your personal guide. What's on your mind today?",
     },
@@ -421,7 +421,7 @@ export const translations: Record<Language, TranslationSchema> = {
       skipConfirm: 'Saa asɛm yi bɛboa yɛn ma yɛahu sɛnea yɛbɛboa wo. Wopɛ sɛ wotwa mu ampa?',
       skipConfirmAction: 'Twa mu nanso',
       skipConfirmCancel: 'San kɔ akyi',
-      privacyTitle: 'Wo kokoamsɛm ho hia yɛn 🔒',
+      privacyTitle: 'Wo kokoamsɛm ho hia yɛn',
       privacyPoints: [
         'W’asɛm yɛ dwoodwoo na ɛwɔ banbɔ',
         'Nkɔmmɔbɔ no yɛ kokoamsɛm',
@@ -454,7 +454,7 @@ export const translations: Record<Language, TranslationSchema> = {
       startJourneyToday: 'Fi wo kwantu ase nnɛ',
       dayStreak: 'Nna Streak!',
       dailyQuests: 'Daa Quests',
-      completeAllQuests: 'Wie ne nyinaa na sie wo streak! 🔥',
+      completeAllQuests: 'Wie ne nyinaa na sie wo streak!',
       wellnessHub: 'Wellness Hub',
       wellnessToolkit: 'Wellness Toolkit',
     },
@@ -470,7 +470,7 @@ export const translations: Record<Language, TranslationSchema> = {
       socialInteraction: "Hwan na wo ne no wɔ hɔ?",
       physicalSymptoms: "Wo honam mu yɛ wo den?",
       audioNote: "Nne nkaebɔ",
-      submitBtn: "Ma m'asomdwoe nnɔ 🌱"
+      submitBtn: "Ma m'asomdwoe nnɔ"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -480,7 +480,7 @@ export const translations: Record<Language, TranslationSchema> = {
       disclaimer: "Mewɔ ha sɛ metie wo na maboa wo, nanso menyɛ ayaresabea dɔkta. Sɛ wowɔ asiane mu a, yɛsrɛ wo fa Mmoa akwan no so.",
       greetingStandard: "Maakye! Me ne MindBridge Oracle. Mewɔ ha sɛ metie wo, maboa wo, na mama woahu sɛnea wobɛyɛ wo nkaebɔ ho adwuma. Tebea bɛn na wowɔ mu nnɛ?",
       greetingHeavy: "Hey {name}. Mehuu sɛ wo nkaebɔ a ɛtwa toɔ no yɛ duru, wote nka sɛ {emotions}. Akokoɔduo na ɛhia sɛ wobɛbɔ din. Dɛn na ɛreyɛ wo duru paa?",
-      greetingGlowing: "Maakye {name}! Wo aba a ɛtwa toɔ no na ɛrehyerɛn ne {emotions} 🌱 Dɛn na ɛde saa ahoɔden pa yi aba?",
+      greetingGlowing: "Maakye {name}! Wo aba a ɛtwa toɔ no na ɛrehyerɛn ne {emotions} Dɛn na ɛde saa ahoɔden pa yi aba?",
       greetingRecent: "Maakye {name}. Mehuu sɛ wo nkaebɔ a ɛtwa toɔ no kyerɛ {emotions}. Wowɔ tebea bɛn mu paa nnɛ?",
       greetingWelcome: "Akwaaba, {name}. Me ne MindBridge Oracle, wo ankasa wo kwankyerɛfo. Dɛn na ɛwɔ w’adwene mu nnɛ?",
     },
@@ -625,7 +625,7 @@ export const translations: Record<Language, TranslationSchema> = {
       skipConfirm: 'Ces informations nous aident à personnaliser votre soutien. Êtes-vous sûr de vouloir passer ?',
       skipConfirmAction: 'Passer quand même',
       skipConfirmCancel: 'Retourner',
-      privacyTitle: 'Votre vie privée compte 🔒',
+      privacyTitle: 'Votre vie privée compte',
       privacyPoints: [
         'Vos données sont cryptées et sécurisées',
         'Les conversations sont confidentielles',
@@ -658,7 +658,7 @@ export const translations: Record<Language, TranslationSchema> = {
       startJourneyToday: 'Commencez votre voyage aujourd\'hui',
       dayStreak: 'Série de Jours !',
       dailyQuests: 'Quêtes Quotidiennes',
-      completeAllQuests: 'Complétez tout pour garder votre série ! 🔥',
+      completeAllQuests: 'Complétez tout pour garder votre série !',
       wellnessHub: 'Centre de Bien-être',
       wellnessToolkit: 'Boîte à Outils de Bien-être',
     },
@@ -674,7 +674,7 @@ export const translations: Record<Language, TranslationSchema> = {
       socialInteraction: "Avec qui étiez-vous ?",
       physicalSymptoms: "Des symptômes physiques ?",
       audioNote: "Réflexion vocale",
-      submitBtn: "Nourrir ma paix 🌱"
+      submitBtn: "Nourrir ma paix"
     },
     ai: {
       title: 'Oracle MindBridge',
@@ -684,7 +684,7 @@ export const translations: Record<Language, TranslationSchema> = {
       disclaimer: "Je suis là pour écouter et soutenir, mais je ne remplace pas les soins cliniques. Si vous êtes en danger immédiat, veuillez utiliser l'onglet Support de crise.",
       greetingStandard: "Bonjour ! Je suis l'Oracle MindBridge. Je suis ici pour vous écouter, vous soutenir et vous aider à gérer vos émotions. Comment allez-vous aujourd'hui ?",
       greetingHeavy: "Hé {name}. J'ai remarqué que votre dernier enregistrement était lourd, vous vous sentiez {emotions}. Il faut du courage pour le dire. Qu'est-ce qui vous pèse le plus ?",
-      greetingGlowing: "Bonjour {name} ! Votre dernière graine brillait de {emotions} 🌱 Qu'est-ce qui a contribué à cette bonne énergie ?",
+      greetingGlowing: "Bonjour {name} ! Votre dernière graine brillait de {emotions} Qu'est-ce qui a contribué à cette bonne énergie ?",
       greetingRecent: "Salut {name}. Je vois que votre humeur récente reflétait {emotions}. Comment allez-vous vraiment aujourd'hui ?",
       greetingWelcome: "Bienvenue, {name}. Je suis l'Oracle MindBridge, votre guide personnel. Qu'avez-vous à l'esprit aujourd'hui ?",
     },
@@ -829,7 +829,7 @@ export const translations: Record<Language, TranslationSchema> = {
       skipConfirm: 'Nitsumɔi nɛ bɛye bɛbua wɔ ni wɔtsɔɔ bo gbɛ ni sa. Omiishɛɛ ni ofã?',
       skipConfirmAction: 'Fã kɛ̃',
       skipConfirmCancel: 'Sɛɛ',
-      privacyTitle: 'Ohewulaa he lɛ he hiaa wɔ 🔒',
+      privacyTitle: 'Ohewulaa he lɛ he hiaa wɔ',
       privacyPoints: [
         'Onyɛmɔi bɛ dwoodwoo kɛ banbɔ',
         'Sanebɛi lɛ ji kokoamsɛm',
@@ -862,7 +862,7 @@ export const translations: Record<Language, TranslationSchema> = {
       startJourneyToday: 'Je o-kwantu lɛ shishi nnɛ',
       dayStreak: 'Nna Streak!',
       dailyQuests: 'Daa Quests',
-      completeAllQuests: 'Gbe fɛɛ naa ni osie o-streak! 🔥',
+      completeAllQuests: 'Gbe fɛɛ naa ni osie o-streak!',
       wellnessHub: 'Wellness Hub',
       wellnessToolkit: 'Wellness Toolkit',
     },
@@ -878,7 +878,7 @@ export const translations: Record<Language, TranslationSchema> = {
       socialInteraction: "Amekawo gbɔ nèle?",
       physicalSymptoms: "Lãmesẽkuxi aɖewo le wò hã?",
       audioNote: "Gbeɖiɖi dzesi",
-      submitBtn: "Na nye fafa natsi 🌱"
+      submitBtn: "Na nye fafa natsi"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -888,7 +888,7 @@ export const translations: Record<Language, TranslationSchema> = {
       disclaimer: "Miyɛ biɛ ni mabua bo, shi mifeee dɔkta. Kɛ́ ooshɛ oshãra mli lɛ, ofainɛ yaa Mmoa gbɛ lɛ nɔ.",
       greetingStandard: "Leebi! Mi ji MindBridge Oracle lɛ. Miyɛ biɛ ni mabua bo ni maduru ojwɛŋmɔ mli. Te onuɔ he tɛŋŋ nnɛ?",
       greetingHeavy: "Hé {name}. Mina akɛ o-nitsumɔ ni ofee nyɛ lɛ wa, onuɔ he akɛ {emotions}. Ehe hiaa ekãa akɛ obɛtsɛ́ gbɛ́i. Mɛni haa onuɔ he tɛŋŋ?",
-      greetingGlowing: "Leebi {name}! O-dua ni ofee nyɛ lɛ miitsɛ̀ kɛ {emotions} 🌱 Mɛni ha onuɔ he akɛ o-he wa nakai?",
+      greetingGlowing: "Leebi {name}! O-dua ni ofee nyɛ lɛ miitsɛ̀ kɛ {emotions} Mɛni ha onuɔ he akɛ o-he wa nakai?",
       greetingRecent: "Hé {name}. Mina akɛ o-jwɛŋmɔ mli lɛ etsɔɔ {emotions}. Te onuɔ he tɛŋŋ paa nnɛ?",
       greetingWelcome: "Akwaaba, {name}. Mi ji MindBridge Oracle lɛ, o-gbɛtsɔɔlɔ paa. Mɛni yɔɔ o-jwɛŋmɔ mli nnɛ?",
     },
@@ -1033,7 +1033,7 @@ export const translations: Record<Language, TranslationSchema> = {
       skipConfirm: 'Nyakpui siawo akpe ɖe mía ŋu be míawɔ nu siwo asɔ na wò. Èka ɖe edzi be èdi be yeatutui?',
       skipConfirmAction: 'Tutui kokoo',
       skipConfirmCancel: 'Megbe',
-      privacyTitle: 'Wò gbeɖasiwo ho hia 🔒',
+      privacyTitle: 'Wò gbeɖasiwo ho hia',
       privacyPoints: [
         'Wò nyawo le dzadzɛ ƒe banbɔ me',
         'Dzeɖoɖoawo nye ɣlaɣla nyawo',
@@ -1066,7 +1066,7 @@ export const translations: Record<Language, TranslationSchema> = {
       startJourneyToday: 'Dze wò mɔzɔzɔ gɔme egbe',
       dayStreak: 'Ŋkeke ƒe Streak!',
       dailyQuests: 'Gbesiagbe Quests',
-      completeAllQuests: 'Wuwu wo fɛɛ enu be nàdzra wò streak ɖo! 🔥',
+      completeAllQuests: 'Wuwu wo fɛɛ enu be nàdzra wò streak ɖo!',
       wellnessHub: 'Wellness Hub',
       wellnessToolkit: 'Wellness Toolkit',
     },
@@ -1082,7 +1082,7 @@ export const translations: Record<Language, TranslationSchema> = {
       socialInteraction: "Amekawo gbɔ nèle?",
       physicalSymptoms: "Lãmesẽkuxi aɖewo le wò hã?",
       audioNote: "Gbeɖiɖi dzesi",
-      submitBtn: "Na nye fafa natsi 🌱"
+      submitBtn: "Na nye fafa natsi"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -1092,7 +1092,7 @@ export const translations: Record<Language, TranslationSchema> = {
       disclaimer: "Mele afii be mase wò nya agbɔ, gake nyemye dɔkta o. Ne èle nɔnɔme sesẽ me la, taflatse zã Kpedenanu mɔwo.",
       greetingStandard: "Ŋdi! Nyee nye MindBridge Oracle. Mele afii be mase wò nya agbɔ, mado alɔ wò eye makpe ɖe ŋuwò be nàkpɔ wò seselelãmewo gbɔ. Aleke nèle fifia?",
       greetingHeavy: "Hé {name}. Mekpɔe be wò seselelãme mamlɛa mefa o, nèle {emotions} sem. Ehiã dzinɔameƒe be nàgblɔe. Nu kae le fu ɖem na wò wu?",
-      greetingGlowing: "Ŋdi {name}! Wò ku mamlɛa le dzo dam kple {emotions} 🌱 Nu kae na nèle seselelãme nyui sia me?",
+      greetingGlowing: "Ŋdi {name}! Wò ku mamlɛa le dzo dam kple {emotions} Nu kae na nèle seselelãme nyui sia me?",
       greetingRecent: "Hé {name}. Mekpɔe be wò seselelãme mamlɛa fia {emotions}. Aleke nèle sese me vavã fifia?",
       greetingWelcome: "Woezor, {name}. Nyee nye MindBridge Oracle, wò mɔfiala. Nu kae le wò jwɛŋmɔ me fifia?",
     },
@@ -1237,7 +1237,7 @@ export const translations: Record<Language, TranslationSchema> = {
       skipConfirm: 'Wannan bayanin yana taimaka mana mu keɓance goyan bayan ku. Kun tabbata kuna son tsallake?',
       skipConfirmAction: 'Tsallake Duk da haka',
       skipConfirmCancel: 'Koma Baya',
-      privacyTitle: 'Sirrin ku yana da mahimmanci 🔒',
+      privacyTitle: 'Sirrin ku yana da mahimmanci',
       privacyPoints: [
         'Bayanan ku na sirri ne kuma suna da tsaro',
         'Tattaunawa na sirri ne',
@@ -1270,7 +1270,7 @@ export const translations: Record<Language, TranslationSchema> = {
       startJourneyToday: 'Fara tafiyar ku yau',
       dayStreak: 'Ranar Streak!',
       dailyQuests: 'Ayyukan Kullum',
-      completeAllQuests: 'Kammala duka don kiyaye streak ɗin ku! 🔥',
+      completeAllQuests: 'Kammala duka don kiyaye streak ɗin ku!',
       wellnessHub: 'Cibiyar Lafiya',
       wellnessToolkit: 'Kayan Aikin Lafiya',
     },
@@ -1286,7 +1286,7 @@ export const translations: Record<Language, TranslationSchema> = {
       socialInteraction: "Da wa kake tare?",
       physicalSymptoms: "Akwai wata matsalar lafiya?",
       audioNote: "Muryar tunani",
-      submitBtn: "Haɓaka kwanciyar hankali na 🌱"
+      submitBtn: "Haɓaka kwanciyar hankali na"
     },
     ai: {
       title: 'MindBridge Oracle',
@@ -1296,7 +1296,7 @@ export const translations: Record<Language, TranslationSchema> = {
       disclaimer: "Ina nan don sauraro da taimako, amma ni ba likita ba ne. Idan kana cikin haɗari, don Allah yi amfani da sashen Taimakon Gaggawa.",
       greetingStandard: "Ina kwana! Ni ne MindBridge Oracle. Ina nan don in saurare ka, in taimaka maka, in kuma taimaka maka wajen tafiyar da yadda kake ji. Yaya kake yau?",
       greetingHeavy: "Sannu {name}. Na lura cewa bincikenka na ƙarshe ya yi nauyi, kana jin {emotions}. Yana bukatar jajircewa don bayyana hakan. Me ya fi damun ka?",
-      greetingGlowing: "Sannu {name}! Irin ka na ƙarshe ya kasance mai haske da {emotions} 🌱 Me ya taimaka wa wannan kyakkyawan kuzari?",
+      greetingGlowing: "Sannu {name}! Irin ka na ƙarshe ya kasance mai haske da {emotions} Me ya taimaka wa wannan kyakkyawan kuzari?",
       greetingRecent: "Sannu {name}. Na ga cewa yanayin ka na baya-bayan nan ya nuna {emotions}. Yaya kake da gaske yau?",
       greetingWelcome: "Barka da zuwa, {name}. Ni ne MindBridge Oracle, jagoran ku. Me ke ranka yau?",
     },

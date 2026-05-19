@@ -13,6 +13,9 @@ import {
   StatusBar,
   Alert,
   Clipboard,
+  Keyboard,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
@@ -31,6 +34,8 @@ import {
   ArrowRight,
   Info,
   RefreshCw,
+  History,
+  X,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { Audio } from 'expo-av';
@@ -173,6 +178,22 @@ export default function AIGuideScreen() {
   const flatListRef = useRef<FlatList>(null);
   const inputRef = useRef<TextInput>(null);
   const [inputHeight, setInputHeight] = useState(44);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setIsKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setIsKeyboardVisible(false)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const bottomPad = TAB_BAR_HEIGHT + insets.bottom;
   const INPUT_AREA_HEIGHT = inputHeight + 32;
@@ -343,13 +364,13 @@ export default function AIGuideScreen() {
           data={listData}
           keyExtractor={item => item.id}
           renderItem={({ item }) => <MessageItem item={item} theme={theme} router={router} t={t} />}
-          contentContainerStyle={[S.listContent, { paddingBottom: bottomPad + INPUT_AREA_HEIGHT + 12 }]}
+          contentContainerStyle={[S.listContent, { paddingBottom: (isKeyboardVisible ? 12 : bottomPad) + INPUT_AREA_HEIGHT + 12 }]}
           showsVerticalScrollIndicator={false}
           onLayout={scrollToEnd}
           onContentSizeChange={scrollToEnd}
         />
 
-        <View style={[S.inputPanel, { paddingBottom: bottomPad + 8, backgroundColor: theme.isDark ? 'rgba(18,18,18,0.97)' : 'rgba(255,255,255,0.97)' }]}>
+        <View style={[S.inputPanel, { paddingBottom: isKeyboardVisible ? 8 : (bottomPad + 8), backgroundColor: theme.isDark ? 'rgba(18,18,18,0.97)' : 'rgba(255,255,255,0.97)' }]}>
           <View style={[S.inputRow, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)', borderColor: message.trim() ? theme.colors.plum : (theme.isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)') }]}>
             <TextInput
               ref={inputRef}

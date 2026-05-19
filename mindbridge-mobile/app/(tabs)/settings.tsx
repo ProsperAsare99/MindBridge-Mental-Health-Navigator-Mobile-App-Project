@@ -95,7 +95,7 @@ export default function SettingsScreen() {
       if (result.success) {
         setBiometrics(true);
         await AsyncStorage.setItem('settings_biometrics', 'true');
-        Alert.alert("Enabled", "Biometric unlock is now active for your account. 🔒");
+        Alert.alert("Enabled", "Biometric unlock is now active for your account.");
       } else {
         Alert.alert("Authentication Failed", "We could not verify your identity.");
       }
@@ -122,7 +122,7 @@ export default function SettingsScreen() {
   };
 
   const handleComingSoon = (feature: string) => {
-    Alert.alert("Coming Soon", `${feature} is currently under development and will be available in the next update! ✨`);
+    Alert.alert("Coming Soon", `${feature} is currently under development and will be available in the next update!`);
   };
 
   const submitFeedback = async () => {
@@ -133,7 +133,7 @@ export default function SettingsScreen() {
       setIsSendingFeedback(false);
       setIsFeedbackVisible(false);
       setFeedback('');
-      Alert.alert("Thank You!", "Your feedback helps us make MindBridge better for everyone. 💜");
+      Alert.alert("Thank You!", "Your feedback helps us make MindBridge better for everyone.");
     }, 1500);
   };
 
@@ -157,7 +157,7 @@ export default function SettingsScreen() {
         currentPassword: passForm.current,
         newPassword: passForm.new
       });
-      Alert.alert("Success", "Your password has been updated securely. 🛡️");
+      Alert.alert("Success", "Your password has been updated securely.");
       setIsPasswordModalVisible(false);
       setPassForm({ current: '', new: '', confirm: '' });
     } catch (err: any) {

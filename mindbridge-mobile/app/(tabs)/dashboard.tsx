@@ -542,7 +542,10 @@ export default function DashboardScreen() {
           <View style={styles.sectionHeader}>
             <View>
               <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.dailyQuests')}</Text>
-              <Text style={styles.sectionSubtitleText}>{t('dashboard.completeAllQuests')}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                <Text style={[styles.sectionSubtitleText, { marginBottom: 0 }]}>{t('dashboard.completeAllQuests')}</Text>
+                <Flame size={14} color="#EF4444" fill="#EF4444" />
+              </View>
             </View>
             <View style={[styles.questProgress, { backgroundColor: theme.colors.plum + '20' }]}>
               <Text style={[styles.questProgressText, { color: theme.colors.plum }]}>
@@ -563,7 +566,7 @@ export default function DashboardScreen() {
             />
             <QuestItem 
               theme={theme} 
-              icon={PenLine} 
+              icon={BookOpen} 
               title="Daily Reflection" 
               subtitle="Write a journal entry" 
               done={rituals.journal} 
@@ -597,22 +600,24 @@ export default function DashboardScreen() {
             >
               <View style={styles.reflectionHeader}>
                 <View style={[styles.reflectionMood, { backgroundColor: theme.colors.plum + '10' }]}>
-                  <Sparkles size={22} color={theme.colors.plum} strokeWidth={1.5} />
+                  <BrainCircuit size={22} color={theme.colors.plum} strokeWidth={1.5} />
                 </View>
                 <View style={{ flex: 1, marginLeft: 4 }}>
-                  <View style={styles.reflectionTag}>
-                    <BookOpen size={10} color={theme.colors.plum} />
-                    <Text style={styles.reflectionTagText}>{t('dashboard.clarityTitle').toUpperCase()}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <View style={styles.reflectionTag}>
+                      <BookOpen size={10} color={theme.colors.plum} />
+                      <Text style={styles.reflectionTagText}>{t('dashboard.clarityTitle').toUpperCase()}</Text>
+                    </View>
+                    <Text style={{ fontSize: 10, color: theme.colors.text.tertiary, fontWeight: '700' }}>• {new Date(journalHistory[0].createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Text>
                   </View>
                   <Text style={[styles.reflectionTitle, { color: theme.colors.text.primary }]} numberOfLines={1}>{journalHistory[0].title || 'Untitled Reflection'}</Text>
-                  <Text style={[styles.reflectionDate, { color: theme.colors.text.tertiary }]}>{new Date(journalHistory[0].createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
                 </View>
                 <View style={[styles.reflectionArrow, { backgroundColor: theme.colors.plum + '08' }]}>
                   <ChevronRight color={theme.colors.plum} size={18} />
                 </View>
               </View>
               <View style={[styles.reflectionContentBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(123,97,255,0.03)', borderColor: theme.colors.plum + '20' }]}>
-                <Text style={[styles.reflectionContent, { color: theme.colors.text.secondary }]} numberOfLines={3}>
+                <Text style={[styles.reflectionContent, { color: theme.colors.text.secondary }]} numberOfLines={2}>
                   {journalHistory[0].content}
                 </Text>
               </View>
@@ -642,14 +647,13 @@ export default function DashboardScreen() {
                     <Text style={styles.reflectionTagText}>RECENT CONVERSATION</Text>
                   </View>
                   <Text style={[styles.reflectionTitle, { color: theme.colors.text.primary }]} numberOfLines={1}>Latest Guidance</Text>
-                  <Text style={[styles.reflectionDate, { color: theme.colors.text.tertiary }]}>Personalized advice from your Oracle</Text>
                 </View>
                 <View style={[styles.reflectionArrow, { backgroundColor: theme.colors.plum + '08' }]}>
                   <ChevronRight color={theme.colors.plum} size={18} />
                 </View>
               </View>
               <View style={[styles.reflectionContentBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(123,97,255,0.03)', borderColor: theme.colors.accents.powderBlue + '40' }]}>
-                <Text style={[styles.reflectionContent, { color: theme.colors.text.secondary, fontStyle: 'italic', lineHeight: 20 }]} numberOfLines={3}>
+                <Text style={[styles.reflectionContent, { color: theme.colors.text.secondary, fontStyle: 'italic', lineHeight: 20 }]} numberOfLines={2}>
                   "{chatHistory[chatHistory.length - 1].content}"
                 </Text>
               </View>

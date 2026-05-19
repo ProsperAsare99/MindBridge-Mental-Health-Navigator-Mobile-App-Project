@@ -33,6 +33,7 @@ const getToolGroups = (theme: any, t: any) => [
       { id: 'ai-guide', title: t('ai.title'), subtitle: t('ai.subtitle'), icon: Bot, color: theme.colors.plum },
       { id: 'garden', title: t('garden.title'), subtitle: t('garden.subtitle'), icon: Wind, color: theme.colors.accents.eucalyptus },
       { id: 'journal', title: t('journal.title'), subtitle: t('journal.subtitle'), icon: BookOpen, color: theme.colors.accents.powderBlue },
+      { id: 'breathing', title: 'Deep Breathing', subtitle: '4-7-8 relaxing breathwork session', icon: Wind, color: theme.colors.accents.gentlePeach, isNotTab: true },
     ]
   },
   {
@@ -102,7 +103,13 @@ export default function ToolsScreen() {
                   <TouchableOpacity
                     activeOpacity={0.6}
                     style={styles.listItem}
-                    onPress={() => router.push(`/(tabs)/${page.id}` as any)}
+                    onPress={() => {
+                      if (page.isNotTab) {
+                        router.push('/breathing');
+                      } else {
+                        router.push(`/(tabs)/${page.id}` as any);
+                      }
+                    }}
                   >
                     <View style={[styles.iconWrap, { backgroundColor: page.color + (theme.isDark ? '25' : '15') }]}>
                       <page.icon color={page.color} size={22} />

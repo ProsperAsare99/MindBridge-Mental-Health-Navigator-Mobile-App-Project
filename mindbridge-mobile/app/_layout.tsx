@@ -13,14 +13,6 @@ import {
   Montserrat_700Bold,
   Montserrat_800ExtraBold,
 } from '@expo-google-fonts/montserrat';
-import {
-  Lora_400Regular,
-  Lora_700Bold,
-} from '@expo-google-fonts/lora';
-import {
-  DMSans_400Regular,
-  DMSans_500Medium,
-} from '@expo-google-fonts/dm-sans';
 import * as SplashScreen from 'expo-splash-screen';
 
 SplashScreen.preventAutoHideAsync();
@@ -32,18 +24,12 @@ const InitialLayout = () => {
   const router = useRouter();
 
   const [fontsLoaded] = useFonts({
-    // Montserrat — headings, UI, buttons
+    // Montserrat — unified for all texts
     'Montserrat-Regular':    Montserrat_400Regular,
     'Montserrat-Medium':     Montserrat_500Medium,
     'Montserrat-SemiBold':   Montserrat_600SemiBold,
     'Montserrat-Bold':       Montserrat_700Bold,
     'Montserrat-ExtraBold':  Montserrat_800ExtraBold,
-    // Lora — body content, journal text
-    'Lora-Regular':          Lora_400Regular,
-    'Lora-Bold':             Lora_700Bold,
-    // DM Sans — captions, metadata, secondary UI
-    'DMSans-Regular':        DMSans_400Regular,
-    'DMSans-Medium':         DMSans_500Medium,
   });
 
   useEffect(() => {

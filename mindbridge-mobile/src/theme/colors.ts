@@ -194,18 +194,16 @@ export const borderRadius = {
 };
 
 // ─── Typography System ────────────────────────────────────────────────────────
-// Montserrat  — headings, UI labels, buttons (geometric, authoritative)
-// Lora        — body content, journal text (elegant serif, warm contrast)
-// DM Sans     — captions, metadata, secondary UI text (clean, minimal)
+// Montserrat  — headings, UI labels, buttons, body content (unified geometry)
 export const typography = {
   fonts: {
     header:   'Montserrat-Bold',       // Headings, screen titles
     accent:   'Montserrat-SemiBold',   // Sub-headings, button text
     ui:       'Montserrat-Medium',     // Navigation, labels
-    body:     'Lora-Regular',          // Body reading text, journal content
-    bodyBold: 'Lora-Bold',             // Emphasized body text
-    caption:  'DMSans-Regular',        // Metadata, timestamps, helper text
-    captionMedium: 'DMSans-Medium',    // Semi-prominent captions
+    body:     'Montserrat-Regular',    // Body reading text, journal content
+    bodyBold: 'Montserrat-Bold',       // Emphasized body text
+    caption:  'Montserrat-Medium',     // Metadata, timestamps, helper text
+    captionMedium: 'Montserrat-SemiBold', // Semi-prominent captions
   },
   h1: { fontSize: 34, fontFamily: 'Montserrat-ExtraBold', letterSpacing: -1 },
   h2: { fontSize: 26, fontFamily: 'Montserrat-Bold',      letterSpacing: -0.5 },
@@ -213,12 +211,12 @@ export const typography = {
   h4: { fontSize: 17, fontFamily: 'Montserrat-SemiBold',  letterSpacing: -0.2 },
   body: {
     fontSize: 16,
-    fontFamily: 'Lora-Regular',
+    fontFamily: 'Montserrat-Regular',
     lineHeight: 26,
   },
   bodyBold: {
     fontSize: 16,
-    fontFamily: 'Lora-Bold',
+    fontFamily: 'Montserrat-Bold',
     lineHeight: 26,
   },
   ui: {
@@ -228,7 +226,7 @@ export const typography = {
   },
   caption: {
     fontSize: 13,
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'Montserrat-Medium',
     letterSpacing: 0.1,
   },
   label: {
@@ -238,9 +236,9 @@ export const typography = {
     letterSpacing: 1.2,
   },
   // Legacy aliases — keeps existing code working
-  content: { fontSize: 16, fontFamily: 'Lora-Regular', lineHeight: 26 },
-  secondary: { fontSize: 15, fontFamily: 'DMSans-Regular', lineHeight: 22 },
-  humanist: { fontSize: 15, fontFamily: 'DMSans-Medium', lineHeight: 22 },
+  content: { fontSize: 16, fontFamily: 'Montserrat-Regular', lineHeight: 26 },
+  secondary: { fontSize: 15, fontFamily: 'Montserrat-Regular', lineHeight: 22 },
+  humanist: { fontSize: 15, fontFamily: 'Montserrat-Medium', lineHeight: 22 },
 };
 
 // Legacy export

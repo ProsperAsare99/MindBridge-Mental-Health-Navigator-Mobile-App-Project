@@ -588,14 +588,17 @@ export default function AssessmentsScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
-      <LinearGradient 
-        colors={theme.isDark 
-          ? ['rgba(123, 97, 255, 0.1)', theme.colors.background, theme.colors.backgroundSecondary]
-          : ['rgba(123, 97, 255, 0.08)', theme.colors.background, theme.colors.backgroundSecondary]
-        } 
-        locations={[0, 0.2, 1]}
-        style={StyleSheet.absoluteFillObject} 
-      />
+      <View style={StyleSheet.absoluteFillObject}>
+        <LinearGradient 
+          colors={theme.isDark 
+            ? [theme.colors.background, theme.colors.backgroundSecondary, '#080C18'] 
+            : [theme.colors.background, theme.colors.backgroundSecondary, '#E0E3EB']
+          } 
+          style={StyleSheet.absoluteFillObject} 
+        />
+        <View style={[styles.bgBlob, { top: -50, left: -100, backgroundColor: theme.colors.accents.powderBlue + '08' }]} />
+        <View style={[styles.bgBlob, { bottom: -100, right: -100, backgroundColor: theme.colors.plum + '08' }]} />
+      </View>
 
       <ScrollView 
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
@@ -737,7 +740,12 @@ export default function AssessmentsScreen() {
 const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.backgroundSecondary,
+  },
+  bgBlob: { 
+    position: 'absolute', 
+    width: 400, 
+    height: 400, 
+    borderRadius: 200 
   },
   scrollContent: {
     paddingHorizontal: 0,
@@ -812,15 +820,22 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.text.disabled,
   },
   startBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: theme.isDark ? 0.3 : 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   startBtnText: {
-    color: theme.colors.text.onPrimary || '#FFF',
-    fontFamily: theme.typography.fonts.accent,
-    fontWeight: '700',
-    fontSize: 13,
+    color: '#FFF',
+    fontFamily: theme.typography.fonts.header,
+    fontWeight: '900',
+    fontSize: 14,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   section: {
     marginBottom: 32,
@@ -1070,9 +1085,9 @@ const createStyles = (theme: any) => StyleSheet.create({
     elevation: 3,
   },
   navBtnText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: theme.typography.fonts.header,
-    fontWeight: '700',
+    fontWeight: '900',
     color: theme.colors.text.primary,
   },
   resultScroll: {
@@ -1218,9 +1233,11 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   actionBtnText: {
     color: '#FFF',
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: theme.typography.fonts.header,
-    fontWeight: '700',
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   doneBtn: {
     width: '100%',
@@ -1233,9 +1250,11 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
   },
   doneBtnText: {
-    color: theme.colors.text.primary,
     fontSize: 16,
     fontFamily: theme.typography.fonts.header,
-    fontWeight: '700',
+    fontWeight: '900',
+    color: theme.colors.text.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });

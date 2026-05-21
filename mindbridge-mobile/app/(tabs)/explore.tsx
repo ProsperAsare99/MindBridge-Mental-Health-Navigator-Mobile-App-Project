@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { SkeletonLoader } from '../../src/components/SkeletonLoader';
 import { 
   Library,
   Headphones,
@@ -167,15 +168,7 @@ export default function ResourcesScreen() {
   }, []);
 
 
-  if (loading || !resources) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={theme.colors.plum} />
-      </View>
-    );
-  }
-
-  const { audio = [], articles = [], videos = [], books = [] } = resources;
+  const { audio = [], articles = [], videos = [], books = [] } = resources || {};
 
   // ── For You Card Component ──────────────────────────────────
   const ForYouCard = ({ card, index }: { card: any; index: number }) => {
@@ -229,6 +222,36 @@ export default function ResourcesScreen() {
 
         <View style={{ height: 20 }} />
 
+        {loading || !resources ? (
+          <View>
+            <View style={styles.section}>
+              <SkeletonLoader width={120} height={24} borderRadius={4} style={{ marginBottom: 16 }} />
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.forYouScroll}>
+                {[1, 2, 3].map((i) => (
+                  <View key={i} style={[fyStyles.card, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor: 'transparent' }]}>
+                    <SkeletonLoader width={46} height={46} borderRadius={16} style={{ marginBottom: 12 }} />
+                    <SkeletonLoader width={60} height={16} borderRadius={8} style={{ marginBottom: 10 }} />
+                    <SkeletonLoader width="100%" height={16} borderRadius={4} style={{ marginBottom: 4 }} />
+                    <SkeletonLoader width="80%" height={16} borderRadius={4} style={{ marginBottom: 8 }} />
+                    <SkeletonLoader width="90%" height={12} borderRadius={4} />
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+
+            <View style={{ height: 24 }} />
+
+            <View style={styles.featuredContainer}>
+              <View style={[styles.featuredCard, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
+                <SkeletonLoader width={80} height={24} borderRadius={8} style={{ marginBottom: 12 }} />
+                <SkeletonLoader width="80%" height={28} borderRadius={4} style={{ marginBottom: 8 }} />
+                <SkeletonLoader width="100%" height={16} borderRadius={4} style={{ marginBottom: 20 }} />
+                <SkeletonLoader width={120} height={40} borderRadius={16} />
+              </View>
+            </View>
+          </View>
+        ) : (
+          <>
         {/* ── For You Section ── */}
         {forYouCards.length > 0 && (
           <View style={styles.section}>
@@ -372,6 +395,8 @@ export default function ResourcesScreen() {
               ))}
             </View>
           </Animated.View>
+        )}
+          </>
         )}
 
       </ScrollView>

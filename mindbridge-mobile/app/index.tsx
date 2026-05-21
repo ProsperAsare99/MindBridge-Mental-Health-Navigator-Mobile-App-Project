@@ -5,7 +5,6 @@ import { AnimatedLogoLoader } from '../src/components/AnimatedLogoLoader';
 
 export default function Index() {
   const { userToken, isLoading } = useContext(AuthContext);
-  const theme = useTheme();
 
   if (isLoading) {
     return <AnimatedLogoLoader />;

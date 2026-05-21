@@ -13,7 +13,8 @@ import {
   Modal,
   TextInput,
   Alert,
-  Dimensions
+  Dimensions,
+  FlatList
 } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useTheme } from '../../src/context/ThemeContext';
@@ -45,7 +46,9 @@ import {
   Camera,
   ShieldAlert,
   Phone,
-  Mic
+  Mic,
+  Search,
+  Check
 } from 'lucide-react-native';
 
 import { AuthContext } from '../../src/context/AuthContext';
@@ -245,6 +248,7 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<any>({});
   const [showUniPicker, setShowUniPicker] = useState(false);
+  const [uniSearch, setUniSearch] = useState('');
   const [showHelp, setShowHelp] = useState(false);
 
   const fetchProfile = async () => {
@@ -641,7 +645,7 @@ export default function ProfileScreen() {
                   <Text style={styles.inputLabel}>University</Text>
                   <TouchableOpacity 
                     style={styles.pickerTrigger} 
-                    onPress={() => setShowUniPicker(!showUniPicker)}
+                    onPress={() => setShowUniPicker(true)}
                   >
                     <Text style={[styles.pickerTriggerText, !editData.university && { color: theme.colors.text.disabled }]}>
                       {editData.university || "Select University"}
@@ -649,22 +653,47 @@ export default function ProfileScreen() {
                     <ChevronRight size={20} color={theme.colors.text.tertiary} style={{ transform: [{ rotate: showUniPicker ? '90deg' : '0deg' }] }} />
                   </TouchableOpacity>
                   
-                  {showUniPicker && (
-                    <Animated.View entering={FadeInUp} style={styles.uniList}>
-                      {UNIVERSITIES.map(uni => (
-                        <TouchableOpacity 
-                          key={uni} 
-                          style={styles.uniOption} 
-                          onPress={() => {
-                            setEditData({...editData, university: uni});
-                            setShowUniPicker(false);
-                          }}
-                        >
-                          <Text style={[styles.uniOptionText, editData.university === uni && { color: theme.colors.plum, fontWeight: '700' }]}>{uni}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </Animated.View>
-                  )}
+                  <Modal visible={showUniPicker} animationType="slide" transparent>
+                    <View style={styles.uniModalOverlay}>
+                      <View style={styles.uniModalContent}>
+                        <View style={styles.modalHeader}>
+                          <Text style={styles.modalTitle}>Select Institution</Text>
+                          <TouchableOpacity onPress={() => setShowUniPicker(false)} style={styles.closeBtn}>
+                            <X color={theme.colors.text.tertiary} size={24} />
+                          </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.searchContainer}>
+                          <Search color={theme.colors.text.disabled} size={20} style={styles.searchIcon} />
+                          <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search institution..."
+                            placeholderTextColor={theme.colors.text.disabled}
+                            value={uniSearch}
+                            onChangeText={setUniSearch}
+                          />
+                        </View>
+
+                        <FlatList
+                          data={UNIVERSITIES.filter(i => i.toLowerCase().includes(uniSearch.toLowerCase()))}
+                          keyExtractor={item => item}
+                          contentContainerStyle={styles.listContent}
+                          renderItem={({ item }) => (
+                            <TouchableOpacity
+                              style={[styles.listItemSearch, editData.university === item && styles.listItemActiveSearch]}
+                              onPress={() => {
+                                setEditData({...editData, university: item});
+                                setShowUniPicker(false);
+                              }}
+                            >
+                              <Text style={[styles.listItemText, editData.university === item && styles.listItemTextActive]}>{item}</Text>
+                              {editData.university === item && <Check color={theme.colors.plum} size={18} />}
+                            </TouchableOpacity>
+                          )}
+                        />
+                      </View>
+                    </View>
+                  </Modal>
                 </View>
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Program of Study</Text>
@@ -783,20 +812,16 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 16,
     color: theme.colors.text.primary,
   },
-  uniList: {
-    marginTop: 8,
-    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-    borderRadius: 16,
-    padding: 8,
-  },
-  uniOption: {
-    padding: 12,
-    borderRadius: 12,
-  },
-  uniOptionText: {
-    fontSize: 14,
-    color: theme.colors.text.secondary,
-  },
+  uniModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  uniModalContent: { backgroundColor: theme.colors.surface, borderTopLeftRadius: 32, borderTopRightRadius: 32, height: SCREEN_WIDTH * 2, maxHeight: '85%', padding: 24, paddingBottom: 40 },
+  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.background, borderRadius: 16, paddingHorizontal: 16, marginBottom: 16, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+  searchIcon: { marginRight: 10 },
+  searchInput: { flex: 1, height: 56, color: theme.colors.text.primary, fontWeight: '600', fontSize: 16 },
+  listContent: { paddingBottom: 40 },
+  listItemSearch: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 18, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)' },
+  listItemActiveSearch: { backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.05)', borderRadius: 16, paddingHorizontal: 16, marginVertical: 4, borderBottomWidth: 0 },
+  listItemText: { fontSize: 16, color: theme.colors.text.primary, fontWeight: '500', flex: 1 },
+  listItemTextActive: { color: theme.colors.plum, fontWeight: '700' },
   crisisCard: { 
     flexDirection: 'row', 
     alignItems: 'center', 

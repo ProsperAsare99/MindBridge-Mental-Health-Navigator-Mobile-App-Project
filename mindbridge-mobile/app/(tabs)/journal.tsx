@@ -403,22 +403,28 @@ export default function JournalScreen() {
 
             <View style={{ height: 24 }} />
 
-            <TextInput
-              style={styles.titleInput}
-              placeholder={t('journal.title_placeholder')}
-              placeholderTextColor={theme.colors.text.tertiary}
-              value={newTitle}
-              onChangeText={setNewTitle}
-            />
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Entry Title</Text>
+              <TextInput
+                style={styles.titleInput}
+                placeholder={t('journal.title_placeholder')}
+                placeholderTextColor={theme.colors.text.tertiary}
+                value={newTitle}
+                onChangeText={setNewTitle}
+              />
+            </View>
 
-            <TextInput
-              style={styles.contentInput}
-              placeholder={t('journal.content_placeholder')}
-              placeholderTextColor={theme.colors.text.tertiary}
-              multiline
-              value={newContent}
-              onChangeText={setNewContent}
-            />
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Journal Content</Text>
+              <TextInput
+                style={styles.contentInput}
+                placeholder={t('journal.content_placeholder')}
+                placeholderTextColor={theme.colors.text.tertiary}
+                multiline
+                value={newContent}
+                onChangeText={setNewContent}
+              />
+            </View>
 
             {/* Audio Recording UI */}
             <View style={styles.audioComposer}>
@@ -591,18 +597,39 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 24,
   },
+  inputGroup: {
+    gap: 8,
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.text.tertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginLeft: 4,
+  },
   titleInput: {
-    fontSize: 24,
-    fontWeight: '800',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    borderRadius: 16,
+    padding: 16,
+    fontSize: 16,
+    fontWeight: '700',
     color: theme.colors.text.primary,
-    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
   },
   contentInput: {
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    borderRadius: 16,
+    padding: 16,
     minHeight: 200,
-    fontSize: 17,
+    fontSize: 16,
     color: theme.colors.text.primary,
-    lineHeight: 26,
+    lineHeight: 24,
     textAlignVertical: 'top',
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
   },
   filterBar: {
     marginTop: 16,

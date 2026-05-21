@@ -269,7 +269,7 @@ export default function CommunityScreen() {
               ))}
             </View>
 
-            <Text style={styles.modalLabel}>Your Thought</Text>
+            <Text style={styles.modalLabel}>Your Message</Text>
             <TextInput
               style={[styles.modalInput, { color: theme.colors.text.primary, borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]}
               placeholder="What's on your mind? Sharing anonymously can help relieve stress..."

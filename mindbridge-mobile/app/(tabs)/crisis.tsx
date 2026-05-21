@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
+import api from '../../src/services/api';
 import { 
   Phone, 
   Building2,
@@ -23,66 +24,105 @@ import {
   ChevronRight,
   Stethoscope,
   Users,
-  BriefcaseMedical
+  BriefcaseMedical,
+  Mail,
+  Globe
 } from 'lucide-react-native';
 
 const UNIVERSITY_COUNSELING_CENTERS: Record<string, any> = {
   'Kwame Nkrumah University of Science and Technology (KNUST)': {
     name: 'KNUST Counseling Center',
-    number: '+233 24 123 4567',
+    number: '+233 50 644 9747',
+    email: 'counsellingcentre@knust.edu.gh',
     description: 'Professional support for students & staff',
-    address: 'Dean of Students Office, Campus'
+    address: 'Dean of Students Office, Campus',
+    services: ['Mental Health Support', 'Academic Counselling', 'Career Development']
   },
   'University of Ghana (UG)': {
-    name: 'UG Counseling & Placement Center',
-    number: '+233 30 250 0381',
+    name: 'UG Careers & Counselling Services',
+    number: '+233 24 594 5752',
+    secondaryNumber: '+233 20 499 9221',
+    email: 'careers@st.ug.edu.gh',
+    website: 'UG Careers & Counselling Services',
     description: 'Confidential psychological support',
-    address: 'Legon Campus'
+    address: 'Legon Campus',
+    services: [
+      'Mental Health & Psycho-social Support: Treatment for depression, anxiety, stress, grief, and relationship counselling.',
+      'Academic Counselling: Guidance on study skills, learning disorders, and academic stress management.',
+      'Career Development: CV clinics, vocational counselling, and internship placement.',
+      'Assessment: Psychometric and psychiatric assessment'
+    ]
   },
   'University of Cape Coast (UCC)': {
-    name: 'UCC Counseling Center',
-    number: '+233 24 485 5411',
+    name: 'UCC Counselling Centre',
+    number: '+233 33 213 2440',
+    email: 'registrar@ucc.edu.gh',
     description: 'Mental health and career guidance services',
-    address: 'North Campus, Cape Coast'
+    address: 'North Campus, Cape Coast',
+    services: ['Mental Health Support', 'Academic Guidance', 'Career Counselling']
   },
   'Ashesi University': {
-    name: 'Ashesi Health & Wellbeing',
+    name: 'Ashesi Counselling and Coaching Center',
     number: '+233 30 261 0330',
+    email: 'ddavis@ashesi.edu.gh',
+    website: 'ashesicounsellingandcoachingcenter.simplybook.me',
     description: 'Holistic support for Ashesi students',
-    address: 'Berekuso Campus'
+    address: 'Berekuso Campus',
+    services: ['Emotional Support', 'Academic Coaching', 'Career Guidance']
   },
   'Academic City University College': {
-    name: 'Academic City Student Support',
-    number: '+233 30 277 2222',
-    description: 'Wellness and counseling for ACity students',
-    address: 'Haatso, Accra'
+    name: 'ACity Career Services & Support',
+    number: '+233 59 403 0308',
+    email: 'careerservices@acity.edu.gh',
+    description: 'Wellness and career counseling for ACity students',
+    address: 'Haatso, Accra',
+    services: ['Career Counselling', 'Student Wellness']
   },
   'University of Professional Studies, Accra (UPSA)': {
-    name: 'UPSA Counseling Services',
-    number: '+233 30 250 1181',
+    name: 'UPSA Counselling Unit',
+    number: '+233 30 395 8571',
     description: 'Professional guidance and counseling unit',
-    address: 'Legon, Accra'
+    address: 'Student Services, Legon, Accra',
+    services: ['Academic Counselling', 'Career Guidance', 'Personal Counselling']
   },
   'GIMPA': {
-    name: 'GIMPA Counseling Unit',
+    name: 'GIMPA Counselling Unit',
     number: '+233 30 240 1681',
+    email: 'gcu@gimpa.edu.gh',
+    website: 'scheduler.gimpa.edu.gh/ea',
     description: 'Support for the GIMPA community',
-    address: 'Greenhill, Accra'
+    address: 'Greenhill, Accra',
+    services: ['Individual Counselling', 'Group Counselling', 'Mental Health Consultations']
   },
   'Other': {
     name: 'National Counseling Center',
     number: '0800 678 678',
     description: 'General institutional support',
-    address: 'Head Office, Accra'
+    address: 'Head Office, Accra',
+    services: ['24/7 Crisis Support', 'Mental Health Referrals']
   }
 };
 
 export default function CrisisSupportScreen() {
   const insets = useSafeAreaInsets();
   const themeContext = useTheme();
-  const { userData } = useContext(AuthContext) as any;
-  const userUni = userData?.academic?.institution || 'Other';
   
+  const [userUni, setUserUni] = useState<string>('Other');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get('/profile');
+        if (response.data?.onboarding?.university) {
+          setUserUni(response.data.onboarding.university);
+        }
+      } catch (error) {
+        console.error('Error fetching university for crisis support:', error);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const styles = createStyles(themeContext);
   const institution = UNIVERSITY_COUNSELING_CENTERS[userUni] || UNIVERSITY_COUNSELING_CENTERS['Other'];
 
@@ -173,10 +213,35 @@ export default function CrisisSupportScreen() {
             </View>
 
             <View style={styles.instDetails}>
-              <View style={styles.detailRow}>
-                <MapPin size={16} color={themeContext.colors.text.tertiary} />
-                <Text style={styles.detailText}>{institution.address}</Text>
-              </View>
+              {institution.address && (
+                <View style={styles.detailRow}>
+                  <MapPin size={16} color={themeContext.colors.text.tertiary} />
+                  <Text style={styles.detailText}>{institution.address}</Text>
+                </View>
+              )}
+              {institution.email && (
+                <View style={styles.detailRow}>
+                  <Mail size={16} color={themeContext.colors.text.tertiary} />
+                  <Text style={styles.detailText}>{institution.email}</Text>
+                </View>
+              )}
+              {institution.website && (
+                <View style={styles.detailRow}>
+                  <Globe size={16} color={themeContext.colors.text.tertiary} />
+                  <Text style={styles.detailText}>{institution.website}</Text>
+                </View>
+              )}
+              {institution.services && (
+                <View style={{ marginTop: 12 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '700', color: themeContext.colors.text.primary, marginBottom: 8 }}>Key Services</Text>
+                  {institution.services.map((service: string, idx: number) => (
+                    <View key={idx} style={{ flexDirection: 'row', marginBottom: 4 }}>
+                      <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: themeContext.colors.plum, marginTop: 7, marginRight: 8 }} />
+                      <Text style={{ fontSize: 13, color: themeContext.colors.text.secondary, flex: 1, lineHeight: 18 }}>{service}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
 
             <TouchableOpacity 
@@ -185,8 +250,19 @@ export default function CrisisSupportScreen() {
               activeOpacity={0.8}
             >
               <Phone color="#FFF" size={20} style={{ marginRight: 8 }} />
-              <Text style={styles.primaryCallText}>Contact Counseling Services</Text>
+              <Text style={styles.primaryCallText}>Call {institution.secondaryNumber ? 'Primary Line' : 'Counseling Services'}</Text>
             </TouchableOpacity>
+
+            {institution.secondaryNumber && (
+              <TouchableOpacity 
+                style={[styles.primaryCallBtn, { backgroundColor: themeContext.colors.accents.powderBlue, marginTop: 8 }]}
+                onPress={() => handleCall(institution.secondaryNumber)}
+                activeOpacity={0.8}
+              >
+                <Phone color="#FFF" size={20} style={{ marginRight: 8 }} />
+                <Text style={styles.primaryCallText}>Call Secondary Line</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </Animated.View>
 

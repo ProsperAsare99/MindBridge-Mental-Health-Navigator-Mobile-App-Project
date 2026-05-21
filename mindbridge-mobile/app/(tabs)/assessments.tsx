@@ -72,6 +72,32 @@ const ASSESSMENT_QUESTIONS: Record<string, Record<string, { question: string; op
       { question: "Finding it hard to concentrate on schoolwork or assignments", options: ["Never", "Seldom", "Often", "Always"] },
       { question: "Feeling less confident in your ability to succeed in exams/tests", options: ["Never", "Seldom", "Often", "Always"] },
       { question: "Feeling physically exhausted or getting frequent headaches/stomachaches from academic stress", options: ["Never", "Seldom", "Often", "Always"] }
+    ],
+    pss: [
+      { question: "In the last month, how often have you been upset because of something that happened unexpectedly?", options: ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"] },
+      { question: "In the last month, how often have you felt that you were unable to control the important things in your life?", options: ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"] },
+      { question: "In the last month, how often have you felt nervous and 'stressed'?", options: ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"] },
+      { question: "In the last month, how often have you felt confident about your ability to handle your personal problems?", options: ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"] },
+      { question: "In the last month, how often have you felt that things were going your way?", options: ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"] },
+      { question: "In the last month, how often have you found that you could not cope with all the things that you had to do?", options: ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"] },
+      { question: "In the last month, how often have you been able to control irritations in your life?", options: ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"] },
+      { question: "In the last month, how often have you felt that you were on top of things?", options: ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"] },
+      { question: "In the last month, how often have you been angered because of things that were outside of your control?", options: ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"] },
+      { question: "In the last month, how often have you felt difficulties were piling up so high that you could not overcome them?", options: ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"] }
+    ],
+    cssrs: [
+      { question: "Have you wished you were dead or wished you could go to sleep and not wake up?", options: ["No", "Yes"] },
+      { question: "Have you actually had any thoughts of killing yourself?", options: ["No", "Yes"] },
+      { question: "Have you been thinking about how you might do this?", options: ["No", "Yes"] },
+      { question: "Have you had these thoughts and had some intention of acting on them?", options: ["No", "Yes"] }
+    ],
+    brs: [
+      { question: "I tend to bounce back quickly after hard times", options: ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"] },
+      { question: "I have a hard time making it through stressful events", options: ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"] },
+      { question: "It does not take me long to recover from a stressful event", options: ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"] },
+      { question: "It is hard for me to snap back when something bad happens", options: ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"] },
+      { question: "I usually come through difficult times with little trouble", options: ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"] },
+      { question: "I tend to take a long time to get over set-backs in my life", options: ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"] }
     ]
   },
   French: {
@@ -170,19 +196,48 @@ const calculateBurnout = (score: number) => {
   return 'High Burnout';
 };
 
+const calculatePSS = (answers: number[]) => {
+  const score = answers.reduce((sum, val, idx) => {
+    if ([3, 4, 6, 7].includes(idx)) return sum + (4 - val);
+    return sum + val;
+  }, 0);
+  if (score <= 13) return { score, severity: 'Low Stress' };
+  if (score <= 26) return { score, severity: 'Moderate Stress' };
+  return { score, severity: 'High Stress' };
+};
+
+const calculateBRS = (answers: number[]) => {
+  const sum = answers.reduce((sum, val, idx) => {
+    let score = val + 1;
+    if ([1, 3, 5].includes(idx)) score = 6 - score;
+    return sum + score;
+  }, 0);
+  const mean = sum / 6;
+  if (mean < 3.0) return { score: Math.round(sum), severity: 'Low Resilience' };
+  if (mean <= 4.3) return { score: Math.round(sum), severity: 'Normal Resilience' };
+  return { score: Math.round(sum), severity: 'High Resilience' };
+};
+
+const calculateCSSRS = (answers: number[]) => {
+  const score = answers.reduce((sum, val) => sum + val, 0);
+  if (score > 1) return { score, severity: 'High Risk' };
+  if (score > 0) return { score, severity: 'Moderate Risk' };
+  return { score, severity: 'Low Risk' };
+};
+
 const getAssessments = (theme: any, t: any) => [
   {
     id: 'phq9',
-    title: 'PHQ-9',
-    subtitle: t('assessments.depression_screening'),
+    title: 'Patient Health Questionnaire',
+    subtitle: 'PHQ-9 Depression Screener',
     duration: `3 ${t('assessments.minutes')}`,
     icon: Activity,
     color: theme.colors.accents.powderBlue,
   },
   {
     id: 'gad7',
-    title: 'GAD-7',
-    subtitle: t('assessments.anxiety_screening'),
+    title: 'General Anxiety Disorder',
+    subtitle: 'GAD-7 Anxiety Screener',
     duration: `2 ${t('assessments.minutes')}`,
     icon: BrainCircuit,
     color: theme.colors.accents.eucalyptus,
@@ -194,6 +249,22 @@ const getAssessments = (theme: any, t: any) => [
     duration: `4 ${t('assessments.minutes')}`,
     icon: GraduationCap,
     color: theme.colors.accents.terracotta,
+  },
+  {
+    id: 'pss',
+    title: 'Perceived Stress Scale',
+    subtitle: 'PSS-10 Screener',
+    duration: `3 ${t('assessments.minutes')}`,
+    icon: Activity,
+    color: theme.colors.accents.softLilac,
+  },
+  {
+    id: 'brs',
+    title: 'Brief Resilience Scale',
+    subtitle: 'BRS Screener',
+    duration: `2 ${t('assessments.minutes')}`,
+    icon: Award,
+    color: theme.colors.accents.sand,
   }
 ];
 
@@ -336,28 +407,63 @@ export default function AssessmentsScreen() {
     if (!activeTestId) return;
     setSubmittingResult(true);
     try {
-      const score = answers.reduce((sum, val) => sum + val, 0);
+      // Dynamic Routing: Intercept PHQ-9 self-harm ideation (Question 9 is index 8)
+      if (activeTestId === 'phq9' && answers[8] > 0) {
+        // Save the PHQ-9 silently first
+        const phqScore = answers.reduce((sum, val) => sum + val, 0);
+        await api.post('/ai/assessments', {
+          type: 'PHQ-9',
+          score: phqScore,
+          severity: calculatePHQ9(phqScore)
+        });
+        
+        setSubmittingResult(false);
+        // Alert the user and route to CSSRS
+        Alert.alert(
+          'Important Follow-up',
+          'Based on your responses, we need to ask you a few short safety questions to ensure you are okay.',
+          [{ text: 'Continue', onPress: () => handleStartTest('cssrs') }]
+        );
+        return;
+      }
 
+      let finalScore = answers.reduce((sum, val) => sum + val, 0);
       let severity = '';
       let typeLabel = '';
+      
       if (activeTestId === 'phq9') {
-        severity = calculatePHQ9(score);
+        severity = calculatePHQ9(finalScore);
         typeLabel = 'PHQ-9';
       } else if (activeTestId === 'gad7') {
-        severity = calculateGAD7(score);
+        severity = calculateGAD7(finalScore);
         typeLabel = 'GAD-7';
+      } else if (activeTestId === 'pss') {
+        const res = calculatePSS(answers);
+        finalScore = res.score;
+        severity = res.severity;
+        typeLabel = 'PSS-10';
+      } else if (activeTestId === 'brs') {
+        const res = calculateBRS(answers);
+        finalScore = res.score;
+        severity = res.severity;
+        typeLabel = 'BRS';
+      } else if (activeTestId === 'cssrs') {
+        const res = calculateCSSRS(answers);
+        finalScore = res.score;
+        severity = res.severity;
+        typeLabel = 'C-SSRS';
       } else {
-        severity = calculateBurnout(score);
+        severity = calculateBurnout(finalScore);
         typeLabel = 'Burnout';
       }
 
       const response = await api.post('/ai/assessments', {
         type: typeLabel,
-        score,
+        score: finalScore,
         severity
       });
 
-      setCalculatedResult({ score, severity });
+      setCalculatedResult({ score: finalScore, severity });
       setShowResultModal(true);
 
       // Refresh history immediately
@@ -374,7 +480,18 @@ export default function AssessmentsScreen() {
   const getActiveColor = () => {
     if (activeTestId === 'phq9') return theme.colors.accents.powderBlue;
     if (activeTestId === 'gad7') return theme.colors.accents.eucalyptus;
+    if (activeTestId === 'pss') return theme.colors.accents.softLilac;
+    if (activeTestId === 'brs') return theme.colors.accents.sand;
     return theme.colors.accents.terracotta;
+  };
+
+  const getTestTitle = (id: string | null) => {
+    if (id === 'phq9') return 'Patient Health Questionnaire';
+    if (id === 'gad7') return 'General Anxiety Disorder';
+    if (id === 'pss') return 'Perceived Stress Scale';
+    if (id === 'brs') return 'Brief Resilience Scale';
+    if (id === 'cssrs') return 'Columbia-Suicide Severity Screener';
+    return t('assessments.burnout_test') || 'Student Burnout';
   };
 
   const renderQuestionWizard = () => {
@@ -485,7 +602,7 @@ export default function AssessmentsScreen() {
                      severity.toLowerCase().includes('moderately severe') ||
                      severity.toLowerCase().includes('moderate');
 
-    const testTitle = activeTestId === 'phq9' ? 'PHQ-9' : activeTestId === 'gad7' ? 'GAD-7' : 'Student Burnout';
+    const testTitle = getTestTitle(activeTestId);
 
     return (
       <ScrollView contentContainerStyle={styles.resultScroll} showsVerticalScrollIndicator={false}>
@@ -574,16 +691,24 @@ export default function AssessmentsScreen() {
           </View>
         )}
 
-        {/* Done Button */}
-        <TouchableOpacity
-          style={styles.doneBtn}
-          onPress={() => setActiveTestId(null)}
-        >
-          <Text style={styles.doneBtnText}>Close & Return</Text>
-        </TouchableOpacity>
+        {/* Done Button (Hidden if strict CSSRS positive) */}
+        {!(activeTestId === 'cssrs' && isSevere) && (
+          <TouchableOpacity
+            style={styles.doneBtn}
+            onPress={() => setActiveTestId(null)}
+          >
+            <Text style={styles.doneBtnText}>Close & Return</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     );
   };
+
+  const processedResults = results.map((result, idx) => {
+    const previousResult = results.find((r, prevIdx) => prevIdx > idx && r.type === result.type);
+    const diff = previousResult ? result.score - previousResult.score : null;
+    return { ...result, diff };
+  });
 
   return (
     <View style={styles.container}>
@@ -661,31 +786,38 @@ export default function AssessmentsScreen() {
                 <Text style={{ color: theme.colors.text.secondary }}>No assessments taken yet.</Text>
               </View>
             ) : (
-              results.map((result: any, index: number) => (
+              processedResults.map((result: any, index: number) => (
                 <React.Fragment key={result.id}>
                   <TouchableOpacity 
                     style={styles.resultItem}
                     activeOpacity={0.7}
                     onPress={() => Alert.alert(
                       `${result.type} Result`,
-                      `Date: ${formatDate(result.createdAt)}\nScore: ${result.score}\nSeverity: ${result.severity}`
+                      `Date: ${formatDate(result.createdAt)}\nScore: ${result.score}\nSeverity: ${result.severity}${result.diff !== null ? `\nChange: ${result.diff > 0 ? '+' : ''}${result.diff} since previous` : ''}`
                     )}
                   >
                     <View style={[styles.resultIconWrap, { backgroundColor: theme.colors.accents.powderBlue + (theme.isDark ? '25' : '15') }]}>
-                      {result.score > 10 ? <TrendingUp color={theme.colors.accents.terracotta} size={18} /> : <Minus color={theme.colors.accents.powderBlue} size={18} />}
+                      {result.diff !== null && result.diff > 0 ? <TrendingUp color={theme.colors.accents.terracotta} size={18} /> : 
+                       result.diff !== null && result.diff < 0 ? <TrendingDown color={theme.colors.accents.powderBlue} size={18} /> : 
+                       <Minus color={theme.colors.accents.powderBlue} size={18} />}
                     </View>
                     <View style={styles.resultInfo}>
                       <Text style={styles.resultTest}>{result.type}</Text>
-                      <Text style={[styles.resultScore, { color: result.score > 15 ? theme.colors.accents.terracotta : theme.colors.text.primary }]}>
+                      <Text style={[styles.resultScore, { color: (result.score > 15 || result.severity.includes('Risk') || result.severity.includes('High')) ? theme.colors.semantic.danger : theme.colors.text.primary }]}>
                         {result.severity} ({result.score})
                       </Text>
+                      {result.diff !== null && (
+                        <Text style={{ fontSize: 12, color: theme.colors.text.secondary, marginTop: 2 }}>
+                          {result.diff > 0 ? '+' : ''}{result.diff} pts
+                        </Text>
+                      )}
                     </View>
                     <View style={styles.resultRight}>
                       <Text style={styles.resultDate}>{formatDate(result.createdAt)}</Text>
                       <ChevronRight color={theme.colors.text.disabled} size={18} />
                     </View>
                   </TouchableOpacity>
-                  {index < results.length - 1 && <View style={styles.divider} />}
+                  {index < processedResults.length - 1 && <View style={styles.divider} />}
                 </React.Fragment>
               ))
             )}
@@ -724,7 +856,7 @@ export default function AssessmentsScreen() {
               <X color={theme.colors.text.primary} size={24} />
             </TouchableOpacity>
             <Text style={styles.modalTitleText}>
-              {activeTestId === 'phq9' ? 'PHQ-9' : activeTestId === 'gad7' ? 'GAD-7' : t('assessments.burnout_test') || 'Student Burnout'}
+              {getTestTitle(activeTestId)}
             </Text>
             <View style={{ width: 44 }} />
           </View>

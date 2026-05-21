@@ -13,7 +13,7 @@ interface ThemeContextType {
   language: Language;
   setMode: (mode: ThemeMode) => void;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string) => any;
   colors: typeof lightColors;
   spacing: typeof spacing;
   borderRadius: typeof borderRadius;
@@ -67,16 +67,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const t = (path: string): string => {
+  const t = (path: string): any => {
     try {
       const keys = path.split('.');
       let result: any = translations[language];
       for (const key of keys) {
+        if (result === undefined || result === null) return undefined;
         result = result[key];
       }
-      return result || path;
+      return result !== undefined ? result : undefined;
     } catch {
-      return path;
+      return undefined;
     }
   };
 

@@ -19,6 +19,7 @@ import Animated, { FadeInUp, FadeIn, SlideInDown, SlideOutDown, withRepeat, with
 import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { SkeletonLoader } from '../../src/components/SkeletonLoader';
 import { 
   BookOpen, 
   Plus, 
@@ -274,7 +275,19 @@ export default function JournalScreen() {
           </Animated.View>
 
           {loading ? (
-            <ActivityIndicator size="large" color={theme.colors.plum} style={{ marginTop: 40 }} />
+            <View style={styles.entriesList}>
+              {[1, 2, 3].map((_, i) => (
+                <View key={i} style={[styles.entryCard, { marginTop: i === 0 ? 10 : 0 }]}>
+                  <View style={styles.entryHeader}>
+                    <SkeletonLoader width={80} height={16} borderRadius={4} />
+                    <SkeletonLoader width={32} height={32} borderRadius={16} />
+                  </View>
+                  <SkeletonLoader width="60%" height={20} borderRadius={4} style={{ marginBottom: 12 }} />
+                  <SkeletonLoader width="100%" height={14} borderRadius={4} style={{ marginBottom: 6 }} />
+                  <SkeletonLoader width="80%" height={14} borderRadius={4} />
+                </View>
+              ))}
+            </View>
           ) : filteredEntries.length === 0 ? (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconWrap}>

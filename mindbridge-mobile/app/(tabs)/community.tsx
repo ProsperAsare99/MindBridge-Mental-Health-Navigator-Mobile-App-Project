@@ -27,6 +27,7 @@ import {
   X
 } from 'lucide-react-native';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { SkeletonLoader } from '../../src/components/SkeletonLoader';
 import api from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
@@ -159,7 +160,29 @@ export default function CommunityScreen() {
           <Text style={[styles.sectionTitle, { paddingHorizontal: 24, marginBottom: 16 }]}>{t('community.recent_discussions')}</Text>
           
           {loading ? (
-            <ActivityIndicator size="large" color={theme.colors.plum} style={{ marginTop: 40 }} />
+            <View style={styles.feedContainer}>
+              {[1, 2, 3].map((_, i) => (
+                <View key={i} style={styles.postCard}>
+                  <View style={styles.postHeader}>
+                    <View style={styles.postAuthorInfo}>
+                      <SkeletonLoader width={40} height={40} borderRadius={20} style={{ marginRight: 12 }} />
+                      <View>
+                        <SkeletonLoader width={100} height={15} borderRadius={4} style={{ marginBottom: 6 }} />
+                        <SkeletonLoader width={80} height={13} borderRadius={4} />
+                      </View>
+                    </View>
+                    <SkeletonLoader width={24} height={24} borderRadius={12} />
+                  </View>
+                  <SkeletonLoader width="100%" height={16} borderRadius={4} style={{ marginBottom: 8 }} />
+                  <SkeletonLoader width="85%" height={16} borderRadius={4} style={{ marginBottom: 8 }} />
+                  <SkeletonLoader width="60%" height={16} borderRadius={4} style={{ marginBottom: 24 }} />
+                  <View style={styles.postActions}>
+                    <SkeletonLoader width={60} height={18} borderRadius={4} />
+                    <SkeletonLoader width={60} height={18} borderRadius={4} />
+                  </View>
+                </View>
+              ))}
+            </View>
           ) : feed.length === 0 ? (
              <View style={{ padding: 24, alignItems: 'center' }}>
                 <Text style={{ color: theme.colors.text.secondary }}>No discussions yet. Be the first to share!</Text>

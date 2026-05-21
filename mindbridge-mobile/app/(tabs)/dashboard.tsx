@@ -57,6 +57,7 @@ import {
   Calendar
 } from 'lucide-react-native';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { ReadMoreText } from '../../src/components/ReadMoreText';
 
 const { width } = Dimensions.get('window');
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
@@ -616,9 +617,11 @@ export default function DashboardScreen() {
                 </View>
               </View>
               <View style={[styles.reflectionContentBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(123,97,255,0.03)', borderColor: theme.colors.plum + '20' }]}>
-                <Text style={[styles.reflectionContent, { color: theme.colors.text.secondary }]} numberOfLines={2}>
-                  {journalHistory[0].content}
-                </Text>
+                <ReadMoreText 
+                  style={[styles.reflectionContent, { color: theme.colors.text.secondary }]} 
+                  text={journalHistory[0].content} 
+                  numberOfLines={2}
+                />
               </View>
             </TouchableOpacity>
           </View>
@@ -652,9 +655,11 @@ export default function DashboardScreen() {
                 </View>
               </View>
               <View style={[styles.reflectionContentBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(123,97,255,0.03)', borderColor: theme.colors.accents.powderBlue + '40' }]}>
-                <Text style={[styles.reflectionContent, { color: theme.colors.text.secondary, fontStyle: 'italic', lineHeight: 20 }]} numberOfLines={2}>
-                  "{chatHistory[chatHistory.length - 1].content}"
-                </Text>
+                <ReadMoreText 
+                  style={[styles.reflectionContent, { color: theme.colors.text.secondary, fontStyle: 'italic', lineHeight: 20 }]} 
+                  text={`"${chatHistory[chatHistory.length - 1].content}"`}
+                  numberOfLines={2}
+                />
               </View>
             </TouchableOpacity>
           </View>

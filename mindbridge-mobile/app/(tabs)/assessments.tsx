@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { SkeletonLoader } from '../../src/components/SkeletonLoader';
 import api from '../../src/services/api';
 import { 
   ClipboardList, 
@@ -173,7 +174,20 @@ export default function AssessmentsScreen() {
           <Text style={styles.sectionTitle}>{t('assessments.recent_results')}</Text>
           <View style={styles.resultsContainer}>
             {loading ? (
-              <ActivityIndicator size="small" color={theme.colors.plum} style={{ padding: 40 }} />
+              <View style={{ padding: 20 }}>
+                {[1, 2].map((_, i) => (
+                  <View key={i} style={[styles.resultItem, { padding: 0, paddingVertical: 10 }]}>
+                    <SkeletonLoader width={40} height={40} borderRadius={12} style={{ marginRight: 16 }} />
+                    <View style={styles.resultInfo}>
+                      <SkeletonLoader width={100} height={16} borderRadius={4} style={{ marginBottom: 6 }} />
+                      <SkeletonLoader width={60} height={14} borderRadius={4} />
+                    </View>
+                    <View style={styles.resultRight}>
+                      <SkeletonLoader width={40} height={14} borderRadius={4} />
+                    </View>
+                  </View>
+                ))}
+              </View>
             ) : results.length === 0 ? (
               <View style={{ padding: 40, alignItems: 'center' }}>
                 <Text style={{ color: theme.colors.text.secondary }}>No assessments taken yet.</Text>

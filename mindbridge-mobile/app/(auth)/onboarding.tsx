@@ -28,7 +28,7 @@ import {
   ChevronRight, ChevronLeft, ShieldCheck, User, CheckCircle2,
   Info, GraduationCap, BookOpen, Brain, MessageSquare, Activity, Heart, Users, Zap
 } from 'lucide-react-native';
-import AuthCharacters from '../../src/components/AuthCharacters';
+import { AnimatedLogoLoader } from '../../src/components/AnimatedLogoLoader';
 
 const { width, height } = Dimensions.get('window');
 
@@ -743,12 +743,7 @@ export default function OnboardingScreen() {
 
       {/* Finishing / Transition Modal */}
       <Modal visible={isFinishing} transparent animationType="fade">
-        <View style={[styles.modalOverlay, { backgroundColor: themeContext.colors.background }]}>
-          <Reanimated.View entering={FadeInUp} style={{ alignItems: 'center' }}>
-            <ActivityIndicator size="large" color={themeContext.colors.plum} />
-            <Text style={[styles.modalTitle, { marginTop: 24 }]}>{t.common.loadingSafeSpace}</Text>
-          </Reanimated.View>
-        </View>
+        <AnimatedLogoLoader />
       </Modal>
     </KeyboardAvoidingView>
   );

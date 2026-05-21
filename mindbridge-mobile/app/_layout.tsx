@@ -1,8 +1,9 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect, useContext } from 'react';
 import { AuthProvider, AuthContext } from '../src/context/AuthContext';
-import { View, ActivityIndicator } from 'react-native';
+import { View } from 'react-native';
 import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
+import { AnimatedLogoLoader } from '../src/components/AnimatedLogoLoader';
 import { 
   useFonts,
   Poppins_400Regular,
@@ -70,11 +71,7 @@ const InitialLayout = () => {
   }, [userToken, isLoading, userData, segments]);
 
   if (isLoading || !fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: theme.colors.background }}>
-        <ActivityIndicator size="large" color={theme.colors.plum} />
-      </View>
-    );
+    return <AnimatedLogoLoader />;
   }
 
   return (

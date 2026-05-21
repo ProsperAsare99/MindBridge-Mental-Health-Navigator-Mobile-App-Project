@@ -8,7 +8,8 @@ import {
   Dimensions,
   StatusBar,
   ActivityIndicator,
-  Alert
+  Alert,
+  Modal
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { SkeletonLoader } from '../../src/components/SkeletonLoader';
 import api from '../../src/services/api';
+import { useRouter } from 'expo-router';
 import { 
   ClipboardList, 
   Activity, 
@@ -26,10 +28,147 @@ import {
   ChevronRight,
   TrendingDown,
   TrendingUp,
-  Minus
+  Minus,
+  X,
+  ArrowRight,
+  ArrowLeft,
+  ShieldAlert,
+  Award,
+  Compass
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
+
+const ASSESSMENT_QUESTIONS: Record<string, Record<string, { question: string; options: string[] }[]>> = {
+  English: {
+    phq9: [
+      { question: "Little interest or pleasure in doing things", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Feeling down, depressed, or hopeless", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Trouble falling or staying asleep, or sleeping too much", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Feeling tired or having little energy", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Poor appetite or overeating", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Feeling bad about yourself — or that you are a failure or have let yourself or your family down", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Trouble concentrating on things, such as reading the newspaper or watching television", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Thoughts that you would be better off dead or of hurting yourself in some way", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] }
+    ],
+    gad7: [
+      { question: "Feeling nervous, anxious, or on edge", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Not being able to stop or control worrying", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Worrying too much about different things", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Trouble relaxing", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Being so restless that it is hard to sit still", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Becoming easily annoyed or irritable", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] },
+      { question: "Feeling afraid as if something awful might happen", options: ["Not at all", "Several days", "More than half the days", "Nearly every day"] }
+    ],
+    burnout: [
+      { question: "Feeling emotionally exhausted by your studies", options: ["Never", "Seldom", "Often", "Always"] },
+      { question: "Feeling completely worn out at the end of a day at university/school", options: ["Never", "Seldom", "Often", "Always"] },
+      { question: "Feeling tired when you wake up in the morning and have to face another day of classes", options: ["Never", "Seldom", "Often", "Always"] },
+      { question: "Feeling that you are becoming less interested or more cynical about your studies", options: ["Never", "Seldom", "Often", "Always"] },
+      { question: "Doubting the usefulness or value of your academic program", options: ["Never", "Seldom", "Often", "Always"] },
+      { question: "Feeling that you cannot cope with the academic workload", options: ["Never", "Seldom", "Often", "Always"] },
+      { question: "Lacking motivation to attend classes or study", options: ["Never", "Seldom", "Often", "Always"] },
+      { question: "Finding it hard to concentrate on schoolwork or assignments", options: ["Never", "Seldom", "Often", "Always"] },
+      { question: "Feeling less confident in your ability to succeed in exams/tests", options: ["Never", "Seldom", "Often", "Always"] },
+      { question: "Feeling physically exhausted or getting frequent headaches/stomachaches from academic stress", options: ["Never", "Seldom", "Often", "Always"] }
+    ]
+  },
+  French: {
+    phq9: [
+      { question: "Peu d'intérêt ou de plaisir à faire des choses", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Se sentir triste, déprimé ou sans espoir", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Difficultés à s'endormir ou à rester endormi, ou trop dormir", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Se sentir fatigué ou manquer d'énergie", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Manque d'appétit ou trop manger", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Mauvaise opinion de vous-même — ou sentiment d'être un raté ou d'avoir déçu votre famille", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Difficultés à se concentrer, par exemple en lisant ou en regardant la télévision", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Bouger ou parler si lentement que les autres auraient pu le remarquer ? Ou l'inverse — être si agité que vous bougez beaucoup plus que d'habitude", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Pensées que vous seriez mieux mort ou de vous faire du mal d'une manière ou d'une autre", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] }
+    ],
+    gad7: [
+      { question: "Se sentir nerveux, anxieux ou sur les nerfs", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Ne pas pouvoir s'empêcher ou s'arrêter de s'inquiéter", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Trop s'inquiéter pour différentes choses", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Difficultés à se détendre", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Être si agité qu'il est difficile de rester assis", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Devenir facilement agacé ou irritable", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] },
+      { question: "Avoir peur comme si quelque chose d'horrible allait se passer", options: ["Pas du tout", "Plusieurs jours", "Plus de la moitié du temps", "Presque tous les jours"] }
+    ],
+    burnout: [
+      { question: "Se sentir émotionnellement épuisé par vos études", options: ["Jamais", "Rarement", "Souvent", "Toujours"] },
+      { question: "Se sentir complètement vidé à la fin d'une journée à l'université/école", options: ["Jamais", "Rarement", "Souvent", "Toujours"] },
+      { question: "Se sentir fatigué au réveil le matin face à une autre journée de cours", options: ["Jamais", "Rarement", "Souvent", "Toujours"] },
+      { question: "Sentiment de vous désintéresser ou de devenir cynique envers vos études", options: ["Jamais", "Rarement", "Souvent", "Toujours"] },
+      { question: "Douter de l'utilité ou de la valeur de votre programme académique", options: ["Jamais", "Rarement", "Souvent", "Toujours"] },
+      { question: "Sentiment de ne pas pouvoir faire face à la charge de travail académique", options: ["Jamais", "Rarement", "Souvent", "Toujours"] },
+      { question: "Manque de motivation pour assister aux cours ou étudier", options: ["Jamais", "Rarement", "Souvent", "Toujours"] },
+      { question: "Difficultés à se concentrer sur les devoirs ou le travail scolaire", options: ["Jamais", "Rarement", "Souvent", "Toujours"] },
+      { question: "Manque de confiance en vos capacités à réussir les examens/tests", options: ["Jamais", "Rarement", "Souvent", "Toujours"] },
+      { question: "Se sentir physiquement épuisé ou avoir des maux de tête/d'estomac dus au stress académique", options: ["Jamais", "Rarement", "Souvent", "Toujours"] }
+    ]
+  },
+  Twi: {
+    phq9: [
+      { question: "Anigyeɛ anaa ɔpɛ a wode yɛ nneɛma a ɛkɔ fam", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Wo nkae a ɛkɔ fam, awerɛhow, anaa anidaso a nnim", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Ɔhaw wɔ nna mu, anaa nna a ɛboro so", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Ɔbrɛ anaa ahoɔden a ɛkɔ fam", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Adidi a ɛkɔ fam anaa adidi a ɛboro so", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Wo nkae sɛ woyɛ onipa a woanhyehyɛ wo ho yiye anaa woama w’abusua abam abu", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Ɔhaw wɔ adwene a wode bɛsi nneɛma so, te sɛ akenkan anaa television hwɛ", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Ɔkasa anaa kootoo a ɛyɛ bɔkɔɔ a afoforo bɛtumi ahu, anaa ahotoso a enni hɔ a wodi nea ɛboro so", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Nsusuwii a ɛkyerɛ sɛ wowu a anka ɛye anaa wopɛ sɛ wopira wo ho", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] }
+    ],
+    gad7: [
+      { question: "Wo nkae a ɛyɛ hu, dadwen, anaa wo ho a ɛpopɔ", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Dadwen a wuntumi nnye ho hwee", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Dadwen a ɛboro so wɔ nneɛma ahorow ho", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Ɔbrɛ wɔ ahomegye mu", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Ahotoso a enni hɔ a wutumi tena baako", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Abufuw a ɛba ntɛm", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] },
+      { question: "Ehu sɛ biribi bɔne bi bɛtumi aba", options: ["Koraa", "Nna kakra", "Nna dodow no ara", "Daa biara"] }
+    ],
+    burnout: [
+      { question: "Ɔbrɛ wɔ adwene mu wɔ wo sukuu ho", options: ["Da", "Mbere kakra", "Taataa", "Daa"] },
+      { question: "Ɔbrɛ a ɛboro so wɔ sukuu da awiei", options: ["Da", "Mbere kakra", "Taataa", "Daa"] },
+      { question: "Ɔbrɛ a wote nka anɔpa a wobɛkɔ sukuu bio", options: ["Da", "Mbere kakra", "Taataa", "Daa"] },
+      { question: "Ɔpɛ a ɛkɔ fam wɔ wo sukuu adesua ho", options: ["Da", "Mbere kakra", "Taataa", "Daa"] },
+      { question: "Akyinnye wɔ sukuu a wukɔ yi mfaso ho", options: ["Da", "Mbere kakra", "Taataa", "Daa"] },
+      { question: "Sukuu nnwuma a wutumi yɛ", options: ["Da", "Mbere kakra", "Taataa", "Daa"] },
+      { question: "Ɔpɛ a enni hɔ sɛ wobɛkɔ adesua mu", options: ["Da", "Mbere kakra", "Taataa", "Daa"] },
+      { question: "Akyinnye wɔ adesua so adwene a wode bɛsi so", options: ["Da", "Mbere kakra", "Taataa", "Daa"] },
+      { question: "Ahotoso a ɛkɔ fam wɔ sɔhwɛ a wobɛtumi apase", options: ["Da", "Mbere kakra", "Taataa", "Daa"] },
+      { question: "Ɔbrɛ wɔ honam mu anaa tiyadeɛ a efi sukuu dadwen mu ba", options: ["Da", "Mbere kakra", "Taataa", "Daa"] }
+    ]
+  }
+};
+
+const getQuestionsForLanguage = (lang: string, type: string) => {
+  const currentLang = ASSESSMENT_QUESTIONS[lang] ? lang : 'English';
+  return ASSESSMENT_QUESTIONS[currentLang][type] || ASSESSMENT_QUESTIONS['English'][type];
+};
+
+const calculatePHQ9 = (score: number) => {
+  if (score <= 4) return 'Minimal';
+  if (score <= 9) return 'Mild';
+  if (score <= 14) return 'Moderate';
+  if (score <= 19) return 'Moderately Severe';
+  return 'Severe';
+};
+
+const calculateGAD7 = (score: number) => {
+  if (score <= 4) return 'Minimal';
+  if (score <= 9) return 'Mild';
+  if (score <= 14) return 'Moderate';
+  return 'Severe';
+};
+
+const calculateBurnout = (score: number) => {
+  if (score <= 9) return 'Low Burnout';
+  if (score <= 19) return 'Moderate Burnout';
+  return 'High Burnout';
+};
 
 const getAssessments = (theme: any, t: any) => [
   {
@@ -77,11 +216,15 @@ const getRecentResults = (theme: any) => [
   }
 ];
 
-const AssessmentCard = ({ assessment, delay, theme }: any) => {
+const AssessmentCard = ({ assessment, delay, theme, onStart }: any) => {
   const styles = createStyles(theme);
   return (
     <Animated.View entering={FadeInUp.delay(delay).duration(500)}>
-      <TouchableOpacity style={styles.assessmentCard} activeOpacity={0.8}>
+      <TouchableOpacity 
+        style={styles.assessmentCard} 
+        activeOpacity={0.8}
+        onPress={() => onStart(assessment.id)}
+      >
         <View style={[styles.assessmentIconWrap, { backgroundColor: assessment.color + (theme.isDark ? '25' : '20') }]}>
           <assessment.icon color={assessment.color} size={28} />
         </View>
@@ -104,8 +247,18 @@ export default function AssessmentsScreen() {
   const { t } = theme;
   const styles = createStyles(theme);
   const assessments = getAssessments(theme, t);
+  const router = useRouter();
+
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Wizard state hooks
+  const [activeTestId, setActiveTestId] = useState<string | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+  const [answers, setAnswers] = useState<number[]>([]);
+  const [showResultModal, setShowResultModal] = useState<boolean>(false);
+  const [submittingResult, setSubmittingResult] = useState<boolean>(false);
+  const [calculatedResult, setCalculatedResult] = useState<{ score: number; severity: string } | null>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -124,6 +277,312 @@ export default function AssessmentsScreen() {
   const formatDate = (dateString: string) => {
     const d = new Date(dateString);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const handleStartTest = (id: string) => {
+    const questList = getQuestionsForLanguage(theme.language, id);
+    setActiveTestId(id);
+    setCurrentQuestionIndex(0);
+    setAnswers(new Array(questList.length).fill(-1));
+    setCalculatedResult(null);
+    setShowResultModal(false);
+  };
+
+  const handleCloseRequest = () => {
+    if (showResultModal) {
+      setActiveTestId(null);
+      return;
+    }
+    Alert.alert(
+      t('assessments.exit_title') || 'Exit Screening?',
+      t('assessments.exit_msg') || 'Are you sure you want to exit? Your progress will be lost.',
+      [
+        { text: t('common.cancel') || 'Cancel', style: 'cancel' },
+        { text: t('common.confirm') || 'Exit', style: 'destructive', onPress: () => setActiveTestId(null) }
+      ]
+    );
+  };
+
+  const handleSelectAnswer = (idx: number) => {
+    const newAnswers = [...answers];
+    newAnswers[currentQuestionIndex] = idx;
+    setAnswers(newAnswers);
+
+    // Smoothly auto-advance after 250ms if not the last question
+    const questions = getQuestionsForLanguage(theme.language, activeTestId!);
+    if (currentQuestionIndex < questions.length - 1) {
+      setTimeout(() => {
+        setCurrentQuestionIndex(prev => prev + 1);
+      }, 250);
+    }
+  };
+
+  const handlePrevQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
+
+  const handleNextQuestion = async () => {
+    const questions = getQuestionsForLanguage(theme.language, activeTestId!);
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      await handleSubmitResult();
+    }
+  };
+
+  const handleSubmitResult = async () => {
+    if (!activeTestId) return;
+    setSubmittingResult(true);
+    try {
+      const score = answers.reduce((sum, val) => sum + val, 0);
+
+      let severity = '';
+      let typeLabel = '';
+      if (activeTestId === 'phq9') {
+        severity = calculatePHQ9(score);
+        typeLabel = 'PHQ-9';
+      } else if (activeTestId === 'gad7') {
+        severity = calculateGAD7(score);
+        typeLabel = 'GAD-7';
+      } else {
+        severity = calculateBurnout(score);
+        typeLabel = 'Burnout';
+      }
+
+      const response = await api.post('/ai/assessments', {
+        type: typeLabel,
+        score,
+        severity
+      });
+
+      setCalculatedResult({ score, severity });
+      setShowResultModal(true);
+
+      // Refresh history immediately
+      const refreshResponse = await api.get('/ai/oracle-context');
+      setResults(refreshResponse.data.assessments || []);
+    } catch (error) {
+      console.error('Error submitting assessment result:', error);
+      Alert.alert('Error', 'Failed to save screening result. Please try again.');
+    } finally {
+      setSubmittingResult(false);
+    }
+  };
+
+  const getActiveColor = () => {
+    if (activeTestId === 'phq9') return theme.colors.accents.powderBlue;
+    if (activeTestId === 'gad7') return theme.colors.accents.eucalyptus;
+    return theme.colors.accents.terracotta;
+  };
+
+  const renderQuestionWizard = () => {
+    if (!activeTestId) return null;
+    const questions = getQuestionsForLanguage(theme.language, activeTestId);
+    const currentQuestion = questions[currentQuestionIndex];
+    const progress = (currentQuestionIndex + 1) / questions.length;
+
+    return (
+      <View style={styles.wizardContainer}>
+        {/* Progress Bar */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBarBg}>
+            <View style={[styles.progressBarFill, { width: `${progress * 100}%`, backgroundColor: getActiveColor() }]} />
+          </View>
+          <Text style={styles.progressText}>
+            {t('assessments.question') || 'Question'} {currentQuestionIndex + 1} {t('assessments.of') || 'of'} {questions.length}
+          </Text>
+        </View>
+
+        {/* Question Card */}
+        <ScrollView contentContainerStyle={styles.questionScroll} showsVerticalScrollIndicator={false}>
+          <View style={styles.questionCard}>
+            <Text style={styles.questionText}>{currentQuestion.question}</Text>
+          </View>
+
+          {/* Options */}
+          <View style={styles.optionsContainer}>
+            {currentQuestion.options.map((option, idx) => {
+              const isSelected = answers[currentQuestionIndex] === idx;
+              return (
+                <TouchableOpacity
+                  key={idx}
+                  style={[
+                    styles.optionButton,
+                    isSelected && { 
+                      borderColor: getActiveColor(), 
+                      backgroundColor: getActiveColor() + '15' 
+                    }
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() => handleSelectAnswer(idx)}
+                >
+                  <View style={[
+                    styles.optionRadio, 
+                    isSelected && { borderColor: getActiveColor(), backgroundColor: getActiveColor() }
+                  ]}>
+                    {isSelected && <View style={styles.optionRadioInner} />}
+                  </View>
+                  <Text style={[
+                    styles.optionText, 
+                    isSelected && { color: theme.colors.text.primary, fontWeight: '700' }
+                  ]}>
+                    {option}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </ScrollView>
+
+        {/* Navigation Buttons */}
+        <View style={styles.navContainer}>
+          <TouchableOpacity
+            style={[styles.navBtn, currentQuestionIndex === 0 && styles.navBtnDisabled]}
+            disabled={currentQuestionIndex === 0}
+            onPress={handlePrevQuestion}
+          >
+            <ArrowLeft color={currentQuestionIndex === 0 ? theme.colors.text.disabled : theme.colors.text.primary} size={20} />
+            <Text style={[styles.navBtnText, currentQuestionIndex === 0 && { color: theme.colors.text.disabled }]}>
+              {t('common.back') || 'Back'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.navBtn, 
+              styles.navBtnNext,
+              answers[currentQuestionIndex] === -1 && styles.navBtnDisabled,
+              { backgroundColor: getActiveColor() }
+            ]}
+            disabled={answers[currentQuestionIndex] === -1 || submittingResult}
+            onPress={handleNextQuestion}
+          >
+            {submittingResult ? (
+              <ActivityIndicator color="#FFF" size="small" />
+            ) : (
+              <>
+                <Text style={[styles.navBtnText, { color: '#FFF' }]}>
+                  {currentQuestionIndex === questions.length - 1 
+                    ? (t('common.confirm') || 'Submit') 
+                    : (t('common.next') || 'Next')}
+                </Text>
+                <ArrowRight color="#FFF" size={20} />
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
+  const renderResultScreen = () => {
+    if (!calculatedResult || !activeTestId) return null;
+    const { score, severity } = calculatedResult;
+    const isSevere = severity.toLowerCase().includes('severe') || 
+                     severity.toLowerCase().includes('high burnout') || 
+                     severity.toLowerCase().includes('moderately severe') ||
+                     severity.toLowerCase().includes('moderate');
+
+    const testTitle = activeTestId === 'phq9' ? 'PHQ-9' : activeTestId === 'gad7' ? 'GAD-7' : 'Student Burnout';
+
+    return (
+      <ScrollView contentContainerStyle={styles.resultScroll} showsVerticalScrollIndicator={false}>
+        <View style={styles.successIconWrap}>
+          <Award color={getActiveColor()} size={64} />
+        </View>
+
+        <Text style={styles.resultHeading}>Screening Completed</Text>
+        <Text style={styles.resultSubheading}>
+          You have successfully completed the {testTitle} assessment. Here is your evaluation:
+        </Text>
+
+        {/* Result Card */}
+        <View style={[styles.resultCard, { borderColor: getActiveColor() }]}>
+          <View style={styles.scoreContainer}>
+            <Text style={styles.scoreTitle}>Total Score</Text>
+            <Text style={[styles.scoreValue, { color: getActiveColor() }]}>{score}</Text>
+          </View>
+          <View style={styles.dividerVertical} />
+          <View style={styles.severityContainer}>
+            <Text style={styles.severityTitle}>Severity Level</Text>
+            <View style={[
+              styles.severityBadge, 
+              { backgroundColor: isSevere ? 'rgba(239, 68, 68, 0.15)' : 'rgba(90, 138, 112, 0.15)' }
+            ]}>
+              <Text style={[
+                styles.severityText, 
+                { color: isSevere ? theme.colors.semantic.danger : theme.colors.semantic.success }
+              ]}>
+                {severity}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Safety Redirect or Coping Suggestions */}
+        {isSevere ? (
+          <View style={[
+            styles.actionCard, 
+            { 
+              backgroundColor: theme.isDark ? 'rgba(239, 68, 68, 0.08)' : 'rgba(239, 68, 68, 0.04)',
+              borderColor: theme.colors.semantic.danger 
+            }
+          ]}>
+            <ShieldAlert color={theme.colors.semantic.danger} size={32} style={{ marginBottom: 12 }} />
+            <Text style={[styles.actionTitle, { color: theme.colors.semantic.danger }]}>
+              Crisis Support Available
+            </Text>
+            <Text style={styles.actionText}>
+              Your results indicate that you may be going through a highly challenging period. Please know that you are not alone, and reaching out for support can make a difference.
+            </Text>
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: theme.colors.semantic.danger }]}
+              onPress={() => {
+                setActiveTestId(null);
+                router.push('/(tabs)/crisis');
+              }}
+            >
+              <Text style={styles.actionBtnText}>Connect with Support</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={[
+            styles.actionCard, 
+            { 
+              backgroundColor: theme.isDark ? 'rgba(123, 97, 255, 0.08)' : 'rgba(123, 97, 255, 0.04)',
+              borderColor: getActiveColor() 
+            }
+          ]}>
+            <Compass color={getActiveColor()} size={32} style={{ marginBottom: 12 }} />
+            <Text style={[styles.actionTitle, { color: theme.colors.text.primary }]}>
+              Self-Care Recommendations
+            </Text>
+            <Text style={styles.actionText}>
+              Taking standard mindfulness breaks is a great way to regulate your nervous system. Try a simple breathing exercise to rest and center yourself.
+            </Text>
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: getActiveColor() }]}
+              onPress={() => {
+                setActiveTestId(null);
+                router.push('/breathing');
+              }}
+            >
+              <Text style={styles.actionBtnText}>Start Calming Breath</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Done Button */}
+        <TouchableOpacity
+          style={styles.doneBtn}
+          onPress={() => setActiveTestId(null)}
+        >
+          <Text style={styles.doneBtnText}>Close & Return</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
   };
 
   return (
@@ -165,7 +624,13 @@ export default function AssessmentsScreen() {
             decelerationRate="fast"
           >
             {assessments.map((assessment, index) => (
-              <AssessmentCard key={assessment.id} assessment={assessment} delay={200 + (index * 100)} theme={theme} />
+              <AssessmentCard 
+                key={assessment.id} 
+                assessment={assessment} 
+                delay={200 + (index * 100)} 
+                theme={theme} 
+                onStart={handleStartTest}
+              />
             ))}
           </ScrollView>
         </Animated.View>
@@ -195,7 +660,14 @@ export default function AssessmentsScreen() {
             ) : (
               results.map((result: any, index: number) => (
                 <React.Fragment key={result.id}>
-                  <TouchableOpacity style={styles.resultItem}>
+                  <TouchableOpacity 
+                    style={styles.resultItem}
+                    activeOpacity={0.7}
+                    onPress={() => Alert.alert(
+                      `${result.type} Result`,
+                      `Date: ${formatDate(result.createdAt)}\nScore: ${result.score}\nSeverity: ${result.severity}`
+                    )}
+                  >
                     <View style={[styles.resultIconWrap, { backgroundColor: theme.colors.accents.powderBlue + (theme.isDark ? '25' : '15') }]}>
                       {result.score > 10 ? <TrendingUp color={theme.colors.accents.terracotta} size={18} /> : <Minus color={theme.colors.accents.powderBlue} size={18} />}
                     </View>
@@ -228,6 +700,36 @@ export default function AssessmentsScreen() {
         </Animated.View>
 
       </ScrollView>
+
+      {/* Active Screening Modal */}
+      <Modal
+        visible={activeTestId !== null}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={handleCloseRequest}
+      >
+        <LinearGradient 
+          colors={theme.isDark 
+            ? ['#0A0F1E', '#111520', theme.colors.backgroundSecondary] 
+            : ['#F8F5F2', '#EAEBED', '#FFFFFF']
+          } 
+          style={[styles.modalBg, { paddingTop: insets.top, paddingBottom: insets.bottom + 10 }]}
+        >
+          {/* Modal Header */}
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={handleCloseRequest} style={styles.modalCloseBtn}>
+              <X color={theme.colors.text.primary} size={24} />
+            </TouchableOpacity>
+            <Text style={styles.modalTitleText}>
+              {activeTestId === 'phq9' ? 'PHQ-9' : activeTestId === 'gad7' ? 'GAD-7' : t('assessments.burnout_test') || 'Student Burnout'}
+            </Text>
+            <View style={{ width: 44 }} /> {/* Spacer */}
+          </View>
+
+          {/* Modal Content */}
+          {showResultModal ? renderResultScreen() : renderQuestionWizard()}
+        </LinearGradient>
+      </Modal>
     </View>
   );
 }
@@ -408,5 +910,307 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 13,
     color: theme.colors.text.secondary,
     lineHeight: 20,
+  },
+  modalBg: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    height: 60,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+  },
+  modalCloseBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+  },
+  modalTitleText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+  },
+  wizardContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  progressContainer: {
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 12,
+  },
+  progressBarBg: {
+    height: 6,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+    borderRadius: 3,
+    marginBottom: 10,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  progressText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.text.secondary,
+  },
+  questionScroll: {
+    paddingHorizontal: 24,
+    paddingTop: 10,
+    paddingBottom: 40,
+  },
+  questionCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: theme.isDark ? 0.15 : 0.03,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  questionText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+    lineHeight: 30,
+    letterSpacing: -0.3,
+  },
+  optionsContainer: {
+    gap: 12,
+  },
+  optionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1.5,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: theme.isDark ? 0.1 : 0.01,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  optionRadio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: theme.colors.text.disabled,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  optionRadioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#FFF',
+  },
+  optionText: {
+    fontSize: 16,
+    color: theme.colors.text.secondary,
+    fontWeight: '500',
+    flex: 1,
+  },
+  navContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+    backgroundColor: theme.colors.surface,
+  },
+  navBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 16,
+    gap: 8,
+  },
+  navBtnDisabled: {
+    opacity: 0.5,
+  },
+  navBtnNext: {
+    flex: 1,
+    marginLeft: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  navBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: theme.colors.text.primary,
+  },
+  resultScroll: {
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 40,
+    alignItems: 'center',
+  },
+  successIconWrap: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+  },
+  resultHeading: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: theme.colors.text.primary,
+    marginBottom: 10,
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
+  resultSubheading: {
+    fontSize: 15,
+    color: theme.colors.text.secondary,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginBottom: 32,
+    paddingHorizontal: 12,
+  },
+  resultCard: {
+    flexDirection: 'row',
+    backgroundColor: theme.colors.surface,
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    marginBottom: 28,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: theme.isDark ? 0.2 : 0.05,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  scoreContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scoreTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.text.disabled,
+    marginBottom: 6,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  scoreValue: {
+    fontSize: 36,
+    fontWeight: '800',
+  },
+  dividerVertical: {
+    width: 1,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+    marginHorizontal: 16,
+  },
+  severityContainer: {
+    flex: 1.2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  severityTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.text.disabled,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  severityBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  severityText: {
+    fontSize: 15,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  actionCard: {
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1.5,
+    width: '100%',
+    marginBottom: 32,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  actionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  actionText: {
+    fontSize: 14,
+    color: theme.colors.text.secondary,
+    lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  actionBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  actionBtnText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  doneBtn: {
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 20,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+  },
+  doneBtnText: {
+    color: theme.colors.text.primary,
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

@@ -61,15 +61,22 @@ export const getInsights = async (req, res) => {
         const socialMoods = {};
         logs.forEach(l => {
             if (l.socialSetting) {
-                if (!socialMoods[l.socialSetting])
-                    socialMoods[l.socialSetting] = [];
-                socialMoods[l.socialSetting].push(l.score);
+                const setting = l.socialSetting;
+                let list = socialMoods[setting];
+                if (!list) {
+                    list = [];
+                    socialMoods[setting] = list;
+                }
+                list.push(l.score);
             }
         });
-        const socialInsights = Object.keys(socialMoods).map(key => ({
-            setting: key,
-            avg: socialMoods[key].reduce((a, b) => a + b, 0) / socialMoods[key].length
-        })).sort((a, b) => b.avg - a.avg);
+        const socialInsights = Object.keys(socialMoods).map(key => {
+            const scores = socialMoods[key];
+            return {
+                setting: key,
+                avg: scores.reduce((a, b) => a + b, 0) / scores.length
+            };
+        }).sort((a, b) => b.avg - a.avg);
         // Recent Trend (Last 7 logs)
         const trend = logs.slice(0, 7).reverse().map(l => ({
             day: new Date(l.createdAt).toLocaleDateString('en-US', { weekday: 'short' }),

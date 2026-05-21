@@ -45,6 +45,9 @@ export const createPost = async (req, res) => {
 export const sendHug = async (req, res) => {
     try {
         const { postId } = req.params;
+        if (typeof postId !== 'string') {
+            return res.status(400).json({ error: 'Invalid post ID' });
+        }
         const post = await prisma.communityPost.update({
             where: { id: postId },
             data: {

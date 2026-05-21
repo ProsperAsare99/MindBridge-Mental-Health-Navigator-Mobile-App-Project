@@ -33,7 +33,12 @@ export const register = async (req, res) => {
             where: { id: user.id },
             include: { onboarding: true }
         });
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            console.error('[CRITICAL] JWT_SECRET environment variable is missing.');
+            return res.status(500).json({ error: 'Internal server configuration error' });
+        }
+        const token = jwt.sign({ userId: user.id }, secret, { expiresIn: '7d' });
         res.status(201).json({
             user: {
                 id: user.id,
@@ -65,7 +70,12 @@ export const login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch)
             return res.status(400).json({ error: 'Invalid credentials' });
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            console.error('[CRITICAL] JWT_SECRET environment variable is missing.');
+            return res.status(500).json({ error: 'Internal server configuration error' });
+        }
+        const token = jwt.sign({ userId: user.id }, secret, { expiresIn: '7d' });
         res.status(200).json({
             user: {
                 id: user.id,

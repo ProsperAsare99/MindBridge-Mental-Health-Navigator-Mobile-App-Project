@@ -330,8 +330,8 @@ export default function ProfileScreen() {
       <View style={StyleSheet.absoluteFillObject}>
         <LinearGradient 
           colors={theme.isDark 
-            ? ['#121212', '#1A1A1A', '#0D0D0D'] 
-            : ['#FDFCFB', '#F4F7F9', '#E6E9EF']
+            ? [theme.colors.background, theme.colors.backgroundSecondary, '#080C18'] 
+            : [theme.colors.background, theme.colors.backgroundSecondary, '#E0E3EB']
           } 
           style={StyleSheet.absoluteFillObject} 
         />

@@ -70,6 +70,7 @@ export default function GroundingScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const router = useRouter();
+  const styles = createStyles(theme);
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [inputs, setInputs] = useState<string[]>(Array(5).fill(''));
@@ -116,16 +117,19 @@ export default function GroundingScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
         <LinearGradient 
-          colors={theme.isDark ? ['#0E1118', '#161B26'] : ['#2E4057', '#1E293B']} 
+          colors={theme.isDark 
+            ? [theme.colors.background, theme.colors.backgroundSecondary] 
+            : [theme.colors.background, theme.colors.backgroundSecondary]
+          } 
           style={StyleSheet.absoluteFillObject} 
         />
 
         {/* Header */}
         <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn} activeOpacity={0.85}>
-            <X color="#FFF" size={24} />
+            <X color={theme.colors.text.primary} size={24} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Grounding Space</Text>
           <View style={{ width: 40 }} />
@@ -158,7 +162,7 @@ export default function GroundingScreen() {
                     style={[
                       styles.progressBar, 
                       { 
-                        backgroundColor: idx <= currentStepIndex ? '#7B61FF' : 'rgba(255,255,255,0.1)',
+                        backgroundColor: idx <= currentStepIndex ? theme.colors.plum : theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)',
                         flex: 1
                       }
                     ]} 
@@ -169,7 +173,7 @@ export default function GroundingScreen() {
               {/* Icon & Title */}
               <Animated.View key={currentStep.step} entering={FadeIn.duration(DURATIONS.enter).easing(easeOut)} style={styles.card}>
                 <View style={styles.iconContainer}>
-                  <StepIcon color="#7B61FF" size={32} />
+                  <StepIcon color={theme.colors.plum} size={32} />
                 </View>
                 <Text style={styles.stepTitle}>{currentStep.title}</Text>
                 <Text style={styles.instruction}>{currentStep.instruction}</Text>
@@ -181,7 +185,7 @@ export default function GroundingScreen() {
                       key={idx}
                       style={styles.textInput}
                       placeholder={`${currentStep.placeholder} ${idx + 1}`}
-                      placeholderTextColor="rgba(255,255,255,0.3)"
+                      placeholderTextColor={theme.isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"}
                       value={inputs[idx] || ''}
                       onChangeText={(text) => handleInputChange(text, idx)}
                       returnKeyType="next"
@@ -207,7 +211,7 @@ export default function GroundingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -222,14 +226,14 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
-    color: '#FFF',
+    color: theme.colors.text.primary,
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: theme.typography.fonts.header,
     letterSpacing: 0.5,
   },
   scrollContent: {
@@ -254,32 +258,38 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: theme.colors.surface,
     borderRadius: 28,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
     padding: 24,
     marginBottom: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: theme.isDark ? 0.3 : 0.08,
+    shadowRadius: 16,
+    elevation: 4,
   },
   iconContainer: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(123,97,255,0.1)',
+    backgroundColor: theme.colors.plum + '18',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   stepTitle: {
-    color: '#FFF',
+    color: theme.colors.text.primary,
     fontSize: 22,
-    fontWeight: '800',
+    fontFamily: theme.typography.fonts.header,
     marginBottom: 8,
     textAlign: 'center',
   },
   instruction: {
-    color: 'rgba(255,255,255,0.6)',
+    color: theme.colors.text.secondary,
     fontSize: 14,
+    fontFamily: theme.typography.fonts.body,
     lineHeight: 20,
     textAlign: 'center',
     marginBottom: 24,
@@ -292,25 +302,31 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 48,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
     paddingHorizontal: 16,
-    color: '#FFF',
+    color: theme.colors.text.primary,
+    fontFamily: theme.typography.fonts.ui,
     fontSize: 14,
   },
   nextBtn: {
-    backgroundColor: '#FFF',
+    backgroundColor: theme.colors.plum,
     paddingVertical: 16,
     borderRadius: 30,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: theme.colors.plum,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 5,
   },
   nextBtnText: {
-    color: '#2E4057',
+    color: theme.colors.text.onPrimary,
+    fontFamily: theme.typography.fonts.header,
     fontSize: 16,
-    fontWeight: '800',
   },
   completedContainer: {
     alignItems: 'center',
@@ -326,27 +342,33 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   completedTitle: {
-    color: '#FFF',
+    color: theme.colors.text.primary,
     fontSize: 24,
-    fontWeight: '800',
+    fontFamily: theme.typography.fonts.header,
     marginBottom: 12,
   },
   completedSub: {
-    color: 'rgba(255,255,255,0.7)',
+    color: theme.colors.text.secondary,
     textAlign: 'center',
     fontSize: 15,
+    fontFamily: theme.typography.fonts.body,
     lineHeight: 23,
     marginBottom: 32,
   },
   doneBtn: {
-    backgroundColor: '#FFF',
+    backgroundColor: theme.colors.plum,
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 28,
+    shadowColor: theme.colors.plum,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 5,
   },
   doneBtnText: {
-    color: '#2E4057',
+    color: theme.colors.text.onPrimary,
+    fontFamily: theme.typography.fonts.header,
     fontSize: 16,
-    fontWeight: '800',
   }
 });

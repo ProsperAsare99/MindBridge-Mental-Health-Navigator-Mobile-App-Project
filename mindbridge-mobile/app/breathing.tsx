@@ -39,6 +39,7 @@ export default function BreathingScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const router = useRouter();
+  const styles = createStyles(theme);
 
   // Settings
   const [selectedDuration, setSelectedDuration] = useState(60); // default 1 minute (60s)
@@ -171,16 +172,19 @@ export default function BreathingScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
       <LinearGradient 
-        colors={theme.isDark ? ['#0C0E14', '#151821'] : ['#2E4057', '#1F2A38']} 
+        colors={theme.isDark 
+          ? [theme.colors.background, theme.colors.backgroundSecondary] 
+          : [theme.colors.background, theme.colors.backgroundSecondary]
+        } 
         style={StyleSheet.absoluteFillObject} 
       />
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn} activeOpacity={0.85}>
-          <X color="#FFF" size={24} />
+          <X color={theme.colors.text.primary} size={24} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Breathing Space</Text>
         <View style={{ width: 40 }} />
@@ -216,7 +220,10 @@ export default function BreathingScreen() {
               {/* Main Breathing Circle */}
               <Animated.View style={[styles.breathingCircle, animatedCircleStyle]}>
                 <LinearGradient 
-                  colors={theme.isDark ? ['#8E6BE6', '#7F56D9'] : ['rgba(255,255,255,0.4)', 'rgba(255,255,255,0.1)']} 
+                  colors={theme.isDark 
+                    ? [theme.colors.plum, theme.colors.accents.blueMirage] 
+                    : [theme.colors.plum + '80', theme.colors.plum + '20']
+                  } 
                   style={StyleSheet.absoluteFillObject} 
                 />
               </Animated.View>
@@ -267,7 +274,7 @@ export default function BreathingScreen() {
                   onPress={startBreathing}
                   activeOpacity={0.9}
                 >
-                  <Play color="#2E4057" size={20} fill="#2E4057" style={{ marginRight: 8 }} />
+                  <Play color={theme.colors.text.onPrimary} size={20} fill={theme.colors.text.onPrimary} style={{ marginRight: 8 }} />
                   <Text style={styles.startBtnText}>Begin Session</Text>
                 </TouchableOpacity>
               </Animated.View>
@@ -283,7 +290,7 @@ export default function BreathingScreen() {
                   onPress={stopBreathing}
                   activeOpacity={0.8}
                 >
-                  <Square color="#FFF" size={14} fill="#FFF" style={{ marginRight: 6 }} />
+                  <Square color={theme.colors.plum} size={14} fill={theme.colors.plum} style={{ marginRight: 6 }} />
                   <Text style={styles.stopBtnText}>End Session</Text>
                 </TouchableOpacity>
               </Animated.View>
@@ -295,7 +302,7 @@ export default function BreathingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -310,14 +317,14 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
-    color: '#FFF',
+    color: theme.colors.text.primary,
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: theme.typography.fonts.header,
     letterSpacing: 0.5,
   },
   content: {
@@ -339,7 +346,7 @@ const styles = StyleSheet.create({
     height: 216,
     borderRadius: 108,
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
     borderStyle: 'dashed',
   },
   ring: {
@@ -350,18 +357,18 @@ const styles = StyleSheet.create({
   ringMid: {
     width: 140,
     height: 140,
-    borderColor: 'rgba(123,97,255,0.2)',
+    borderColor: theme.colors.plum + '30',
   },
   ringOuter: {
     width: 140,
     height: 140,
-    borderColor: 'rgba(123,97,255,0.1)',
+    borderColor: theme.colors.plum + '15',
   },
   breathingCircle: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: theme.colors.plum + '24',
     overflow: 'hidden',
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.25)',
@@ -372,17 +379,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   phaseText: {
-    color: '#FFF',
+    color: theme.colors.text.primary,
     fontSize: 28,
-    fontWeight: '300',
+    fontFamily: theme.typography.fonts.header,
     letterSpacing: 3,
     textTransform: 'uppercase',
     textAlign: 'center',
   },
   timerDisplay: {
-    color: 'rgba(255,255,255,0.6)',
+    color: theme.colors.text.secondary,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: theme.typography.fonts.captionMedium,
     marginTop: 8,
   },
   footer: {
@@ -398,18 +405,19 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   instruction: {
-    color: 'rgba(255,255,255,0.65)',
+    color: theme.colors.text.secondary,
     textAlign: 'center',
     fontSize: 15,
+    fontFamily: theme.typography.fonts.body,
     lineHeight: 22,
     marginBottom: 24,
   },
   pacingInstruction: {
-    color: '#FFF',
+    color: theme.colors.text.primary,
     textAlign: 'center',
     fontSize: 16,
+    fontFamily: theme.typography.fonts.ui,
     lineHeight: 24,
-    fontWeight: '500',
     marginBottom: 32,
     minHeight: 48,
   },
@@ -423,36 +431,40 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
   },
   pickerPillActive: {
-    backgroundColor: '#FFF',
-    borderColor: '#FFF',
+    backgroundColor: theme.colors.plum,
+    borderColor: theme.colors.plum,
   },
   pickerPillText: {
-    color: 'rgba(255,255,255,0.7)',
+    color: theme.colors.text.secondary,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: theme.typography.fonts.ui,
   },
   pickerPillTextActive: {
-    color: '#2E4057',
-    fontWeight: '700',
+    color: theme.colors.text.onPrimary,
   },
   startBtn: {
     flexDirection: 'row',
-    backgroundColor: '#FFF',
+    backgroundColor: theme.colors.plum,
     paddingVertical: 16,
     borderRadius: 30,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: theme.colors.plum,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 5,
   },
   startBtnText: {
-    color: '#2E4057',
+    color: theme.colors.text.onPrimary,
     fontSize: 17,
-    fontWeight: '800',
+    fontFamily: theme.typography.fonts.header,
   },
   stopBtn: {
     flexDirection: 'row',
@@ -460,14 +472,14 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 28,
     borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: theme.colors.plum + '20',
+    borderWidth: 1.5,
+    borderColor: theme.colors.plum,
   },
   stopBtnText: {
-    color: '#FFF',
+    color: theme.colors.plum,
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: theme.typography.fonts.header,
   },
   completedContainer: {
     alignItems: 'center',
@@ -483,27 +495,28 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   completedTitle: {
-    color: '#FFF',
+    color: theme.colors.text.primary,
     fontSize: 24,
-    fontWeight: '800',
+    fontFamily: theme.typography.fonts.header,
     marginBottom: 12,
   },
   completedSub: {
-    color: 'rgba(255,255,255,0.7)',
+    color: theme.colors.text.secondary,
     textAlign: 'center',
     fontSize: 15,
+    fontFamily: theme.typography.fonts.body,
     lineHeight: 23,
     marginBottom: 32,
   },
   doneBtn: {
-    backgroundColor: '#FFF',
+    backgroundColor: theme.colors.plum,
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 28,
   },
   doneBtnText: {
-    color: '#2E4057',
+    color: theme.colors.text.onPrimary,
     fontSize: 16,
-    fontWeight: '800',
+    fontFamily: theme.typography.fonts.header,
   }
 });

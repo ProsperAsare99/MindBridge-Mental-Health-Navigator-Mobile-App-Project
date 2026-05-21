@@ -486,7 +486,10 @@ export default function DashboardScreen() {
     <View style={styles.container}>
       <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
       <View style={StyleSheet.absoluteFillObject}>
-        <LinearGradient colors={theme.isDark ? ['#121212', '#1A1A1A', '#0D0D0D'] : ['#FDFCFB', '#F4F7F9', '#E6E9EF']} style={StyleSheet.absoluteFillObject} />
+        <LinearGradient colors={theme.isDark 
+          ? [theme.colors.background, theme.colors.backgroundSecondary, '#080C18'] 
+          : [theme.colors.background, theme.colors.backgroundSecondary, '#E0E3EB']
+        } style={StyleSheet.absoluteFillObject} />
         <View style={[styles.bgBlob, { top: -100, right: -100, backgroundColor: theme.colors.plum + '08' }]} />
         <View style={[styles.bgBlob, { bottom: 100, left: -50, backgroundColor: theme.colors.accents.powderBlue + '05' }]} />
       </View>

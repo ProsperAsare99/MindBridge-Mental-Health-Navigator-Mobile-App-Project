@@ -3,6 +3,7 @@ import { useEffect, useContext } from 'react';
 import { AuthProvider, AuthContext } from '../src/context/AuthContext';
 import { View } from 'react-native';
 import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
+import { ThemeProvider as NavigationProvider } from '@react-navigation/native';
 import { AnimatedLogoLoader } from '../src/components/AnimatedLogoLoader';
 import {
   useFonts,
@@ -81,13 +82,27 @@ const InitialLayout = () => {
     return <AnimatedLogoLoader />;
   }
 
+  const navigationTheme = {
+    dark: theme.isDark,
+    colors: {
+      primary: theme.colors.plum,
+      background: theme.colors.background,
+      card: theme.colors.surface,
+      text: theme.colors.text.primary,
+      border: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+      notification: theme.colors.semantic.danger,
+    },
+  };
+
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="+not-found" />
-      <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-    </Stack>
+    <NavigationProvider value={navigationTheme}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="+not-found" />
+        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+      </Stack>
+    </NavigationProvider>
   );
 };
 

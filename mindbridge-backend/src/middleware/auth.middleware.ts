@@ -13,7 +13,13 @@ export const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
       return res.status(401).json({ error: 'No token, authorization denied' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret') as { userId: string };
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error('[CRITICAL] JWT_SECRET environment variable is missing.');
+      return res.status(500).json({ error: 'Internal server configuration error' });
+    }
+
+    const decoded = jwt.verify(token, secret) as { userId: string };
     req.userId = decoded.userId;
     next();
   } catch (err) {

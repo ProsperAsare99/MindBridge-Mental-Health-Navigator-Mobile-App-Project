@@ -189,4 +189,26 @@ export const deleteBulkChatMessages = async (req, res) => {
         res.status(500).json({ error: 'Failed to delete messages' });
     }
 };
+export const saveAssessmentResult = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const { type, score, severity } = req.body;
+        if (!type || typeof score !== 'number' || !severity) {
+            return res.status(400).json({ error: 'Type, score, and severity are required.' });
+        }
+        const result = await prisma.assessmentResult.create({
+            data: {
+                userId,
+                type,
+                score,
+                severity
+            }
+        });
+        res.status(201).json(result);
+    }
+    catch (error) {
+        console.error('Error saving assessment result:', error);
+        res.status(500).json({ error: 'Failed to save assessment result' });
+    }
+};
 //# sourceMappingURL=ai.controller.js.map

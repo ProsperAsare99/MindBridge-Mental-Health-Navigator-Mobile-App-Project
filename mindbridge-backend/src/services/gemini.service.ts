@@ -124,60 +124,65 @@ const tools = [
 ];
 
 export const generateOracleResponse = async (userMessage: string, context: any, userId: string) => {
-  try {
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
-      systemInstruction: SYSTEM_PROMPT,
-      tools: tools as any
-    });
+  const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.5-flash", "gemini-flash-latest"];
+  let lastError: any = null;
 
-    // Build a rich, structured user profile context block
-    const onboarding = context.onboarding;
-    const latestMood = context.latestMood;
-    const recentJournal = context.recentJournal || [];
-    const userName = context.userName || onboarding?.firstName || 'User';
-    // Use first name if full name provided
-    const firstName = userName.split(' ')[0];
+  for (const modelName of modelsToTry) {
+    try {
+      console.log(`[BACKEND] [Oracle] Attempting generateOracleResponse using model: ${modelName}`);
+      const model = genAI.getGenerativeModel({ 
+        model: modelName,
+        systemInstruction: SYSTEM_PROMPT,
+        tools: tools as any
+      });
 
-    const moodSummary = latestMood
-      ? `Latest mood: ${latestMood.emotions?.join(', ') || 'unspecified'} (score: ${latestMood.score}/10) on ${new Date(latestMood.createdAt).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}`
-      : 'No mood logs yet.';
+      // Build a rich, structured user profile context block
+      const onboarding = context.onboarding;
+      const latestMood = context.latestMood;
+      const recentJournal = context.recentJournal || [];
+      const userName = context.userName || onboarding?.firstName || 'User';
+      // Use first name if full name provided
+      const firstName = userName.split(' ')[0];
 
-    const journalSummary = recentJournal.length > 0
-      ? recentJournal.map((j: any, i: number) => `${i + 1}. "${j.title || 'Untitled'}" (${j.mood || 'no mood tag'}) — ${new Date(j.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`).join('\n')
-      : 'No journal entries yet.';
+      const moodSummary = latestMood
+        ? `Latest mood: ${latestMood.emotions?.join(', ') || 'unspecified'} (score: ${latestMood.score}/10) on ${new Date(latestMood.createdAt).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}`
+        : 'No mood logs yet.';
 
-    const assessments = context.assessments || [];
-    const assessmentSummary = assessments.length > 0
-      ? assessments.map((a: any) => `- ${a.type}: ${a.severity} (Score: ${a.score}) on ${new Date(a.createdAt).toLocaleDateString()}`).join('\n')
-      : 'No clinical assessments completed yet.';
+      const journalSummary = recentJournal.length > 0
+        ? recentJournal.map((j: any, i: number) => `${i + 1}. "${j.title || 'Untitled'}" (${j.mood || 'no mood tag'}) — ${new Date(j.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`).join('\n')
+        : 'No journal entries yet.';
 
-    // Prepare history: reverse since DB gives descending
-    const rawHistory = context.history || [];
-    let chatHistory = rawHistory.reverse().map((msg: any) => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }]
-    }));
+      const assessments = context.assessments || [];
+      const assessmentSummary = assessments.length > 0
+        ? assessments.map((a: any) => `- ${a.type}: ${a.severity} (Score: ${a.score}) on ${new Date(a.createdAt).toLocaleDateString()}`).join('\n')
+        : 'No clinical assessments completed yet.';
 
-    // Ensure perfectly alternating history ending with model
-    let lastRole = 'model';
-    const validHistory: any[] = [];
-    for (const msg of chatHistory) {
-      if (msg.role !== lastRole) {
-        validHistory.push(msg);
-        lastRole = msg.role;
+      // Prepare history: reverse since DB gives descending
+      const rawHistory = context.history || [];
+      let chatHistory = rawHistory.reverse().map((msg: any) => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }]
+      }));
+
+      // Ensure perfectly alternating history ending with model
+      let lastRole = 'model';
+      const validHistory: any[] = [];
+      for (const msg of chatHistory) {
+        if (msg.role !== lastRole) {
+          validHistory.push(msg);
+          lastRole = msg.role;
+        }
       }
-    }
-    if (validHistory.length > 0 && validHistory[validHistory.length - 1].role === 'user') {
-      validHistory.pop();
-    }
-    chatHistory = validHistory;
+      if (validHistory.length > 0 && validHistory[validHistory.length - 1].role === 'user') {
+        validHistory.pop();
+      }
+      chatHistory = validHistory;
 
-    const chat = model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: `
+      const chat = model.startChat({
+        history: [
+          {
+            role: "user",
+            parts: [{ text: `
 ═══════════════════════════════════════════
 CURRENT USER CONTEXT (Confidential — for your use only)
 ═══════════════════════════════════════════
@@ -220,54 +225,58 @@ INSTRUCTIONS:
   - If their mood score is below 5 or assessment shows 'Severe', lead with extra warmth.
   - Suggest specific app tools like 'Mood Garden' or 'Box Breathing' if relevant.
   - Respond in: ${onboarding?.preferredLanguage || 'English'}
-          ` }]
-        },
-        {
-          role: "model",
-          parts: [{ text: `Understood. I have a full picture of ${firstName}'s world, including their academic context, recent feelings, and clinical assessments. I will provide compassionate, culturally-aware support in ${onboarding?.preferredLanguage || 'English'}, adapting my style to be ${onboarding?.communicationStyle || 'Gentle'}. I'm ready.` }]
-        },
-        ...chatHistory
-      ]
-    });
+            ` }]
+          },
+          {
+            role: "model",
+            parts: [{ text: `Understood. I have a full picture of ${firstName}'s world, including their academic context, recent feelings, and clinical assessments. I will provide compassionate, culturally-aware support in ${onboarding?.preferredLanguage || 'English'}, adapting my style to be ${onboarding?.communicationStyle || 'Gentle'}. I'm ready.` }]
+          },
+          ...chatHistory
+        ]
+      });
 
-    let result = await chat.sendMessage(userMessage);
-    let response = result.response;
+      let result = await chat.sendMessage(userMessage);
+      let response = result.response;
 
-    // Handle Function Calls (Tools)
-    const call = response.functionCalls()?.[0];
-    if (call) {
-      console.log(`[Oracle Tool] Calling: ${call.name}`, call.args);
-      let toolResponse: any;
+      // Handle Function Calls (Tools)
+      const call = response.functionCalls()?.[0];
+      if (call) {
+        console.log(`[Oracle Tool] Calling: ${call.name} with model: ${modelName}`, call.args);
+        let toolResponse: any;
 
-      switch (call.name) {
-        case "get_mood_history":
-          toolResponse = await AiRepository.getMoodHistory(userId, (call.args as any).limit || 7);
-          break;
-        case "get_journal_history":
-          toolResponse = await AiRepository.getJournalHistory(userId, (call.args as any).limit || 3);
-          break;
-        case "get_ritual_status":
-          toolResponse = await AiRepository.getTodayRitualStatus(userId);
-          break;
-        case "get_recommended_resources":
-          toolResponse = await AiRepository.searchResources((call.args as any).category);
-          break;
-        default:
-          toolResponse = { error: "Unknown tool" };
+        switch (call.name) {
+          case "get_mood_history":
+            toolResponse = await AiRepository.getMoodHistory(userId, (call.args as any).limit || 7);
+            break;
+          case "get_journal_history":
+            toolResponse = await AiRepository.getJournalHistory(userId, (call.args as any).limit || 3);
+            break;
+          case "get_ritual_status":
+            toolResponse = await AiRepository.getTodayRitualStatus(userId);
+            break;
+          case "get_recommended_resources":
+            toolResponse = await AiRepository.searchResources((call.args as any).category);
+            break;
+          default:
+            toolResponse = { error: "Unknown tool" };
+        }
+
+        result = await chat.sendMessage([{
+          functionResponse: {
+            name: call.name,
+            response: { result: toolResponse }
+          }
+        }]);
+        response = result.response;
       }
 
-      result = await chat.sendMessage([{
-        functionResponse: {
-          name: call.name,
-          response: { result: toolResponse }
-        }
-      }]);
-      response = result.response;
+      return response.text();
+    } catch (error: any) {
+      console.error(`[BACKEND] Error in Oracle service with model ${modelName}:`, error);
+      lastError = error;
     }
-
-    return response.text();
-  } catch (error) {
-    console.error("Error in Oracle service:", error);
-    throw error;
   }
+
+  // If we exit the loop, it means all models failed
+  throw lastError || new Error("Failed to generate response from all available Gemini models.");
 };

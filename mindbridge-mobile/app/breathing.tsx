@@ -24,6 +24,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import { X, Play, Square, Award } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { easeOut, easeInOut, DURATIONS } from '../src/constants/animations';
 
 const { width } = Dimensions.get('window');
 
@@ -113,20 +114,21 @@ export default function BreathingScreen() {
     // Animating Main circle
     scale.value = withTiming(phase.targetScale, {
       duration: phase.duration,
-      easing: Easing.out(Easing.quad),
+      easing: easeInOut,
     });
 
     opacity.value = withTiming(phase.text === 'Hold' ? 0.75 : 0.45, {
       duration: phase.duration,
+      easing: easeInOut,
     });
 
     // Outer Halo Ring Animations
     if (phase.text === 'Inhale') {
-      ringScale2.value = withTiming(2.2, { duration: phase.duration, easing: Easing.out(Easing.quad) });
-      ringScale3.value = withTiming(2.6, { duration: phase.duration, easing: Easing.out(Easing.quad) });
+      ringScale2.value = withTiming(2.2, { duration: phase.duration, easing: easeInOut });
+      ringScale3.value = withTiming(2.6, { duration: phase.duration, easing: easeInOut });
     } else if (phase.text === 'Exhale') {
-      ringScale2.value = withTiming(1.0, { duration: phase.duration, easing: Easing.inOut(Easing.quad) });
-      ringScale3.value = withTiming(1.0, { duration: phase.duration, easing: Easing.inOut(Easing.quad) });
+      ringScale2.value = withTiming(1.0, { duration: phase.duration, easing: easeInOut });
+      ringScale3.value = withTiming(1.0, { duration: phase.duration, easing: easeInOut });
     }
 
     phaseTimeoutRef.current = setTimeout(() => {
@@ -186,7 +188,7 @@ export default function BreathingScreen() {
 
       <View style={styles.content}>
         {isCompleted ? (
-          <Animated.View entering={FadeInDown.duration(400)} style={styles.completedContainer}>
+          <Animated.View entering={FadeInDown.duration(DURATIONS.enter).easing(easeOut)} style={styles.completedContainer}>
             <View style={styles.badgeContainer}>
               <Award color="#F59E0B" size={60} strokeWidth={1.5} />
             </View>
@@ -233,7 +235,7 @@ export default function BreathingScreen() {
 
             {/* Bottom Controls / Configuration panel */}
             {!isActive ? (
-              <Animated.View entering={FadeIn.delay(300)} style={styles.footer}>
+              <Animated.View entering={FadeIn.delay(300).duration(DURATIONS.enter).easing(easeOut)} style={styles.footer}>
                 <Text style={styles.instruction}>
                   Choose your duration. Focus on the expanding circle to pace your breathing using the 4-7-8 method.
                 </Text>
@@ -270,7 +272,7 @@ export default function BreathingScreen() {
                 </TouchableOpacity>
               </Animated.View>
             ) : (
-              <Animated.View entering={FadeInDown} style={styles.footerActive}>
+              <Animated.View entering={FadeInDown.duration(DURATIONS.enter).easing(easeOut)} style={styles.footerActive}>
                 <Text style={styles.pacingInstruction}>
                   {PHASES[phaseIndex].text === 'Inhale' && 'Breathe in deeply through your nose.'}
                   {PHASES[phaseIndex].text === 'Hold' && 'Hold your breath gently.'}

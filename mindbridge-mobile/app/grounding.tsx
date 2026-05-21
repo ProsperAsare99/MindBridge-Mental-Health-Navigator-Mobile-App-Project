@@ -19,6 +19,7 @@ import Animated, { FadeIn, FadeInDown, Layout } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { X, Eye, Hand, Volume2, Smile, Award } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { easeOut, DURATIONS } from '../src/constants/animations';
 
 const { width } = Dimensions.get('window');
 
@@ -135,7 +136,7 @@ export default function GroundingScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {isCompleted ? (
-            <Animated.View entering={FadeInDown.duration(400)} style={styles.completedContainer}>
+            <Animated.View entering={FadeInDown.duration(DURATIONS.enter).easing(easeOut)} style={styles.completedContainer}>
               <View style={styles.badgeContainer}>
                 <Award color="#F59E0B" size={60} strokeWidth={1.5} />
               </View>
@@ -166,7 +167,7 @@ export default function GroundingScreen() {
               </View>
 
               {/* Icon & Title */}
-              <Animated.View key={currentStep.step} entering={FadeIn.duration(400)} style={styles.card}>
+              <Animated.View key={currentStep.step} entering={FadeIn.duration(DURATIONS.enter).easing(easeOut)} style={styles.card}>
                 <View style={styles.iconContainer}>
                   <StepIcon color="#7B61FF" size={32} />
                 </View>

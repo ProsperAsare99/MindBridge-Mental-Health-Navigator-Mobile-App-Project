@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View, StyleSheet, Animated, Dimensions, Easing } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -18,14 +18,16 @@ const Eye = ({ size, pupilSize, isBlinking, lookAt }: EyeProps) => {
     Animated.spring(pupilAnimX, {
       toValue: lookAt.x,
       useNativeDriver: true,
-      friction: 7,
-      tension: 40,
+      damping: 15,
+      stiffness: 150,
+      mass: 1,
     }).start();
     Animated.spring(pupilAnimY, {
       toValue: lookAt.y,
       useNativeDriver: true,
-      friction: 7,
-      tension: 40,
+      damping: 15,
+      stiffness: 150,
+      mass: 1,
     }).start();
   }, [lookAt]);
 
@@ -71,14 +73,16 @@ const SimplePupil = ({ size, lookAt }: SimplePupilProps) => {
     Animated.spring(pupilAnimX, {
       toValue: lookAt.x,
       useNativeDriver: true,
-      friction: 7,
-      tension: 40,
+      damping: 15,
+      stiffness: 150,
+      mass: 1,
     }).start();
     Animated.spring(pupilAnimY, {
       toValue: lookAt.y,
       useNativeDriver: true,
-      friction: 7,
-      tension: 40,
+      damping: 15,
+      stiffness: 150,
+      mass: 1,
     }).start();
   }, [lookAt]);
 
@@ -118,11 +122,13 @@ const AuthCharacters = ({ focusedField, showPassword }: AuthCharactersProps) => 
           toValue: 1,
           duration: 2000,
           useNativeDriver: true,
+          easing: Easing.inOut(Easing.ease),
         }),
         Animated.timing(breatheAnim, {
           toValue: 0,
           duration: 2000,
           useNativeDriver: true,
+          easing: Easing.inOut(Easing.ease),
         }),
       ])
     ).start();

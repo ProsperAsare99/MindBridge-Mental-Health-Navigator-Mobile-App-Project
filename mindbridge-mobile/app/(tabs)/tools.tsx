@@ -25,37 +25,38 @@ import {
   ChevronRight,
   MoreVertical,
   Activity,
+  Leaf,
 } from 'lucide-react-native';
 
 const getToolGroups = (theme: any, t: any) => [
   {
-    title: t('tools.daily_growth'),
+    title: 'Daily Growth',
     items: [
-      { id: 'ai-guide', title: t('ai.title'), subtitle: t('ai.subtitle'), icon: Bot, color: theme.colors.plum },
-      { id: 'garden', title: t('garden.title'), subtitle: t('garden.subtitle'), icon: Wind, color: theme.colors.accents.eucalyptus },
-      { id: 'journal', title: t('journal.title'), subtitle: t('journal.subtitle'), icon: BookOpen, color: theme.colors.accents.powderBlue },
+      { id: 'ai-guide', title: 'AI Companion', subtitle: 'Your supportive mental health guide', icon: Bot, color: theme.colors.plum },
+      { id: 'garden', title: 'Mindful Garden', subtitle: 'Nurture your peaceful mental space', icon: Leaf, color: theme.colors.accents.eucalyptus },
+      { id: 'journal', title: 'Clarity Journal', subtitle: 'Write your way to deeper insight', icon: BookOpen, color: theme.colors.accents.powderBlue },
       { id: 'breathing', title: 'Deep Breathing', subtitle: '4-7-8 relaxing breathwork session', icon: Wind, color: theme.colors.accents.gentlePeach, isNotTab: true },
-      { id: 'grounding', title: '5-4-3-2-1 Grounding', subtitle: 'Sensory grounding exercise', icon: Activity, color: theme.colors.accents.powderBlue, isNotTab: true },
+      { id: 'grounding', title: '5-4-3-2-1 Grounding', subtitle: 'Sensory awareness exercise', icon: Activity, color: theme.colors.accents.powderBlue, isNotTab: true },
     ]
   },
   {
-    title: t('tools.knowledge_checks'),
+    title: 'Knowledge & Exploration',
     items: [
-      { id: 'assessments', title: t('assessments.title'), subtitle: t('assessments.subtitle'), icon: ClipboardList, color: theme.colors.accents.slate },
-      { id: 'explore', title: t('resources.title'), subtitle: t('resources.subtitle'), icon: Library, color: theme.colors.accents.forestGreen },
+      { id: 'assessments', title: 'Wellness Checks', subtitle: 'Track and understand your mood', icon: ClipboardList, color: theme.colors.accents.slate },
+      { id: 'explore', title: 'Resource Library', subtitle: 'Curated articles, guides & audio', icon: Library, color: theme.colors.accents.forestGreen },
     ]
   },
   {
-    title: t('tools.support_connection'),
+    title: 'Support & Connection',
     items: [
-      { id: 'community', title: t('community.title'), subtitle: t('community.subtitle'), icon: Users, color: theme.colors.plum },
-      { id: 'crisis', title: t('crisis.title'), subtitle: t('crisis.subtitle'), icon: ShieldAlert, color: theme.colors.accents.terracotta },
+      { id: 'community', title: 'Community Spaces', subtitle: 'Connect with peers who understand', icon: Users, color: theme.colors.plum },
+      { id: 'crisis', title: 'Crisis Support', subtitle: 'Immediate help and safe resources', icon: ShieldAlert, color: theme.colors.accents.terracotta },
     ]
   },
   {
-    title: t('tools.app_preferences'),
+    title: 'App Preferences',
     items: [
-      { id: 'settings', title: t('settings.title'), subtitle: t('settings.subtitle'), icon: Settings, color: theme.colors.text.secondary },
+      { id: 'settings', title: 'Settings', subtitle: 'Manage your app experience', icon: Settings, color: theme.colors.text.secondary },
     ]
   }
 ];
@@ -81,8 +82,8 @@ export default function ToolsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ScreenHeader 
-          title={t('tools.title')} 
-          subtitle={t('tools.subtitle')}
+          title="All Tools" 
+          subtitle="Discover exercises, resources, and support tailored to your journey."
           rightAction={
             <TouchableOpacity>
               <MoreVertical color={theme.colors.text.secondary} size={24} />
@@ -149,10 +150,11 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   groupTitle: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: theme.typography.fonts.accent,
+    fontWeight: '800',
     color: theme.colors.text.secondary,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
     marginBottom: 12,
     marginLeft: 8,
   },
@@ -187,12 +189,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   itemTitle: {
     fontSize: 17,
-    fontWeight: '600',
+    fontFamily: theme.typography.fonts.header,
+    fontWeight: '700',
     color: theme.colors.text.primary,
     letterSpacing: -0.3,
   },
   itemSubtitle: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
     marginTop: 2,
   },

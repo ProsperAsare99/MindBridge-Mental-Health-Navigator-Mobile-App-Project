@@ -518,6 +518,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   dateText: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '600',
     color: theme.colors.text.tertiary,
     textTransform: 'uppercase',
@@ -541,6 +542,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   entryTitle: {
     fontSize: 18,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
     color: theme.colors.text.primary,
     marginBottom: 8,
@@ -548,6 +550,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   entryContent: {
     fontSize: 15,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
     lineHeight: 22,
   },
@@ -573,6 +576,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   composerTitle: {
     fontSize: 17,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
   },
@@ -589,6 +593,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   saveBtnText: {
     color: '#FFFFFF',
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
     fontSize: 15,
   },
@@ -603,6 +608,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   inputLabel: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '700',
     color: theme.colors.text.tertiary,
     textTransform: 'uppercase',
@@ -614,6 +620,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     borderWidth: 1,
@@ -625,6 +632,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     padding: 16,
     minHeight: 200,
     fontSize: 16,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.primary,
     lineHeight: 24,
     textAlignVertical: 'top',
@@ -653,6 +661,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   filterText: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.body,
     fontWeight: '700',
     color: theme.colors.text.secondary,
   },
@@ -678,6 +687,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.tertiary,
     textAlign: 'center',
     lineHeight: 24,
@@ -685,6 +695,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   moodSelectorLabel: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '700',
     color: theme.colors.text.tertiary,
     textTransform: 'uppercase',
@@ -709,6 +720,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   moodOptionText: {
     fontSize: 14,
+    fontFamily: theme.typography.fonts.body,
     fontWeight: '700',
   },
   audioPreview: {
@@ -721,6 +733,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   audioText: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
   },
   audioWaveform: {
@@ -768,6 +781,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   recordingLabel: {
     fontSize: 12,
+    fontFamily: theme.typography.fonts.body,
     fontWeight: '600',
     color: theme.colors.text.tertiary,
   },
@@ -791,6 +805,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   audioPreviewText: {
     flex: 1,
     fontSize: 14,
+    fontFamily: theme.typography.fonts.body,
     fontWeight: '600',
     color: theme.colors.text.primary,
   },

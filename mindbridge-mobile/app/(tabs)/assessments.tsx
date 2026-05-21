@@ -753,6 +753,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 16,
@@ -787,6 +788,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   assessmentTitle: {
     fontSize: 20,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
     color: theme.colors.text.primary,
     marginBottom: 4,
@@ -794,6 +796,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   assessmentSubtitle: {
     fontSize: 14,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
     marginBottom: 24,
   },
@@ -804,6 +807,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   durationText: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '600',
     color: theme.colors.text.disabled,
   },
@@ -814,6 +818,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   startBtnText: {
     color: theme.colors.text.onPrimary || '#FFF',
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '700',
     fontSize: 13,
   },
@@ -850,12 +855,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   resultTest: {
     fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 2,
   },
   resultScore: {
     fontSize: 14,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '600',
   },
   resultRight: {
@@ -865,6 +872,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   resultDate: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.accent,
     color: theme.colors.text.disabled,
     fontWeight: '500',
   },
@@ -902,12 +910,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   eduTitle: {
     fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.plum,
     marginBottom: 4,
   },
   eduText: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
     lineHeight: 20,
   },
@@ -933,6 +943,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   modalTitleText: {
     fontSize: 18,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
   },
@@ -958,6 +969,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   progressText: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '600',
     color: theme.colors.text.secondary,
   },
@@ -981,6 +993,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   questionText: {
     fontSize: 20,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     lineHeight: 30,
@@ -1021,6 +1034,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   optionText: {
     fontSize: 16,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
     fontWeight: '500',
     flex: 1,
@@ -1057,6 +1071,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   navBtnText: {
     fontSize: 15,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
   },
@@ -1079,6 +1094,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   resultHeading: {
     fontSize: 26,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
     color: theme.colors.text.primary,
     marginBottom: 10,
@@ -1087,6 +1103,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   resultSubheading: {
     fontSize: 15,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
     lineHeight: 22,
     textAlign: 'center',
@@ -1114,6 +1131,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   scoreTitle: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '600',
     color: theme.colors.text.disabled,
     marginBottom: 6,
@@ -1122,6 +1140,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   scoreValue: {
     fontSize: 36,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
   },
   dividerVertical: {
@@ -1136,6 +1155,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   severityTitle: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '600',
     color: theme.colors.text.disabled,
     marginBottom: 8,
@@ -1152,6 +1172,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   severityText: {
     fontSize: 15,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '700',
     textAlign: 'center',
   },
@@ -1170,12 +1191,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   actionTitle: {
     fontSize: 18,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     marginBottom: 8,
     textAlign: 'center',
   },
   actionText: {
     fontSize: 14,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
     lineHeight: 20,
     textAlign: 'center',
@@ -1196,6 +1219,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   actionBtnText: {
     color: '#FFF',
     fontSize: 15,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
   },
   doneBtn: {
@@ -1211,6 +1235,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   doneBtnText: {
     color: theme.colors.text.primary,
     fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
   },
 });

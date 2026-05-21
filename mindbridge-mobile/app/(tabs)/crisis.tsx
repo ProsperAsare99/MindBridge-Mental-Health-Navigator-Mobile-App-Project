@@ -251,6 +251,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 16,
@@ -292,12 +293,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   contactTitle: {
     fontSize: 17,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 4,
   },
   contactDesc: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
     lineHeight: 18,
   },
@@ -307,6 +310,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   contactNumber: {
     fontSize: 15,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '800',
     color: theme.colors.plum,
   },
@@ -318,6 +322,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   editPlanText: {
     fontSize: 15,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '700',
     color: theme.colors.plum,
   },
@@ -343,6 +348,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   safetyBannerText: {
     fontSize: 14,
+    fontFamily: theme.typography.fonts.body,
     fontWeight: '600',
     color: theme.colors.accents.eucalyptus,
     marginLeft: 8,
@@ -363,12 +369,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   stepNumber: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '700',
     color: theme.colors.plum,
   },
   stepText: {
     flex: 1,
     fontSize: 15,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.primary,
     fontWeight: '500',
     lineHeight: 22,
@@ -403,12 +411,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   locationTitle: {
     fontSize: 17,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 4,
   },
   locationDesc: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
   },
 });

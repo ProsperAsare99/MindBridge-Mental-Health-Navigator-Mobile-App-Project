@@ -498,6 +498,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   sectionHeader: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
     color: theme.colors.text.tertiary,
     textTransform: 'uppercase',
@@ -535,6 +536,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   rowLabel: {
     flex: 1,
     fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '600',
     color: theme.colors.text.primary,
   },
@@ -545,6 +547,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   rowValue: {
     fontSize: 14,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.tertiary,
   },
   themeCard: {
@@ -571,6 +574,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   themeOptionText: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.body,
     fontWeight: '700',
     color: theme.colors.text.secondary,
   },
@@ -596,12 +600,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   logoutText: {
     fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '900',
     color: '#FFF',
   },
   versionText: {
     textAlign: 'center',
     fontSize: 12,
+    fontFamily: theme.typography.fonts.accent,
     color: theme.colors.text.disabled,
     fontWeight: '600',
     letterSpacing: 0.5,
@@ -641,6 +647,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   modalTitle: {
     flex: 1,
     fontSize: 20,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
     color: theme.colors.text.primary,
   },
@@ -655,6 +662,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   inputLabel: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '700',
     color: theme.colors.text.tertiary,
     textTransform: 'uppercase',
@@ -666,6 +674,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     fontSize: 16,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.primary,
     borderWidth: 1,
     borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
@@ -685,6 +694,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   modalActionText: {
     color: '#FFF',
     fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
   }
 });

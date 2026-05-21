@@ -165,12 +165,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   title: {
     fontSize: 34,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
     color: theme.colors.text.primary,
     letterSpacing: -1,
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
     marginTop: 4,
   },
@@ -207,11 +209,13 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   statVal: {
     fontSize: 17,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
     color: theme.colors.text.primary,
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: theme.typography.fonts.accent,
     color: theme.colors.text.secondary,
     marginTop: 2,
     textTransform: 'uppercase',
@@ -239,12 +243,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   progressText: {
     fontSize: 14,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
     textAlign: 'center',
     fontWeight: '600',
   },
   sectionTitle: {
     fontSize: 20,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 24,
@@ -265,6 +271,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   timeText: {
     fontSize: 12,
+    fontFamily: theme.typography.fonts.body,
     fontWeight: '700',
     color: theme.colors.text.tertiary,
     marginTop: 4,
@@ -318,6 +325,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   taskTitle: {
     fontSize: 17,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 8,
@@ -339,12 +347,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   categoryText: {
     fontSize: 11,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '700',
     color: theme.colors.plum,
     textTransform: 'uppercase',
   },
   pointsText: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
     color: theme.colors.accents.eucalyptus,
   }

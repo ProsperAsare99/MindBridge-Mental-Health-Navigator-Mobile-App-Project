@@ -82,6 +82,7 @@ const typingStyles = StyleSheet.create({
 
 // ─── Individual Message ────────────────────────────────────────────────────────
 const MessageItem = ({ item, theme, router, t }: any) => {
+  const msgStyles = createMsgStyles(theme);
   const onLongPress = () => {
     Clipboard.setString(item.text);
     Alert.alert('Copied', 'Message copied to clipboard.');
@@ -152,21 +153,21 @@ const MessageItem = ({ item, theme, router, t }: any) => {
   );
 };
 
-const msgStyles = StyleSheet.create({
+const createMsgStyles = (theme: any) => StyleSheet.create({
   rowAi: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 20, paddingBottom: 16 },
   rowUser: { alignItems: 'flex-end', paddingHorizontal: 20, paddingBottom: 16 },
   avatarSmall: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 10, flexShrink: 0 },
   bubbleAi: { maxWidth: width * 0.74, paddingHorizontal: 16, paddingVertical: 13, borderRadius: 20, borderBottomLeftRadius: 4, borderWidth: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 },
   bubbleUser: { maxWidth: width * 0.74, paddingHorizontal: 16, paddingVertical: 13, borderRadius: 20, borderBottomRightRadius: 4 },
-  textAi: { fontSize: 15.5, lineHeight: 23 },
-  textUser: { fontSize: 15.5, lineHeight: 23, color: '#FFF' },
-  time: { fontSize: 11, fontWeight: '500', marginTop: 5, marginLeft: 2 },
-  timeUser: { fontSize: 11, fontWeight: '500', marginTop: 5 },
+  textAi: { fontSize: 15.5, lineHeight: 23, fontFamily: theme.typography.fonts.body },
+  textUser: { fontSize: 15.5, lineHeight: 23, color: '#FFF', fontFamily: theme.typography.fonts.body },
+  time: { fontSize: 11, fontWeight: '500', marginTop: 5, marginLeft: 2, fontFamily: theme.typography.fonts.accent },
+  timeUser: { fontSize: 11, fontWeight: '500', marginTop: 5, fontFamily: theme.typography.fonts.accent },
   crisisBubble: { maxWidth: width * 0.78, borderWidth: 1.5, borderColor: '#EF4444', borderRadius: 20, borderBottomLeftRadius: 4, padding: 16, backgroundColor: 'rgba(239,68,68,0.06)' },
   crisisTop: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 10 },
-  crisisLabel: { fontSize: 10, fontWeight: '800', color: '#EF4444', letterSpacing: 0.8 },
+  crisisLabel: { fontSize: 10, fontWeight: '800', color: '#EF4444', letterSpacing: 0.8, fontFamily: theme.typography.fonts.accent },
   crisisBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#EF4444', paddingVertical: 11, borderRadius: 12, marginTop: 12, gap: 8 },
-  crisisBtnText: { color: '#FFF', fontWeight: '800', fontSize: 14 },
+  crisisBtnText: { color: '#FFF', fontWeight: '800', fontSize: 14, fontFamily: theme.typography.fonts.header },
 });
 
 // ─── Main Screen ───────────────────────────────────────────────────────────────
@@ -176,6 +177,7 @@ export default function AIGuideScreen() {
   const { t } = theme;
   const router = useRouter();
   const { userData: authData } = useContext(AuthContext) as any;
+  const S = createStyles(theme);
 
   const [messages, setMessages] = useState<any[]>([]);
   const [message, setMessage] = useState('');
@@ -622,28 +624,28 @@ export default function AIGuideScreen() {
   );
 }
 
-const S = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   root: { flex: 1 },
   header: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(123,97,255,0.1)', zIndex: 10 },
   headerInner: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingBottom: 14, gap: 12 },
   headerAvatar: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 17, fontWeight: '800', letterSpacing: -0.3 },
+  headerTitle: { fontSize: 17, fontFamily: theme.typography.fonts.header, fontWeight: '800', letterSpacing: -0.3 },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
   dot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#34D399' },
-  headerSub: { fontSize: 12, fontWeight: '500' },
+  headerSub: { fontSize: 12, fontFamily: theme.typography.fonts.body, fontWeight: '500' },
   headerBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   disclaimer: { flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: 20, marginTop: 14, marginBottom: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, borderWidth: 1 },
-  disclaimerText: { flex: 1, fontSize: 12, lineHeight: 17, fontWeight: '500' },
+  disclaimerText: { flex: 1, fontSize: 12, lineHeight: 17, fontFamily: theme.typography.fonts.body, fontWeight: '500' },
   prompts: { paddingHorizontal: 20, marginVertical: 12 },
   promptsHeader: { marginBottom: 10 },
-  promptsLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
+  promptsLabel: { fontSize: 11, fontFamily: theme.typography.fonts.accent, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
   promptsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, borderWidth: 1 },
-  chipText: { fontSize: 14, fontWeight: '500' },
+  chipText: { fontSize: 14, fontFamily: theme.typography.fonts.body, fontWeight: '500' },
   listContent: { paddingTop: 8 },
   inputPanel: { paddingHorizontal: 20, paddingTop: 12 },
   inputRow: { flexDirection: 'row', alignItems: 'flex-end', borderRadius: 28, borderWidth: 1.5, paddingHorizontal: 14, paddingVertical: 6, gap: 8 },
-  input: { flex: 1, fontSize: 16, lineHeight: 22, paddingTop: 10, paddingBottom: 10, minHeight: 44, maxHeight: 120 },
+  input: { flex: 1, fontSize: 16, fontFamily: theme.typography.fonts.body, lineHeight: 22, paddingTop: 10, paddingBottom: 10, minHeight: 44, maxHeight: 120 },
   inputActions: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
   micBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.03)', alignItems: 'center', justifyContent: 'center' },
   sendBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
@@ -651,23 +653,23 @@ const S = StyleSheet.create({
   modalContainer: { height: '80%', borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: 'hidden', padding: 24 },
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottomWidth: 1, marginBottom: 20 },
   modalHeaderLeft: { flexDirection: 'row', alignItems: 'center' },
-  modalTitle: { fontSize: 18, fontWeight: '800' },
-  modalSubtitle: { fontSize: 12, marginTop: 2 },
+  modalTitle: { fontSize: 18, fontFamily: theme.typography.fonts.header, fontWeight: '800' },
+  modalSubtitle: { fontSize: 12, fontFamily: theme.typography.fonts.body, marginTop: 2 },
   closeBtn: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   emptyHistory: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 60 },
-  emptyText: { fontSize: 16, fontWeight: '700', marginTop: 12 },
-  emptySub: { fontSize: 13, marginTop: 4, textAlign: 'center', opacity: 0.8 },
+  emptyText: { fontSize: 16, fontFamily: theme.typography.fonts.header, fontWeight: '700', marginTop: 12 },
+  emptySub: { fontSize: 13, fontFamily: theme.typography.fonts.body, marginTop: 4, textAlign: 'center', opacity: 0.8 },
   modalScrollContent: { paddingBottom: 40, gap: 14 },
   historyBubble: { borderRadius: 20, padding: 16, maxWidth: '85%' },
   historyAiBubble: { alignSelf: 'flex-start', backgroundColor: 'rgba(123,97,255,0.06)' },
   historyUserBubble: { alignSelf: 'flex-end' },
   historyBubbleHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, gap: 12 },
-  historySender: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
-  historyText: { fontSize: 14, lineHeight: 20 },
+  historySender: { fontSize: 11, fontFamily: theme.typography.fonts.accent, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
+  historyText: { fontSize: 14, fontFamily: theme.typography.fonts.body, lineHeight: 20 },
   historyGroup: { marginVertical: 8 },
   groupLabelRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 12, gap: 10 },
-  groupLabelText: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  groupLabelText: { fontSize: 12, fontFamily: theme.typography.fonts.accent, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   groupLabelLine: { flex: 1, height: 1 },
   groupDeleteBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, backgroundColor: 'rgba(239,68,68,0.06)' },
-  groupDeleteText: { fontSize: 11, fontWeight: '700' },
+  groupDeleteText: { fontSize: 11, fontFamily: theme.typography.fonts.accent, fontWeight: '700' },
 });

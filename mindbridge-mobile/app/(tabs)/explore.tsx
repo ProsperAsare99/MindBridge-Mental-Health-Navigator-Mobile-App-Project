@@ -51,41 +51,41 @@ const { width } = Dimensions.get('window');
 // MindDoc-inspired: onboarding answers → curated resource cards
 const FOR_YOU_MAP: Record<string, { title: string; subtitle: string; icon: any; color: string; tag: string }[]> = {
   academic_stress: [
-    { title: 'Exam Stress Toolkit', subtitle: '5 evidence-based strategies', icon: BookOpen, color: '#6366F1', tag: 'For You' },
-    { title: 'Study Without Burning Out', subtitle: 'Sustainable study habits', icon: Brain, color: '#8B5CF6', tag: 'Trending' },
+    { title: 'Exam Stress Toolkit', subtitle: 'Reclaim your focus', icon: BookOpen, color: '#6366F1', tag: 'For You' },
+    { title: 'Study Without Burning Out', subtitle: 'Pace yourself safely', icon: Brain, color: '#8B5CF6', tag: 'Trending' },
   ],
   anxiety: [
-    { title: 'Managing Anxiety', subtitle: 'Calm your nervous system', icon: Waves, color: '#06B6D4', tag: 'For You' },
-    { title: 'Box Breathing Guide', subtitle: '5-minute daily practice', icon: Wind, color: '#0EA5E9', tag: 'Quick' },
+    { title: 'Navigate Anxiety', subtitle: 'Soothe your nervous system', icon: Waves, color: '#06B6D4', tag: 'For You' },
+    { title: 'Box Breathing', subtitle: 'Find your center in 5 mins', icon: Wind, color: '#0EA5E9', tag: 'Quick Relief' },
   ],
   sadness: [
-    { title: 'Lifting Your Mood', subtitle: 'CBT techniques for low days', icon: Sun, color: '#F59E0B', tag: 'For You' },
-    { title: 'Behavioural Activation', subtitle: 'Do more, feel more', icon: Compass, color: '#EF4444', tag: 'Evidence-Based' },
+    { title: 'Gentle Mood Lifts', subtitle: 'Small steps for heavy days', icon: Sun, color: '#F59E0B', tag: 'For You' },
+    { title: 'Find Your Spark', subtitle: 'Behavioral activation basics', icon: Compass, color: '#EF4444', tag: 'Evidence-Based' },
   ],
   loneliness: [
-    { title: 'Building Connections', subtitle: 'From isolation to belonging', icon: Heart, color: '#10B981', tag: 'For You' },
-    { title: 'Connecting on Campus', subtitle: 'Find your community', icon: Users, color: '#34D399', tag: 'Student' },
+    { title: 'Bridge the Gap', subtitle: 'From isolation to belonging', icon: Heart, color: '#10B981', tag: 'For You' },
+    { title: 'Your Campus Community', subtitle: 'Meaningful connections', icon: Users, color: '#34D399', tag: 'Student Life' },
   ],
   relationships: [
-    { title: 'Interpersonal Skills', subtitle: 'Communicate with confidence', icon: MessageSquare, color: '#EC4899', tag: 'For You' },
-    { title: 'Setting Healthy Boundaries', subtitle: 'Protect your energy', icon: Shield, color: '#F43F5E', tag: 'Popular' },
+    { title: 'Communicate Clearly', subtitle: 'Speak your truth with care', icon: MessageSquare, color: '#EC4899', tag: 'For You' },
+    { title: 'Healthy Boundaries', subtitle: 'Protect your peace', icon: Shield, color: '#F43F5E', tag: 'Popular' },
   ],
   financial: [
-    { title: 'Financial Stress & Wellbeing', subtitle: 'Mind-body connection', icon: Coins, color: '#84CC16', tag: 'For You' },
-    { title: 'Student Money Guide', subtitle: 'Budget without anxiety', icon: BarChart2, color: '#65A30D', tag: 'Practical' },
+    { title: 'Money & Mind', subtitle: 'Ease financial anxiety', icon: Coins, color: '#84CC16', tag: 'For You' },
+    { title: 'The Student Budget', subtitle: 'Practical money moves', icon: BarChart2, color: '#65A30D', tag: 'Practical' },
   ],
   family: [
-    { title: 'Family Pressure & Identity', subtitle: 'Navigate expectations', icon: Home, color: '#F97316', tag: 'For You' },
-    { title: 'Cultural Identity & Wellbeing', subtitle: 'Holding multiple worlds', icon: Globe, color: '#EA580C', tag: 'Deep Dive' },
+    { title: 'Family Dynamics', subtitle: 'Navigating expectations', icon: Home, color: '#F97316', tag: 'For You' },
+    { title: 'Cultural Bridges', subtitle: 'Honoring multiple worlds', icon: Globe, color: '#EA580C', tag: 'Deep Dive' },
   ],
   tracking: [
-    { title: 'Understanding Your Mood', subtitle: 'Read your emotional patterns', icon: TrendingUp, color: '#7C3AED', tag: 'For You' },
-    { title: 'Journaling for Clarity', subtitle: 'Write to understand yourself', icon: BookOpen, color: '#6D28D9', tag: 'Reflective' },
+    { title: 'Pattern Recognition', subtitle: 'Understand your mood cycles', icon: TrendingUp, color: '#7C3AED', tag: 'For You' },
+    { title: 'Clarity Journal', subtitle: 'Write your way to insight', icon: BookOpen, color: '#6D28D9', tag: 'Reflective' },
   ],
   default: [
-    { title: 'Getting Started with Mindfulness', subtitle: 'Your 5-min daily practice', icon: Compass, color: '#14B8A6', tag: 'Start Here' },
-    { title: 'Sleep Better Tonight', subtitle: 'Science-backed sleep hygiene', icon: Moon, color: '#6366F1', tag: 'Popular' },
-    { title: 'Self-Compassion 101', subtitle: 'Be kind to yourself', icon: Heart, color: '#F59E0B', tag: 'For You' },
+    { title: 'Mindful Beginnings', subtitle: 'A gentle 5-minute start', icon: Compass, color: '#14B8A6', tag: 'Start Here' },
+    { title: 'Restful Nights', subtitle: 'Science-backed sleep hygiene', icon: Moon, color: '#6366F1', tag: 'Popular' },
+    { title: 'The Art of Self-Compassion', subtitle: 'Be kind to your mind', icon: Heart, color: '#F59E0B', tag: 'For You' },
   ],
 };
 
@@ -177,18 +177,18 @@ export default function ResourcesScreen() {
       <Animated.View entering={FadeInUp.delay(80 + index * 60).duration(450)}>
         <TouchableOpacity
           activeOpacity={0.82}
-          style={[fyStyles.card, { backgroundColor: card.color + '18', borderColor: card.color + '40' }]}
+          style={[styles.fyCard, { backgroundColor: card.color + '18', borderColor: card.color + '40' }]}
           onPress={() => {}}
         >
-          <View style={[fyStyles.iconWrap, { backgroundColor: card.color + '22' }]}>
+          <View style={[styles.fyIconWrap, { backgroundColor: card.color + '22' }]}>
             <IconComponent color={card.color} size={26} strokeWidth={2} />
           </View>
-          <View style={[fyStyles.tag, { backgroundColor: card.color + '25' }]}>
+          <View style={[styles.fyTag, { backgroundColor: card.color + '25' }]}>
             <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: card.color }} />
-            <Text style={[fyStyles.tagText, { color: card.color }]}>{card.tag}</Text>
+            <Text style={[styles.fyTagText, { color: card.color }]}>{card.tag}</Text>
           </View>
-          <Text style={[fyStyles.cardTitle, { color: theme.colors.text.primary }]} numberOfLines={2}>{card.title}</Text>
-          <Text style={[fyStyles.cardSub, { color: theme.colors.text.secondary }]} numberOfLines={2}>{card.subtitle}</Text>
+          <Text style={[styles.fyCardTitle, { color: theme.colors.text.primary }]} numberOfLines={2}>{card.title}</Text>
+          <Text style={[styles.fyCardSub, { color: theme.colors.text.secondary }]} numberOfLines={2}>{card.subtitle}</Text>
         </TouchableOpacity>
       </Animated.View>
     );
@@ -228,7 +228,7 @@ export default function ResourcesScreen() {
               <SkeletonLoader width={120} height={24} borderRadius={4} style={{ marginBottom: 16 }} />
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.forYouScroll}>
                 {[1, 2, 3].map((i) => (
-                  <View key={i} style={[fyStyles.card, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor: 'transparent' }]}>
+                  <View key={i} style={[styles.fyCard, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderColor: 'transparent' }]}>
                     <SkeletonLoader width={46} height={46} borderRadius={16} style={{ marginBottom: 12 }} />
                     <SkeletonLoader width={60} height={16} borderRadius={8} style={{ marginBottom: 10 }} />
                     <SkeletonLoader width="100%" height={16} borderRadius={4} style={{ marginBottom: 4 }} />
@@ -279,8 +279,8 @@ export default function ResourcesScreen() {
             <View style={styles.featuredBadge}>
               <Text style={styles.featuredBadgeText}>FEATURED</Text>
             </View>
-            <Text style={styles.featuredTitle}>The Art of Self-Compassion</Text>
-            <Text style={styles.featuredSubtitle}>A 10-minute guided audio journey to quiet your inner critic.</Text>
+            <Text style={styles.featuredTitle}>Quiet the Inner Critic</Text>
+            <Text style={styles.featuredSubtitle}>A soothing 10-minute audio journey into the art of self-compassion.</Text>
             <TouchableOpacity style={styles.featuredBtn}>
               <Play color={theme.colors.plum} size={16} fill={theme.colors.plum} />
               <Text style={styles.featuredBtnText}>Listen Now</Text>
@@ -305,7 +305,7 @@ export default function ResourcesScreen() {
         {(activeCategory === 'All' || activeCategory === 'Audio') && audio.length > 0 && (
           <Animated.View entering={FadeInUp.delay(200).duration(500)}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Guided Audio</Text>
+              <Text style={styles.sectionTitle}>Audio Journeys</Text>
               <TouchableOpacity><Text style={styles.seeAllText}>See all</Text></TouchableOpacity>
             </View>
             <ScrollView 
@@ -343,7 +343,7 @@ export default function ResourcesScreen() {
         {/* Quick Tools */}
         {(activeCategory === 'All' || activeCategory === 'Techniques') && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('resources.coping_tools')}</Text>
+            <Text style={styles.sectionTitle}>Quick Relief Tools</Text>
             <View style={styles.copingGrid}>
               {COPING_TOOLS.map((tool) => (
                 <TouchableOpacity 
@@ -375,7 +375,7 @@ export default function ResourcesScreen() {
         {(activeCategory === 'All' || activeCategory === 'Articles') && articles.length > 0 && (
           <Animated.View entering={FadeInUp.delay(400).duration(500)} style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Deep Dives</Text>
+              <Text style={styles.sectionTitle}>Curated Reads</Text>
             </View>
             <View style={styles.articleList}>
               {articles.map((article: any, index: number) => (
@@ -446,11 +446,13 @@ const createStyles = (theme: any) => StyleSheet.create({
   featuredBadgeText: {
     color: '#FFF',
     fontSize: 10,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '800',
     letterSpacing: 1,
   },
   featuredTitle: {
     fontSize: 24,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
     color: '#FFF',
     marginBottom: 8,
@@ -458,6 +460,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   featuredSubtitle: {
     fontSize: 15,
+    fontFamily: theme.typography.fonts.body,
     color: 'rgba(255,255,255,0.8)',
     lineHeight: 22,
     marginBottom: 20,
@@ -474,6 +477,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   featuredBtnText: {
     color: theme.colors.plum,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '800',
     fontSize: 15,
   },
@@ -498,6 +502,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   filterText: {
     fontSize: 14,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '700',
     color: theme.colors.text.secondary,
   },
@@ -517,12 +522,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     letterSpacing: -0.5,
   },
   seeAllText: {
     fontSize: 15,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '600',
     color: theme.colors.plum,
   },
@@ -560,6 +567,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   audioTitle: {
     fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 4,
@@ -567,6 +575,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   audioDuration: {
     fontSize: 12,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '600',
     color: theme.colors.text.tertiary,
     marginBottom: 12,
@@ -611,12 +620,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   toolTitle: {
     fontSize: 17,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 4,
   },
   toolSubtitle: {
     fontSize: 14,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
   },
   articleList: {
@@ -641,6 +652,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   articleCategory: {
     fontSize: 12,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '800',
     color: theme.colors.plum,
     textTransform: 'uppercase',
@@ -649,6 +661,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   articleTitle: {
     fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 8,
@@ -656,6 +669,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   articleReadTime: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.tertiary,
   },
   articleIconWrap: {
@@ -670,11 +684,9 @@ const createStyles = (theme: any) => StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     marginLeft: 20,
-  }
-});
-
-const fyStyles = StyleSheet.create({
-  card: {
+  },
+  // Added ForYou styles
+  fyCard: {
     width: 158,
     borderRadius: 24,
     padding: 18,
@@ -685,7 +697,7 @@ const fyStyles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 3,
   },
-  iconWrap: {
+  fyIconWrap: {
     width: 46,
     height: 46,
     borderRadius: 16,
@@ -693,7 +705,7 @@ const fyStyles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
-  tag: {
+  fyTag: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -703,20 +715,23 @@ const fyStyles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
   },
-  tagText: {
+  fyTagText: {
     fontSize: 10,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '800',
     letterSpacing: 0.4,
   },
-  cardTitle: {
+  fyCardTitle: {
     fontSize: 14,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '800',
     letterSpacing: -0.3,
     marginBottom: 4,
     lineHeight: 20,
   },
-  cardSub: {
+  fyCardSub: {
     fontSize: 12,
+    fontFamily: theme.typography.fonts.body,
     fontWeight: '500',
     lineHeight: 17,
   },

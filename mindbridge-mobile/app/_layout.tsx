@@ -3,7 +3,7 @@ import { useEffect, useContext } from 'react';
 import { AuthProvider, AuthContext } from '../src/context/AuthContext';
 import { View } from 'react-native';
 import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
-import { ThemeProvider as NavigationProvider } from '@react-navigation/native';
+import { ThemeProvider as NavigationProvider, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { AnimatedLogoLoader } from '../src/components/AnimatedLogoLoader';
 import {
   useFonts,
@@ -82,9 +82,12 @@ const InitialLayout = () => {
     return <AnimatedLogoLoader />;
   }
 
+  const baseTheme = theme.isDark ? DarkTheme : DefaultTheme;
   const navigationTheme = {
+    ...baseTheme,
     dark: theme.isDark,
     colors: {
+      ...baseTheme.colors,
       primary: theme.colors.plum,
       background: theme.colors.background,
       card: theme.colors.surface,

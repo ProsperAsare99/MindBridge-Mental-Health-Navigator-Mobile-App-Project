@@ -330,12 +330,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     letterSpacing: -0.5,
   },
   seeAllText: {
     fontSize: 15,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '600',
     color: theme.colors.plum,
   },
@@ -361,11 +363,13 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   groupTitle: {
     fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
   },
   groupMembers: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.body,
     fontWeight: '500',
     color: theme.colors.text.secondary,
   },
@@ -403,12 +407,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   postGroup: {
     fontSize: 15,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.primary,
     marginBottom: 2,
   },
   postTime: {
     fontSize: 13,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.tertiary,
   },
   moreBtn: {
@@ -416,6 +422,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   postContent: {
     fontSize: 16,
+    fontFamily: theme.typography.fonts.body,
     color: theme.colors.text.secondary,
     lineHeight: 24,
     marginBottom: 20,
@@ -435,6 +442,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   actionText: {
     fontSize: 14,
+    fontFamily: theme.typography.fonts.accent,
     fontWeight: '600',
     color: theme.colors.text.secondary,
   },
@@ -458,19 +466,20 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   fabText: {
     fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
     fontWeight: '700',
     color: theme.colors.text.onPrimary || '#FFF',
   },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   modalContainer: { height: '70%', borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: 'hidden', padding: 24 },
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', marginBottom: 20 },
-  modalTitle: { fontSize: 18, fontWeight: '800', color: theme.colors.text.primary },
+  modalTitle: { fontSize: 18, fontFamily: theme.typography.fonts.header, fontWeight: '800', color: theme.colors.text.primary },
   closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', alignItems: 'center', justifyContent: 'center' },
-  modalLabel: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, color: theme.colors.text.tertiary, marginBottom: 10, marginTop: 10 },
+  modalLabel: { fontSize: 12, fontFamily: theme.typography.fonts.accent, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, color: theme.colors.text.tertiary, marginBottom: 10, marginTop: 10 },
   pickerRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   pickerChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' },
-  pickerChipText: { fontSize: 13, fontWeight: '600' },
-  modalInput: { borderWidth: 1, borderRadius: 16, padding: 14, fontSize: 15, lineHeight: 22, height: 120, textAlignVertical: 'top', marginBottom: 24, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' },
+  pickerChipText: { fontSize: 13, fontFamily: theme.typography.fonts.accent, fontWeight: '600' },
+  modalInput: { borderWidth: 1, borderRadius: 16, padding: 14, fontSize: 15, fontFamily: theme.typography.fonts.body, lineHeight: 22, height: 120, textAlignVertical: 'top', marginBottom: 24, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' },
   publishBtn: { flexDirection: 'row', backgroundColor: '#7B61FF', paddingVertical: 16, borderRadius: 28, alignItems: 'center', justifyContent: 'center', gap: 8 },
-  publishBtnText: { color: '#FFF', fontSize: 16, fontWeight: '800' },
+  publishBtnText: { color: '#FFF', fontSize: 16, fontFamily: theme.typography.fonts.header, fontWeight: '800' },
 });

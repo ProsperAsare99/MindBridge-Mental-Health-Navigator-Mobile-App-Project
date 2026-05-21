@@ -4,16 +4,22 @@ import { AuthProvider, AuthContext } from '../src/context/AuthContext';
 import { View } from 'react-native';
 import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 import { AnimatedLogoLoader } from '../src/components/AnimatedLogoLoader';
-import { 
+import {
   useFonts,
-  Poppins_400Regular,
-  Poppins_600SemiBold,
-  Poppins_700Bold,
-  Poppins_800ExtraBold 
-} from '@expo-google-fonts/poppins';
-import { OpenSans_400Regular, OpenSans_600SemiBold } from '@expo-google-fonts/open-sans';
-import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
-import { Lato_400Regular, Lato_700Bold } from '@expo-google-fonts/lato';
+  Montserrat_400Regular,
+  Montserrat_500Medium,
+  Montserrat_600SemiBold,
+  Montserrat_700Bold,
+  Montserrat_800ExtraBold,
+} from '@expo-google-fonts/montserrat';
+import {
+  Lora_400Regular,
+  Lora_700Bold,
+} from '@expo-google-fonts/lora';
+import {
+  DMSans_400Regular,
+  DMSans_500Medium,
+} from '@expo-google-fonts/dm-sans';
 import * as SplashScreen from 'expo-splash-screen';
 
 SplashScreen.preventAutoHideAsync();
@@ -25,17 +31,18 @@ const InitialLayout = () => {
   const router = useRouter();
 
   const [fontsLoaded] = useFonts({
-    'Poppins-Regular': Poppins_400Regular,
-    'Poppins-SemiBold': Poppins_600SemiBold,
-    'Poppins-Bold': Poppins_700Bold,
-    'Poppins-ExtraBold': Poppins_800ExtraBold,
-    'OpenSans-Regular': OpenSans_400Regular,
-    'OpenSans-SemiBold': OpenSans_600SemiBold,
-    'Inter-Regular': Inter_400Regular,
-    'Inter-SemiBold': Inter_600SemiBold,
-    'Inter-Bold': Inter_700Bold,
-    'Lato-Regular': Lato_400Regular,
-    'Lato-Bold': Lato_700Bold,
+    // Montserrat — headings, UI, buttons
+    'Montserrat-Regular':    Montserrat_400Regular,
+    'Montserrat-Medium':     Montserrat_500Medium,
+    'Montserrat-SemiBold':   Montserrat_600SemiBold,
+    'Montserrat-Bold':       Montserrat_700Bold,
+    'Montserrat-ExtraBold':  Montserrat_800ExtraBold,
+    // Lora — body content, journal text
+    'Lora-Regular':          Lora_400Regular,
+    'Lora-Bold':             Lora_700Bold,
+    // DM Sans — captions, metadata, secondary UI
+    'DMSans-Regular':        DMSans_400Regular,
+    'DMSans-Medium':         DMSans_500Medium,
   });
 
   useEffect(() => {

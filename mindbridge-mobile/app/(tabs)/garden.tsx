@@ -759,7 +759,7 @@ export default function WellnessTrackerScreen() {
               let insightTitle = 'Emotional Reservoir Stable';
               let insightDesc = 'Your emotional trends show strong resilience. Maintain this momentum by writing down one intention each morning.';
               let IconComponent = Lightbulb;
-              let iconColor = theme.colors.plum;
+              let iconColor: string = theme.colors.plum;
 
               if (avgScore < 6.0) {
                 insightTitle = 'Emotional Reservoir Low';

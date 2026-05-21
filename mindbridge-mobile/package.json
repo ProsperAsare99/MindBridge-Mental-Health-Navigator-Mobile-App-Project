@@ -9,8 +9,10 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo-google-fonts/dm-sans": "^0.4.2",
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo-google-fonts/lato": "^0.4.1",
+    "@expo-google-fonts/lora": "^0.4.2",
     "@expo-google-fonts/montserrat": "^0.4.2",
     "@expo-google-fonts/open-sans": "^0.4.2",
     "@expo-google-fonts/poppins": "^0.4.1",

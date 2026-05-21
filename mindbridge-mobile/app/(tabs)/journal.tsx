@@ -77,7 +77,7 @@ export default function JournalScreen() {
     { id: 'sad', icon: Frown, color: theme.colors.accents.slate, label: 'Sad' },
     { id: 'angry', icon: Flame, color: theme.colors.semantic.danger, label: 'Angry' },
     { id: 'hopeful', icon: Smile, color: theme.colors.accents.softMint, label: 'Hopeful' },
-    { id: 'peaceful', icon: Heart, color: theme.colors.accents.blushPink, label: 'Peaceful' },
+    { id: 'peaceful', icon: Heart, color: theme.colors.accents.dustyRose, label: 'Peaceful' },
     { id: 'exhausted', icon: Meh, color: theme.colors.accents.dustyRose, label: 'Tired' },
   ];
 
@@ -90,7 +90,7 @@ export default function JournalScreen() {
       case 'exhausted': return <Meh color={theme.colors.accents.dustyRose} size={16} />;
       case 'angry': return <Flame color={theme.colors.semantic.danger} size={16} />;
       case 'hopeful': return <Smile color={theme.colors.accents.softMint} size={16} />;
-      case 'peaceful': return <Heart color={theme.colors.accents.blushPink} size={16} />;
+      case 'peaceful': return <Heart color={theme.colors.accents.dustyRose} size={16} />;
       default: return <Sun color={theme.colors.accents.gentlePeach} size={16} />;
     }
   };

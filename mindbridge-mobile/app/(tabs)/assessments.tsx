@@ -723,7 +723,7 @@ export default function AssessmentsScreen() {
             <Text style={styles.modalTitleText}>
               {activeTestId === 'phq9' ? 'PHQ-9' : activeTestId === 'gad7' ? 'GAD-7' : t('assessments.burnout_test') || 'Student Burnout'}
             </Text>
-            <View style={{ width: 44 }} /> {/* Spacer */}
+            <View style={{ width: 44 }} />
           </View>
 
           {/* Modal Content */}

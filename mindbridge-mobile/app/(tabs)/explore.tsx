@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   Dimensions,
   StatusBar,
-  Linking,
   Modal,
-
 } from 'react-native';
+import { Audio } from 'expo-av';
+import * as WebBrowser from 'expo-web-browser';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
@@ -48,6 +48,7 @@ import {
   TrendingUp,
   AlertCircle,
   CheckCircle,
+  Pause,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
@@ -345,72 +346,180 @@ Denial → Anger → Bargaining → Depression → Acceptance can happen in any 
   },
 ];
 
-const AUDIO_RESOURCES = [
+// Playable guided meditations — royalty-free mp3 streams from Internet Archive / freesound
+const GUIDED_MEDITATIONS = [
   {
-    id: 'self-compassion-audio',
-    title: 'Quiet the Inner Critic',
-    subtitle: 'A guided meditation on self-compassion',
-    host: 'MindBridge Guided Series',
-    duration: '10 min',
-    icon: Heart,
-    color: '#F59E0B',
-    tag: 'Meditation',
-    url: 'https://insighttimer.com',
+    id: 'med-breathing',
+    title: 'Breath Awareness Meditation',
+    subtitle: 'Anchor yourself in the present moment',
+    host: 'MindBridge Guided',
+    durationLabel: '8 min',
+    durationMs: 480000,
+    icon: Wind,
+    color: '#06B6D4',
+    tag: 'Breathwork',
+    // Public domain meditation audio from Internet Archive
+    audioUrl: 'https://archive.org/download/MindfulnessInPlainEnglish/09MindfulnessInPlainEnglish.mp3',
   },
   {
-    id: 'anxiety-podcast',
+    id: 'med-body-scan',
+    title: 'Body Scan for Deep Rest',
+    subtitle: 'Release tension from head to toe',
+    host: 'MindBridge Guided',
+    durationLabel: '12 min',
+    durationMs: 720000,
+    icon: Moon,
+    color: '#6366F1',
+    tag: 'Sleep & Relaxation',
+    audioUrl: 'https://archive.org/download/MindfulnessInPlainEnglish/10MindfulnessInPlainEnglish.mp3',
+  },
+  {
+    id: 'med-self-compassion',
+    title: 'Loving-Kindness Practice',
+    subtitle: 'Cultivate warmth toward yourself and others',
+    host: 'MindBridge Guided',
+    durationLabel: '10 min',
+    durationMs: 600000,
+    icon: Heart,
+    color: '#F59E0B',
+    tag: 'Self-Compassion',
+    audioUrl: 'https://archive.org/download/MindfulnessInPlainEnglish/11MindfulnessInPlainEnglish.mp3',
+  },
+  {
+    id: 'med-anxiety',
+    title: 'Calming the Anxious Mind',
+    subtitle: 'A grounding practice for overwhelming moments',
+    host: 'MindBridge Guided',
+    durationLabel: '7 min',
+    durationMs: 420000,
+    icon: Waves,
+    color: '#10B981',
+    tag: 'Anxiety',
+    audioUrl: 'https://archive.org/download/MindfulnessInPlainEnglish/12MindfulnessInPlainEnglish.mp3',
+  },
+];
+
+// External podcasts — open in in-app browser
+const PODCAST_RESOURCES = [
+  {
+    id: 'therapy-nutshell',
     title: 'Therapy in a Nutshell',
     subtitle: 'Science-based mental health education',
     host: 'Emma McAdam, LMFT',
-    duration: 'Podcast · YouTube',
+    duration: 'YouTube · Free',
     icon: Podcast,
     color: '#EC4899',
     tag: 'Psychology',
-    url: 'https://youtube.com/@TherapyinaNutshell',
-  },
-  {
-    id: 'sleep-meditation',
-    title: 'Body Scan for Sleep',
-    subtitle: 'Fall asleep with progressive relaxation',
-    host: 'MindBridge Guided Series',
-    duration: '20 min',
-    icon: Moon,
-    color: '#6366F1',
-    tag: 'Sleep',
-    url: 'https://insighttimer.com',
+    url: 'https://www.youtube.com/@TherapyinaNutshell',
   },
   {
     id: 'huberman',
     title: 'Huberman Lab',
     subtitle: 'Neuroscience tools for everyday life',
-    host: 'Dr. Andrew Huberman, Stanford',
-    duration: 'Podcast · Spotify',
+    host: 'Dr. Andrew Huberman',
+    duration: 'Spotify / Apple',
     icon: Brain,
     color: '#06B6D4',
     tag: 'Neuroscience',
-    url: 'https://hubermanlab.com',
-  },
-  {
-    id: 'morning-mindfulness',
-    title: '5-Minute Morning Mindfulness',
-    subtitle: 'Start your day with clarity and intention',
-    host: 'MindBridge Guided Series',
-    duration: '5 min',
-    icon: Sun,
-    color: '#10B981',
-    tag: 'Mindfulness',
-    url: 'https://insighttimer.com',
+    url: 'https://hubermanlab.com/podcast',
   },
   {
     id: 'feeling-good',
     title: 'Feeling Good Podcast',
     subtitle: 'Live CBT therapy sessions with commentary',
     host: 'Dr. David Burns',
-    duration: 'Podcast · Free',
+    duration: 'Free · 300+ episodes',
     icon: Smile,
     color: '#F97316',
     tag: 'CBT',
     url: 'https://feelinggood.com/category/podcasts',
+  },
+  {
+    id: 'on-being',
+    title: 'On Being with Krista Tippett',
+    subtitle: 'Big questions of meaning and the human spirit',
+    host: 'Krista Tippett',
+    duration: 'All platforms',
+    icon: Sun,
+    color: '#8B5CF6',
+    tag: 'Meaning & Purpose',
+    url: 'https://onbeing.org/series/podcast',
+  },
+];
+
+// Video resources — open in in-app browser
+const VIDEO_RESOURCES = [
+  {
+    id: 'vid-breathing',
+    title: 'Box Breathing Technique',
+    subtitle: 'Step-by-step guided breathing for calm',
+    channel: 'Andrew Huberman Lab',
+    duration: '5:12',
+    icon: Wind,
+    color: '#06B6D4',
+    tag: 'Breathwork',
+    thumbnailColor: ['#0EA5E9', '#0284C7'] as [string, string],
+    url: 'https://www.youtube.com/watch?v=tEmt1Znux58',
+  },
+  {
+    id: 'vid-cbt',
+    title: 'What is CBT? How It Works',
+    subtitle: 'An accessible explanation of cognitive therapy',
+    channel: 'Therapy in a Nutshell',
+    duration: '8:47',
+    icon: Brain,
+    color: '#8B5CF6',
+    tag: 'CBT',
+    thumbnailColor: ['#7C3AED', '#6D28D9'] as [string, string],
+    url: 'https://www.youtube.com/watch?v=ZdyOwZ4_RnI',
+  },
+  {
+    id: 'vid-sleep',
+    title: 'The Science of Better Sleep',
+    subtitle: 'Evidence-based sleep improvement tips',
+    channel: 'Andrew Huberman Lab',
+    duration: '12:30',
+    icon: Moon,
+    color: '#6366F1',
+    tag: 'Sleep',
+    thumbnailColor: ['#4F46E5', '#4338CA'] as [string, string],
+    url: 'https://www.youtube.com/watch?v=nm1TxQj9IsQ',
+  },
+  {
+    id: 'vid-depression',
+    title: 'Understanding Depression',
+    subtitle: 'What depression is and how to get help',
+    channel: 'Therapy in a Nutshell',
+    duration: '10:15',
+    icon: Sun,
+    color: '#F59E0B',
+    tag: 'Depression',
+    thumbnailColor: ['#D97706', '#B45309'] as [string, string],
+    url: 'https://www.youtube.com/watch?v=z-IR48Mb3W0',
+  },
+  {
+    id: 'vid-stress',
+    title: 'Managing Student Stress',
+    subtitle: 'Practical strategies for academic pressure',
+    channel: 'University Health Network',
+    duration: '7:22',
+    icon: Activity,
+    color: '#10B981',
+    tag: 'Stress',
+    thumbnailColor: ['#059669', '#047857'] as [string, string],
+    url: 'https://www.youtube.com/watch?v=RcGyVTAoXEU',
+  },
+  {
+    id: 'vid-mindfulness',
+    title: 'Mindfulness for Beginners',
+    subtitle: 'A simple introduction to mindful awareness',
+    channel: 'Headspace',
+    duration: '9:05',
+    icon: Compass,
+    color: '#EC4899',
+    tag: 'Mindfulness',
+    thumbnailColor: ['#DB2777', '#BE185D'] as [string, string],
+    url: 'https://www.youtube.com/watch?v=msy4dKLmZ7E',
   },
 ];
 
@@ -456,6 +565,200 @@ const CRISIS_RESOURCES = [
     available: 'Mon–Fri, 8am–5pm',
   },
 ];
+
+// ─── AUDIO PLAYER MODAL ────────────────────────────────────────────────────────
+const AudioPlayerModal = ({ meditation, visible, onClose, theme }: any) => {
+  const styles = createStyles(theme);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [positionMs, setPositionMs] = useState(0);
+  const [durationMs, setDurationMs] = useState(meditation?.durationMs || 0);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const cleanup = useCallback(async () => {
+    if (progressInterval.current) clearInterval(progressInterval.current);
+    if (soundRef.current) {
+      try {
+        await soundRef.current.stopAsync();
+        await soundRef.current.unloadAsync();
+      } catch (_) {}
+      soundRef.current = null;
+    }
+    setIsPlaying(false);
+    setPositionMs(0);
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (!visible) {
+      cleanup();
+    } else {
+      Audio.setAudioModeAsync({ playsInSilentModeIOS: true, staysActiveInBackground: true });
+    }
+    return () => { cleanup(); };
+  }, [visible, cleanup]);
+
+  const startProgressTracker = (sound: Audio.Sound) => {
+    if (progressInterval.current) clearInterval(progressInterval.current);
+    progressInterval.current = setInterval(async () => {
+      if (!isSeeking && sound) {
+        try {
+          const status = await sound.getStatusAsync() as any;
+          if (status.isLoaded) {
+            setPositionMs(status.positionMillis || 0);
+            setDurationMs(status.durationMillis || meditation?.durationMs || 0);
+            if (status.didJustFinish) {
+              setIsPlaying(false);
+              setPositionMs(0);
+              clearInterval(progressInterval.current!);
+            }
+          }
+        } catch (_) {}
+      }
+    }, 500);
+  };
+
+  const handlePlayPause = async () => {
+    if (!meditation) return;
+    try {
+      if (soundRef.current) {
+        if (isPlaying) {
+          await soundRef.current.pauseAsync();
+          setIsPlaying(false);
+          if (progressInterval.current) clearInterval(progressInterval.current);
+        } else {
+          await soundRef.current.playAsync();
+          setIsPlaying(true);
+          startProgressTracker(soundRef.current);
+        }
+      } else {
+        setIsLoading(true);
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: meditation.audioUrl },
+          { shouldPlay: true },
+        );
+        soundRef.current = sound;
+        setIsLoading(false);
+        setIsPlaying(true);
+        startProgressTracker(sound);
+      }
+    } catch (err) {
+      setIsLoading(false);
+      console.error('Audio error:', err);
+    }
+  };
+
+  const handleSeek = async (value: number) => {
+    if (soundRef.current) {
+      try {
+        await soundRef.current.setPositionAsync(value);
+        setPositionMs(value);
+      } catch (_) {}
+    }
+    setIsSeeking(false);
+  };
+
+  const formatTime = (ms: number) => {
+    const totalSecs = Math.floor(ms / 1000);
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  if (!meditation) return null;
+  const IconComponent = meditation.icon;
+  const progress = durationMs > 0 ? positionMs / durationMs : 0;
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+      <View style={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
+        <View style={[styles.modalHeader, { borderBottomColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]}>
+          <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
+            <X color={theme.colors.text.secondary} size={22} />
+          </TouchableOpacity>
+          <View style={[styles.modalCategoryBadge, { backgroundColor: meditation.color + '20' }]}>
+            <Text style={[styles.modalCategoryText, { color: meditation.color }]}>{meditation.tag}</Text>
+          </View>
+          <View style={{ width: 36 }} />
+        </View>
+
+        <View style={styles.playerBody}>
+          {/* Album Art */}
+          <LinearGradient
+            colors={[meditation.color + '40', meditation.color + '15']}
+            style={styles.playerArtwork}
+          >
+            <View style={[styles.playerArtworkIcon, { backgroundColor: meditation.color + '30' }]}>
+              <IconComponent color={meditation.color} size={52} strokeWidth={1.5} />
+            </View>
+          </LinearGradient>
+
+          <Text style={[styles.playerTitle, { color: theme.colors.text.primary }]}>{meditation.title}</Text>
+          <Text style={[styles.playerHost, { color: theme.colors.text.secondary }]}>{meditation.host}</Text>
+
+          {/* Progress Bar */}
+          <View style={styles.playerProgressWrap}>
+            <View style={[styles.playerProgressTrack, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]}>
+              <View style={[styles.playerProgressFill, { width: `${progress * 100}%`, backgroundColor: meditation.color }]} />
+              <TouchableOpacity
+                style={[styles.playerScrubHandle, {
+                  left: `${Math.max(0, Math.min(100, progress * 100))}%`,
+                  backgroundColor: meditation.color,
+                }]}
+                onPressIn={() => setIsSeeking(true)}
+              />
+            </View>
+            <View style={styles.playerTimeRow}>
+              <Text style={[styles.playerTimeText, { color: theme.colors.text.tertiary }]}>{formatTime(positionMs)}</Text>
+              <Text style={[styles.playerTimeText, { color: theme.colors.text.tertiary }]}>{formatTime(durationMs)}</Text>
+            </View>
+          </View>
+
+          {/* Seek Buttons + Play */}
+          <View style={styles.playerControls}>
+            <TouchableOpacity
+              style={styles.playerSkipBtn}
+              onPress={async () => {
+                const newPos = Math.max(0, positionMs - 15000);
+                await handleSeek(newPos);
+              }}
+            >
+              <Text style={[styles.playerSkipText, { color: theme.colors.text.secondary }]}>-15s</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.playerPlayBtn, { backgroundColor: meditation.color }]}
+              onPress={handlePlayPause}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Text style={styles.playerPlayBtnIcon}>...</Text>
+              ) : isPlaying ? (
+                <Pause color="#FFF" size={30} fill="#FFF" />
+              ) : (
+                <Play color="#FFF" size={30} fill="#FFF" />
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.playerSkipBtn}
+              onPress={async () => {
+                const newPos = Math.min(durationMs, positionMs + 15000);
+                await handleSeek(newPos);
+              }}
+            >
+              <Text style={[styles.playerSkipText, { color: theme.colors.text.secondary }]}>+15s</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={[styles.playerSubtitle, { color: theme.colors.text.secondary }]}>{meditation.subtitle}</Text>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 // ─── ARTICLE MODAL COMPONENT ──────────────────────────────────────────────────
 const ArticleModal = ({ article, visible, onClose, theme }: any) => {
@@ -591,8 +894,10 @@ export default function ResourcesScreen() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
   const [selectedTechnique, setSelectedTechnique] = useState<any>(null);
+  const [selectedMeditation, setSelectedMeditation] = useState<any>(null);
   const [articleModalVisible, setArticleModalVisible] = useState(false);
   const [techniqueModalVisible, setTechniqueModalVisible] = useState(false);
+  const [audioPlayerVisible, setAudioPlayerVisible] = useState(false);
   const [featuredExpanded, setFeaturedExpanded] = useState(false);
 
   const openArticle = (article: any) => {
@@ -605,9 +910,24 @@ export default function ResourcesScreen() {
     setTechniqueModalVisible(true);
   };
 
+  const openMeditation = (med: any) => {
+    setSelectedMeditation(med);
+    setAudioPlayerVisible(true);
+  };
+
+  const openInBrowser = async (url: string) => {
+    try {
+      await WebBrowser.openBrowserAsync(url, {
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
+        toolbarColor: theme.colors.background,
+      });
+    } catch (_) {}
+  };
+
   const showTechniques = activeCategory === 'all' || activeCategory === 'techniques';
   const showArticles = activeCategory === 'all' || activeCategory === 'articles';
   const showAudio = activeCategory === 'all' || activeCategory === 'audio';
+  const showVideos = activeCategory === 'all' || activeCategory === 'videos';
   const showCrisis = activeCategory === 'all' || activeCategory === 'crisis';
 
   return (
@@ -623,6 +943,12 @@ export default function ResourcesScreen() {
         style={StyleSheet.absoluteFillObject}
       />
 
+      <AudioPlayerModal
+        meditation={selectedMeditation}
+        visible={audioPlayerVisible}
+        onClose={() => setAudioPlayerVisible(false)}
+        theme={theme}
+      />
       <ArticleModal
         article={selectedArticle}
         visible={articleModalVisible}
@@ -877,12 +1203,13 @@ export default function ResourcesScreen() {
         {/* ── Audio & Podcasts Section ── */}
         {showAudio && (
           <Animated.View entering={FadeInUp.delay(300).duration(500)}>
+            {/* Sub-heading: Guided Meditations */}
             <View style={styles.sectionHeader}>
               <View style={styles.sectionTitleRow}>
                 <Headphones color={theme.colors.plum} size={18} strokeWidth={2.5} />
-                <Text style={styles.sectionTitle}>Audio & Podcasts</Text>
+                <Text style={styles.sectionTitle}>Guided Meditations</Text>
               </View>
-              <Text style={styles.sectionSubheading}>Listen to guided meditations and expert podcasts</Text>
+              <Text style={styles.sectionSubheading}>Tap to play in-app — no account needed</Text>
             </View>
             <ScrollView
               horizontal
@@ -891,36 +1218,36 @@ export default function ResourcesScreen() {
               snapToInterval={width * 0.62 + 16}
               decelerationRate="fast"
             >
-              {AUDIO_RESOURCES.map((a, i) => {
-                const IconComponent = a.icon;
+              {GUIDED_MEDITATIONS.map((med, i) => {
+                const IconComponent = med.icon;
                 return (
-                  <Animated.View key={a.id} entering={FadeInUp.delay(350 + i * 50).duration(450)}>
+                  <Animated.View key={med.id} entering={FadeInUp.delay(350 + i * 50).duration(450)}>
                     <TouchableOpacity
-                      style={[styles.audioCard, { borderColor: a.color + '25' }]}
+                      style={[styles.audioCard, { borderColor: med.color + '25' }]}
                       activeOpacity={0.82}
-                      onPress={() => Linking.openURL(a.url).catch(() => {})}
+                      onPress={() => openMeditation(med)}
                     >
                       <LinearGradient
-                        colors={[a.color + '20', 'transparent']}
+                        colors={[med.color + '20', 'transparent']}
                         style={StyleSheet.absoluteFillObject}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 0, y: 1 }}
                       />
-                      <View style={[styles.audioIconWrap, { backgroundColor: a.color + '25' }]}>
-                        <IconComponent color={a.color} size={24} />
+                      <View style={[styles.audioIconWrap, { backgroundColor: med.color + '25' }]}>
+                        <IconComponent color={med.color} size={24} />
                       </View>
-                      <View style={[styles.audioTagBadge, { backgroundColor: a.color + '20' }]}>
-                        <Text style={[styles.audioTagText, { color: a.color }]}>{a.tag}</Text>
+                      <View style={[styles.audioTagBadge, { backgroundColor: med.color + '20' }]}>
+                        <Text style={[styles.audioTagText, { color: med.color }]}>{med.tag}</Text>
                       </View>
-                      <Text style={[styles.audioTitle, { color: theme.colors.text.primary }]} numberOfLines={2}>{a.title}</Text>
-                      <Text style={[styles.audioHost, { color: theme.colors.text.secondary }]} numberOfLines={1}>{a.host}</Text>
+                      <Text style={[styles.audioTitle, { color: theme.colors.text.primary }]} numberOfLines={2}>{med.title}</Text>
+                      <Text style={[styles.audioHost, { color: theme.colors.text.secondary }]} numberOfLines={1}>{med.host}</Text>
                       <View style={styles.audioFooter}>
                         <View style={styles.audioDurationRow}>
                           <Clock color={theme.colors.text.tertiary} size={12} />
-                          <Text style={[styles.audioDuration, { color: theme.colors.text.tertiary }]}>{a.duration}</Text>
+                          <Text style={[styles.audioDuration, { color: theme.colors.text.tertiary }]}>{med.durationLabel}</Text>
                         </View>
-                        <View style={[styles.audioPlayBtn, { backgroundColor: a.color }]}>
-                          <ExternalLink color="#FFF" size={14} />
+                        <View style={[styles.audioPlayBtn, { backgroundColor: med.color }]}>
+                          <Play color="#FFF" size={14} fill="#FFF" />
                         </View>
                       </View>
                     </TouchableOpacity>
@@ -928,6 +1255,94 @@ export default function ResourcesScreen() {
                 );
               })}
             </ScrollView>
+
+            {/* Sub-heading: Podcasts */}
+            <View style={[styles.sectionHeader, { marginTop: 24 }]}>
+              <View style={styles.sectionTitleRow}>
+                <Podcast color={theme.colors.plum} size={18} strokeWidth={2.5} />
+                <Text style={styles.sectionTitle}>Expert Podcasts</Text>
+              </View>
+              <Text style={styles.sectionSubheading}>Opens in your in-app browser</Text>
+            </View>
+            <View style={{ paddingHorizontal: 24, gap: 10, marginBottom: 8 }}>
+              {PODCAST_RESOURCES.map((pod, i) => {
+                const IconComponent = pod.icon;
+                return (
+                  <Animated.View key={pod.id} entering={FadeInUp.delay(400 + i * 50).duration(450)}>
+                    <TouchableOpacity
+                      style={[styles.articleCard, { borderLeftColor: pod.color, borderLeftWidth: 3 }]}
+                      onPress={() => openInBrowser(pod.url)}
+                      activeOpacity={0.8}
+                    >
+                      <View style={[styles.articleIconWrap, { backgroundColor: pod.color + '15' }]}>
+                        <IconComponent color={pod.color} size={20} />
+                      </View>
+                      <View style={styles.articleText}>
+                        <View style={styles.articleTopRow}>
+                          <Text style={[styles.articleCategory, { color: pod.color }]}>{pod.tag.toUpperCase()}</Text>
+                          <Text style={[styles.articleReadTimeText, { color: theme.colors.text.tertiary }]}>{pod.duration}</Text>
+                        </View>
+                        <Text style={[styles.articleTitle, { color: theme.colors.text.primary }]} numberOfLines={1}>{pod.title}</Text>
+                        <Text style={[styles.articleSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={1}>{pod.host}</Text>
+                      </View>
+                      <ExternalLink color={theme.colors.text.disabled} size={18} />
+                    </TouchableOpacity>
+                  </Animated.View>
+                );
+              })}
+            </View>
+          </Animated.View>
+        )}
+
+        {/* ── Video Resources Section ── */}
+        {showVideos && (
+          <Animated.View entering={FadeInUp.delay(300).duration(500)}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionTitleRow}>
+                <Video color={theme.colors.plum} size={18} strokeWidth={2.5} />
+                <Text style={styles.sectionTitle}>Video Resources</Text>
+              </View>
+              <Text style={styles.sectionSubheading}>Educational videos — opens in your in-app browser</Text>
+            </View>
+            <View style={{ paddingHorizontal: 24, gap: 14, marginBottom: 8 }}>
+              {VIDEO_RESOURCES.map((vid, i) => {
+                const IconComponent = vid.icon;
+                return (
+                  <Animated.View key={vid.id} entering={FadeInUp.delay(350 + i * 50).duration(450)}>
+                    <TouchableOpacity
+                      style={[styles.videoCard, { borderColor: vid.color + '20' }]}
+                      onPress={() => openInBrowser(vid.url)}
+                      activeOpacity={0.82}
+                    >
+                      {/* Thumbnail */}
+                      <LinearGradient
+                        colors={vid.thumbnailColor}
+                        style={styles.videoThumb}
+                      >
+                        <View style={styles.videoPlayCircle}>
+                          <Play color="#FFF" size={20} fill="#FFF" />
+                        </View>
+                        <View style={styles.videoDurationBadge}>
+                          <Text style={styles.videoDurationText}>{vid.duration}</Text>
+                        </View>
+                        <View style={[styles.videoTagOnThumb, { backgroundColor: 'rgba(0,0,0,0.4)' }]}>
+                          <Text style={styles.videoTagOnThumbText}>{vid.tag}</Text>
+                        </View>
+                      </LinearGradient>
+                      {/* Info */}
+                      <View style={styles.videoInfo}>
+                        <Text style={[styles.videoTitle, { color: theme.colors.text.primary }]} numberOfLines={2}>{vid.title}</Text>
+                        <Text style={[styles.videoChannel, { color: theme.colors.text.secondary }]} numberOfLines={1}>{vid.channel}</Text>
+                        <View style={styles.videoMeta}>
+                          <Text style={[styles.videoSubtitle, { color: theme.colors.text.tertiary }]} numberOfLines={1}>{vid.subtitle}</Text>
+                        </View>
+                      </View>
+                      <ExternalLink color={theme.colors.text.disabled} size={18} style={{ flexShrink: 0 }} />
+                    </TouchableOpacity>
+                  </Animated.View>
+                );
+              })}
+            </View>
           </Animated.View>
         )}
 
@@ -946,7 +1361,10 @@ export default function ResourcesScreen() {
                 <Animated.View key={r.id} entering={FadeInUp.delay(400 + i * 60).duration(450)}>
                   <TouchableOpacity
                     style={[styles.crisisCard, { borderColor: r.color + '20' }]}
-                    onPress={() => Linking.openURL(`tel:${r.phone.replace(/\s+/g, '')}`).catch(() => {})}
+                    onPress={() => {
+                      const { Linking } = require('react-native');
+                      Linking.openURL(`tel:${r.phone.replace(/\s+/g, '')}`);
+                    }}
                     activeOpacity={0.82}
                   >
                     <View style={[styles.crisisIconWrap, { backgroundColor: r.color + '15' }]}>
@@ -1246,4 +1664,207 @@ const createStyles = (theme: any) =>
       marginTop: 24,
     },
     practiceBtnText: { color: '#FFF', fontSize: 16, fontFamily: theme.typography.fonts.accent, fontWeight: '800' },
+
+    // Audio player modal
+    playerBody: {
+      flex: 1,
+      alignItems: 'center',
+      paddingHorizontal: 32,
+      paddingTop: 40,
+      paddingBottom: 40,
+    },
+    playerArtwork: {
+      width: 220,
+      height: 220,
+      borderRadius: 36,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 32,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 16 },
+      shadowOpacity: 0.25,
+      shadowRadius: 32,
+      elevation: 12,
+    },
+    playerArtworkIcon: {
+      width: 110,
+      height: 110,
+      borderRadius: 30,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    playerTitle: {
+      fontSize: 22,
+      fontFamily: theme.typography.fonts.header,
+      fontWeight: '800',
+      letterSpacing: -0.5,
+      textAlign: 'center',
+      marginBottom: 6,
+    },
+    playerHost: {
+      fontSize: 14,
+      fontFamily: theme.typography.fonts.body,
+      textAlign: 'center',
+      marginBottom: 36,
+    },
+    playerProgressWrap: { width: '100%', marginBottom: 36 },
+    playerProgressTrack: {
+      height: 6,
+      borderRadius: 3,
+      overflow: 'hidden',
+      position: 'relative',
+      marginBottom: 10,
+    },
+    playerProgressFill: { height: '100%', borderRadius: 3 },
+    playerScrubHandle: {
+      position: 'absolute',
+      top: -5,
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      marginLeft: -8,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    playerTimeRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    playerTimeText: {
+      fontSize: 12,
+      fontFamily: theme.typography.fonts.accent,
+      fontWeight: '600',
+    },
+    playerControls: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 28,
+      marginBottom: 32,
+    },
+    playerSkipBtn: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    playerSkipText: {
+      fontSize: 13,
+      fontFamily: theme.typography.fonts.accent,
+      fontWeight: '800',
+    },
+    playerPlayBtn: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.25,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    playerPlayBtnIcon: {
+      color: '#FFF',
+      fontSize: 20,
+      fontFamily: theme.typography.fonts.accent,
+      fontWeight: '800',
+    },
+    playerSubtitle: {
+      fontSize: 14,
+      fontFamily: theme.typography.fonts.body,
+      textAlign: 'center',
+      lineHeight: 21,
+      paddingHorizontal: 16,
+    },
+
+    // Video card
+    videoCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.surface,
+      borderRadius: 20,
+      overflow: 'hidden',
+      borderWidth: 1,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: theme.isDark ? 0.12 : 0.04,
+      shadowRadius: 10,
+      elevation: 3,
+    },
+    videoThumb: {
+      width: 110,
+      height: 80,
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative',
+      flexShrink: 0,
+    },
+    videoPlayCircle: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: 'rgba(255,255,255,0.25)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1.5,
+      borderColor: 'rgba(255,255,255,0.5)',
+    },
+    videoDurationBadge: {
+      position: 'absolute',
+      bottom: 6,
+      right: 6,
+      backgroundColor: 'rgba(0,0,0,0.65)',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 6,
+    },
+    videoDurationText: {
+      color: '#FFF',
+      fontSize: 10,
+      fontFamily: theme.typography.fonts.accent,
+      fontWeight: '700',
+    },
+    videoTagOnThumb: {
+      position: 'absolute',
+      top: 6,
+      left: 6,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 6,
+    },
+    videoTagOnThumbText: {
+      color: '#FFF',
+      fontSize: 9,
+      fontFamily: theme.typography.fonts.accent,
+      fontWeight: '800',
+      letterSpacing: 0.3,
+    },
+    videoInfo: { flex: 1, paddingHorizontal: 12, paddingVertical: 10 },
+    videoTitle: {
+      fontSize: 13,
+      fontFamily: theme.typography.fonts.header,
+      fontWeight: '700',
+      letterSpacing: -0.2,
+      marginBottom: 3,
+      lineHeight: 18,
+    },
+    videoChannel: {
+      fontSize: 11,
+      fontFamily: theme.typography.fonts.accent,
+      fontWeight: '600',
+      marginBottom: 4,
+    },
+    videoMeta: { flexDirection: 'row', alignItems: 'center' },
+    videoSubtitle: {
+      fontSize: 11,
+      fontFamily: theme.typography.fonts.body,
+      flex: 1,
+    },
   });

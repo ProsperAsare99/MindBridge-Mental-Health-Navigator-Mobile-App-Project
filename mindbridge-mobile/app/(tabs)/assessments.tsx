@@ -252,7 +252,7 @@ const getAssessments = (theme: any, t: any) => [
   },
   {
     id: 'pss',
-    title: 'Perceived Stress Scale',
+    title: t('assessments.pss_screening') || 'Perceived Stress Scale',
     subtitle: 'PSS-10 Screener',
     duration: `3 ${t('assessments.minutes')}`,
     icon: Activity,
@@ -260,7 +260,7 @@ const getAssessments = (theme: any, t: any) => [
   },
   {
     id: 'brs',
-    title: 'Brief Resilience Scale',
+    title: t('assessments.brs_screening') || 'Brief Resilience Scale',
     subtitle: 'BRS Screener',
     duration: `2 ${t('assessments.minutes')}`,
     icon: Award,
@@ -488,9 +488,9 @@ export default function AssessmentsScreen() {
   const getTestTitle = (id: string | null) => {
     if (id === 'phq9') return 'Patient Health Questionnaire';
     if (id === 'gad7') return 'General Anxiety Disorder';
-    if (id === 'pss') return 'Perceived Stress Scale';
-    if (id === 'brs') return 'Brief Resilience Scale';
-    if (id === 'cssrs') return 'Columbia-Suicide Severity Screener';
+    if (id === 'pss') return t('assessments.pss_screening') || 'Perceived Stress Scale';
+    if (id === 'brs') return t('assessments.brs_screening') || 'Brief Resilience Scale';
+    if (id === 'cssrs') return t('assessments.cssrs_screening') || 'Columbia-Suicide Severity Screener';
     return t('assessments.burnout_test') || 'Student Burnout';
   };
 

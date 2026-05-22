@@ -172,6 +172,9 @@ export interface TranslationSchema {
     depression_screening: string;
     anxiety_screening: string;
     burnout_test: string;
+    pss_screening: string;
+    cssrs_screening: string;
+    brs_screening: string;
     start: string;
     minutes: string;
   };
@@ -585,6 +588,9 @@ export const translations: Record<Language, TranslationSchema> = {
       depression_screening: 'Adwene mu Yadeɛ Nhwehwɛmu',
       anxiety_screening: 'Ahoyera Nhwehwɛmu',
       burnout_test: 'Sukuufoɔ Brɛ Nhwehwɛmu',
+      pss_screening: 'Perceived Stress Scale',
+      cssrs_screening: 'Risk Screener',
+      brs_screening: 'Brief Resilience Scale',
       start: 'Fi aseɛ',
       minutes: 'miniti',
     },
@@ -789,6 +795,9 @@ export const translations: Record<Language, TranslationSchema> = {
       depression_screening: 'Dépistage de la dépression',
       anxiety_screening: 'Dépistage de l\'anxiété',
       burnout_test: 'Test d\'épuisement étudiant',
+      pss_screening: 'Perceived Stress Scale',
+      cssrs_screening: 'Risk Screener',
+      brs_screening: 'Brief Resilience Scale',
       start: 'Démarrer',
       minutes: 'min',
     },
@@ -993,6 +1002,9 @@ export const translations: Record<Language, TranslationSchema> = {
       depression_screening: 'Jwɛŋmɔ mli hela Nhwehwɛmu',
       anxiety_screening: 'Ahoyera Nhwehwɛmu',
       burnout_test: 'Sukuu bii a-tɔlɛ Nhwehwɛmu',
+      pss_screening: 'Perceived Stress Scale',
+      cssrs_screening: 'Risk Screener',
+      brs_screening: 'Brief Resilience Scale',
       start: 'Je kpo',
       minutes: 'miniti',
     },
@@ -1197,6 +1209,9 @@ export const translations: Record<Language, TranslationSchema> = {
       depression_screening: 'Jwɛŋmɔ me hela dɔdɔkpɔ',
       anxiety_screening: 'Ahoyera dɔdɔkpɔ',
       burnout_test: 'Sukuu bii ƒe ɖeɖi dɔdɔkpɔ',
+      pss_screening: 'Perceived Stress Scale',
+      cssrs_screening: 'Risk Screener',
+      brs_screening: 'Brief Resilience Scale',
       start: 'Dze egɔme',
       minutes: 'miniti',
     },
@@ -1401,6 +1416,9 @@ export const translations: Record<Language, TranslationSchema> = {
       depression_screening: 'Gwajin Bakin Ciki',
       anxiety_screening: 'Gwajin Damuwa',
       burnout_test: 'Gwajin Gajiya Dalibai',
+      pss_screening: 'Perceived Stress Scale',
+      cssrs_screening: 'Risk Screener',
+      brs_screening: 'Brief Resilience Scale',
       start: 'Fara',
       minutes: 'minti',
     },

@@ -347,7 +347,7 @@ Denial → Anger → Bargaining → Depression → Acceptance can happen in any 
 ];
 
 // Playable guided meditations — Official UCLA MARC (Mindful Awareness Research Center) free audio
-// These are verified live URLs hosted by UCLA Health
+// These are verified live HTTPS URLs hosted by UCLA Health (via their CloudFront CDN)
 const GUIDED_MEDITATIONS = [
   {
     id: 'med-breathing',
@@ -359,19 +359,19 @@ const GUIDED_MEDITATIONS = [
     icon: Wind,
     color: '#06B6D4',
     tag: 'Breathwork',
-    audioUrl: 'http://marc.ucla.edu/mpeg/01_Breathing_Meditation.mp3',
+    audioUrl: 'https://d1cy5zxxhbcbkk.cloudfront.net/guided-meditations/01_Breathing_Meditation.mp3',
   },
   {
     id: 'med-body-scan',
     title: 'Body Scan for Sleep',
     subtitle: 'Release tension from head to toe for deep rest',
     host: 'UCLA Mindful Awareness Research Center',
-    durationLabel: '20 min',
-    durationMs: 1200000,
+    durationLabel: '13 min',
+    durationMs: 780000,
     icon: Moon,
     color: '#6366F1',
     tag: 'Sleep & Relaxation',
-    audioUrl: 'http://marc.ucla.edu/mpeg/Body-Scan-for-Sleep.mp3',
+    audioUrl: 'https://d1cy5zxxhbcbkk.cloudfront.net/guided-meditations/Body-Scan-for-Sleep.mp3',
   },
   {
     id: 'med-loving-kindness',
@@ -383,7 +383,7 @@ const GUIDED_MEDITATIONS = [
     icon: Heart,
     color: '#F59E0B',
     tag: 'Self-Compassion',
-    audioUrl: 'http://marc.ucla.edu/mpeg/Loving_Kindness_Meditation.mp3',
+    audioUrl: 'https://d1cy5zxxhbcbkk.cloudfront.net/guided-meditations/05_Loving_Kindness_Meditation.mp3',
   },
   {
     id: 'med-breath-sound',
@@ -395,7 +395,7 @@ const GUIDED_MEDITATIONS = [
     icon: Waves,
     color: '#10B981',
     tag: 'Mindfulness',
-    audioUrl: 'http://marc.ucla.edu/mpeg/03_Breath_Sound_Body_Meditation.mp3',
+    audioUrl: 'https://d1cy5zxxhbcbkk.cloudfront.net/guided-meditations/02_Breath_Sound_Body_Meditation.mp3',
   },
 ];
 

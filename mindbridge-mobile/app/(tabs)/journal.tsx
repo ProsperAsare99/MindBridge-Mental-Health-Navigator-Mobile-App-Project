@@ -11,7 +11,8 @@ import {
   Platform,
   Dimensions,
   ActivityIndicator,
-  Alert
+  Alert,
+  FlatList
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -234,123 +235,125 @@ export default function JournalScreen() {
       />
       
       {!isWriting ? (
-        <ScrollView 
-        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]} 
-        showsVerticalScrollIndicator={false}
-      >
-        <ScreenHeader 
-          title={t('journal.title')} 
-          subtitle={t('journal.subtitle')}
-            rightAction={
-              <TouchableOpacity 
-                activeOpacity={0.8} 
-                style={styles.newBtn}
-                onPress={() => setIsWriting(true)}
-              >
-                <Plus color={theme.colors.text.onPrimary || '#FFF'} size={24} />
-              </TouchableOpacity>
-            }
-          />
-
-          <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
-            {/* Filter Pills */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterBar}>
-              <TouchableOpacity 
-                onPress={() => setFilterMood('all')}
-                style={[styles.filterPill, filterMood === 'all' && styles.filterPillActive]}
-              >
-                <Text style={[styles.filterText, filterMood === 'all' && styles.filterTextActive]}>All</Text>
-              </TouchableOpacity>
-              {MOOD_OPTIONS.map(mood => (
-                <TouchableOpacity 
-                  key={mood.id}
-                  onPress={() => setFilterMood(mood.id)}
-                  style={[styles.filterPill, filterMood === mood.id && styles.filterPillActive]}
-                >
-                  <mood.icon size={14} color={filterMood === mood.id ? '#FFF' : mood.color} />
-                  <Text style={[styles.filterText, filterMood === mood.id && styles.filterTextActive]}>{mood.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </Animated.View>
-
-          {loading ? (
-            <View style={styles.entriesList}>
-              {[1, 2, 3].map((_, i) => (
-                <View key={i} style={[styles.entryCard, { marginTop: i === 0 ? 10 : 0 }]}>
-                  <View style={styles.entryHeader}>
-                    <SkeletonLoader width={80} height={16} borderRadius={4} />
-                    <SkeletonLoader width={32} height={32} borderRadius={16} />
-                  </View>
-                  <SkeletonLoader width="60%" height={20} borderRadius={4} style={{ marginBottom: 12 }} />
-                  <SkeletonLoader width="100%" height={14} borderRadius={4} style={{ marginBottom: 6 }} />
-                  <SkeletonLoader width="80%" height={14} borderRadius={4} />
-                </View>
-              ))}
-            </View>
-          ) : filteredEntries.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconWrap}>
-              <BookOpen color={theme.colors.plum} size={32} />
-            </View>
-            <Text style={styles.emptyText}>
-              {t('journal.no_entries')}
-            </Text>
-          </View>
-          ) : (
-            <View style={styles.entriesList}>
-              {filteredEntries.map((entry, index) => (
-                <Animated.View 
-                  key={entry.id}
-                  entering={FadeInUp.delay(index * 50).duration(500)}
-                  style={styles.entryCard}
-                >
-                  <View style={styles.entryHeader}>
-                    <View style={styles.dateRow}>
-                      <Calendar color={theme.colors.text.tertiary} size={14} />
-                      <Text style={styles.dateText}>{formatDate(entry.createdAt)}</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                      <TouchableOpacity 
-                        activeOpacity={0.7} 
-                        onPress={() => handleDelete(entry.id)}
-                        style={styles.deleteBtn}
-                      >
-                        <Trash2 color={theme.colors.accents.terracotta} size={16} />
-                      </TouchableOpacity>
-                      <View style={styles.moodBadge}>
-                        {getMoodIcon(entry.mood || 'calm')}
-                      </View>
-                    </View>
-                  </View>
-                  <Text style={styles.entryTitle}>{entry.title}</Text>
-                  <Text style={styles.entryContent} numberOfLines={4}>{entry.content}</Text>
-                  
-                  {entry.audioUrl && (
+        <FlatList 
+          data={filteredEntries}
+          keyExtractor={entry => entry.id}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]} 
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <>
+              <ScreenHeader 
+                title={t('journal.title')} 
+                subtitle={t('journal.subtitle')}
+                  rightAction={
                     <TouchableOpacity 
-                      style={[styles.audioPreview, { backgroundColor: theme.colors.plum + '10' }]}
-                      onPress={() => playSound(entry.audioUrl, entry.id)}
+                      activeOpacity={0.8} 
+                      style={styles.newBtn}
+                      onPress={() => setIsWriting(true)}
                     >
-                      {isPlaying === entry.id ? <Pause size={14} color={theme.colors.plum} /> : <Play size={14} color={theme.colors.plum} />}
-                      <Text style={[styles.audioText, { color: theme.colors.plum }]}>Voice Reflection</Text>
-                      <View style={styles.audioWaveform}>
-                        {Array.from({ length: 12 }).map((_, i) => (
-                          <View 
-                            key={i} 
-                            style={[
-                              styles.waveBar, 
-                              { height: Math.random() * 12 + 4, backgroundColor: isPlaying === entry.id ? theme.colors.plum : theme.colors.text.disabled }
-                            ]} 
-                          />
-                        ))}
-                      </View>
+                      <Plus color={theme.colors.text.onPrimary || '#FFF'} size={24} />
                     </TouchableOpacity>
-                  )}
+                  }
+                />
+
+                <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
+                  {/* Filter Pills */}
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterBar}>
+                    <TouchableOpacity 
+                      onPress={() => setFilterMood('all')}
+                      style={[styles.filterPill, filterMood === 'all' && styles.filterPillActive]}
+                    >
+                      <Text style={[styles.filterText, filterMood === 'all' && styles.filterTextActive]}>All</Text>
+                    </TouchableOpacity>
+                    {MOOD_OPTIONS.map(mood => (
+                      <TouchableOpacity 
+                        key={mood.id}
+                        onPress={() => setFilterMood(mood.id)}
+                        style={[styles.filterPill, filterMood === mood.id && styles.filterPillActive]}
+                      >
+                        <mood.icon size={14} color={filterMood === mood.id ? '#FFF' : mood.color} />
+                        <Text style={[styles.filterText, filterMood === mood.id && styles.filterTextActive]}>{mood.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
                 </Animated.View>
-              ))}
-            </View>
+            </>
+          }
+          ListEmptyComponent={
+            loading ? (
+              <View style={styles.entriesList}>
+                {[1, 2, 3].map((_, i) => (
+                  <View key={i} style={[styles.entryCard, { marginTop: i === 0 ? 10 : 0 }]}>
+                    <View style={styles.entryHeader}>
+                      <SkeletonLoader width={80} height={16} borderRadius={4} />
+                      <SkeletonLoader width={32} height={32} borderRadius={16} />
+                    </View>
+                    <SkeletonLoader width="60%" height={20} borderRadius={4} style={{ marginBottom: 12 }} />
+                    <SkeletonLoader width="100%" height={14} borderRadius={4} style={{ marginBottom: 6 }} />
+                    <SkeletonLoader width="80%" height={14} borderRadius={4} />
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.emptyContainer}>
+                <View style={styles.emptyIconWrap}>
+                  <BookOpen color={theme.colors.plum} size={32} />
+                </View>
+                <Text style={styles.emptyText}>
+                  {t('journal.no_entries')}
+                </Text>
+              </View>
+            )
+          }
+          renderItem={({ item: entry, index }) => (
+            <Animated.View 
+              entering={FadeInUp.delay(Math.min(index, 10) * 50).duration(500)}
+              style={[styles.entryCard, { marginHorizontal: 24, marginBottom: 16 }]}
+            >
+              <View style={styles.entryHeader}>
+                <View style={styles.dateRow}>
+                  <Calendar color={theme.colors.text.tertiary} size={14} />
+                  <Text style={styles.dateText}>{formatDate(entry.createdAt)}</Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  <TouchableOpacity 
+                    activeOpacity={0.7} 
+                    onPress={() => handleDelete(entry.id)}
+                    style={styles.deleteBtn}
+                  >
+                    <Trash2 color={theme.colors.accents.terracotta} size={16} />
+                  </TouchableOpacity>
+                  <View style={styles.moodBadge}>
+                    {getMoodIcon(entry.mood || 'calm')}
+                  </View>
+                </View>
+              </View>
+              <Text style={styles.entryTitle}>{entry.title}</Text>
+              <Text style={styles.entryContent} numberOfLines={4}>{entry.content}</Text>
+              
+              {entry.audioUrl && (
+                <TouchableOpacity 
+                  style={[styles.audioPreview, { backgroundColor: theme.colors.plum + '10' }]}
+                  onPress={() => playSound(entry.audioUrl, entry.id)}
+                >
+                  {isPlaying === entry.id ? <Pause size={14} color={theme.colors.plum} /> : <Play size={14} color={theme.colors.plum} />}
+                  <Text style={[styles.audioText, { color: theme.colors.plum }]}>Voice Reflection</Text>
+                  <View style={styles.audioWaveform}>
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <View 
+                        key={i} 
+                        style={[
+                          styles.waveBar, 
+                          { height: Math.random() * 12 + 4, backgroundColor: isPlaying === entry.id ? theme.colors.plum : theme.colors.text.disabled }
+                        ]} 
+                      />
+                    ))}
+                  </View>
+                </TouchableOpacity>
+              )}
+            </Animated.View>
           )}
-        </ScrollView>
+        />
       ) : (
         <Animated.View 
           entering={SlideInDown.duration(500)} 

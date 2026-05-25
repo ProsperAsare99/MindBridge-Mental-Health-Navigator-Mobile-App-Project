@@ -10,7 +10,8 @@ import {
   ActivityIndicator,
   Alert,
   Modal,
-  TextInput
+  TextInput,
+  FlatList
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -120,46 +121,51 @@ export default function CommunityScreen() {
         style={StyleSheet.absoluteFillObject} 
       />
 
-      <ScrollView 
+      <FlatList 
+        data={feed}
+        keyExtractor={post => post.id}
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
-      >
-        <ScreenHeader 
-          title={t('community.title')} 
-          subtitle={t('community.subtitle')}
-          rightAction={
-            <TouchableOpacity 
-              style={styles.searchBtn}
-              onPress={() => Alert.alert('Search', 'Community search will be available soon!')}
-            >
-              <Search color={theme.colors.accents.gentlePeach} size={24} />
-            </TouchableOpacity>
-          }
-        />
-
-        {/* My Groups */}
-        <Animated.View entering={FadeInUp.delay(50).duration(500)}>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('community.explore_groups')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.groupsScroll}>
-              {GROUPS.map(group => (
-                <TouchableOpacity key={group.id} style={[styles.groupCard, { borderColor: group.color + '30' }]}>
-                  <View style={[styles.groupIcon, { backgroundColor: group.color + '20' }]}>
-                    <Users color={group.color} size={20} />
-                  </View>
-                  <Text style={styles.groupTitle}>{group.title}</Text>
-                  <Text style={styles.groupMembers}>{group.members} {t('community.members')}</Text>
+        ListHeaderComponent={
+          <>
+            <ScreenHeader 
+              title={t('community.title')} 
+              subtitle={t('community.subtitle')}
+              rightAction={
+                <TouchableOpacity 
+                  style={styles.searchBtn}
+                  onPress={() => Alert.alert('Search', 'Community search will be available soon!')}
+                >
+                  <Search color={theme.colors.accents.gentlePeach} size={24} />
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        </Animated.View>
+              }
+            />
 
-        {/* Discussion Feed */}
-        <Animated.View entering={FadeInUp.delay(150).duration(500)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { paddingHorizontal: 24, marginBottom: 16 }]}>{t('community.recent_discussions')}</Text>
-          
-          {loading ? (
+            {/* My Groups */}
+            <Animated.View entering={FadeInUp.delay(50).duration(500)}>
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>{t('community.explore_groups')}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.groupsScroll}>
+                  {GROUPS.map(group => (
+                    <TouchableOpacity key={group.id} style={[styles.groupCard, { borderColor: group.color + '30' }]}>
+                      <View style={[styles.groupIcon, { backgroundColor: group.color + '20' }]}>
+                        <Users color={group.color} size={20} />
+                      </View>
+                      <Text style={styles.groupTitle}>{group.title}</Text>
+                      <Text style={styles.groupMembers}>{group.members} {t('community.members')}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </Animated.View>
+
+            <Animated.View entering={FadeInUp.delay(150).duration(500)}>
+              <Text style={[styles.sectionTitle, { paddingHorizontal: 24, marginBottom: 16 }]}>{t('community.recent_discussions')}</Text>
+            </Animated.View>
+          </>
+        }
+        ListEmptyComponent={
+          loading ? (
             <View style={styles.feedContainer}>
               {[1, 2, 3].map((_, i) => (
                 <View key={i} style={styles.postCard}>
@@ -183,46 +189,42 @@ export default function CommunityScreen() {
                 </View>
               ))}
             </View>
-          ) : feed.length === 0 ? (
-             <View style={{ padding: 24, alignItems: 'center' }}>
-                <Text style={{ color: theme.colors.text.secondary }}>No discussions yet. Be the first to share!</Text>
-             </View>
           ) : (
-            <View style={styles.feedContainer}>
-              {feed.map((post, index) => (
-                <Animated.View key={post.id} entering={FadeInUp.delay(200 + (index * 50)).duration(500)} style={styles.postCard}>
-                  <View style={styles.postHeader}>
-                    <View style={styles.postAuthorInfo}>
-                      <View style={[styles.postAvatar, { backgroundColor: theme.colors.accents.powderBlue }]} />
-                      <View>
-                        <Text style={styles.postGroup}>{post.group}</Text>
-                        <Text style={styles.postTime}>{formatDate(post.createdAt)} • Anonymous</Text>
-                      </View>
-                    </View>
-                    <TouchableOpacity style={styles.moreBtn}>
-                      <MoreHorizontal color={theme.colors.text.tertiary} size={20} />
-                    </TouchableOpacity>
-                  </View>
-                  
-                  <Text style={styles.postContent}>{post.content}</Text>
-                  
-                  <View style={styles.postActions}>
-                    <TouchableOpacity style={styles.actionBtn} onPress={() => handleHug(post.id)}>
-                      <Heart color={theme.colors.accents.dustyRose} size={18} fill={theme.colors.accents.dustyRose + '20'} />
-                      <Text style={styles.actionText}>{post.hugs} {t('community.send_hug')}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionBtn}>
-                      <MessageCircle color={theme.colors.text.secondary} size={18} />
-                      <Text style={styles.actionText}>{post.comments || 0} {t('community.comment')}</Text>
-                    </TouchableOpacity>
-                  </View>
-                </Animated.View>
-              ))}
+            <View style={{ padding: 24, alignItems: 'center' }}>
+              <Text style={{ color: theme.colors.text.secondary }}>No discussions yet. Be the first to share!</Text>
             </View>
-          )}
-        </Animated.View>
-
-      </ScrollView>
+          )
+        }
+        renderItem={({ item: post, index }) => (
+          <Animated.View entering={FadeInUp.delay(200 + (Math.min(index, 10) * 50)).duration(500)} style={[styles.postCard, { marginHorizontal: 24, marginBottom: 16 }]}>
+            <View style={styles.postHeader}>
+              <View style={styles.postAuthorInfo}>
+                <View style={[styles.postAvatar, { backgroundColor: theme.colors.accents.powderBlue }]} />
+                <View>
+                  <Text style={styles.postGroup}>{post.group}</Text>
+                  <Text style={styles.postTime}>{formatDate(post.createdAt)} • Anonymous</Text>
+                </View>
+              </View>
+              <TouchableOpacity style={styles.moreBtn}>
+                <MoreHorizontal color={theme.colors.text.tertiary} size={20} />
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={styles.postContent}>{post.content}</Text>
+            
+            <View style={styles.postActions}>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => handleHug(post.id)}>
+                <Heart color={theme.colors.accents.dustyRose} size={18} fill={theme.colors.accents.dustyRose + '20'} />
+                <Text style={styles.actionText}>{post.hugs} {t('community.send_hug')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionBtn}>
+                <MessageCircle color={theme.colors.text.secondary} size={18} />
+                <Text style={styles.actionText}>{post.comments || 0} {t('community.comment')}</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        )}
+      />
 
       {/* FAB */}
       <Animated.View entering={FadeInUp.delay(400).duration(500)} style={[styles.fabContainer, { bottom: insets.bottom + 20 }]}>

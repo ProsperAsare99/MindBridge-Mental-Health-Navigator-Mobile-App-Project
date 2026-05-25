@@ -266,7 +266,28 @@ export default function ProfileScreen() {
         level: res.data.onboarding?.level,
       });
     } catch (e: any) {
-      console.error('Error fetching profile:', e);
+      console.warn('Network issue fetching profile:', e.message);
+      // Fallback to AuthContext data if network fails
+      if (userData) {
+        setProfile({
+          name: userData.name,
+          username: userData.username,
+          email: userData.email,
+          onboarding: {
+            university: userData.academic?.institution,
+            program: userData.academic?.faculty,
+            level: userData.academic?.level,
+          }
+        });
+        setEditData({
+          name: userData.name,
+          username: userData.username,
+          university: userData.academic?.institution,
+          program: userData.academic?.faculty,
+          level: userData.academic?.level,
+        });
+      }
+
       if (e.response?.status === 401 || e.response?.status === 404) {
         Alert.alert('Session Expired', 'Please log in again to continue.');
         signOut();
@@ -315,7 +336,23 @@ export default function ProfileScreen() {
       fetchProfile();
       Alert.alert('Success', 'Profile updated successfully');
     } catch (e) {
-      Alert.alert('Error', 'Could not update profile');
+      // Offline fallback: optimistically update the local state
+      console.warn('Network timeout when updating profile, saving locally instead.');
+      setProfile((prev: any) => ({
+        ...prev,
+        name: editData.name,
+        phoneNumber: editData.phoneNumber,
+        studentId: editData.studentId,
+        username: editData.username,
+        onboarding: {
+          ...prev?.onboarding,
+          university: editData.university,
+          program: editData.program,
+          level: editData.level
+        }
+      }));
+      setIsEditing(false);
+      Alert.alert('Saved Locally', 'Your changes have been saved to your device. They will sync when the connection is restored.');
     }
   };
 

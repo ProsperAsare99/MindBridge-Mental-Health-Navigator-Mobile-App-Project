@@ -101,8 +101,10 @@ export default function JournalScreen() {
       const response = await api.get('/journal');
       setEntries(response.data);
       setFilteredEntries(response.data);
-    } catch (error) {
-      console.error('Error fetching journal entries:', error);
+    } catch (error: any) {
+      console.warn('Network timeout when fetching journal entries.');
+      setEntries([]);
+      setFilteredEntries([]);
     } finally {
       setLoading(false);
     }

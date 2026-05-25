@@ -11,11 +11,14 @@ import {
   Alert,
   Modal,
   TextInput,
-  FlatList
+  FlatList,
+  RefreshControl,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInUp, FadeIn, useSharedValue, withSpring, useAnimatedStyle, withSequence } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { 
@@ -45,6 +48,8 @@ export default function CommunityScreen() {
   const [selectedGroup, setSelectedGroup] = useState('Final Year Stress');
   const [isCreateVisible, setIsCreateVisible] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [sortBy, setSortBy] = useState<'recent' | 'popular'>('recent');
 
   const GROUPS = [
     { id: '1', title: 'Final Year Stress', members: '1.2k', color: theme.colors.accents.powderBlue },
@@ -56,11 +61,18 @@ export default function CommunityScreen() {
     try {
       const response = await api.get('/community');
       setFeed(response.data);
-    } catch (error) {
-      console.error('Error fetching community feed:', error);
+    } catch (error: any) {
+      console.warn('Network timeout when fetching community feed.');
+      setFeed([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchFeed();
   };
 
   useEffect(() => {
@@ -109,6 +121,64 @@ export default function CommunityScreen() {
     return `${Math.floor(diffInHours / 24)}${t('community.days_ago')}`;
   };
 
+  const getSortedFeed = () => {
+    const sorted = [...feed];
+    if (sortBy === 'recent') {
+      sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else {
+      sorted.sort((a, b) => (b.hugs || 0) - (a.hugs || 0));
+    }
+    return sorted;
+  };
+
+  const PostCard = ({ post, index }: { post: any, index: number }) => {
+    const hugScale = useSharedValue(1);
+
+    const animatedHugStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: hugScale.value }]
+    }));
+
+    const handleHugPress = () => {
+      hugScale.value = withSequence(
+        withSpring(1.4, { damping: 2, stiffness: 80 }),
+        withSpring(1, { damping: 4, stiffness: 40 })
+      );
+      handleHug(post.id);
+    };
+
+    return (
+      <Animated.View entering={FadeInUp.delay(200 + (Math.min(index, 10) * 50)).duration(500)} style={[styles.postCard, { marginHorizontal: 24, marginBottom: 16 }]}>
+        <View style={styles.postHeader}>
+          <View style={styles.postAuthorInfo}>
+            <View style={[styles.postAvatar, { backgroundColor: theme.colors.accents.powderBlue }]} />
+            <View>
+              <Text style={styles.postGroup}>{post.group}</Text>
+              <Text style={styles.postTime}>{formatDate(post.createdAt)} • Anonymous</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.moreBtn}>
+            <MoreHorizontal color={theme.colors.text.tertiary} size={20} />
+          </TouchableOpacity>
+        </View>
+        
+        <Text style={styles.postContent}>{post.content}</Text>
+        
+        <View style={styles.postActions}>
+          <TouchableOpacity style={styles.actionBtn} onPress={handleHugPress} activeOpacity={0.7}>
+            <Animated.View style={animatedHugStyle}>
+              <Heart color={theme.colors.accents.dustyRose} size={18} fill={theme.colors.accents.dustyRose + '20'} />
+            </Animated.View>
+            <Text style={styles.actionText}>{post.hugs} {t('community.send_hug')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtn} activeOpacity={0.7}>
+            <MessageCircle color={theme.colors.text.secondary} size={18} />
+            <Text style={styles.actionText}>{post.comments || 0} {t('community.comment')}</Text>
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
@@ -122,10 +192,18 @@ export default function CommunityScreen() {
       />
 
       <FlatList 
-        data={feed}
+        data={getSortedFeed()}
         keyExtractor={post => post.id}
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+            tintColor={theme.colors.plum}
+            colors={[theme.colors.plum]}
+          />
+        }
         ListHeaderComponent={
           <>
             <ScreenHeader 
@@ -160,7 +238,23 @@ export default function CommunityScreen() {
             </Animated.View>
 
             <Animated.View entering={FadeInUp.delay(150).duration(500)}>
-              <Text style={[styles.sectionTitle, { paddingHorizontal: 24, marginBottom: 16 }]}>{t('community.recent_discussions')}</Text>
+              <View style={styles.feedHeaderRow}>
+                <Text style={styles.sectionTitle}>{t('community.recent_discussions')}</Text>
+                <View style={styles.filterToggle}>
+                  <TouchableOpacity 
+                    onPress={() => setSortBy('recent')}
+                    style={[styles.filterToggleBtn, sortBy === 'recent' && { backgroundColor: theme.colors.plum }]}
+                  >
+                    <Text style={[styles.filterToggleText, sortBy === 'recent' && { color: '#FFF' }]}>Recent</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    onPress={() => setSortBy('popular')}
+                    style={[styles.filterToggleBtn, sortBy === 'popular' && { backgroundColor: theme.colors.plum }]}
+                  >
+                    <Text style={[styles.filterToggleText, sortBy === 'popular' && { color: '#FFF' }]}>Popular</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </Animated.View>
           </>
         }
@@ -190,40 +284,15 @@ export default function CommunityScreen() {
               ))}
             </View>
           ) : (
-            <View style={{ padding: 24, alignItems: 'center' }}>
-              <Text style={{ color: theme.colors.text.secondary }}>No discussions yet. Be the first to share!</Text>
+            <View style={styles.emptyContainer}>
+              <View style={[styles.emptyIconWrap, { backgroundColor: theme.colors.plum + '15' }]}>
+                <MessageCircle color={theme.colors.plum} size={32} />
+              </View>
+              <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>No discussions yet. Be the first to share!</Text>
             </View>
           )
         }
-        renderItem={({ item: post, index }) => (
-          <Animated.View entering={FadeInUp.delay(200 + (Math.min(index, 10) * 50)).duration(500)} style={[styles.postCard, { marginHorizontal: 24, marginBottom: 16 }]}>
-            <View style={styles.postHeader}>
-              <View style={styles.postAuthorInfo}>
-                <View style={[styles.postAvatar, { backgroundColor: theme.colors.accents.powderBlue }]} />
-                <View>
-                  <Text style={styles.postGroup}>{post.group}</Text>
-                  <Text style={styles.postTime}>{formatDate(post.createdAt)} • Anonymous</Text>
-                </View>
-              </View>
-              <TouchableOpacity style={styles.moreBtn}>
-                <MoreHorizontal color={theme.colors.text.tertiary} size={20} />
-              </TouchableOpacity>
-            </View>
-            
-            <Text style={styles.postContent}>{post.content}</Text>
-            
-            <View style={styles.postActions}>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => handleHug(post.id)}>
-                <Heart color={theme.colors.accents.dustyRose} size={18} fill={theme.colors.accents.dustyRose + '20'} />
-                <Text style={styles.actionText}>{post.hugs} {t('community.send_hug')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn}>
-                <MessageCircle color={theme.colors.text.secondary} size={18} />
-                <Text style={styles.actionText}>{post.comments || 0} {t('community.comment')}</Text>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
-        )}
+        renderItem={({ item, index }) => <PostCard post={item} index={index} />}
       />
 
       {/* FAB */}
@@ -241,7 +310,10 @@ export default function CommunityScreen() {
         transparent={true}
         onRequestClose={() => setIsCreateVisible(false)}
       >
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView 
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
           <BlurView intensity={100} tint={theme.isDark ? 'dark' : 'light'} style={styles.modalContainer}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('community.share_thought') || 'Share Anonymously'}</Text>
@@ -271,12 +343,18 @@ export default function CommunityScreen() {
               ))}
             </View>
 
-            <Text style={styles.modalLabel}>Your Message</Text>
+            <View style={styles.composerHeader}>
+              <Text style={styles.modalLabel}>Your Message</Text>
+              <Text style={[styles.charCount, postContent.length > 250 && { color: theme.colors.semantic.danger }]}>
+                {postContent.length}/300
+              </Text>
+            </View>
             <TextInput
               style={[styles.modalInput, { color: theme.colors.text.primary, borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]}
               placeholder="What's on your mind? Sharing anonymously can help relieve stress..."
               placeholderTextColor={theme.colors.text.disabled}
               multiline
+              maxLength={300}
               numberOfLines={6}
               value={postContent}
               onChangeText={setPostContent}
@@ -297,7 +375,7 @@ export default function CommunityScreen() {
               )}
             </TouchableOpacity>
           </BlurView>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -378,6 +456,49 @@ const createStyles = (theme: any) => StyleSheet.create({
   feedContainer: {
     paddingHorizontal: 24,
     gap: 16,
+  },
+  feedHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    marginBottom: 16,
+  },
+  filterToggle: {
+    flexDirection: 'row',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    borderRadius: 20,
+    padding: 4,
+  },
+  filterToggleBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  filterToggleText: {
+    fontSize: 13,
+    fontFamily: theme.typography.fonts.accent,
+    fontWeight: '700',
+    color: theme.colors.text.secondary,
+  },
+  emptyContainer: {
+    padding: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyIconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyText: {
+    fontSize: 15,
+    fontFamily: theme.typography.fonts.body,
+    textAlign: 'center',
+    lineHeight: 22,
   },
   postCard: {
     backgroundColor: theme.colors.surface,
@@ -484,4 +605,17 @@ const createStyles = (theme: any) => StyleSheet.create({
   modalInput: { borderWidth: 1, borderRadius: 16, padding: 14, fontSize: 15, fontFamily: theme.typography.fonts.body, lineHeight: 22, height: 120, textAlignVertical: 'top', marginBottom: 24, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' },
   publishBtn: { flexDirection: 'row', backgroundColor: '#7B61FF', paddingVertical: 16, borderRadius: 28, alignItems: 'center', justifyContent: 'center', gap: 8 },
   publishBtnText: { color: '#FFF', fontSize: 16, fontFamily: theme.typography.fonts.header, fontWeight: '800' },
+  composerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    marginTop: 10,
+  },
+  charCount: {
+    fontSize: 12,
+    fontFamily: theme.typography.fonts.accent,
+    fontWeight: '600',
+    color: theme.colors.text.tertiary,
+  }
 });

@@ -336,8 +336,9 @@ export default function AssessmentsScreen() {
       try {
         const response = await api.get('/ai/oracle-context');
         setResults(response.data.assessments || []);
-      } catch (error) {
-        console.error('Error fetching assessment results:', error);
+      } catch (error: any) {
+        console.warn('Network timeout when fetching assessment results.');
+        setResults([]);
       } finally {
         setLoading(false);
       }

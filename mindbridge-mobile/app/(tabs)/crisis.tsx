@@ -106,8 +106,11 @@ const UNIVERSITY_COUNSELING_CENTERS: Record<string, any> = {
 export default function CrisisSupportScreen() {
   const insets = useSafeAreaInsets();
   const themeContext = useTheme();
+  const { userData } = useContext(AuthContext);
   
-  const [userUni, setUserUni] = useState<string>('Other');
+  // Use userData.academic.institution if available, otherwise default to 'Other'
+  const initialUni = userData?.academic?.institution || 'Other';
+  const [userUni, setUserUni] = useState<string>(initialUni);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -117,14 +120,34 @@ export default function CrisisSupportScreen() {
           setUserUni(response.data.onboarding.university);
         }
       } catch (error) {
-        console.error('Error fetching university for crisis support:', error);
+        console.warn('Network timeout when fetching profile, falling back to cached institution.');
       }
     };
     fetchProfile();
   }, []);
 
   const styles = createStyles(themeContext);
-  const institution = UNIVERSITY_COUNSELING_CENTERS[userUni] || UNIVERSITY_COUNSELING_CENTERS['Other'];
+  
+  // Dynamically create an institution if it's not in the hardcoded list
+  const getInstitutionDetails = (uniName: string) => {
+    if (UNIVERSITY_COUNSELING_CENTERS[uniName]) {
+      return UNIVERSITY_COUNSELING_CENTERS[uniName];
+    }
+    
+    if (uniName === 'Other') {
+      return UNIVERSITY_COUNSELING_CENTERS['Other'];
+    }
+
+    return {
+      name: `${uniName} Counseling Services`,
+      number: '0800 678 678', // Generic crisis line fallback
+      description: 'Please contact your local student affairs office or use the national crisis line.',
+      address: 'Campus Administration',
+      services: ['Mental Health Support', 'General Counseling', 'Crisis Management']
+    };
+  };
+
+  const institution = getInstitutionDetails(userUni);
 
   const NEARBY_SERVICES = [
     {

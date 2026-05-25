@@ -228,7 +228,7 @@ export default function CommunityScreen() {
       <Animated.View entering={FadeInUp.delay(400).duration(500)} style={[styles.fabContainer, { bottom: insets.bottom + 20 }]}>
         <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => setIsCreateVisible(true)}>
           <PenSquare color={theme.colors.text.onPrimary || '#FFF'} size={24} />
-          <Text style={styles.fabText}>Share Thought</Text>
+          <Text style={styles.fabText}>{t('community.share_thought') || 'Share Thought'}</Text>
         </TouchableOpacity>
       </Animated.View>
 
@@ -242,7 +242,7 @@ export default function CommunityScreen() {
         <View style={styles.modalOverlay}>
           <BlurView intensity={100} tint={theme.isDark ? 'dark' : 'light'} style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Share Anonymously</Text>
+              <Text style={styles.modalTitle}>{t('community.share_thought') || 'Share Anonymously'}</Text>
               <TouchableOpacity onPress={() => setIsCreateVisible(false)} style={styles.closeBtn}>
                 <X color={theme.colors.plum} size={18} />
               </TouchableOpacity>

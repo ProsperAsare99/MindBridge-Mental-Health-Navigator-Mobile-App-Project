@@ -608,7 +608,7 @@ export default function WellnessTrackerScreen() {
         {/* History Section */}
         <View style={styles.historySection}>
           <View style={styles.historyHeader}>
-            <Text style={[styles.historyTitle, { color: theme.colors.text.primary }]}>Recent Check-ins</Text>
+            <Text style={[styles.historyTitle, { color: theme.colors.text.primary }]}>{t('tracker.recent_checkins') || 'Recent Check-ins'}</Text>
             <TouchableOpacity onPress={() => router.push('/(tabs)/profile')}><Text style={{ color: theme.colors.plum, fontWeight: '700' }}>View All</Text></TouchableOpacity>
           </View>
           {history.length > 0 ? history.map((item: any, idx: number) => {
@@ -639,7 +639,7 @@ export default function WellnessTrackerScreen() {
         {/* ── Mood Analysis ── */}
         {moodLogs.length > 0 && (
           <View style={styles.analysisSection}>
-            <Text style={[styles.historyTitle, { color: theme.colors.text.primary, marginBottom: 6 }]}>Mood Analysis</Text>
+            <Text style={[styles.historyTitle, { color: theme.colors.text.primary, marginBottom: 6 }]}>{t('tracker.mood_analysis') || 'Mood Analysis'}</Text>
             <Text style={[styles.analysisSub, { color: theme.colors.text.tertiary }]}>Your emotional patterns based on {moodLogs.length} check-ins</Text>
 
             {/* 7-Day / 30-Day Trend Chart */}

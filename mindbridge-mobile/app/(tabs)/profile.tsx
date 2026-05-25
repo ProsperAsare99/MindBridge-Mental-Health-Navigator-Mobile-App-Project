@@ -483,8 +483,8 @@ export default function ProfileScreen() {
               <Phone size={20} color="#FFF" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.crisisTitle}>Emergency Hotline</Text>
-              <Text style={styles.crisisSubtitle}>Tap for immediate mental health support</Text>
+              <Text style={styles.crisisTitle}>{t('crisis.emergency_contact') || 'Emergency Hotline'}</Text>
+              <Text style={styles.crisisSubtitle}>{t('crisis.immediate_help') || 'Tap for immediate mental health support'}</Text>
             </View>
             <ChevronRight color={theme.colors.semantic.danger} size={20} />
           </TouchableOpacity>
@@ -523,31 +523,31 @@ export default function ProfileScreen() {
           <ProfileListItem
             theme={theme}
             icon={Bell}
-            title="Reminders"
+            title={t('settings.notifications') || "Reminders"}
             color={theme.colors.accents.softMint}
             onPress={() => router.push('/(tabs)/settings')}
           />
           <ProfileListItem
             theme={theme}
             icon={HelpCircle}
-            title="Help & Support"
+            title={t('settings.help_center') || "Help & Support"}
             color={theme.colors.text.secondary}
             onPress={() => setShowHelp(true)}
           />
           <ProfileListItem 
             theme={theme}
             icon={LogOut} 
-            title={isGuest ? 'End Session' : 'Sign Out'} 
+            title={isGuest ? 'End Session' : (t('settings.log_out') || 'Sign Out')} 
             color={theme.colors.text.secondary} 
             destructive 
             isLast 
             onPress={() => {
               Alert.alert(
-                isGuest ? 'End Session' : 'Sign Out',
+                isGuest ? 'End Session' : (t('settings.log_out') || 'Sign Out'),
                 isGuest ? 'Are you sure you want to end your guest session?' : 'Are you sure you want to sign out?',
                 [
                   { text: 'Cancel', style: 'cancel' },
-                  { text: isGuest ? 'End' : 'Sign Out', style: 'destructive', onPress: () => { signOut(); router.replace('/(auth)/welcome'); } }
+                  { text: isGuest ? 'End' : (t('settings.log_out') || 'Sign Out'), style: 'destructive', onPress: () => { signOut(); router.replace('/(auth)/welcome'); } }
                 ]
               );
             }}

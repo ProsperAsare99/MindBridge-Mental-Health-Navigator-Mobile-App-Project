@@ -16,4 +16,17 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response && error.response.status === 401) {
+      // Handle session expiry (e.g., clear token, redirect to login)
+      await AsyncStorage.removeItem('userToken');
+      // A full implementation would dispatch an event or use a ref to navigate
+      console.warn('Session expired. Please log in again.');
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

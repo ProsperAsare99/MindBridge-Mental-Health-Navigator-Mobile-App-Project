@@ -100,6 +100,7 @@ export default function ToolsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const theme = useTheme();
+  const { t } = theme;
   const styles = createStyles(theme);
 
   const featuredTools = [
@@ -112,14 +113,14 @@ export default function ToolsScreen() {
 
   const exploreGroups = [
     {
-      title: 'Knowledge & Exploration',
+      title: t('tools.knowledge_checks') || 'Knowledge & Exploration',
       items: [
         { id: 'assessments', title: 'Clinical Assessments', subtitle: 'Track mood and anxiety patterns', icon: ClipboardList, color: theme.colors.accents.forestGreen },
         { id: 'explore', title: 'Knowledge Hub', subtitle: 'Curated articles and audio guides', icon: Library, color: theme.colors.accents.powderBlue },
       ]
     },
     {
-      title: 'Support & Connection',
+      title: t('tools.support_connection') || 'Support & Connection',
       items: [
         { id: 'community', title: 'Peer Support', subtitle: 'Connect with understanding students', icon: Users, color: theme.colors.plum },
         { id: 'crisis', title: 'Crisis Response', subtitle: 'Immediate help when you need it', icon: ShieldAlert, color: theme.colors.semantic.danger },
@@ -146,8 +147,8 @@ export default function ToolsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ScreenHeader 
-          title="Explore Tools" 
-          subtitle="Discover curated exercises and resources tailored for your mind."
+          title={t('tools.title') || "Explore Tools"} 
+          subtitle={t('tools.subtitle') || "Discover curated exercises and resources tailored for your mind."}
           rightAction={
             <TouchableOpacity 
               activeOpacity={0.8}
@@ -168,7 +169,7 @@ export default function ToolsScreen() {
 
         {/* Featured Grid */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Daily Practices</Text>
+          <Text style={styles.sectionTitle}>{t('tools.daily_growth') || 'Daily Practices'}</Text>
           <View style={styles.gridContainer}>
             {featuredTools.map((item, index) => (
               <ToolCard 

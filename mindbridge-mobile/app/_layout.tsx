@@ -78,8 +78,8 @@ const InitialLayout = () => {
         const { x, y, z } = accelerometerData;
         const acceleration = Math.sqrt(x * x + y * y + z * z);
         
-        // 1g is resting gravity. 1.8g is a moderate shake.
-        if (acceleration > 1.8) {
+        // 1g is resting gravity. 3.5g requires a deliberate, forceful shake.
+        if (acceleration > 3.5) {
           // Prevent multiple pushes if already on crisis screen
           if (segments[segments.length - 1] !== 'crisis') {
             router.push('/(tabs)/crisis');

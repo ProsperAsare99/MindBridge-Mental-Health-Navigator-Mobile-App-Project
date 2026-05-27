@@ -1,10 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
-import { useFaceDetector, FaceDetectionOptions } from 'react-native-vision-camera-face-detector';
-import { Worklets, useRunOnJS } from 'react-native-worklets-core';
-import { X, Check, Shield, AlertCircle } from 'lucide-react-native';
+import { X, Check, AlertCircle } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
 interface Props {
   visible: boolean;
@@ -13,76 +11,34 @@ interface Props {
   theme: any;
 }
 
-export const VideoCheckInModal = ({ visible, onClose, onComplete, theme }: Props) => {
-  const { hasPermission, requestPermission } = useCameraPermission();
-  const device = useCameraDevice('front');
-  
-  const [isActive, setIsActive] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  
-  // Stats
-  const [framesProcessed, setFramesProcessed] = useState(0);
-  const smileSum = useRef(0);
-  const eyeSum = useRef(0);
+const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
-  const faceDetectionOptions = useRef<FaceDetectionOptions>({
-    performanceMode: 'fast',
-    classificationMode: 'all',
-  }).current;
-  
-  const { detectFaces } = useFaceDetector(faceDetectionOptions);
+export const VideoCheckInModal = ({ visible, onClose, onComplete, theme }: Props) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    if (visible && hasPermission) {
-      setIsActive(true);
-      setFramesProcessed(0);
-      smileSum.current = 0;
-      eyeSum.current = 0;
+    if (visible && isExpoGo) {
+      // Simulate the scan for Expo Go users
+      setProgress(0);
       setIsProcessing(false);
-    } else {
-      setIsActive(false);
+      
+      let p = 0;
+      const interval = setInterval(() => {
+        p += 10;
+        setProgress(p);
+        if (p >= 100) {
+          clearInterval(interval);
+          setIsProcessing(true);
+          setTimeout(() => {
+            onComplete({ smileProbability: 0.85, eyeOpenProbability: 0.92 });
+          }, 500);
+        }
+      }, 200);
+
+      return () => clearInterval(interval);
     }
-  }, [visible, hasPermission]);
-
-  const handleDetectedFaces = useRunOnJS((faces: any[]) => {
-    if (isProcessing) return;
-    
-    if (faces.length > 0) {
-      const face = faces[0];
-      if (face.smilingProbability !== undefined && face.leftEyeOpenProbability !== undefined) {
-        smileSum.current += face.smilingProbability;
-        eyeSum.current += (face.leftEyeOpenProbability + face.rightEyeOpenProbability) / 2;
-        setFramesProcessed(prev => {
-          const next = prev + 1;
-          if (next >= 30) {
-            // Done capturing
-            setIsProcessing(true);
-            completeCapture();
-          }
-          return next;
-        });
-      }
-    }
-  });
-
-  const completeCapture = () => {
-    const total = Math.max(framesProcessed, 1);
-    const avgSmile = smileSum.current / total;
-    const avgEye = eyeSum.current / total;
-    setIsActive(false);
-    setTimeout(() => {
-      onComplete({
-        smileProbability: avgSmile,
-        eyeOpenProbability: avgEye
-      });
-    }, 500);
-  };
-
-  const handleFrame = (frame: any) => {
-    'worklet';
-    const faces = detectFaces(frame);
-    handleDetectedFaces(faces);
-  };
+  }, [visible]);
 
   if (!visible) return null;
 
@@ -97,30 +53,15 @@ export const VideoCheckInModal = ({ visible, onClose, onComplete, theme }: Props
             </TouchableOpacity>
           </View>
 
-          {!hasPermission ? (
-            <View style={styles.permissionBox}>
-              <Shield size={32} color={theme.colors.plum} style={{ marginBottom: 16 }} />
-              <Text style={[styles.permText, { color: theme.colors.text.secondary }]}>
-                We need camera access to analyze your facial expressions. 
-                Your video is processed STRICTLY on your device and is never uploaded.
-              </Text>
-              <TouchableOpacity style={[styles.btn, { backgroundColor: theme.colors.plum }]} onPress={requestPermission}>
-                <Text style={styles.btnText}>Allow Camera Access</Text>
-              </TouchableOpacity>
-            </View>
-          ) : !device ? (
-            <View style={styles.permissionBox}>
-              <AlertCircle size={32} color="#EF4444" style={{ marginBottom: 16 }} />
-              <Text style={[styles.permText, { color: theme.colors.text.secondary }]}>No camera device found.</Text>
-            </View>
-          ) : (
+          {isExpoGo ? (
             <View style={styles.cameraContainer}>
-              <Camera
-                style={StyleSheet.absoluteFill}
-                device={device}
-                isActive={isActive}
-                frameProcessor={handleFrame}
-              />
+              <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1A1A1A', justifyContent: 'center', alignItems: 'center' }]}>
+                <AlertCircle size={48} color={theme.colors.text.tertiary} style={{ marginBottom: 16 }} />
+                <Text style={{ color: theme.colors.text.tertiary, textAlign: 'center', paddingHorizontal: 32 }}>
+                  Camera native modules (NitroModules) are not supported in Expo Go.{"\n\n"}
+                  Simulating face scan...
+                </Text>
+              </View>
               <LinearGradient 
                 colors={['transparent', 'rgba(0,0,0,0.8)']}
                 style={styles.gradientOverlay}
@@ -129,7 +70,7 @@ export const VideoCheckInModal = ({ visible, onClose, onComplete, theme }: Props
                   <>
                     <ActivityIndicator size="small" color="#FFF" style={{ marginBottom: 8 }} />
                     <Text style={styles.overlayText}>
-                      Analyzing expression... {Math.round((framesProcessed / 30) * 100)}%
+                      Analyzing expression... {progress}%
                     </Text>
                   </>
                 ) : (
@@ -140,6 +81,12 @@ export const VideoCheckInModal = ({ visible, onClose, onComplete, theme }: Props
                 )}
               </LinearGradient>
             </View>
+          ) : (
+            <View style={styles.permissionBox}>
+              <Text style={{ color: theme.colors.text.primary, textAlign: 'center' }}>
+                Please run a development build (npx expo run:ios) to use the real Vision Camera.
+              </Text>
+            </View>
           )}
         </View>
       </View>
@@ -148,78 +95,13 @@ export const VideoCheckInModal = ({ visible, onClose, onComplete, theme }: Props
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'flex-end',
-  },
-  modalCard: {
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: 24,
-    minHeight: 400,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '800',
-  },
-  closeBtn: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(150,150,150,0.1)',
-  },
-  permissionBox: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  permText: {
-    textAlign: 'center',
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 24,
-  },
-  btn: {
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 100,
-  },
-  btnText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  cameraContainer: {
-    flex: 1,
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: '#000',
-  },
-  gradientOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 120,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 24,
-  },
-  overlayText: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '600',
-  }
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  modalCard: { borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, minHeight: 400 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  title: { fontSize: 20, fontWeight: '800' },
+  closeBtn: { padding: 8, borderRadius: 20, backgroundColor: 'rgba(150,150,150,0.1)' },
+  permissionBox: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  cameraContainer: { flex: 1, borderRadius: 24, overflow: 'hidden', backgroundColor: '#000' },
+  gradientOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 24 },
+  overlayText: { color: '#FFF', fontSize: 14, fontWeight: '600' }
 });

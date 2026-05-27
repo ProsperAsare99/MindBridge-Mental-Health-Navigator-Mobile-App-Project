@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { generateOracleResponse } from '../services/gemini.service.js';
+import { generateOracleResponse, generateProactiveInsights } from '../services/gemini.service.js';
 import { AiRepository } from '../repositories/ai.repository.js';
 
 const prisma = new PrismaClient();
@@ -271,4 +271,32 @@ export const saveAssessmentResult = async (req: Request, res: Response) => {
   }
 };
 
+export const getProactiveInsights = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
 
+    const onboarding = await prisma.onboarding.findUnique({
+      where: { userId }
+    });
+
+    const recentMoods = await prisma.moodLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 14 // Last 14 logs for better pattern detection
+    });
+
+    const insights = await generateProactiveInsights(userId, { onboarding, recentMoods });
+    res.json(insights);
+  } catch (error) {
+    console.error('Error fetching proactive insights:', error);
+    // Fallback response if something fails
+    res.json({
+      dashboardPrompt: "How are you feeling right now?",
+      gardenInsight: {
+        title: "Emotional Reservoir Stable",
+        description: "Keep checking in to build a clearer picture of your wellness trends.",
+        icon: "Heart"
+      }
+    });
+  }
+};

@@ -49,7 +49,9 @@ import {
   Frown,
   Meh,
   Smile,
-  Zap
+  Zap,
+  Users,
+  Brain
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -198,6 +200,8 @@ export default function WellnessTrackerScreen() {
     }
   };
 
+  const [aiInsight, setAiInsight] = useState<any>(null);
+
   const fetchData = async () => {
     try {
       const [contextRes, logsRes, insightsRes] = await Promise.all([
@@ -209,6 +213,13 @@ export default function WellnessTrackerScreen() {
       setTotalCount(contextRes.data.moodCount || 0);
       setMoodLogs(logsRes.data || []);
       setInsights(insightsRes.data || null);
+
+      // Fetch AI Proactive Insights in the background
+      api.get('/ai/proactive-insights').then(res => {
+        if (res.data?.gardenInsight) {
+          setAiInsight(res.data.gardenInsight);
+        }
+      }).catch(err => console.log('Failed to fetch proactive insights in garden'));
 
       // Recent history: last 3 logs
       const logs = logsRes.data || [];
@@ -822,35 +833,22 @@ export default function WellnessTrackerScreen() {
 
             {/* AI Insight Capsule - Evaluates actual mood logs to build support tips */}
             {(() => {
-              const recentOverwhelmed = moodLogs.slice(0, 5).filter(l => l.note?.toLowerCase().includes('stress') || l.note?.toLowerCase().includes('study') || l.note?.toLowerCase().includes('exam'));
-              const avgSleep = moodLogs.reduce((acc, l) => acc + (l.sleepHours || 0), 0) / moodLogs.length;
-              const avgScore = moodLogs.reduce((acc, l) => acc + l.score, 0) / moodLogs.length;
-
               let insightTitle = 'Emotional Reservoir Stable';
-              let insightDesc = 'Your emotional trends show strong resilience. Maintain this momentum by writing down one intention each morning.';
+              let insightDesc = 'Keep checking in to build a clearer picture of your wellness trends.';
               let IconComponent = Lightbulb;
               let iconColor: string = theme.colors.plum;
 
-              if (avgScore < 6.0) {
-                insightTitle = 'Emotional Reservoir Low';
-                insightDesc = 'Your average mood is slightly lower than usual. Try micro-dosing relaxation: do a 2-minute breathing cycle before studying.';
-                IconComponent = Cloud;
-                iconColor = theme.colors.accents.powderBlue;
-              } else if (avgScore >= 8.0) {
-                insightTitle = 'Glowing Vital Energy';
-                insightDesc = 'You are experiencing high emotional clarity! Keep tracking what triggers these moments so you can replicate them next week.';
-                IconComponent = Sun;
-                iconColor = theme.colors.accents.gentlePeach;
-              } else if (avgSleep < 6.5) {
-                insightTitle = 'Rest Deficit Warning';
-                insightDesc = 'Your average sleep is under 6.5 hours. A quick wind-down routine without your phone can increase sleep quality.';
-                IconComponent = Moon;
-                iconColor = theme.colors.accents.softLilac;
-              } else if (recentOverwhelmed.length > 1) {
-                insightTitle = 'High Cognitive Load';
-                insightDesc = 'We detected studies/stress in your recent notes. Break study sessions into 25-minute Pomodoro focus blocks to reduce load.';
-                IconComponent = Activity;
-                iconColor = theme.colors.accents.terracotta;
+              if (aiInsight) {
+                insightTitle = aiInsight.title;
+                insightDesc = aiInsight.description;
+                const iconName = aiInsight.icon;
+                if (iconName === 'Users') { IconComponent = Users; iconColor = theme.colors.accents.gentlePeach; }
+                else if (iconName === 'Moon') { IconComponent = Moon; iconColor = theme.colors.accents.softLilac; }
+                else if (iconName === 'Sun') { IconComponent = Sun; iconColor = theme.colors.accents.gentlePeach; }
+                else if (iconName === 'Wind') { IconComponent = Wind; iconColor = theme.colors.accents.powderBlue; }
+                else if (iconName === 'Activity') { IconComponent = Activity; iconColor = theme.colors.accents.terracotta; }
+                else if (iconName === 'Brain') { IconComponent = Brain; iconColor = theme.colors.plum; }
+                else if (iconName === 'Heart') { IconComponent = Heart; iconColor = theme.colors.accents.dustyRose; }
               }
 
               return (

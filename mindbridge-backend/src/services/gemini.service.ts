@@ -287,3 +287,64 @@ INSTRUCTIONS:
   // If we exit the loop, it means all models failed
   throw lastError || new Error("Failed to generate response from all available Gemini models.");
 };
+
+export const generateProactiveInsights = async (userId: string, context: any) => {
+  let lastError = null;
+
+  for (const modelName of MODELS) {
+    try {
+      console.log(`[BACKEND] Attempting to generate insights using model: ${modelName}`);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      
+      const prompt = `
+You are the AI engine for MindBridge, a mental health app for university students.
+Analyse the user's recent data and provide proactive, hyper-personalised insights.
+
+USER CONTEXT:
+Name: ${context.onboarding?.firstName || 'Friend'}
+Recent Mood Logs:
+${context.recentMoods?.map((m: any, i: number) => `- Day ${i+1}: Mood ${m.score}/10, Location: ${m.location || 'Unknown'}, Social: ${m.socialSetting || 'Unknown'}, Steps: ${m.steps || 'Unknown'}, Sleep: ${m.sleepHours}h`).join('\n') || 'Not enough logs yet.'}
+
+INSTRUCTIONS:
+1. Identify patterns (e.g., mood improves after social spaces, low sleep = high stress, isolation in dorms).
+2. Generate a 'dashboardPrompt': A 1-2 sentence gentle, contextual greeting or suggestion based on their current state (e.g., "I notice you haven't left your dorm in 2 days. Getting outside might help.").
+3. Generate a 'gardenInsight': A structured insight card containing a 'title', 'description', and an 'icon' name (choose one of: 'Users', 'Moon', 'Sun', 'Wind', 'Activity', 'Brain', 'Heart').
+4. Output MUST be valid JSON and exactly match this schema:
+{
+  "dashboardPrompt": "string",
+  "gardenInsight": {
+    "title": "string",
+    "description": "string",
+    "icon": "string"
+  }
+}
+Do not output any markdown formatting, just the raw JSON object.`;
+
+      const result = await model.generateContent(prompt);
+      const text = result.response.text().trim();
+      
+      // Clean up markdown code blocks if the model included them
+      let jsonStr = text;
+      if (jsonStr.startsWith('\`\`\`json')) {
+        jsonStr = jsonStr.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
+      } else if (jsonStr.startsWith('\`\`\`')) {
+        jsonStr = jsonStr.replace(/\`\`\`/g, '').trim();
+      }
+
+      return JSON.parse(jsonStr);
+    } catch (error: any) {
+      console.error(`[BACKEND] Error generating insights with model ${modelName}:`, error);
+      lastError = error;
+    }
+  }
+
+  // Fallback if all models fail
+  return {
+    dashboardPrompt: "How are you feeling right now?",
+    gardenInsight: {
+      title: "Emotional Reservoir Stable",
+      description: "Keep checking in to build a clearer picture of your wellness trends.",
+      icon: "Heart"
+    }
+  };
+};

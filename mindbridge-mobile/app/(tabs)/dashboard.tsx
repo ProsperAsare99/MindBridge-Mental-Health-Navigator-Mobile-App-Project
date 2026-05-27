@@ -429,6 +429,7 @@ export default function DashboardScreen() {
   const [userData, setUserData] = useState({ name: authData?.name || 'Friend', language: 'English', streak: 0 });
   const [stepCount, setStepCount] = useState<number | null>(null);
   const [recentLocation, setRecentLocation] = useState<string | null>(null);
+  const [aiPrompt, setAiPrompt] = useState<string | null>(null);
   const completedCount = Object.values(rituals).filter(Boolean).length;
   
   // Modals state
@@ -469,6 +470,13 @@ export default function DashboardScreen() {
       if (res.data.latestMood?.location) {
         setRecentLocation(res.data.latestMood.location);
       }
+
+      // Fetch AI Insights in background so it doesn't block UI load
+      api.get('/ai/proactive-insights').then(aiRes => {
+        if (aiRes.data?.dashboardPrompt) {
+          setAiPrompt(aiRes.data.dashboardPrompt);
+        }
+      }).catch(err => console.warn('Failed to fetch proactive insights'));
 
       setRituals({
         garden: res.data.latestMood && new Date(res.data.latestMood.createdAt).toDateString() === todayStr,
@@ -599,7 +607,7 @@ export default function DashboardScreen() {
             <View style={styles.sectionHeader}>
               <View>
                 <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.yourJourney')}</Text>
-                <Text style={styles.sectionSubtitleText}>{contextualPrompt}</Text>
+                <Text style={styles.sectionSubtitleText}>{aiPrompt || contextualPrompt}</Text>
               </View>
               <View style={styles.streakBadge}>
                 <Flame size={14} color="#FF9800" />

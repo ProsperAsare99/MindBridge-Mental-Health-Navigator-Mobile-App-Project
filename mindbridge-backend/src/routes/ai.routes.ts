@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { getOracleContext, chatWithOracle, clearChatHistory, deleteChatMessage, deleteBulkChatMessages, saveAssessmentResult } from '../controllers/ai.controller.js';
+import { getOracleContext, chatWithOracle, clearChatHistory, deleteChatMessage, deleteBulkChatMessages, saveAssessmentResult, getProactiveInsights } from '../controllers/ai.controller.js';
 import { auth } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
 router.get('/oracle-context', auth, getOracleContext);
+router.get('/proactive-insights', auth, getProactiveInsights);
 router.post('/assessments', auth, saveAssessmentResult);
 router.post('/chat', auth, chatWithOracle);
 router.delete('/history', auth, clearChatHistory);

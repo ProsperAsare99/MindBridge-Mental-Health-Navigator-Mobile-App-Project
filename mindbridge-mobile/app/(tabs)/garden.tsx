@@ -56,7 +56,7 @@ import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { useRouter } from 'expo-router';
 import api from '../../src/services/api';
 import { AuthContext } from '../../src/context/AuthContext';
-import { Audio } from 'expo-av';
+import { useAudioRecorder, useAudioRecorderState, createAudioPlayer, AudioPlayer, requestRecordingPermissionsAsync, RecordingPresets, setAudioModeAsync } from 'expo-audio';
 import * as Location from 'expo-location';
 import {
   EnergySelector,
@@ -144,11 +144,13 @@ export default function WellnessTrackerScreen() {
   const [location, setLocation] = useState<string | null>(null);
   const [weather, setWeather] = useState<string | null>(null);
 
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(recorder);
+  const isRecording = recorderState.isRecording;
+  
   const [audioUri, setAudioUri] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [player, setPlayer] = useState<AudioPlayer | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -156,9 +158,9 @@ export default function WellnessTrackerScreen() {
 
   useEffect(() => {
     return () => {
-      if (sound) sound.unloadAsync();
+      if (player) player.remove();
     };
-  }, [sound]);
+  }, [player]);
 
   const fetchData = async () => {
     try {
@@ -243,12 +245,11 @@ export default function WellnessTrackerScreen() {
 
   const startRecording = async () => {
     try {
-      const permission = await Audio.requestPermissionsAsync();
-      if (permission.status === 'granted') {
-        await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-        const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
-        setRecording(recording);
-        setIsRecording(true);
+      const { granted } = await requestRecordingPermissionsAsync();
+      if (granted) {
+        await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+        await recorder.prepareToRecordAsync();
+        recorder.record();
       }
     } catch (err) {
       console.error('Failed to start recording', err);
@@ -256,37 +257,34 @@ export default function WellnessTrackerScreen() {
   };
 
   const stopRecording = async () => {
-    setIsRecording(false);
-    setRecording(null);
-    await recording?.stopAndUnloadAsync();
-    const uri = recording?.getURI();
-    setAudioUri(uri || null);
+    await recorder.stop();
+    setAudioUri(recorder.uri);
   };
 
   const playSound = async () => {
     if (!audioUri) return;
     if (isPlaying) {
-      if (sound) {
-        await sound.pauseAsync();
+      if (player) {
+        player.pause();
       }
       setIsPlaying(false);
       return;
     }
-    if (sound) {
-      await sound.unloadAsync();
+    if (player) {
+      player.remove();
     }
-    const { sound: newSound } = await Audio.Sound.createAsync({ uri: audioUri });
-    setSound(newSound);
+    const newPlayer = createAudioPlayer(audioUri);
+    setPlayer(newPlayer);
     setIsPlaying(true);
-    await newSound.playAsync();
-    newSound.setOnPlaybackStatusUpdate((status: any) => {
+    newPlayer.play();
+    newPlayer.addListener('playbackStatusUpdate', (status) => {
       if (status.didJustFinish) setIsPlaying(false);
     });
   };
 
   const deleteSound = async () => {
-    if (sound) {
-      await sound.unloadAsync();
+    if (player) {
+      player.remove();
     }
     setAudioUri(null);
     setIsPlaying(false);

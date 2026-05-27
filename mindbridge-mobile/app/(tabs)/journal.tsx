@@ -17,7 +17,7 @@ import {
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn, SlideInDown, SlideOutDown, withRepeat, withSequence, withTiming, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { Audio } from 'expo-av';
+import { useAudioRecorder, useAudioRecorderState, createAudioPlayer, AudioPlayer, requestRecordingPermissionsAsync, RecordingPresets, setAudioModeAsync } from 'expo-audio';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { SkeletonLoader } from '../../src/components/SkeletonLoader';
@@ -63,10 +63,12 @@ export default function JournalScreen() {
   const [filterMood, setFilterMood] = useState('all');
   
   // Audio State
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(recorder);
+  const isRecording = recorderState.isRecording;
+  
   const [audioUri, setAudioUri] = useState<string | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [player, setPlayer] = useState<AudioPlayer | null>(null);
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
   const micScale = useSharedValue(1);
   const animatedMicStyle = useAnimatedStyle(() => ({ transform: [{ scale: micScale.value }] }));
@@ -124,18 +126,17 @@ export default function JournalScreen() {
 
   useEffect(() => {
     return () => {
-      if (sound) sound.unloadAsync();
+      if (player) player.remove();
     };
-  }, [sound]);
+  }, [player]);
 
   const startRecording = async () => {
     try {
-      const permission = await Audio.requestPermissionsAsync();
-      if (permission.status === 'granted') {
-        await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-        const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
-        setRecording(recording);
-        setIsRecording(true);
+      const { granted } = await requestRecordingPermissionsAsync();
+      if (granted) {
+        await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+        await recorder.prepareToRecordAsync();
+        recorder.record();
         micScale.value = withRepeat(withSequence(withTiming(1.2), withTiming(1)), -1, true);
       }
     } catch (err) {
@@ -144,27 +145,24 @@ export default function JournalScreen() {
   };
 
   const stopRecording = async () => {
-    setIsRecording(false);
-    setRecording(null);
     micScale.value = withTiming(1);
-    await recording?.stopAndUnloadAsync();
-    const uri = recording?.getURI();
-    setAudioUri(uri || null);
+    await recorder.stop();
+    setAudioUri(recorder.uri);
   };
 
   const playSound = async (uri: string, id: string) => {
     if (isPlaying === id) {
-      await sound?.pauseAsync();
+      player?.pause();
       setIsPlaying(null);
       return;
     }
     
-    if (sound) await sound.unloadAsync();
-    const { sound: newSound } = await Audio.Sound.createAsync({ uri });
-    setSound(newSound);
+    if (player) player.remove();
+    const newPlayer = createAudioPlayer(uri);
+    setPlayer(newPlayer);
     setIsPlaying(id);
-    await newSound.playAsync();
-    newSound.setOnPlaybackStatusUpdate((status: any) => {
+    newPlayer.play();
+    newPlayer.addListener('playbackStatusUpdate', (status) => {
       if (status.didJustFinish) setIsPlaying(null);
     });
   };

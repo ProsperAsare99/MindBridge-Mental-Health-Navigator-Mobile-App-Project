@@ -39,7 +39,7 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { Audio } from 'expo-av';
+import { useAudioRecorder, useAudioRecorderState, requestRecordingPermissionsAsync, RecordingPresets, setAudioModeAsync } from 'expo-audio';
 
 const { width } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = 64;
@@ -182,8 +182,9 @@ export default function AIGuideScreen() {
   const [messages, setMessages] = useState<any[]>([]);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(recorder);
+  const isRecording = recorderState.isRecording;
   const flatListRef = useRef<FlatList>(null);
   const inputRef = useRef<TextInput>(null);
   const [inputHeight, setInputHeight] = useState(44);
@@ -255,21 +256,21 @@ export default function AIGuideScreen() {
 
   const startRecording = async () => {
     try {
-      await Audio.requestPermissionsAsync();
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-      const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
-      setRecording(recording);
-      setIsRecording(true);
+      const { granted } = await requestRecordingPermissionsAsync();
+      if (granted) {
+        await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+        await recorder.prepareToRecordAsync();
+        recorder.record();
+      } else {
+        Alert.alert('Permission to record audio was denied');
+      }
     } catch (err) {
       Alert.alert('Could not start recording');
     }
   };
 
   const stopRecording = async () => {
-    if (!recording) return;
-    setIsRecording(false);
-    await recording.stopAndUnloadAsync();
-    setRecording(null);
+    await recorder.stop();
     handleSend("I'm feeling a bit exhausted today, but trying to keep my head up.");
   };
 

@@ -9,7 +9,7 @@ import {
   StatusBar,
   Modal,
 } from 'react-native';
-import { Audio } from 'expo-av';
+import { createAudioPlayer, AudioPlayer, setAudioModeAsync } from 'expo-audio';
 import * as WebBrowser from 'expo-web-browser';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -569,80 +569,64 @@ const CRISIS_RESOURCES = [
 // ─── AUDIO PLAYER MODAL ────────────────────────────────────────────────────────
 const AudioPlayerModal = ({ meditation, visible, onClose, theme }: any) => {
   const styles = createStyles(theme);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const [player, setPlayer] = useState<AudioPlayer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [positionMs, setPositionMs] = useState(0);
   const [durationMs, setDurationMs] = useState(meditation?.durationMs || 0);
   const [isSeeking, setIsSeeking] = useState(false);
-  const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const cleanup = useCallback(async () => {
-    if (progressInterval.current) clearInterval(progressInterval.current);
-    if (soundRef.current) {
-      try {
-        await soundRef.current.stopAsync();
-        await soundRef.current.unloadAsync();
-      } catch (_) {}
-      soundRef.current = null;
+  const cleanup = useCallback(() => {
+    if (player) {
+      player.remove();
+      setPlayer(null);
     }
     setIsPlaying(false);
     setPositionMs(0);
     setIsLoading(false);
-  }, []);
+  }, [player]);
 
   useEffect(() => {
     if (!visible) {
       cleanup();
     } else {
-      Audio.setAudioModeAsync({ playsInSilentModeIOS: true, staysActiveInBackground: true });
+      setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true });
     }
     return () => { cleanup(); };
   }, [visible, cleanup]);
 
-  const startProgressTracker = (sound: Audio.Sound) => {
-    if (progressInterval.current) clearInterval(progressInterval.current);
-    progressInterval.current = setInterval(async () => {
-      if (!isSeeking && sound) {
-        try {
-          const status = await sound.getStatusAsync() as any;
-          if (status.isLoaded) {
-            setPositionMs(status.positionMillis || 0);
-            setDurationMs(status.durationMillis || meditation?.durationMs || 0);
-            if (status.didJustFinish) {
-              setIsPlaying(false);
-              setPositionMs(0);
-              clearInterval(progressInterval.current!);
-            }
-          }
-        } catch (_) {}
-      }
-    }, 500);
-  };
-
   const handlePlayPause = async () => {
     if (!meditation) return;
     try {
-      if (soundRef.current) {
+      if (player) {
         if (isPlaying) {
-          await soundRef.current.pauseAsync();
+          player.pause();
           setIsPlaying(false);
-          if (progressInterval.current) clearInterval(progressInterval.current);
         } else {
-          await soundRef.current.playAsync();
+          player.play();
           setIsPlaying(true);
-          startProgressTracker(soundRef.current);
         }
       } else {
         setIsLoading(true);
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: meditation.audioUrl },
-          { shouldPlay: true },
-        );
-        soundRef.current = sound;
+        const newPlayer = createAudioPlayer(meditation.audioUrl);
+        setPlayer(newPlayer);
+        
+        newPlayer.addListener('playbackStatusUpdate', (status) => {
+          if (!isSeeking) {
+             setPositionMs((status.currentTime || 0) * 1000);
+             if (status.duration) {
+               setDurationMs(status.duration * 1000);
+             }
+             if (status.didJustFinish) {
+               setIsPlaying(false);
+               setPositionMs(0);
+             }
+          }
+        });
+
         setIsLoading(false);
         setIsPlaying(true);
-        startProgressTracker(sound);
+        newPlayer.play();
       }
     } catch (err) {
       setIsLoading(false);
@@ -651,9 +635,9 @@ const AudioPlayerModal = ({ meditation, visible, onClose, theme }: any) => {
   };
 
   const handleSeek = async (value: number) => {
-    if (soundRef.current) {
+    if (player) {
       try {
-        await soundRef.current.setPositionAsync(value);
+        await player.seekTo(value / 1000);
         setPositionMs(value);
       } catch (_) {}
     }

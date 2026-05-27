@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Dimensions, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Dimensions, ScrollView, Modal, TextInput } from 'react-native';
 import { useTheme } from '../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X, Footprints, Flame, Navigation, Activity as ActivityIcon } from 'lucide-react-native';
+import { X, Footprints, Flame, Navigation, Activity as ActivityIcon, Settings, Check } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { Pedometer } from 'expo-sensors';
 import Svg, { Circle } from 'react-native-svg';
-import Animated, { FadeInUp, useSharedValue, useAnimatedProps, withTiming, Easing, withDelay } from 'react-native-reanimated';
+import Animated, { FadeInUp, useSharedValue, useAnimatedProps, withTiming, Easing, withDelay, FadeIn, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { BarChart } from 'react-native-gifted-charts';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../src/services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -40,9 +42,14 @@ export default function ActivityScreen() {
   const [weeklySteps, setWeeklySteps] = useState<any[]>([]);
   
   // Goals
-  const goalSteps = 10000;
-  const goalCalories = 400;
-  const goalDistance = 7.62; // roughly 10k steps in km
+  const [goalSteps, setGoalSteps] = useState(10000);
+  const [goalCalories, setGoalCalories] = useState(400);
+  const goalDistance = (goalSteps * 0.000762).toFixed(2);
+  
+  // Settings Modal State
+  const [showSettings, setShowSettings] = useState(false);
+  const [tempGoalSteps, setTempGoalSteps] = useState(10000);
+  const [tempGoalCalories, setTempGoalCalories] = useState(400);
   
   const progressSteps = useSharedValue(0);
   const progressCalories = useSharedValue(0);
@@ -52,8 +59,50 @@ export default function ActivityScreen() {
   const calories = Math.round(steps * 0.04);
   const distanceKm = (steps * 0.000762).toFixed(2);
 
+  const saveGoals = async () => {
+    setGoalSteps(tempGoalSteps);
+    setGoalCalories(tempGoalCalories);
+    await AsyncStorage.setItem('@activity_goal_steps', tempGoalSteps.toString());
+    await AsyncStorage.setItem('@activity_goal_calories', tempGoalCalories.toString());
+    setShowSettings(false);
+    
+    // Re-animate rings based on new goals
+    const currentSteps = steps;
+    const calculatedCals = Math.round(currentSteps * 0.04);
+    const calculatedDist = currentSteps * 0.000762;
+    const currentGoalDistance = tempGoalSteps * 0.000762;
+    
+    progressSteps.value = withTiming(Math.min(currentSteps / tempGoalSteps, 1), { duration: 1000 });
+    progressCalories.value = withTiming(Math.min(calculatedCals / tempGoalCalories, 1), { duration: 1000 });
+    progressDistance.value = withTiming(Math.min(calculatedDist / currentGoalDistance, 1), { duration: 1000 });
+  };
+
   useEffect(() => {
-    const fetchRealData = async () => {
+    const initAndFetch = async () => {
+      // 1. Init Goals
+      let gSteps = 10000;
+      let gCals = 400;
+      try {
+        const savedSteps = await AsyncStorage.getItem('@activity_goal_steps');
+        const savedCals = await AsyncStorage.getItem('@activity_goal_calories');
+        if (savedSteps) gSteps = parseInt(savedSteps);
+        if (savedCals) gCals = parseInt(savedCals);
+      } catch (e) {}
+      setGoalSteps(gSteps);
+      setGoalCalories(gCals);
+      setTempGoalSteps(gSteps);
+      setTempGoalCalories(gCals);
+
+      // 2. Fetch DB History as Fallback
+      let moodHistory: any[] = [];
+      try {
+        const dbRes = await api.get('/mood');
+        moodHistory = dbRes.data || [];
+      } catch (e) {
+        console.log('Failed to fetch mood history fallback', e);
+      }
+
+      // 3. Fetch Pedometer Data
       try {
         const available = await Pedometer.isAvailableAsync();
         setIsAvailable(available);
@@ -63,20 +112,28 @@ export default function ActivityScreen() {
           const start = new Date();
           start.setHours(0, 0, 0, 0);
           
-          // 1. Fetch Today's Real Steps
+          // Fetch Today's Real Steps
           const todayRes = await Pedometer.getStepCountAsync(start, end);
-          const todaySteps = todayRes ? todayRes.steps : 0;
+          let todaySteps = todayRes ? todayRes.steps : 0;
+          
+          // Fallback to DB for today if 0
+          if (todaySteps === 0) {
+            const logsToday = moodHistory.filter(l => new Date(l.createdAt).toDateString() === start.toDateString());
+            if (logsToday.length > 0) todaySteps = Math.max(...logsToday.map(l => l.steps || 0));
+          }
+          
           setSteps(todaySteps);
           
           const calculatedCals = Math.round(todaySteps * 0.04);
           const calculatedDist = todaySteps * 0.000762;
+          const gDist = gSteps * 0.000762;
 
           // Animate the 3 rings
-          progressSteps.value = withDelay(300, withTiming(Math.min(todaySteps / goalSteps, 1), { duration: 1500, easing: Easing.out(Easing.cubic) }));
-          progressCalories.value = withDelay(400, withTiming(Math.min(calculatedCals / goalCalories, 1), { duration: 1500, easing: Easing.out(Easing.cubic) }));
-          progressDistance.value = withDelay(500, withTiming(Math.min(calculatedDist / goalDistance, 1), { duration: 1500, easing: Easing.out(Easing.cubic) }));
+          progressSteps.value = withDelay(300, withTiming(Math.min(todaySteps / gSteps, 1), { duration: 1500, easing: Easing.out(Easing.cubic) }));
+          progressCalories.value = withDelay(400, withTiming(Math.min(calculatedCals / gCals, 1), { duration: 1500, easing: Easing.out(Easing.cubic) }));
+          progressDistance.value = withDelay(500, withTiming(Math.min(calculatedDist / gDist, 1), { duration: 1500, easing: Easing.out(Easing.cubic) }));
 
-          // 2. Fetch Last 7 Days of Real Steps for Chart
+          // Fetch Last 7 Days of Real Steps for Chart
           const weekData = [];
           for (let i = 6; i >= 0; i--) {
             const dStart = new Date();
@@ -87,27 +144,31 @@ export default function ActivityScreen() {
             dEnd.setHours(23, 59, 59, 999);
             if (i === 0) dEnd.setTime(end.getTime());
 
+            let dailySteps = 0;
             try {
               const res = await Pedometer.getStepCountAsync(dStart, dEnd);
-              const dailySteps = res ? res.steps : 0;
-              
-              weekData.push({
-                value: dailySteps,
-                label: dStart.toLocaleDateString('en-US', { weekday: 'narrow' }),
-                frontColor: dailySteps >= goalSteps ? COLOR_STEPS : COLOR_STEPS + '50',
-                topLabelComponent: () => (
-                  <Text style={{ color: theme.colors.text.tertiary, fontSize: 10, marginBottom: 4, fontWeight: '600' }}>
-                    {dailySteps > 0 ? (dailySteps > 999 ? (dailySteps/1000).toFixed(1)+'k' : dailySteps) : ''}
-                  </Text>
-                )
-              });
-            } catch (e) {
-              weekData.push({
-                value: 0,
-                label: dStart.toLocaleDateString('en-US', { weekday: 'narrow' }),
-                frontColor: COLOR_STEPS + '40'
-              });
+              if (res && res.steps > 0) dailySteps = res.steps;
+            } catch (e) {}
+
+            // Fallback to DB
+            if (dailySteps === 0) {
+               const dayStr = dStart.toDateString();
+               const logsForDay = moodHistory.filter(l => new Date(l.createdAt).toDateString() === dayStr);
+               if (logsForDay.length > 0) {
+                  dailySteps = Math.max(...logsForDay.map(l => l.steps || 0));
+               }
             }
+
+            weekData.push({
+              value: dailySteps,
+              label: dStart.toLocaleDateString('en-US', { weekday: 'narrow' }),
+              frontColor: dailySteps >= gSteps ? COLOR_STEPS : COLOR_STEPS + '50',
+              topLabelComponent: () => (
+                <Text style={{ color: theme.colors.text.tertiary, fontSize: 10, marginBottom: 4, fontWeight: '600' }}>
+                  {dailySteps > 0 ? (dailySteps > 999 ? (dailySteps/1000).toFixed(1)+'k' : dailySteps) : ''}
+                </Text>
+              )
+            });
           }
           setWeeklySteps(weekData);
         }
@@ -117,7 +178,7 @@ export default function ActivityScreen() {
       }
     };
     
-    fetchRealData();
+    initAndFetch();
   }, []);
 
   const animatedPropsSteps = useAnimatedProps(() => ({ strokeDashoffset: CIRCUMFERENCE_STEPS - (CIRCUMFERENCE_STEPS * progressSteps.value) }));
@@ -142,7 +203,9 @@ export default function ActivityScreen() {
           <X color={theme.colors.text.primary} size={24} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Activity</Text>
-        <View style={{ width: 44 }} />
+        <TouchableOpacity onPress={() => setShowSettings(true)} style={styles.closeBtn} activeOpacity={0.85}>
+          <Settings color={theme.colors.text.primary} size={22} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -180,7 +243,7 @@ export default function ActivityScreen() {
           <View style={[styles.statBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
               <Footprints color={COLOR_STEPS} size={18} style={{ marginRight: 6 }} />
-              <Text style={[styles.statLabel, { color: COLOR_STEPS }]}>Steps</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.text.secondary }]}>Steps</Text>
             </View>
             <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>{steps.toLocaleString()}</Text>
             <Text style={[styles.statSub, { color: theme.colors.text.tertiary }]}>Goal: {goalSteps}</Text>
@@ -190,7 +253,7 @@ export default function ActivityScreen() {
           <View style={[styles.statBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
               <Flame color={COLOR_CALORIES} size={18} style={{ marginRight: 6 }} />
-              <Text style={[styles.statLabel, { color: COLOR_CALORIES }]}>Calories</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.text.secondary }]}>Calories</Text>
             </View>
             <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>{calories}</Text>
             <Text style={[styles.statSub, { color: theme.colors.text.tertiary }]}>Goal: {goalCalories} kcal</Text>
@@ -200,7 +263,7 @@ export default function ActivityScreen() {
           <View style={[styles.statBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
               <Navigation color={COLOR_DISTANCE} size={18} style={{ marginRight: 6 }} />
-              <Text style={[styles.statLabel, { color: COLOR_DISTANCE }]}>Distance</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.text.secondary }]}>Distance</Text>
             </View>
             <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>{distanceKm} <Text style={{fontSize: 16}}>km</Text></Text>
             <Text style={[styles.statSub, { color: theme.colors.text.tertiary }]}>Goal: {goalDistance} km</Text>
@@ -258,6 +321,47 @@ export default function ActivityScreen() {
         
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Settings Modal */}
+      <Modal visible={showSettings} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: theme.colors.text.primary }]}>Activity Goals</Text>
+              <TouchableOpacity onPress={() => {
+                setShowSettings(false);
+                setTempGoalSteps(goalSteps);
+                setTempGoalCalories(goalCalories);
+              }} style={styles.modalClose}>
+                <X color={theme.colors.text.primary} size={24} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.modalBody}>
+              <Text style={[styles.modalLabel, { color: theme.colors.text.secondary }]}>Daily Step Goal</Text>
+              <TextInput 
+                style={[styles.modalInput, { color: theme.colors.text.primary, borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]}
+                keyboardType="numeric"
+                value={tempGoalSteps.toString()}
+                onChangeText={(val) => setTempGoalSteps(parseInt(val) || 0)}
+              />
+              
+              <Text style={[styles.modalLabel, { color: theme.colors.text.secondary, marginTop: 16 }]}>Daily Calorie Goal (kcal)</Text>
+              <TextInput 
+                style={[styles.modalInput, { color: theme.colors.text.primary, borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]}
+                keyboardType="numeric"
+                value={tempGoalCalories.toString()}
+                onChangeText={(val) => setTempGoalCalories(parseInt(val) || 0)}
+              />
+              
+              <TouchableOpacity onPress={saveGoals} style={[styles.saveBtn, { backgroundColor: theme.colors.plum }]}>
+                <Check color="#FFF" size={20} />
+                <Text style={styles.saveBtnText}>Save Goals</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -368,5 +472,61 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 13,
     fontFamily: theme.typography.fonts.body,
     lineHeight: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: 24,
+    paddingBottom: 48,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: theme.typography.fonts.header,
+    fontWeight: '800',
+  },
+  modalClose: {
+    padding: 4,
+  },
+  modalBody: {
+    paddingBottom: 10,
+  },
+  modalLabel: {
+    fontSize: 14,
+    fontFamily: theme.typography.fonts.ui,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 16,
+    fontSize: 16,
+    fontFamily: theme.typography.fonts.body,
+  },
+  saveBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 16,
+    marginTop: 32,
+  },
+  saveBtnText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: theme.typography.fonts.ui,
+    fontWeight: '700',
+    marginLeft: 8,
   }
 });

@@ -215,11 +215,16 @@ ADVANCED VITALS (Current Check-in):
   Physical Symptoms: ${context.symptoms?.join(', ') || 'None reported'}
   Environment: ${context.weather || 'Unknown'}
   Physical Activity (Steps): ${context.steps !== undefined ? context.steps : 'Unknown'}
+  Location (Campus): ${context.location || 'Unknown'}
 
-MULTI-MODAL SENTIMENT & ACTIVITY:
+RECENT LOCATIONS:
+  ${context.recentMoods?.map((m: any, i: number) => `${i + 1}. ${m.location || 'Unknown'} (${new Date(m.createdAt).toLocaleDateString('en-GB', { weekday: 'short', hour: 'numeric' })}) - Score: ${m.score}/10`).join('\n') || 'No recent locations'}
+
+MULTI-MODAL SENTIMENT & ACTIVITY & GEOLOCATION:
   - If the user provides a journal entry or voice reflection, analyze the underlying sentiment (Grief, Frustration, Joy, etc.) and address it.
   - Look for "hidden" symptoms like burnout or social withdrawal based on the correlation of low sleep + high social stress.
   - Evaluate Physical Activity: If steps are very low (e.g. under 1000) and mood is low, recognize this as a potential red flag for depression/lethargy and gently suggest movement. If steps are high, celebrate the exercise as a mood booster.
+  - Evaluate Campus Location & Isolation: Track the user's recent locations. If the user is constantly in 'DORM' over multiple logs and their mood is low, flag this as potential isolation and gently suggest getting out (e.g., 'I noticed you've been in your room a lot recently...'). If they check in at 'LIBRARY' and note stress, offer brief grounding exercises. If they are near 'COUNSELING_CENTER', gently remind them that they are close by and could drop in if they need immediate support.
 
 INSTRUCTIONS:
   - This context is your foundation. Use it to personalise every response.

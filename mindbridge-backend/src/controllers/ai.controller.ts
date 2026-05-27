@@ -138,6 +138,13 @@ export const chatWithOracle = async (req: Request, res: Response) => {
       orderBy: { createdAt: 'desc' },
     });
 
+    const recentMoods = await prisma.moodLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      select: { location: true, createdAt: true, score: true }
+    });
+
     const recentJournal = await prisma.journal.findMany({
       where: { userId },
       take: 3,
@@ -168,6 +175,7 @@ export const chatWithOracle = async (req: Request, res: Response) => {
     // 4. Generate AI Response
     const aiResponse = await generateOracleResponse(message, {
       latestMood,
+      recentMoods,
       recentJournal,
       onboarding,
       userName: user?.name || 'Friend',
@@ -180,6 +188,7 @@ export const chatWithOracle = async (req: Request, res: Response) => {
       symptoms: latestMood?.physicalSymptoms,
       weather: latestMood?.weather,
       steps: latestMood?.steps,
+      location: latestMood?.location,
     }, userId);
 
     // 5. Save AI Response

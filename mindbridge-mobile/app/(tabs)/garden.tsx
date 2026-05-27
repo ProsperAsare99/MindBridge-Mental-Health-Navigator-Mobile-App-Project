@@ -12,6 +12,7 @@ import {
   Alert,
   TextInput,
   FlatList,
+  Modal,
 } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useTheme } from '../../src/context/ThemeContext';
@@ -99,6 +100,8 @@ const TrackerHeader = ({ totalCount, avgMood, theme }: any) => {
   );
 };
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export default function WellnessTrackerScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
@@ -144,6 +147,9 @@ export default function WellnessTrackerScreen() {
   const [note, setNote] = useState('');
   const [location, setLocation] = useState<string | null>(null);
   const [weather, setWeather] = useState<string | null>(null);
+  
+  // Privacy Modal
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder);
@@ -163,6 +169,35 @@ export default function WellnessTrackerScreen() {
     };
   }, [player]);
 
+  const requestAndFetchLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        const _ = await Location.getCurrentPositionAsync({}); // Triggers actual permission/GPS
+        // Mock semantic engine based on time of day
+        const hour = new Date().getHours();
+        let semLoc = 'DORM';
+        if (hour > 8 && hour < 12) semLoc = 'LIBRARY';
+        else if (hour >= 12 && hour < 14) semLoc = 'SOCIAL_SPACE';
+        else if (hour >= 14 && hour < 17) semLoc = 'COUNSELING_CENTER';
+        else if (hour >= 17 && hour < 20) semLoc = 'SOCIAL_SPACE';
+        
+        setLocation(semLoc);
+        setWeather('Clear');
+      }
+    } catch (e) {
+      console.log('Location fetch error:', e);
+    }
+  };
+
+  const handleConsent = async (granted: boolean) => {
+    await AsyncStorage.setItem('@location_consent', granted ? 'true' : 'false');
+    setShowLocationModal(false);
+    if (granted) {
+      await requestAndFetchLocation();
+    }
+  };
+
   const fetchData = async () => {
     try {
       const [contextRes, logsRes, insightsRes] = await Promise.all([
@@ -179,10 +214,12 @@ export default function WellnessTrackerScreen() {
       const logs = logsRes.data || [];
       setHistory(logs.slice(0, 3));
 
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
-        setLocation('University Campus');
-        setWeather('Clear');
+      // Privacy Check
+      const consent = await AsyncStorage.getItem('@location_consent');
+      if (!consent) {
+        setShowLocationModal(true);
+      } else if (consent === 'true') {
+        await requestAndFetchLocation();
       }
     } catch (e) {
       console.warn('Network timeout when fetching garden context, using local offline fallbacks.');
@@ -914,6 +951,30 @@ export default function WellnessTrackerScreen() {
         )}
 
       </ScrollView>
+
+      {/* Privacy Location Modal */}
+      <Modal visible={showLocationModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+            <View style={styles.modalHeader}>
+              <MapPin color={theme.colors.plum} size={32} />
+            </View>
+            <Text style={[styles.modalTitle, { color: theme.colors.text.primary, marginBottom: 8 }]}>Campus Location Tracking</Text>
+            <Text style={[styles.modalLabel, { color: theme.colors.text.secondary, lineHeight: 22, marginBottom: 24 }]}>
+              We use this to suggest nearby resources. Only approximate campus locations (like "Dorm" or "Library") are stored, never exact GPS coordinates.
+            </Text>
+            
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity onPress={() => handleConsent(false)} style={[styles.saveBtn, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', flex: 1 }]}>
+                <Text style={[styles.saveBtnText, { color: theme.colors.text.primary }]}>Not Now</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleConsent(true)} style={[styles.saveBtn, { backgroundColor: theme.colors.plum, flex: 1 }]}>
+                <Text style={[styles.saveBtnText, { color: '#FFF' }]}>Enable</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -1002,13 +1063,49 @@ const createStyles = (theme: any) => StyleSheet.create({
   sleepCell: { flex: 1, borderRadius: 20, padding: 16, alignItems: 'center', gap: 4 },
   sleepCellNum: { fontSize: 24, fontFamily: theme.typography.fonts.header, marginTop: 4 },
   sleepCellLabel: { fontSize: 12, fontFamily: theme.typography.fonts.header, textTransform: 'uppercase', letterSpacing: 0.5 },
-  sleepCellSub: { fontSize: 11, fontFamily: theme.typography.fonts.body },
-  insightBanner: { borderRadius: 16, padding: 14, marginTop: 16 },
-  insightBannerText: { fontSize: 13, fontFamily: theme.typography.fonts.body, lineHeight: 20 },
-  // Toggles
-  chartHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  toggleContainer: { flexDirection: 'row', borderRadius: 12, padding: 3, gap: 2 },
-  toggleBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  toggleActiveBtn: { shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 3, elevation: 1 },
-  toggleBtnText: { fontSize: 11, fontFamily: theme.typography.fonts.header },
+  sleepCellSub: { fontSize: 11, fontFamily: theme.typography.fonts.body, marginTop: 2 },
+  insightBanner: { padding: 16, borderRadius: 20, marginTop: 12 },
+  insightBannerText: { fontSize: 14, fontFamily: theme.typography.fonts.body, lineHeight: 20 },
+  chartHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
+  toggleContainer: { flexDirection: 'row', borderRadius: 20, padding: 4 },
+  toggleBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
+  toggleActiveBtn: { },
+  toggleBtnText: { fontSize: 12, fontFamily: theme.typography.fonts.header },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: 24,
+    paddingBottom: 48,
+  },
+  modalHeader: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontFamily: theme.typography.fonts.header,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  modalLabel: {
+    fontSize: 15,
+    fontFamily: theme.typography.fonts.body,
+    textAlign: 'center',
+  },
+  saveBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 16,
+  },
+  saveBtnText: {
+    fontSize: 16,
+    fontFamily: theme.typography.fonts.header,
+  }
 });

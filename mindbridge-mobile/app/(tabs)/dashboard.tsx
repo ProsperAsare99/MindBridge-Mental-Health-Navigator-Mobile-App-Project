@@ -428,6 +428,7 @@ export default function DashboardScreen() {
   const [gardenStats, setGardenStats] = useState({ count: 0, stage: 'Empty Garden', icon: CircleDashed, color: '#94A3B8' });
   const [userData, setUserData] = useState({ name: authData?.name || 'Friend', language: 'English', streak: 0 });
   const [stepCount, setStepCount] = useState<number | null>(null);
+  const [recentLocation, setRecentLocation] = useState<string | null>(null);
   const completedCount = Object.values(rituals).filter(Boolean).length;
   
   // Modals state
@@ -464,6 +465,10 @@ export default function DashboardScreen() {
       setAssessments(res.data.assessments || []);
       setLatestPost(res.data.latestCommunityPost || null);
       setSuggestedResources(res.data.suggestedResources || []);
+      
+      if (res.data.latestMood?.location) {
+        setRecentLocation(res.data.latestMood.location);
+      }
 
       setRituals({
         garden: res.data.latestMood && new Date(res.data.latestMood.createdAt).toDateString() === todayStr,
@@ -537,7 +542,7 @@ export default function DashboardScreen() {
     }, [checkStatus])
   );
 
-  const getContextualPrompt = (t: any, moodHistory: any[], streak: number, steps: number | null) => {
+  const getContextualPrompt = (t: any, moodHistory: any[], streak: number, steps: number | null, location: string | null) => {
     const hour = new Date().getHours();
     let prompt = "";
     let greeting = "";
@@ -547,7 +552,15 @@ export default function DashboardScreen() {
     else greeting = t('dashboard.greetingEvening') || 'Good Evening';
 
     // Contextual logic
-    if (steps !== null && steps > 8000) {
+    if (location === 'COUNSELING_CENTER') {
+      prompt = "You're near the Counseling Center. Walk-in hours are open until 5 PM if you need to talk.";
+    } else if (location === 'LIBRARY' && hour > 10) {
+      prompt = "Studying hard? Remember to take a 5-minute mental break.";
+    } else if (location === 'DORM' && hour >= 10 && hour <= 18 && (steps === null || steps < 2000)) {
+      prompt = "You've been in your room for a while. A quick walk around campus can boost your mood!";
+    } else if (location === 'SOCIAL_SPACE') {
+      prompt = "Enjoying the campus energy? Social connections are great for your wellness.";
+    } else if (steps !== null && steps > 8000) {
       prompt = "Amazing physical activity today! Notice how your body feels right now.";
     } else if (steps !== null && steps < 500 && hour >= 15) {
       prompt = "You've been quite still today. A brief 10-minute walk can clear your mind.";
@@ -566,7 +579,7 @@ export default function DashboardScreen() {
     return { greeting, prompt };
   };
 
-  const { greeting, prompt: contextualPrompt } = getContextualPrompt(t, moodHistory, userData.streak, stepCount);
+  const { greeting, prompt: contextualPrompt } = getContextualPrompt(t, moodHistory, userData.streak, stepCount, recentLocation);
 
   return (
     <View style={styles.container}>

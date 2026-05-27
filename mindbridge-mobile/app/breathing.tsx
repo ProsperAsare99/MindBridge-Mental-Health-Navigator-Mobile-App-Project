@@ -6,9 +6,9 @@ import {
   TouchableOpacity, 
   StatusBar,
   Dimensions,
-  Vibration,
   Alert
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -110,7 +110,13 @@ export default function BreathingScreen() {
     setPhaseIndex(index);
 
     // Dynamic Haptic Feedback trigger
-    Vibration.vibrate(40);
+    if (phase.text === 'Inhale') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else if (phase.text === 'Hold') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
 
     // Animating Main circle
     scale.value = withTiming(phase.targetScale, {
@@ -152,7 +158,7 @@ export default function BreathingScreen() {
     clearAllTimers();
     setIsActive(false);
     setIsCompleted(true);
-    Vibration.vibrate([0, 100, 100, 150]);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     // Save completed session date
     try {

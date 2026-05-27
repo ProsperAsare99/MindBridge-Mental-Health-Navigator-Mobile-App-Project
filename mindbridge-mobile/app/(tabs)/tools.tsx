@@ -108,7 +108,8 @@ export default function ToolsScreen() {
     { id: 'garden', title: 'Growth Garden', subtitle: 'Nurture your mental space', icon: Sprout, color: theme.colors.accents.eucalyptus },
     { id: 'journal', title: 'Reflective Journal', subtitle: 'Gain clarity through writing', icon: BookOpen, color: theme.colors.accents.powderBlue },
     { id: 'breathing', title: 'Breathwork', subtitle: 'Find calm in 2 mins', icon: Wind, color: theme.colors.accents.gentlePeach, isNotTab: true },
-    { id: 'grounding', title: 'Sensory Grounding', subtitle: '5-4-3-2-1 exercise', icon: Compass, color: theme.colors.accents.slate, isNotTab: true },
+    { id: 'grounding', title: 'Sensory Grounding', subtitle: '5-4-3-2-1 exercise', icon: ClipboardList, color: theme.colors.accents.slate, isNotTab: true },
+    { id: 'compass', title: 'Find North', subtitle: 'Physical spatial grounding', icon: Compass, color: theme.colors.semantic.warning, isNotTab: true },
   ];
 
   const exploreGroups = [

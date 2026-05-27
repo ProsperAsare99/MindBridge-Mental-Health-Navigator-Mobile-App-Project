@@ -15,6 +15,7 @@ import {
 } from '@expo-google-fonts/montserrat';
 import * as SplashScreen from 'expo-splash-screen';
 import { NotificationService } from '../src/services/NotificationService';
+import { Accelerometer } from 'expo-sensors';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -65,6 +66,35 @@ const InitialLayout = () => {
       }
     }
   }, [userToken, isLoading, userData, segments]);
+
+  // Shake for Crisis Support
+  useEffect(() => {
+    let subscription: any;
+    
+    const subscribe = async () => {
+      await Accelerometer.setUpdateInterval(400);
+      subscription = Accelerometer.addListener(accelerometerData => {
+        const { x, y, z } = accelerometerData;
+        const acceleration = Math.sqrt(x * x + y * y + z * z);
+        
+        // 1g is resting gravity. A vigorous shake is typically > 2.8g
+        if (acceleration > 2.8) {
+          // Prevent multiple pushes if already on crisis screen
+          if (segments[segments.length - 1] !== 'crisis') {
+            router.push('/(tabs)/crisis');
+          }
+        }
+      });
+    };
+    
+    if (userToken) {
+      subscribe();
+    }
+    
+    return () => {
+      if (subscription) subscription.remove();
+    };
+  }, [userToken, segments]);
 
   if (isLoading || !fontsLoaded) {
     return <AnimatedLogoLoader />;

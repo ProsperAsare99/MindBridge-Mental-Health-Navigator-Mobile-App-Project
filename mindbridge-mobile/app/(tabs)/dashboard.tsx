@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pedometer } from 'expo-sensors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Animated, {
@@ -54,7 +55,8 @@ import {
   ChevronDown,
   Flame,
   Feather,
-  Calendar
+  Calendar,
+  Footprints
 } from 'lucide-react-native';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { ReadMoreText } from '../../src/components/ReadMoreText';
@@ -425,6 +427,7 @@ export default function DashboardScreen() {
   const [suggestedResources, setSuggestedResources] = useState<any[]>([]);
   const [gardenStats, setGardenStats] = useState({ count: 0, stage: 'Empty Garden', icon: CircleDashed, color: '#94A3B8' });
   const [userData, setUserData] = useState({ name: authData?.name || 'Friend', language: 'English', streak: 0 });
+  const [stepCount, setStepCount] = useState<number | null>(null);
   const completedCount = Object.values(rituals).filter(Boolean).length;
   
   // Modals state
@@ -508,6 +511,25 @@ export default function DashboardScreen() {
       setLatestPost(null);
     }
   }, [authData]);
+
+  // Pedometer setup
+  useEffect(() => {
+    const checkSteps = async () => {
+      try {
+        const isAvailable = await Pedometer.isAvailableAsync();
+        if (isAvailable) {
+          const end = new Date();
+          const start = new Date();
+          start.setHours(0, 0, 0, 0);
+          const pedoRes = await Pedometer.getStepCountAsync(start, end);
+          setStepCount(pedoRes.steps);
+        }
+      } catch (e) {
+        console.log('Pedometer access denied or failed:', e);
+      }
+    };
+    checkSteps();
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -746,18 +768,33 @@ export default function DashboardScreen() {
               styles={styles}
               onPress={() => router.push('/(tabs)/garden')}
             />
-            <AppleWidget 
-              title="Assessments" 
-              subtitle={assessments.length > 0 ? assessments[0].type : "Ready"}
-              value={assessments.length}
-              label="Done"
-              icon={ClipboardList} 
-              color={theme.colors.accents.slate} 
-              delay={450}
-              theme={theme} 
-              styles={styles}
-              onPress={() => router.push('/(tabs)/assessments')}
-            />
+            {stepCount !== null ? (
+              <AppleWidget 
+                title="Activity" 
+                subtitle="Today's Steps"
+                value={stepCount}
+                label="Steps"
+                icon={Footprints} 
+                color={theme.colors.accents.slate} 
+                delay={450}
+                theme={theme} 
+                styles={styles}
+                onPress={() => {}}
+              />
+            ) : (
+              <AppleWidget 
+                title="Assessments" 
+                subtitle={assessments.length > 0 ? assessments[0].type : "Ready"}
+                value={assessments.length}
+                label="Done"
+                icon={ClipboardList} 
+                color={theme.colors.accents.slate} 
+                delay={450}
+                theme={theme} 
+                styles={styles}
+                onPress={() => router.push('/(tabs)/assessments')}
+              />
+            )}
             <AppleWidget 
               title="Resources" 
               subtitle="Discovery Hub"

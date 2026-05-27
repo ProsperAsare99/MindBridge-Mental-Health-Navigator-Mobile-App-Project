@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export const getPeers = async (req: Request, res: Response) => {
   try {
-    const peers = await prisma.peerSupportProfile.findMany({
+    const peers = await (prisma as any).peerSupportProfile.findMany({
       include: {
         user: {
           select: {
@@ -20,62 +20,8 @@ export const getPeers = async (req: Request, res: Response) => {
     
     res.json(peers);
   } catch (error) {
-    console.warn('Database unreachable. Returning mock peer supporters.');
-    const mockPeers = [
-      {
-        id: 'p1',
-        userId: 'u1',
-        bio: 'Hi, I am Ama. I am a final year psychology student. I know how overwhelming balancing academics with family obligations can be. I am here if you need someone to vent to.',
-        specialties: ['Academic Stress', 'Family Obligations', 'Time Management'],
-        isAvailable: true,
-        rating: 4.9,
-        user: {
-          name: 'Ama Osei',
-          profileImage: null,
-          studentId: '1092XXXX'
-        }
-      },
-      {
-        id: 'p2',
-        userId: 'u2',
-        bio: 'Hello! I am Emmanuel. I navigated severe burnout during my second year when I was trying to run a side-hustle while studying. I can help you build better boundaries and routines.',
-        specialties: ['Burnout', 'Work-Life Balance', 'Student Entrepreneurship'],
-        isAvailable: true,
-        rating: 5.0,
-        user: {
-          name: 'Emmanuel Boakye',
-          profileImage: null,
-          studentId: '1088XXXX'
-        }
-      },
-      {
-        id: 'p3',
-        userId: 'u3',
-        bio: 'I understand the intense pressure of family expectations and navigating financial stress on campus. I am a trained peer listener, here to offer practical advice and a listening ear.',
-        specialties: ['Financial Stress', 'Family Expectations', 'Faith Crisis'],
-        isAvailable: false,
-        rating: 4.8,
-        user: {
-          name: 'Kwame A.',
-          profileImage: null,
-          studentId: '1095XXXX'
-        }
-      },
-      {
-        id: 'p4',
-        userId: 'u4',
-        bio: 'Hey, I am Abena. Moving from the village to a big university in the city was a huge culture shock for me. If you are feeling homesick or struggling to fit in, let us talk.',
-        specialties: ['Homesickness', 'Culture Shock', 'Social Anxiety'],
-        isAvailable: true,
-        rating: 4.9,
-        user: {
-          name: 'Abena Appiah',
-          profileImage: null,
-          studentId: '1098XXXX'
-        }
-      }
-    ];
-    res.json(mockPeers);
+    console.warn('Database unreachable. Returning empty array for peers.');
+    res.json([]);
   }
 };
 
@@ -99,11 +45,9 @@ export const seedPeers = async (req: Request, res: Response) => {
     ];
 
     // Delete existing to avoid unique constraint error on userId
-    await prisma.peerSupportProfile.deleteMany({});
+    await (prisma as any).peerSupportProfile.deleteMany({});
 
-    const created = await Promise.all(
-      defaultPeers.map(p => prisma.peerSupportProfile.create({ data: p }))
-    );
+    const created = await (prisma as any).peerSupportProfile.createMany({ data: defaultPeers });
 
     res.status(201).json(created);
   } catch (error) {

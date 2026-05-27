@@ -22,6 +22,7 @@ model User {
   communityPosts CommunityPost[]
   assessmentResults AssessmentResult[]
   chatMessages   ChatMessage[]
+  peerProfile    PeerSupportProfile?
 }
 model Onboarding {
   id                    String   @id @default(uuid())

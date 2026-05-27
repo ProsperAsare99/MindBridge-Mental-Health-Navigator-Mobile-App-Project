@@ -301,6 +301,14 @@ export default function CommunityScreen() {
               </View>
             </View>
           }
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <View style={[styles.emptyIconWrap, { backgroundColor: theme.colors.plum + '15' }]}>
+                <MessageCircle color={theme.colors.plum} size={32} />
+              </View>
+              <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>No discussions yet. Be the first to share!</Text>
+            </View>
+          }
           renderItem={({ item, index }) => <PostCard post={item} index={index} />}
         />
       );
@@ -318,6 +326,14 @@ export default function CommunityScreen() {
               <Text style={styles.sectionTitle}>Explore Groups</Text>
             </View>
           }
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <View style={[styles.emptyIconWrap, { backgroundColor: theme.colors.plum + '15' }]}>
+                <Users color={theme.colors.plum} size={32} />
+              </View>
+              <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>No support groups available yet.</Text>
+            </View>
+          }
           renderItem={({ item, index }) => <GroupCard group={item} index={index} />}
         />
       );
@@ -333,6 +349,14 @@ export default function CommunityScreen() {
           ListHeaderComponent={
             <View style={styles.feedHeaderRow}>
               <Text style={styles.sectionTitle}>Peer Supporters</Text>
+            </View>
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <View style={[styles.emptyIconWrap, { backgroundColor: theme.colors.plum + '15' }]}>
+                <Users color={theme.colors.plum} size={32} />
+              </View>
+              <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>No peer supporters available yet.</Text>
             </View>
           }
           renderItem={({ item, index }) => <PeerCard peer={item} index={index} />}
@@ -413,7 +437,7 @@ export default function CommunityScreen() {
           style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <BlurView intensity={100} tint={theme.isDark ? 'dark' : 'light'} style={styles.modalContainer}>
+          <View style={[styles.modalContainer, { backgroundColor: theme.colors.surface }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('community.share_thought') || 'Start a Discussion'}</Text>
               <TouchableOpacity onPress={() => setIsCreateVisible(false)} style={styles.closeBtn}>
@@ -473,7 +497,7 @@ export default function CommunityScreen() {
                 </>
               )}
             </TouchableOpacity>
-          </BlurView>
+          </View>
         </KeyboardAvoidingView>
       </Modal>
     </View>
@@ -554,6 +578,25 @@ const createStyles = (theme: any) => StyleSheet.create({
   pickerRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   pickerChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' },
   pickerChipText: { fontSize: 13, fontFamily: theme.typography.fonts.accent, fontWeight: '600' },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  emptyIconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyText: {
+    fontSize: 15,
+    fontFamily: theme.typography.fonts.ui,
+    textAlign: 'center',
+  },
   modalInput: { borderWidth: 1, borderRadius: 16, padding: 14, fontSize: 15, fontFamily: theme.typography.fonts.body, lineHeight: 22, height: 120, textAlignVertical: 'top', marginBottom: 24, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' },
   publishBtn: { flexDirection: 'row', backgroundColor: '#7B61FF', paddingVertical: 16, borderRadius: 28, alignItems: 'center', justifyContent: 'center', gap: 8 },
   publishBtnText: { color: '#FFF', fontSize: 16, fontFamily: theme.typography.fonts.header, fontWeight: '800' },

@@ -966,6 +966,7 @@ export default function ResourcesScreen() {
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
       >
         <ScreenHeader
           title="Resource Hub"
@@ -983,6 +984,7 @@ export default function ResourcesScreen() {
           showsHorizontalScrollIndicator={false}
           style={styles.catBar}
           contentContainerStyle={styles.catBarContent}
+          removeClippedSubviews={true}
         >
           {CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat.id;
@@ -1074,6 +1076,7 @@ export default function ResourcesScreen() {
               contentContainerStyle={styles.hScrollContent}
               snapToInterval={width * 0.7 + 16}
               decelerationRate="fast"
+              removeClippedSubviews={true}
             >
               {TECHNIQUES.map((t, i) => {
                 const IconComponent = t.icon;
@@ -1217,6 +1220,7 @@ export default function ResourcesScreen() {
               contentContainerStyle={styles.hScrollContent}
               snapToInterval={width * 0.62 + 16}
               decelerationRate="fast"
+              removeClippedSubviews={true}
             >
               {GUIDED_MEDITATIONS.map((med, i) => {
                 const IconComponent = med.icon;

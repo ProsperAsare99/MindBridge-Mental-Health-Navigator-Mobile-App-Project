@@ -463,7 +463,17 @@ export default function DashboardScreen() {
         const finalName = (onboardingName === 'TESTKW' && authData?.name) ? authData.name : onboardingName;
         setUserData(prev => ({ ...prev, name: finalName }));
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Network timeout when fetching dashboard context, using local offline fallbacks.');
+      if (authData) {
+        setUserData(prev => ({ ...prev, name: authData.name || 'Friend' }));
+      }
+      setJournalHistory([]);
+      setMoodHistory([]);
+      setChatHistory([]);
+      setAssessments([]);
+      setLatestPost(null);
+    }
   }, [authData]);
 
   useFocusEffect(

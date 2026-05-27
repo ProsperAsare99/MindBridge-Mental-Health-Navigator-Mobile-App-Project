@@ -145,7 +145,8 @@ export const generateOracleResponse = async (userMessage: string, context: any, 
       const firstName = userName.split(' ')[0];
 
       const moodSummary = latestMood
-        ? `Latest mood: ${latestMood.emotions?.join(', ') || 'unspecified'} (score: ${latestMood.score}/10) on ${new Date(latestMood.createdAt).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}`
+        ? `Latest mood: ${latestMood.emotions?.join(', ') || 'unspecified'} (score: ${latestMood.score}/10) on ${new Date(latestMood.createdAt).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}` + 
+          (latestMood.facialMetrics ? ` [Video Check-in detected: ${Math.round(latestMood.facialMetrics.smileProbability * 100)}% smile frequency, ${Math.round(latestMood.facialMetrics.eyeOpenProbability * 100)}% eye contact]` : '')
         : 'No mood logs yet.';
 
       const journalSummary = recentJournal.length > 0
@@ -303,10 +304,14 @@ Analyse the user's recent data and provide proactive, hyper-personalised insight
 USER CONTEXT:
 Name: ${context.onboarding?.firstName || 'Friend'}
 Recent Mood Logs:
-${context.recentMoods?.map((m: any, i: number) => `- Day ${i+1}: Mood ${m.score}/10, Location: ${m.location || 'Unknown'}, Social: ${m.socialSetting || 'Unknown'}, Steps: ${m.steps || 'Unknown'}, Sleep: ${m.sleepHours}h`).join('\n') || 'Not enough logs yet.'}
+${context.recentMoods?.map((m: any, i: number) => {
+  const fm = m.facialMetrics ? `[Video Check-in: Smile Freq: ${Math.round(m.facialMetrics.smileProbability * 100)}%, Eye Contact: ${Math.round(m.facialMetrics.eyeOpenProbability * 100)}%]` : '';
+  return `- Day ${i+1}: Mood ${m.score}/10 ${fm}, Location: ${m.location || 'Unknown'}, Social: ${m.socialSetting || 'Unknown'}, Steps: ${m.steps || 'Unknown'}, Sleep: ${m.sleepHours}h`;
+}).join('\n') || 'Not enough logs yet.'}
 
 INSTRUCTIONS:
 1. Identify patterns (e.g., mood improves after social spaces, low sleep = high stress, isolation in dorms).
+   - If they did a Video Check-in, cross-reference their stated Mood score with their facial expressions (e.g., "You noted you were feeling 'fine' (7/10), but your video check-in showed very low smile frequency.").
 2. Generate a 'dashboardPrompt': A 1-2 sentence gentle, contextual greeting or suggestion based on their current state (e.g., "I notice you haven't left your dorm in 2 days. Getting outside might help.").
 3. Generate a 'gardenInsight': A structured insight card containing a 'title', 'description', and an 'icon' name (choose one of: 'Users', 'Moon', 'Sun', 'Wind', 'Activity', 'Brain', 'Heart').
 4. Output MUST be valid JSON and exactly match this schema:

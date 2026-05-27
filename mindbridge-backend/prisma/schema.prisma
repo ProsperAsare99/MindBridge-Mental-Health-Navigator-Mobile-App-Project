@@ -1,114 +1,107 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id             String      @id @default(uuid())
-  email          String      @unique
-  username       String?     @unique
-  password       String
-  name           String
-  studentId      String?     
-  phoneNumber    String?
-  profileImage   String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  onboarding     Onboarding?
-  moodLogs       MoodLog[]
-  journalEntries Journal[]
-  communityPosts CommunityPost[]
+  id                String             @id @default(uuid())
+  email             String             @unique
+  password          String
+  name              String
+  studentId         String?
+  phoneNumber       String?
+  profileImage      String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  username          String?            @unique
   assessmentResults AssessmentResult[]
-  chatMessages   ChatMessage[]
-  peerProfile    PeerSupportProfile?
+  chatMessages      ChatMessage[]
+  communityPosts    CommunityPost[]
+  journalEntries    Journal[]
+  moodLogs          MoodLog[]
+  onboarding        Onboarding?
 }
+
 model Onboarding {
   id                    String   @id @default(uuid())
   userId                String   @unique
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   firstName             String?
   university            String?
   program               String?
   level                 String?
-  preferredLanguage     String?  // e.g., "Twi", "Ewe", "Ga", "English"
-  communicationStyle    String?  // e.g., "Gentle", "Direct", "Analytical"
-  spiritualBackground   String?  // e.g., "Christian", "Muslim", "Traditional", "None"
-  interests             String[] // e.g., ["Music", "Sports", "Art"]
-  currentAcademicSeason String?  // e.g., "Exams", "Thesis", "Holiday"
-  primaryGoals          String[] 
+  preferredLanguage     String?
+  communicationStyle    String?
+  spiritualBackground   String?
+  interests             String[]
+  currentAcademicSeason String?
+  primaryGoals          String[]
   currentMood           String
   sleepPattern          String
-  stressLevel           Int      // 1-10
+  stressLevel           Int
+  completedAt           DateTime @default(now())
   stressSources         String[]
   supportTypes          String[]
-  completedAt           DateTime @default(now())
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-model MoodLog {
-  id              String   @id @default(uuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  score           Int      // 1-10 (1 = Terrible, 10 = Excellent)
-  emotions        String[] // e.g., ["Anxious", "Tired"]
-  energyLevel     Int?     // 1-10
-  sleepHours      Float?
-  sleepQuality    String?  // e.g., "Poor", "Fair", "Good", "Excellent"
-  socialSetting   String?  // e.g., "Alone", "Friends", "Family"
-  physicalSymptoms String[] // e.g., ["Headache", "Fatigue"]
-  weather         String?  // e.g., "Sunny", "Rainy"
-  location        String?  // City/Area
-  audioUrl        String?
-  note            String?
-  createdAt       DateTime @default(now())
 
-  @@index([userId])
-  @@index([createdAt])
+model MoodLog {
+  id               String   @id @default(uuid())
+  userId           String
+  score            Int
+  emotions         String[]
+  energyLevel      Int?
+  sleepHours       Float?
+  sleepQuality     String?
+  socialSetting    String?
+  physicalSymptoms String[]
+  weather          String?
+  location         String?
+  audioUrl         String?
+  note             String?
+  createdAt        DateTime @default(now())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
 model Journal {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String?
   content   String
   mood      String?
   audioUrl  String?
   createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([createdAt])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model CommunityPost {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  group     String   // e.g., "Anxiety Support"
+  group     String
   content   String
   hugs      Int      @default(0)
   createdAt DateTime @default(now())
-
-  @@index([createdAt])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AssessmentResult {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String   // e.g., "PHQ-9", "GAD-7", "Burnout"
+  type      String
   score     Int
-  severity  String   // e.g., "Mild", "Severe"
+  severity  String
   createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([createdAt])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Resource {
   id        String   @id @default(uuid())
   title     String
-  type      String   // e.g., "Audio", "Article", "Video", "Book", "Tool"
-  category  String?  // e.g., "Stress", "Anxiety"
+  type      String
+  category  String?
   duration  String?
   author    String?
   url       String?
@@ -119,28 +112,8 @@ model Resource {
 model ChatMessage {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role      String   // "user" or "model"
+  role      String
   content   String
   createdAt DateTime @default(now())
-}
-
-model SupportGroup {
-  id          String   @id @default(uuid())
-  name        String
-  description String
-  color       String?
-  members     Int      @default(0)
-  createdAt   DateTime @default(now())
-}
-
-model PeerSupportProfile {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bio         String
-  specialties String[]
-  isAvailable Boolean  @default(true)
-  rating      Float    @default(5.0)
-  createdAt   DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

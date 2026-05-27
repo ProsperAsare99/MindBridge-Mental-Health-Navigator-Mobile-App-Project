@@ -779,7 +779,7 @@ export default function DashboardScreen() {
                 delay={450}
                 theme={theme} 
                 styles={styles}
-                onPress={() => {}}
+                onPress={() => router.push('/activity')}
               />
             ) : (
               <AppleWidget 

@@ -14,6 +14,7 @@ import {
   Montserrat_800ExtraBold,
 } from '@expo-google-fonts/montserrat';
 import * as SplashScreen from 'expo-splash-screen';
+import { NotificationService } from '../src/services/NotificationService';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,6 +36,7 @@ const InitialLayout = () => {
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
+      NotificationService.init().catch(console.warn);
     }
   }, [fontsLoaded]);
 

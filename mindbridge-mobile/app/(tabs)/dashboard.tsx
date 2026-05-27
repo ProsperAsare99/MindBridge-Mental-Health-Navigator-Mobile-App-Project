@@ -58,6 +58,8 @@ import {
 } from 'lucide-react-native';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { ReadMoreText } from '../../src/components/ReadMoreText';
+import { InterventionModal } from '../../src/components/InterventionModal';
+import { CelebrationModal } from '../../src/components/CelebrationModal';
 
 const { width } = Dimensions.get('window');
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
@@ -420,9 +422,15 @@ export default function DashboardScreen() {
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [assessments, setAssessments] = useState<any[]>([]);
   const [latestPost, setLatestPost] = useState<any>(null);
+  const [suggestedResources, setSuggestedResources] = useState<any[]>([]);
   const [gardenStats, setGardenStats] = useState({ count: 0, stage: 'Empty Garden', icon: CircleDashed, color: '#94A3B8' });
   const [userData, setUserData] = useState({ name: authData?.name || 'Friend', language: 'English', streak: 0 });
   const completedCount = Object.values(rituals).filter(Boolean).length;
+  
+  // Modals state
+  const [showIntervention, setShowIntervention] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebData, setCelebData] = useState<{ milestone: number, type: 'STREAK' | 'JOURNAL' }>({ milestone: 0, type: 'STREAK' });
 
   const getGrowthStage = (count: number) => {
     if (count >= 20) return { label: 'Ancient Tree', icon: Flower2, color: '#8B5CF6' };
@@ -452,6 +460,7 @@ export default function DashboardScreen() {
       
       setAssessments(res.data.assessments || []);
       setLatestPost(res.data.latestCommunityPost || null);
+      setSuggestedResources(res.data.suggestedResources || []);
 
       setRituals({
         garden: res.data.latestMood && new Date(res.data.latestMood.createdAt).toDateString() === todayStr,
@@ -463,6 +472,30 @@ export default function DashboardScreen() {
         const finalName = (onboardingName === 'TESTKW' && authData?.name) ? authData.name : onboardingName;
         setUserData(prev => ({ ...prev, name: finalName }));
       }
+
+      // Check for interventions locally if recent mood was logged and is critically low
+      if (moodsRes.data && moodsRes.data.length > 0) {
+        const latestMood = moodsRes.data[0];
+        const isRecent = new Date(latestMood.createdAt).toDateString() === todayStr;
+        if (isRecent && latestMood.score <= 3) {
+          const shownIntervention = await AsyncStorage.getItem(`intervention_${todayStr}`);
+          if (!shownIntervention) {
+            setShowIntervention(true);
+            await AsyncStorage.setItem(`intervention_${todayStr}`, 'true');
+          }
+        }
+      }
+
+      // Check for milestones
+      if (currentStreak === 3 || currentStreak === 7 || currentStreak === 14 || currentStreak === 30) {
+        const shownMilestone = await AsyncStorage.getItem(`milestone_${currentStreak}`);
+        if (!shownMilestone) {
+          setCelebData({ milestone: currentStreak, type: 'STREAK' });
+          setShowCelebration(true);
+          await AsyncStorage.setItem(`milestone_${currentStreak}`, 'true');
+        }
+      }
+
     } catch (e) {
       console.warn('Network timeout when fetching dashboard context, using local offline fallbacks.');
       if (authData) {
@@ -482,15 +515,32 @@ export default function DashboardScreen() {
     }, [checkStatus])
   );
 
-  const getTimeContext = (t: any) => {
+  const getContextualPrompt = (t: any, moodHistory: any[], streak: number) => {
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return { greeting: t('dashboard.greetingMorning'), prompt: t('dashboard.startWithIntention') };
-    if (hour >= 12 && hour < 17) return { greeting: t('dashboard.greetingAfternoon'), prompt: t('dashboard.checkInWithYourself') };
-    if (hour >= 17 && hour < 21) return { greeting: t('dashboard.greetingEvening'), prompt: t('dashboard.windDownAndReflect') };
-    return { greeting: t('dashboard.greetingEvening'), prompt: t('dashboard.howWasYourDay') };
+    let prompt = "";
+    let greeting = "";
+
+    if (hour >= 5 && hour < 12) greeting = t('dashboard.greetingMorning') || 'Good Morning';
+    else if (hour >= 12 && hour < 17) greeting = t('dashboard.greetingAfternoon') || 'Good Afternoon';
+    else greeting = t('dashboard.greetingEvening') || 'Good Evening';
+
+    // Contextual logic
+    if (streak >= 3) {
+      prompt = `You're on a ${streak}-day streak! Keep the amazing momentum going.`;
+    } else if (moodHistory.length > 0 && moodHistory[0].score <= 4) {
+      prompt = "We noticed yesterday was a bit tough. Take it easy today, you're doing great.";
+    } else if (hour >= 5 && hour < 12) {
+      prompt = t('dashboard.startWithIntention') || "Start your day with intention.";
+    } else if (hour >= 17 && hour < 21) {
+      prompt = t('dashboard.windDownAndReflect') || "Wind down and reflect on your day.";
+    } else {
+      prompt = t('dashboard.howWasYourDay') || "How are you feeling right now?";
+    }
+
+    return { greeting, prompt };
   };
 
-  const { greeting } = getTimeContext(t);
+  const { greeting, prompt: contextualPrompt } = getContextualPrompt(t, moodHistory, userData.streak);
 
   return (
     <View style={styles.container}>
@@ -510,7 +560,7 @@ export default function DashboardScreen() {
             <View style={styles.sectionHeader}>
               <View>
                 <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.yourJourney')}</Text>
-                <Text style={styles.sectionSubtitleText}>{(userData.streak > 0 || completedCount > 0) ? `${Math.max(userData.streak, completedCount > 0 ? 1 : 0)} ${t('dashboard.dayStreak')}` : t('dashboard.startJourneyToday')}</Text>
+                <Text style={styles.headerSubtitle}>{contextualPrompt}</Text>
               </View>
               <View style={styles.streakBadge}>
                 <Flame size={14} color="#FF9800" />
@@ -742,6 +792,39 @@ export default function DashboardScreen() {
           </ScrollView>
         </View>
 
+        {/* ── Suggested Resources ── */}
+        {suggestedResources && suggestedResources.length > 0 && (
+          <View style={styles.sectionCompact}>
+            <View style={[styles.sectionHeader, { paddingHorizontal: 24 }]}>
+              <View>
+                <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Recommended for You</Text>
+                <Text style={styles.sectionSubtitleText}>Based on your recent reflections</Text>
+              </View>
+              <Library size={20} color={theme.colors.plum} />
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll} decelerationRate="fast">
+              {suggestedResources.map((res: any, idx: number) => (
+                <TouchableOpacity 
+                  key={idx}
+                  style={[styles.resourceCardWide, { backgroundColor: theme.colors.surface, marginRight: 16 }]}
+                  onPress={() => router.push('/(tabs)/resources')}
+                >
+                  <View style={styles.resourceInfo}>
+                    <View style={styles.resourceTag}><Text style={styles.resourceTagText}>{res.category}</Text></View>
+                    <Text style={[styles.resourceTitle, { color: theme.colors.text.primary }]} numberOfLines={1}>{res.title}</Text>
+                    <View style={styles.resourceMeta}>
+                      <Text style={[styles.resourceMetaText, { color: theme.colors.text.tertiary }]}>{res.type.toUpperCase()}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.resourceAction}>
+                    <ChevronRight color={theme.colors.plum} size={20} />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         {/* ── Clinical Disclaimer ── */}
         <View style={[styles.section, { marginTop: 24 }]}>
           <View style={[styles.disclaimerCard, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(123,97,255,0.03)', borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(123,97,255,0.1)' }]}>
@@ -758,6 +841,21 @@ export default function DashboardScreen() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Interventions & Celebrations */}
+      <InterventionModal 
+        visible={showIntervention} 
+        onClose={() => setShowIntervention(false)} 
+        onConnectPeer={() => { setShowIntervention(false); router.push('/(tabs)/community'); }}
+        onViewResources={() => { setShowIntervention(false); router.push('/(tabs)/resources'); }}
+      />
+
+      <CelebrationModal
+        visible={showCelebration}
+        onClose={() => setShowCelebration(false)}
+        milestone={celebData.milestone}
+        type={celebData.type}
+      />
     </View>
   );
 }

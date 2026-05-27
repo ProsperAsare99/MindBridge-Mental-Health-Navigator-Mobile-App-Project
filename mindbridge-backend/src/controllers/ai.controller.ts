@@ -62,6 +62,25 @@ export const getOracleContext = async (req: Request, res: Response) => {
       orderBy: { createdAt: 'desc' }
     });
 
+    // Generate contextual resource suggestions based on recent journal themes
+    let suggestedResources: any[] = [];
+    if (recentJournal && recentJournal.length > 0) {
+      const combinedText = recentJournal.map(j => (j.title + ' ' + j.content).toLowerCase()).join(' ');
+      if (combinedText.includes('stress') || combinedText.includes('exam') || combinedText.includes('pressure')) {
+        suggestedResources.push({ id: 'res-1', title: '5-Minute Box Breathing', type: 'audio', category: 'Stress Relief' });
+      }
+      if (combinedText.includes('anxiety') || combinedText.includes('worry') || combinedText.includes('panic')) {
+        suggestedResources.push({ id: 'res-2', title: 'Grounding Technique (5-4-3-2-1)', type: 'article', category: 'Anxiety' });
+      }
+      if (combinedText.includes('lonely') || combinedText.includes('friend') || combinedText.includes('isolate')) {
+        suggestedResources.push({ id: 'res-3', title: 'Campus Support Groups', type: 'link', category: 'Community' });
+      }
+    }
+    // Always provide at least one fallback resource if none matched
+    if (suggestedResources.length === 0) {
+      suggestedResources.push({ id: 'res-4', title: 'Daily Mindfulness Practice', type: 'audio', category: 'General' });
+    }
+
     res.json({
       latestMood: latestMood || null,
       moodCount: moodCount || 0,
@@ -72,6 +91,7 @@ export const getOracleContext = async (req: Request, res: Response) => {
       history: history || [],
       assessments: assessments || [],
       latestCommunityPost: latestCommunityPost || null,
+      suggestedResources,
       dbStatus: 'online'
     });
   } catch (error: any) {

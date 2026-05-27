@@ -584,7 +584,7 @@ export default function ProfileScreen() {
                 isGuest ? 'Are you sure you want to end your guest session?' : 'Are you sure you want to sign out?',
                 [
                   { text: 'Cancel', style: 'cancel' },
-                  { text: isGuest ? 'End' : (t('settings.log_out') || 'Sign Out'), style: 'destructive', onPress: () => { signOut(); router.replace('/(auth)/welcome'); } }
+                  { text: isGuest ? 'End' : (t('settings.log_out') || 'Sign Out'), style: 'destructive', onPress: signOut }
                 ]
               );
             }}

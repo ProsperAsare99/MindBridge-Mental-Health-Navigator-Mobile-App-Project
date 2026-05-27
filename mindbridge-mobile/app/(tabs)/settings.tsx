@@ -32,7 +32,7 @@ export default function SettingsScreen() {
   const themeContext = useTheme();
   const styles = createStyles(themeContext);
   const { mode, setMode, colors, isDark, language, setLanguage, t } = themeContext;
-  const { logout } = React.useContext(AuthContext) as any;
+  const { signOut } = React.useContext(AuthContext) as any;
   const router = useRouter();
   const [isPasswordModalVisible, setIsPasswordModalVisible] = React.useState(false);
   const [isFeedbackVisible, setIsFeedbackVisible] = React.useState(false);
@@ -311,7 +311,16 @@ export default function SettingsScreen() {
         {/* ── Logout Section ── */}
         <TouchableOpacity 
           style={styles.logoutBtn} 
-          onPress={logout}
+          onPress={() => {
+            Alert.alert(
+              t('settings.log_out') || 'Sign Out',
+              'Are you sure you want to sign out?',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Sign Out', style: 'destructive', onPress: signOut }
+              ]
+            );
+          }}
           activeOpacity={0.8}
         >
           <LogOut color="#FFF" size={20} />

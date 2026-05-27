@@ -101,7 +101,7 @@ const SimplePupil = ({ size, lookAt }: SimplePupilProps) => {
   );
 };
 
-export type AuthField = 'name' | 'email' | 'password' | 'none';
+export type AuthField = 'name' | 'email' | 'password' | 'none' | 'username' | 'phoneNumber' | 'confirmPassword';
 
 interface AuthCharactersProps {
   focusedField: AuthField;
@@ -158,8 +158,11 @@ const AuthCharacters = ({ focusedField, showPassword }: AuthCharactersProps) => 
   const getLookAt = (field: AuthField) => {
     switch (field) {
       case 'name': return { x: -2, y: -4 };
+      case 'username': return { x: -1, y: -3 };
       case 'email': return { x: 0, y: -2 };
+      case 'phoneNumber': return { x: 1, y: -1 };
       case 'password': return { x: 2, y: 2 };
+      case 'confirmPassword': return { x: 3, y: 3 };
       default: return { x: 0, y: 0 };
     }
   };

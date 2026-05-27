@@ -11,6 +11,7 @@ import {
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -18,8 +19,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { useTheme } from '../../src/context/ThemeContext';
 import { Ghost, ShieldCheck } from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 // ─── Illustrations ────────────────────────────────────────────────────────────
 function MindIllustration({ color, theme }: { color: string, theme: any }) {
@@ -39,13 +41,13 @@ function MindIllustration({ color, theme }: { color: string, theme: any }) {
         ]),
       ])
     ).start();
-  }, []);
+  }, [pulse, ringOpacity]);
 
   return (
     <View style={{ width: 220, height: 220, alignItems: 'center', justifyContent: 'center' }}>
       <Animated.View style={[{ position: 'absolute', width: 200, height: 200, borderRadius: 100, borderWidth: 2, borderColor: color, opacity: ringOpacity, transform: [{ scale: pulse }] }]} />
       <Animated.View style={[{ position: 'absolute', width: 175, height: 175, borderRadius: 87.5, borderWidth: 1.5, borderColor: theme.colors.plum, opacity: 0.3, transform: [{ scale: pulse }] }]} />
-      <View style={[{ width: 148, height: 148, borderRadius: 74, overflow: 'hidden', backgroundColor: theme.colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.3 : 0.1, shadowRadius: 10, elevation: 8 }]}>
+      <View style={[{ width: 148, height: 148, borderRadius: 74, overflow: 'hidden', backgroundColor: theme.colors.surface, shadowColor: color, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 8 }]}>
         <Image source={require('../../assets/images/logo.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
       </View>
     </View>
@@ -61,18 +63,18 @@ function GuideIllustration({ color }: { color: string }) {
         Animated.timing(float, { toValue: 0, duration: 2500, useNativeDriver: true }),
       ])
     ).start();
-  }, []);
+  }, [float]);
 
   return (
     <View style={{ width: 220, height: 220, alignItems: 'center', justifyContent: 'center' }}>
       <Animated.View style={{ transform: [{ translateY: float }] }}>
         <Svg width={160} height={160} viewBox="0 0 160 160">
-          <Circle cx="80" cy="80" r="70" fill={color} fillOpacity="0.1" />
-          <Path d="M56 40 Q56 34 62 34 L98 34 Q104 34 104 40 L104 120 Q104 126 98 126 L62 126 Q56 126 56 120Z" stroke={color} strokeWidth="3" fill="none" />
-          <Line x1="66" y1="58" x2="94" y2="58" stroke={color} strokeWidth="3" strokeLinecap="round" />
-          <Line x1="66" y1="74" x2="88" y2="74" stroke={color} strokeWidth="3" strokeOpacity="0.7" strokeLinecap="round" />
-          <Line x1="66" y1="90" x2="94" y2="90" stroke={color} strokeWidth="3" strokeLinecap="round" />
-          <Circle cx="80" cy="110" r="5" stroke={color} strokeWidth="2" fill="none" />
+          <Circle cx="80" cy="80" r="70" fill={color} fillOpacity="0.15" />
+          <Path d="M56 40 Q56 34 62 34 L98 34 Q104 34 104 40 L104 120 Q104 126 98 126 L62 126 Q56 126 56 120Z" stroke={color} strokeWidth="3.5" fill="none" />
+          <Line x1="66" y1="58" x2="94" y2="58" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
+          <Line x1="66" y1="74" x2="88" y2="74" stroke={color} strokeWidth="3.5" strokeOpacity="0.8" strokeLinecap="round" />
+          <Line x1="66" y1="90" x2="94" y2="90" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
+          <Circle cx="80" cy="110" r="6" fill={color} />
         </Svg>
       </Animated.View>
     </View>
@@ -88,22 +90,23 @@ function SafeIllustration({ color }: { color: string }) {
         Animated.timing(scale, { toValue: 0.95, duration: 3000, useNativeDriver: true }),
       ])
     ).start();
-  }, []);
+  }, [scale]);
 
   return (
     <View style={{ width: 220, height: 220, alignItems: 'center', justifyContent: 'center' }}>
       <Animated.View style={{ transform: [{ scale }] }}>
         <Svg width={160} height={160} viewBox="0 0 160 160">
-          <Circle cx="80" cy="80" r="70" fill={color} fillOpacity="0.1" />
-          <Path d="M80 30 L115 45 L115 80 C115 105 98 125 80 135 C62 125 45 105 45 80 L45 45 Z" stroke={color} strokeWidth="3" fill="none" />
-          <Path d="M70 85 L70 105 L90 105 L90 85 Z" stroke={color} strokeWidth="2.5" fill="none" />
-          <Path d="M74 85 L74 78 Q74 70 80 70 Q86 70 86 78 L86 85" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <Circle cx="80" cy="80" r="70" fill={color} fillOpacity="0.15" />
+          <Path d="M80 30 L115 45 L115 80 C115 105 98 125 80 135 C62 125 45 105 45 80 L45 45 Z" stroke={color} strokeWidth="3.5" fill="none" />
+          <Path d="M70 85 L70 105 L90 105 L90 85 Z" stroke={color} strokeWidth="3" fill="none" />
+          <Path d="M74 85 L74 78 Q74 70 80 70 Q86 70 86 78 L86 85" stroke={color} strokeWidth="3" fill="none" strokeLinecap="round" />
         </Svg>
       </Animated.View>
     </View>
   );
 }
 
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -112,6 +115,26 @@ export default function WelcomeScreen() {
   
   const theme = useTheme();
   const styles = createStyles(theme);
+
+  // Background Orb Animations
+  const orb1Anim = useRef(new Animated.Value(0)).current;
+  const orb2Anim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(orb1Anim, { toValue: 1, duration: 12000, useNativeDriver: true }),
+        Animated.timing(orb1Anim, { toValue: 0, duration: 12000, useNativeDriver: true }),
+      ])
+    ).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(orb2Anim, { toValue: 1, duration: 15000, useNativeDriver: true }),
+        Animated.timing(orb2Anim, { toValue: 0, duration: 15000, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
 
   const SLIDES = [
     {
@@ -127,7 +150,7 @@ export default function WelcomeScreen() {
       overline: 'AI-POWERED CARE',
       headline: 'Guidance\nOn Your Terms.',
       body: 'Access personalized check-ins, mood tracking, and coping tools at any time.',
-      accentColor: theme.colors.accents.slate,
+      accentColor: theme.colors.accents.ocean,
       IllustrationComponent: GuideIllustration,
     },
     {
@@ -135,7 +158,7 @@ export default function WelcomeScreen() {
       overline: 'FULLY CONFIDENTIAL',
       headline: 'A Safe Space,\nOnly Yours.',
       body: 'Your data stays private. Talk openly, without fear or judgment.',
-      accentColor: theme.colors.accents.forestGreen,
+      accentColor: theme.colors.sage,
       IllustrationComponent: SafeIllustration,
     },
   ];
@@ -159,8 +182,38 @@ export default function WelcomeScreen() {
     <View style={styles.root}>
       <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} translucent backgroundColor="transparent" />
 
-      <View style={[styles.bgOrb, { backgroundColor: theme.colors.accents.eucalyptus, top: -180, right: -150 }]} />
-      <View style={[styles.bgOrb, { backgroundColor: theme.colors.accents.gentlePeach, bottom: -120, left: -100, width: 300, height: 300 }]} />
+      {/* Animated Gradient Background Elements */}
+      <Animated.View style={[styles.bgOrb, {
+        backgroundColor: theme.colors.accents.gentlePeach,
+        top: height * -0.1,
+        left: width * -0.2,
+        width: width * 1.2,
+        height: width * 1.2,
+        transform: [
+          { translateY: orb1Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 50] }) },
+          { scale: orb1Anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.1] }) }
+        ]
+      }]} />
+      
+      <Animated.View style={[styles.bgOrb, {
+        backgroundColor: theme.colors.accents.powderBlue,
+        bottom: height * -0.1,
+        right: width * -0.3,
+        width: width * 1.4,
+        height: width * 1.4,
+        transform: [
+          { translateY: orb2Anim.interpolate({ inputRange: [0, 1], outputRange: [0, -60] }) },
+          { scale: orb2Anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.15] }) }
+        ]
+      }]} />
+
+      {/* Frosted Glass Overlay for extra depth - Optimized for Android */}
+      <BlurView 
+        intensity={Platform.OS === 'android' ? 50 : 80} 
+        experimentalBlurMethod={Platform.OS === 'android' ? "dimezisBlurView" : undefined}
+        tint={theme.isDark ? "dark" : "light"} 
+        style={StyleSheet.absoluteFillObject} 
+      />
 
       <View style={[styles.layout, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.slideArea}>
@@ -200,7 +253,7 @@ export default function WelcomeScreen() {
           <TouchableOpacity onPress={goNext} activeOpacity={0.9} style={styles.primaryWrap}>
             <LinearGradient
               colors={activeSlide < SLIDES.length - 1
-                ? [theme.colors.surface, theme.isDark ? theme.colors.backgroundSecondary : '#EAE5DE']
+                ? [theme.colors.surface, theme.isDark ? theme.colors.backgroundSecondary : '#F2E0D0']
                 : [theme.colors.plum, theme.isDark ? '#3D4C5D' : '#4A3E4F']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -219,8 +272,10 @@ export default function WelcomeScreen() {
               activeOpacity={0.7} 
               style={styles.guestBtn}
             >
-              <Ghost color={theme.colors.plum} size={20} style={{ marginRight: 8 }} />
-              <Text style={styles.guestBtnText}>Explore Anonymously</Text>
+              <BlurView intensity={40} tint={theme.isDark ? "dark" : "light"} style={styles.guestBtnBlur}>
+                <Ghost color={theme.colors.plum} size={20} style={{ marginRight: 8 }} />
+                <Text style={styles.guestBtnText}>Explore Anonymously</Text>
+              </BlurView>
             </TouchableOpacity>
           )}
 
@@ -247,57 +302,59 @@ const createStyles = (theme: any) => StyleSheet.create({
   layout: { flex: 1, justifyContent: 'space-between' },
   bgOrb: {
     position: 'absolute',
-    width: 400,
-    height: 400,
-    borderRadius: 200,
-    opacity: theme.isDark ? 0.05 : 0.1,
+    borderRadius: 9999,
+    opacity: theme.isDark ? 0.3 : 0.45,
+    filter: 'blur(40px)', // web only, fallback handled by BlurView overlay
   },
   slideArea: { flex: 1 },
   slide: { width, flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
-  illustrationContainer: { marginBottom: 40, alignItems: 'center' },
+  illustrationContainer: { marginBottom: 50, alignItems: 'center' },
   copyBlock: { alignItems: 'center', width: '100%' },
-  overline: { fontSize: 11, fontWeight: '800', letterSpacing: 2.5, marginBottom: 16, textTransform: 'uppercase' },
-  headline: { fontSize: 40, fontWeight: '900', color: theme.colors.plum, letterSpacing: -1.4, lineHeight: 46, textAlign: 'center', marginBottom: 16 },
-  body: { fontSize: 16, color: theme.colors.text.primary, lineHeight: 26, textAlign: 'center', fontWeight: '600', maxWidth: width * 0.75 },
-  dotsRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, paddingVertical: 20 },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: theme.colors.mauve, opacity: 0.5 },
-  dotActive: { width: 22, height: 6, borderRadius: 3, opacity: 1 },
+  overline: { fontSize: 12, fontFamily: 'Montserrat-Bold', letterSpacing: 2.5, marginBottom: 16, textTransform: 'uppercase' },
+  headline: { fontSize: 42, fontFamily: 'Montserrat-ExtraBold', color: theme.colors.plum, letterSpacing: -1.5, lineHeight: 48, textAlign: 'center', marginBottom: 16 },
+  body: { fontSize: 17, color: theme.colors.text.primary, lineHeight: 28, textAlign: 'center', fontFamily: 'Montserrat-Medium', maxWidth: width * 0.8 },
+  dotsRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, paddingVertical: 24 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: theme.colors.text.disabled, opacity: 0.6 },
+  dotActive: { width: 24, height: 8, borderRadius: 4, opacity: 1 },
   ctaSection: { paddingHorizontal: 28, paddingBottom: 8 },
-  primaryWrap: { borderRadius: 18, overflow: 'hidden', marginBottom: 10 },
-  primaryBtn: { height: 62, alignItems: 'center', justifyContent: 'center', borderRadius: 18 },
-  primaryBtnOutline: { borderWidth: 2, borderColor: theme.colors.mauve },
-  primaryLabel: { fontSize: 17, fontWeight: '700', letterSpacing: -0.2 },
+  primaryWrap: { borderRadius: 20, overflow: 'hidden', marginBottom: 12, shadowColor: theme.colors.plum, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 8 },
+  primaryBtn: { height: 64, alignItems: 'center', justifyContent: 'center', borderRadius: 20 },
+  primaryBtnOutline: { borderWidth: 2, borderColor: 'rgba(255,255,255,0.4)', shadowOpacity: 0, elevation: 0 },
+  primaryLabel: { fontSize: 18, fontFamily: 'Montserrat-Bold', letterSpacing: -0.2 },
   guestBtn: {
-    height: 62,
+    height: 64,
+    borderRadius: 20,
+    marginBottom: 16,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(123, 97, 255, 0.2)',
+  },
+  guestBtnBlur: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
-    backgroundColor: theme.isDark ? 'rgba(140, 160, 185, 0.1)' : 'rgba(123, 97, 255, 0.08)',
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: theme.isDark ? 'rgba(140, 160, 185, 0.15)' : 'rgba(123, 97, 255, 0.15)',
   },
   guestBtnText: {
     color: theme.colors.plum,
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontFamily: 'Montserrat-Bold',
   },
-  signInRow: { height: 46, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  signInText: { fontSize: 15, color: theme.colors.text.primary, fontWeight: '600' },
-  signInAccent: { color: theme.colors.plum, fontWeight: '800' },
+  signInRow: { height: 50, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  signInText: { fontSize: 16, color: theme.colors.text.primary, fontFamily: 'Montserrat-Medium' },
+  signInAccent: { color: theme.colors.plum, fontFamily: 'Montserrat-Bold' },
   trustRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 8,
     marginTop: 16,
-    opacity: 0.7
+    opacity: 0.8
   },
   trustText: {
-    fontSize: 11,
+    fontSize: 12,
     color: theme.colors.text.tertiary,
-    fontWeight: '600',
-    letterSpacing: 0.1
+    fontFamily: 'Montserrat-Medium',
+    letterSpacing: 0.2
   }
 });

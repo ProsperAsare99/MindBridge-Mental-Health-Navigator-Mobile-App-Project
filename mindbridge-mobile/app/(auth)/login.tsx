@@ -18,7 +18,7 @@ import { AuthContext } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import api from '../../src/services/api';
-import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInUp, FadeIn, useSharedValue, useAnimatedStyle, withSequence, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Eye, EyeOff, Mail, ChevronLeft, AlertCircle, Ghost } from 'lucide-react-native';
@@ -52,6 +52,47 @@ export default function LoginScreen() {
   const [focusedField, setFocusedField] = useState<AuthField>('none');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
+  const emailShake = useSharedValue(0);
+  const passwordShake = useSharedValue(0);
+
+  const shake = (field: 'email' | 'password') => {
+    const sv = field === 'email' ? emailShake : passwordShake;
+    sv.value = withSequence(
+      withTiming(-10, { duration: 50 }),
+      withTiming(10, { duration: 50 }),
+      withTiming(-10, { duration: 50 }),
+      withTiming(10, { duration: 50 }),
+      withTiming(0, { duration: 50 })
+    );
+  };
+
+  const emailStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: emailShake.value }]
+  }));
+
+  const passwordStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: passwordShake.value }]
+  }));
+
+  const validateField = (field: 'email' | 'password') => {
+    let newErrors = { ...errors };
+    if (field === 'email') {
+      if (!email) newErrors.email = 'Email is required';
+      else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Please enter a valid email';
+      else delete newErrors.email;
+    }
+    if (field === 'password') {
+      if (!password) newErrors.password = 'Password is required';
+      else if (password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+      else delete newErrors.password;
+    }
+    setErrors(newErrors);
+    
+    if (newErrors[field] && !errors[field]) {
+      shake(field);
+    }
+  };
+
   const validate = () => {
     let valid = true;
     let newErrors: { email?: string; password?: string } = {};
@@ -73,6 +114,8 @@ export default function LoginScreen() {
     }
 
     setErrors(newErrors);
+    if (newErrors.email) shake('email');
+    if (newErrors.password) shake('password');
     return valid;
   };
 
@@ -118,8 +161,9 @@ export default function LoginScreen() {
       />
 
       <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
         style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView 
           contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top, paddingBottom: insets.bottom + 40 }]}
@@ -158,10 +202,14 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <View style={styles.inputWrapper}>
+              <Animated.View style={[styles.inputWrapper, emailStyle]}>
                 <Text style={styles.label}>Email Address</Text>
                 <TextInput
-                  style={[styles.input, errors.email && styles.inputError]}
+                  style={[
+                    styles.input, 
+                    focusedField === 'email' && styles.inputFocused,
+                    errors.email ? styles.inputError : null
+                  ]}
                   placeholder="anna@example.com"
                   placeholderTextColor={themeContext.colors.text.disabled}
                   autoCapitalize="none"
@@ -172,14 +220,21 @@ export default function LoginScreen() {
                     if (errors.email) setErrors({ ...errors, email: undefined });
                   }}
                   onFocus={() => setFocusedField('email')}
-                  onBlur={() => setFocusedField('none')}
+                  onBlur={() => {
+                    setFocusedField('none');
+                    validateField('email');
+                  }}
                 />
                 <ErrorMessage message={errors.email || ''} theme={themeContext} />
-              </View>
+              </Animated.View>
 
-              <View style={styles.inputWrapper}>
+              <Animated.View style={[styles.inputWrapper, passwordStyle]}>
                 <Text style={styles.label}>Password</Text>
-                <View style={[styles.passwordContainer, errors.password && styles.inputError]}>
+                <View style={[
+                  styles.passwordContainer, 
+                  focusedField === 'password' && styles.inputFocused,
+                  errors.password ? styles.inputError : null
+                ]}>
                   <TextInput
                     style={styles.passwordInput}
                     placeholder="••••••••"
@@ -191,7 +246,10 @@ export default function LoginScreen() {
                       if (errors.password) setErrors({ ...errors, password: undefined });
                     }}
                     onFocus={() => setFocusedField('password')}
-                    onBlur={() => setFocusedField('none')}
+                    onBlur={() => {
+                      setFocusedField('none');
+                      validateField('password');
+                    }}
                   />
                   <TouchableOpacity 
                     onPress={() => setShowPassword(!showPassword)}
@@ -205,7 +263,7 @@ export default function LoginScreen() {
                   </TouchableOpacity>
                 </View>
                 <ErrorMessage message={errors.password || ''} theme={themeContext} />
-              </View>
+              </Animated.View>
 
               <TouchableOpacity style={styles.forgotPasswordBtn} onPress={() => Alert.alert('Reset Password', 'Instructions have been sent to your email.')}>
                 <Text style={styles.forgotPasswordText}>Forgot password?</Text>
@@ -368,6 +426,14 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 16,
     color: theme.colors.text.primary,
     fontWeight: '600',
+  },
+  inputFocused: {
+    borderColor: theme.colors.plum,
+    borderWidth: 1.5,
+    shadowColor: theme.colors.plum,
+    shadowOpacity: theme.isDark ? 0.3 : 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
   },
   inputError: { 
     borderWidth: 2,

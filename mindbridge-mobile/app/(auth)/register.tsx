@@ -20,7 +20,7 @@ import { AuthContext } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useRouter } from 'expo-router';
 import api from '../../src/services/api';
-import Animated, { FadeInUp, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInUp, FadeIn, useSharedValue, useAnimatedStyle, withSequence, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Eye, EyeOff, ChevronLeft, GraduationCap, Heart, User, AlertCircle, Search, Check, X } from 'lucide-react-native';
@@ -222,8 +222,70 @@ export default function RegisterScreen() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [focusedField, setFocusedField] = useState<AuthField>('none');
+  const [focusedField, setFocusedField] = useState<AuthField | 'name' | 'username' | 'phoneNumber' | 'confirmPassword'>('none');
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+
+  const usernameShake = useSharedValue(0);
+  const emailShake = useSharedValue(0);
+  const phoneShake = useSharedValue(0);
+  const passwordShake = useSharedValue(0);
+  const confirmPasswordShake = useSharedValue(0);
+
+  const shake = (field: string) => {
+    let sv;
+    if (field === 'username') sv = usernameShake;
+    else if (field === 'email') sv = emailShake;
+    else if (field === 'phoneNumber') sv = phoneShake;
+    else if (field === 'password') sv = passwordShake;
+    else if (field === 'confirmPassword') sv = confirmPasswordShake;
+    
+    if (sv) {
+      sv.value = withSequence(
+        withTiming(-10, { duration: 50 }),
+        withTiming(10, { duration: 50 }),
+        withTiming(-10, { duration: 50 }),
+        withTiming(10, { duration: 50 }),
+        withTiming(0, { duration: 50 })
+      );
+    }
+  };
+
+  const usernameStyle = useAnimatedStyle(() => ({ transform: [{ translateX: usernameShake.value }] }));
+  const emailStyle = useAnimatedStyle(() => ({ transform: [{ translateX: emailShake.value }] }));
+  const phoneStyle = useAnimatedStyle(() => ({ transform: [{ translateX: phoneShake.value }] }));
+  const passwordStyle = useAnimatedStyle(() => ({ transform: [{ translateX: passwordShake.value }] }));
+  const confirmPasswordStyle = useAnimatedStyle(() => ({ transform: [{ translateX: confirmPasswordShake.value }] }));
+
+  const validateField = (field: string) => {
+    let newErrors = { ...errors };
+    if (field === 'username') {
+      if (!username) newErrors.username = 'Username is required';
+      else delete newErrors.username;
+    }
+    if (field === 'email') {
+      if (!email) newErrors.email = 'Email is required';
+      else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Enter a valid email';
+      else delete newErrors.email;
+    }
+    if (field === 'phoneNumber') {
+      if (!phoneNumber) newErrors.phoneNumber = 'Phone number is required';
+      else delete newErrors.phoneNumber;
+    }
+    if (field === 'password') {
+      if (!password) newErrors.password = 'Password is required';
+      else if (password.length < 6) newErrors.password = 'Min 6 characters';
+      else delete newErrors.password;
+    }
+    if (field === 'confirmPassword') {
+      if (password !== confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+      else delete newErrors.confirmPassword;
+    }
+    setErrors(newErrors);
+    
+    if (newErrors[field] && !errors[field]) {
+      shake(field);
+    }
+  };
 
   const validate = () => {
     let newErrors: Record<string, string> = {};
@@ -246,6 +308,7 @@ export default function RegisterScreen() {
     if (!supportTypes.length) { Alert.alert('Selection Required', 'Select at least one support type'); return false; }
 
     setErrors(newErrors);
+    Object.keys(newErrors).forEach(field => shake(field));
     if (!valid) Alert.alert('Check Fields', 'Please correct the errors in the form.');
     return valid;
   };
@@ -284,8 +347,9 @@ export default function RegisterScreen() {
       />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
           contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top, paddingBottom: insets.bottom + 40 }]}
@@ -319,7 +383,7 @@ export default function RegisterScreen() {
               <View style={styles.inputWrapper}>
                 <Text style={styles.label}>Full Name (Optional)</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, focusedField === 'name' && styles.inputFocused]}
                   placeholder="Prosper Shaibu Asare"
                   placeholderTextColor={themeContext.colors.text.disabled}
                   value={name}
@@ -329,23 +393,33 @@ export default function RegisterScreen() {
                 />
               </View>
 
-              <View style={styles.inputWrapper}>
+              <Animated.View style={[styles.inputWrapper, usernameStyle]}>
                 <Text style={styles.label}>Username</Text>
                 <TextInput
-                  style={[styles.input, errors.username && styles.inputError]}
+                  style={[
+                    styles.input, 
+                    focusedField === 'username' && styles.inputFocused,
+                    errors.username ? styles.inputError : null
+                  ]}
                   placeholder="asare09"
                   placeholderTextColor={themeContext.colors.text.disabled}
                   autoCapitalize="none"
                   value={username}
                   onChangeText={(txt) => { setUsername(txt); if (errors.username) setErrors({ ...errors, username: undefined }); }}
+                  onFocus={() => setFocusedField('username')}
+                  onBlur={() => { setFocusedField('none'); validateField('username'); }}
                 />
                 <ErrorMessage message={errors.username} theme={themeContext} />
-              </View>
+              </Animated.View>
 
-              <View style={styles.inputWrapper}>
+              <Animated.View style={[styles.inputWrapper, emailStyle]}>
                 <Text style={styles.label}>Email Address</Text>
                 <TextInput
-                  style={[styles.input, errors.email && styles.inputError]}
+                  style={[
+                    styles.input, 
+                    focusedField === 'email' && styles.inputFocused,
+                    errors.email ? styles.inputError : null
+                  ]}
                   placeholder="anna@example.com"
                   placeholderTextColor={themeContext.colors.text.disabled}
                   autoCapitalize="none"
@@ -353,29 +427,37 @@ export default function RegisterScreen() {
                   value={email}
                   onChangeText={(txt) => { setEmail(txt); if (errors.email) setErrors({ ...errors, email: undefined }); }}
                   onFocus={() => setFocusedField('email')}
-                  onBlur={() => setFocusedField('none')}
+                  onBlur={() => { setFocusedField('none'); validateField('email'); }}
                 />
                 <ErrorMessage message={errors.email} theme={themeContext} />
-              </View>
+              </Animated.View>
 
-              <View style={styles.inputWrapper}>
+              <Animated.View style={[styles.inputWrapper, phoneStyle]}>
                 <Text style={styles.label}>Phone Number</Text>
                 <TextInput
-                  style={[styles.input, errors.phoneNumber && styles.inputError]}
+                  style={[
+                    styles.input, 
+                    focusedField === 'phoneNumber' && styles.inputFocused,
+                    errors.phoneNumber ? styles.inputError : null
+                  ]}
                   placeholder="+233 55 123 4567"
                   placeholderTextColor={themeContext.colors.text.disabled}
                   keyboardType="phone-pad"
                   value={phoneNumber}
                   onChangeText={(txt) => { setPhoneNumber(txt); if (errors.phoneNumber) setErrors({ ...errors, phoneNumber: undefined }); }}
-                  onFocus={() => setFocusedField('none')}
-                  onBlur={() => setFocusedField('none')}
+                  onFocus={() => setFocusedField('phoneNumber')}
+                  onBlur={() => { setFocusedField('none'); validateField('phoneNumber'); }}
                 />
                 <ErrorMessage message={errors.phoneNumber} theme={themeContext} />
-              </View>
+              </Animated.View>
 
-              <View style={styles.inputWrapper}>
+              <Animated.View style={[styles.inputWrapper, passwordStyle]}>
                 <Text style={styles.label}>Password</Text>
-                <View style={[styles.passwordContainer, errors.password && styles.inputError]}>
+                <View style={[
+                  styles.passwordContainer, 
+                  focusedField === 'password' && styles.inputFocused,
+                  errors.password ? styles.inputError : null
+                ]}>
                   <TextInput
                     style={styles.passwordInput}
                     placeholder="••••••••"
@@ -384,27 +466,33 @@ export default function RegisterScreen() {
                     value={password}
                     onChangeText={(txt) => { setPassword(txt); if (errors.password) setErrors({ ...errors, password: undefined }); }}
                     onFocus={() => setFocusedField('password')}
-                    onBlur={() => setFocusedField('none')}
+                    onBlur={() => { setFocusedField('none'); validateField('password'); }}
                   />
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
                     {showPassword ? <EyeOff color={themeContext.colors.text.disabled} size={22} /> : <Eye color={themeContext.colors.text.disabled} size={22} />}
                   </TouchableOpacity>
                 </View>
                 <ErrorMessage message={errors.password} theme={themeContext} />
-              </View>
+              </Animated.View>
 
-              <View style={styles.inputWrapper}>
+              <Animated.View style={[styles.inputWrapper, confirmPasswordStyle]}>
                 <Text style={styles.label}>Confirm Password</Text>
                 <TextInput
-                  style={[styles.input, errors.confirmPassword && styles.inputError]}
+                  style={[
+                    styles.input, 
+                    focusedField === 'confirmPassword' && styles.inputFocused,
+                    errors.confirmPassword ? styles.inputError : null
+                  ]}
                   placeholder="••••••••"
                   placeholderTextColor={themeContext.colors.text.disabled}
                   secureTextEntry={!showPassword}
                   value={confirmPassword}
                   onChangeText={(txt) => { setConfirmPassword(txt); if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined }); }}
+                  onFocus={() => setFocusedField('confirmPassword')}
+                  onBlur={() => { setFocusedField('none'); validateField('confirmPassword'); }}
                 />
                 <ErrorMessage message={errors.confirmPassword} theme={themeContext} />
-              </View>
+              </Animated.View>
             </FormSection>
 
             <FormSection title="Academic Context" icon={GraduationCap} theme={themeContext}>
@@ -549,6 +637,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   inputWrapper: { gap: 8 },
   label: { color: theme.colors.text.primary, fontSize: 13, fontWeight: '700', marginLeft: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
   input: { backgroundColor: theme.colors.background, color: theme.colors.text.primary, fontSize: 16, fontWeight: '600', height: 60, borderRadius: 16, paddingHorizontal: 20, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+  inputFocused: {
+    borderColor: theme.colors.plum,
+    borderWidth: 1.5,
+    shadowColor: theme.colors.plum,
+    shadowOpacity: theme.isDark ? 0.3 : 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
   inputError: { borderColor: theme.colors.semantic.danger, borderWidth: 2 },
   errorRow: { flexDirection: 'row', alignItems: 'center', marginLeft: 4, marginTop: 4 },
   errorText: { color: theme.colors.semantic.danger, fontSize: 13, fontWeight: '600' },

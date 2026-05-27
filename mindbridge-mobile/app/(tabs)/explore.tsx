@@ -785,7 +785,7 @@ const ArticleModal = ({ article, visible, onClose, theme }: any) => {
         </View>
         <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
           <View style={[styles.modalIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
-            <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={32} />
+            <IconComponent color={theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={32} />
           </View>
           <Text style={[styles.modalTitle, { color: theme.colors.text.primary }]}>{article.title}</Text>
           <View style={styles.modalMeta}>
@@ -815,14 +815,14 @@ const TechniqueModal = ({ technique, visible, onClose, theme, router }: any) => 
           <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
             <X color={theme.colors.text.secondary} size={22} />
           </TouchableOpacity>
-          <View style={[styles.modalCategoryBadge, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '15' }]}>
+          <View style={[styles.modalCategoryBadge, { backgroundColor: (theme.colors.accents[technique.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '15' }]}>
             <Text style={[styles.modalCategoryText, { color: theme.colors.plum }]}>{technique.tag}</Text>
           </View>
           <View style={{ width: 36 }} />
         </View>
         <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
-          <View style={[styles.modalIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
-            <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={32} />
+          <View style={[styles.modalIconWrap, { backgroundColor: (theme.colors.accents[technique.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+            <IconComponent color={theme.colors.accents[technique.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={32} />
           </View>
           <Text style={[styles.modalTitle, { color: theme.colors.text.primary }]}>{technique.title}</Text>
           <View style={styles.modalMeta}>
@@ -834,7 +834,7 @@ const TechniqueModal = ({ technique, visible, onClose, theme, router }: any) => 
           <Text style={[styles.stepsTitle, { color: theme.colors.text.primary }]}>How to do it</Text>
           {technique.steps.map((step: string, i: number) => (
             <View key={i} style={styles.stepRow}>
-              <View style={[styles.stepNum, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '15' }]}>
+              <View style={[styles.stepNum, { backgroundColor: (theme.colors.accents[technique.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '15' }]}>
                 <Text style={[styles.stepNumText, { color: theme.colors.plum }]}>{i + 1}</Text>
               </View>
               <Text style={[styles.stepText, { color: theme.colors.text.secondary }]}>{step}</Text>
@@ -982,7 +982,7 @@ export default function ResourcesScreen() {
         {activeCategory === 'all' && (
           <Animated.View entering={FadeInUp.delay(80).duration(600)} style={styles.featuredWrap}>
             <View style={[styles.featuredCard, { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]}>
-              <View style={[styles.featuredBadge, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '15' }]}>
+              <View style={[styles.featuredBadge, { backgroundColor: (theme.colors.plum) + '15' }]}>
                 <Star color={theme.colors.plum} size={11} fill={theme.colors.plum} />
                 <Text style={[styles.featuredBadgeText, { color: theme.colors.plum }]}>{FEATURED.category}</Text>
               </View>
@@ -996,7 +996,7 @@ export default function ResourcesScreen() {
                   <Text style={[styles.featuredMetaText, { color: theme.colors.text.tertiary }]}>{FEATURED.readTime}</Text>
                 </View>
                 <TouchableOpacity
-                  style={[styles.featuredBtn, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '15' }]}
+                  style={[styles.featuredBtn, { backgroundColor: (theme.colors.plum) + '15' }]}
                   onPress={() => setFeaturedExpanded(!featuredExpanded)}
                 >
                   <Text style={[styles.featuredBtnText, { color: theme.colors.plum }]}>{featuredExpanded ? 'Collapse' : 'Read Now'}</Text>
@@ -1060,8 +1060,8 @@ export default function ResourcesScreen() {
                       onPress={() => openTechnique(t)}
                     >
                       <View style={styles.techniqueCardTop}>
-                        <View style={[styles.techniqueIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
-                          <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={22} strokeWidth={2} />
+                        <View style={[styles.techniqueIconWrap, { backgroundColor: (theme.colors.accents[t.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+                          <IconComponent color={theme.colors.accents[t.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={22} strokeWidth={2} />
                         </View>
                         <View style={[styles.techniqueTagBadge, { backgroundColor: theme.colors.backgroundSecondary }]}>
                           <Text style={[styles.techniqueTagText, { color: theme.colors.text.secondary }]}>{t.tag}</Text>
@@ -1074,7 +1074,7 @@ export default function ResourcesScreen() {
                           <Clock color={theme.colors.text.tertiary} size={12} />
                           <Text style={[styles.techDurationText, { color: theme.colors.text.tertiary }]}>{t.duration}</Text>
                         </View>
-                        <View style={[styles.techniqueReadMore, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+                        <View style={[styles.techniqueReadMore, { backgroundColor: (theme.colors.accents[t.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
                           <Text style={[styles.techniqueReadMoreText, { color: theme.colors.accents[t.color as keyof typeof theme.colors.accents] || theme.colors.plum }]}>Learn More</Text>
                           <ChevronRight color={theme.colors.plum} size={12} />
                         </View>
@@ -1148,7 +1148,7 @@ export default function ResourcesScreen() {
                     activeOpacity={0.8}
                   >
                     <View style={[styles.articleIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
-                      <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={20} />
+                      <IconComponent color={theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={20} />
                     </View>
                     <View style={styles.articleText}>
                       <View style={styles.articleTopRow}>
@@ -1197,8 +1197,8 @@ export default function ResourcesScreen() {
                       activeOpacity={0.82}
                       onPress={() => openMeditation(med)}
                     >
-                      <View style={[styles.audioIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
-                        <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={24} />
+                      <View style={[styles.audioIconWrap, { backgroundColor: (theme.colors.accents[med.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+                        <IconComponent color={theme.colors.accents[med.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={24} />
                       </View>
                       <View style={[styles.audioTagBadge, { backgroundColor: theme.colors.backgroundSecondary }]}>
                         <Text style={[styles.audioTagText, { color: theme.colors.text.secondary }]}>{med.tag}</Text>
@@ -1238,8 +1238,8 @@ export default function ResourcesScreen() {
                       onPress={() => openInBrowser(pod.url)}
                       activeOpacity={0.8}
                     >
-                      <View style={[styles.articleIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
-                        <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={20} />
+                      <View style={[styles.articleIconWrap, { backgroundColor: (theme.colors.accents[pod.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+                        <IconComponent color={theme.colors.accents[pod.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={20} />
                       </View>
                       <View style={styles.articleText}>
                         <View style={styles.articleTopRow}>
@@ -1280,7 +1280,7 @@ export default function ResourcesScreen() {
                     >
                       {/* Thumbnail */}
                       <View
-                        style={[styles.videoThumb, { backgroundColor: (theme.colors.accents[meditation.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '20' }]}
+                        style={[styles.videoThumb, { backgroundColor: theme.colors.plum + '20' }]}
                       >
                         <View style={styles.videoPlayCircle}>
                           <Play color="#FFF" size={20} fill="#FFF" />
@@ -1330,14 +1330,14 @@ export default function ResourcesScreen() {
                     }}
                     activeOpacity={0.82}
                   >
-                    <View style={[styles.crisisIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
-                      <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={22} />
+                    <View style={[styles.crisisIconWrap, { backgroundColor: (theme.colors.plum) + '10' }]}>
+                      <IconComponent color={theme.colors.plum} size={22} />
                     </View>
                     <View style={styles.crisisInfo}>
                       <Text style={[styles.crisisName, { color: theme.colors.text.primary }]}>{r.title}</Text>
                       <Text style={[styles.crisisSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={1}>{r.subtitle}</Text>
                       <View style={styles.crisisMetaRow}>
-                        <View style={[styles.crisisAvailBadge, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+                        <View style={[styles.crisisAvailBadge, { backgroundColor: (theme.colors.plum) + '10' }]}>
                           <CheckCircle color={theme.colors.plum} size={11} />
                           <Text style={[styles.crisisAvailText, { color: theme.colors.plum }]}>{r.available}</Text>
                         </View>

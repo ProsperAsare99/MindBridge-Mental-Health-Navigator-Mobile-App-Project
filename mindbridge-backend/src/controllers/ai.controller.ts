@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { generateOracleResponse, generateProactiveInsights } from '../services/gemini.service.js';
+import { generateOracleResponse, generateProactiveInsights, analyzeVoiceAudio } from '../services/gemini.service.js';
 import { AiRepository } from '../repositories/ai.repository.js';
 
 const prisma = new PrismaClient();
@@ -298,5 +298,21 @@ export const getProactiveInsights = async (req: Request, res: Response) => {
         icon: "Heart"
       }
     });
+  }
+};
+
+export const analyzeVoice = async (req: Request, res: Response) => {
+  try {
+    const { audioBase64, mimeType } = req.body;
+    
+    if (!audioBase64) {
+      return res.status(400).json({ error: 'audioBase64 is required' });
+    }
+
+    const metrics = await analyzeVoiceAudio(audioBase64, mimeType || 'audio/m4a');
+    res.json(metrics);
+  } catch (error) {
+    console.error('Error analyzing voice:', error);
+    res.status(500).json({ error: 'Failed to analyze voice tone' });
   }
 };

@@ -64,6 +64,7 @@ model MoodLog {
   note             String?
   steps            Int?
   facialMetrics    Json?
+  vocalMetrics     Json?
   createdAt        DateTime @default(now())
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -75,6 +76,7 @@ model Journal {
   content   String
   mood      String?
   audioUrl  String?
+  vocalMetrics Json?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

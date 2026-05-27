@@ -20,7 +20,7 @@ export const getEntries = async (req: Request, res: Response) => {
 export const createEntry = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
-    const { title, content, mood, audioUrl } = req.body;
+    const { title, content, mood, audioUrl, vocalMetrics } = req.body;
     
     if (!content) {
       return res.status(400).json({ error: 'Content is required' });
@@ -33,6 +33,7 @@ export const createEntry = async (req: Request, res: Response) => {
         content,
         mood,
         audioUrl,
+        vocalMetrics,
       } as any,
     });
 

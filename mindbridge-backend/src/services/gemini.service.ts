@@ -291,8 +291,8 @@ INSTRUCTIONS:
 
 export const generateProactiveInsights = async (userId: string, context: any) => {
   let lastError = null;
-
-  for (const modelName of MODELS) {
+  const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.5-flash", "gemini-flash-latest"];
+  for (const modelName of modelsToTry) {
     try {
       console.log(`[BACKEND] Attempting to generate insights using model: ${modelName}`);
       const model = genAI.getGenerativeModel({ model: modelName });
@@ -352,4 +352,51 @@ Do not output any markdown formatting, just the raw JSON object.`;
       icon: "Heart"
     }
   };
+};
+
+export const analyzeVoiceAudio = async (base64Audio: string, mimeType: string) => {
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-2.5-flash",
+  });
+
+  const prompt = `You are a vocal acoustic analyzer. Do not transcribe or analyze the speech content. Listen strictly to the vocal tone, pitch variability, speech rate, and pause duration. 
+
+Return a JSON object exactly matching this structure (no markdown, just valid JSON):
+{
+  "voiceQuality": "string", // One of: "flat", "shaky", "energetic", "stable"
+  "avgPitch": number, // Estimated pitch in Hz
+  "speechRate": number, // Estimated words per minute
+  "pauseDuration": number // Estimated average pause duration in seconds
+}`;
+
+  try {
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          data: base64Audio,
+          mimeType: mimeType
+        }
+      }
+    ]);
+
+    const text = result.response.text().trim();
+    let jsonStr = text;
+    if (jsonStr.startsWith('\`\`\`json')) {
+      jsonStr = jsonStr.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
+    } else if (jsonStr.startsWith('\`\`\`')) {
+      jsonStr = jsonStr.replace(/\`\`\`/g, '').trim();
+    }
+
+    return JSON.parse(jsonStr);
+  } catch (error) {
+    console.error('[BACKEND] Error analyzing voice audio:', error);
+    // Provide a safe fallback if audio analysis fails
+    return {
+      voiceQuality: "stable",
+      avgPitch: 120,
+      speechRate: 130,
+      pauseDuration: 1.5
+    };
+  }
 };

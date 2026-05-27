@@ -42,10 +42,14 @@ import {
   Meh,
   Heart,
   Frown,
-  Moon
+  Moon,
+  Camera,
+  Activity
 } from 'lucide-react-native';
+import * as FileSystem from 'expo-file-system';
 
 import api from '../../src/services/api';
+import { VideoCheckInModal } from '../../src/components/VideoCheckInModal';
 
 const { width } = Dimensions.get('window');
 
@@ -76,6 +80,14 @@ export default function JournalScreen() {
   const micScale = useSharedValue(1);
   const animatedMicStyle = useAnimatedStyle(() => ({ transform: [{ scale: micScale.value }] }));
 
+  // Video Check-in
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [facialMetrics, setFacialMetrics] = useState<any>(null);
+  
+  // Voice Analysis
+  const [isAnalyzingVoice, setIsAnalyzingVoice] = useState(false);
+  const [vocalMetrics, setVocalMetrics] = useState<any>(null);
+
   const MOOD_OPTIONS = [
     { id: 'joy', icon: Sun, color: theme.colors.accents.gentlePeach, label: 'Joyful' },
     { id: 'calm', icon: Wind, color: theme.colors.accents.eucalyptus, label: 'Calm' },
@@ -98,6 +110,28 @@ export default function JournalScreen() {
       case 'hopeful': return <Smile color={theme.colors.accents.softMint} size={16} />;
       case 'peaceful': return <Heart color={theme.colors.accents.dustyRose} size={16} />;
       default: return <Sun color={theme.colors.accents.gentlePeach} size={16} />;
+    }
+  };
+
+  const handleAnalyzeVoice = async () => {
+    if (!audioUri) return;
+    try {
+      setIsAnalyzingVoice(true);
+      const base64Audio = await FileSystem.readAsStringAsync(audioUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const response = await api.post('/ai/analyze-voice', {
+        audioBase64: base64Audio,
+        mimeType: 'audio/m4a'
+      });
+
+      setVocalMetrics(response.data);
+    } catch (error) {
+      console.error('Error analyzing voice:', error);
+      Alert.alert("Analysis Failed", "Could not analyze voice tone at this time.");
+    } finally {
+      setIsAnalyzingVoice(false);
     }
   };
 
@@ -211,6 +245,8 @@ export default function JournalScreen() {
         content: newContent.trim(),
         mood: selectedMood,
         audioUrl: audioUri,
+        facialMetrics: facialMetrics,
+        vocalMetrics: vocalMetrics,
       });
       
       setEntries([response.data, ...entries]);
@@ -219,6 +255,8 @@ export default function JournalScreen() {
       setNewContent('');
       setSelectedMood('calm');
       setAudioUri(null);
+      setFacialMetrics(null);
+      setVocalMetrics(null);
     } catch (error) {
       console.error('Error saving journal entry:', error);
     }
@@ -481,39 +519,85 @@ export default function JournalScreen() {
               />
             </View>
 
-            {/* Audio Recording UI */}
-            <View style={styles.audioComposer}>
-              {audioUri ? (
-                <View style={styles.audioPreviewActive}>
-                  <TouchableOpacity onPress={() => playSound(audioUri, 'new')} style={styles.playIconBtn}>
-                    {isPlaying === 'new' ? <Pause color="#FFF" size={20} /> : <Play color="#FFF" size={20} />}
-                  </TouchableOpacity>
-                  <Text style={styles.audioPreviewText}>Voice recorded</Text>
-                  <TouchableOpacity onPress={() => setAudioUri(null)} style={styles.removeAudioBtn}>
-                    <X color={theme.colors.text.tertiary} size={16} />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={styles.recordingSection}>
+            {/* Sensor & Media Integration UI */}
+            <View style={styles.mediaRow}>
+              <View style={[styles.audioComposer, { flex: 1 }]}>
+                {audioUri ? (
+                  <View style={{ gap: 8, flex: 1 }}>
+                    <View style={styles.audioPreviewActive}>
+                      <TouchableOpacity onPress={() => playSound(audioUri, 'new')} style={styles.playIconBtn}>
+                        {isPlaying === 'new' ? <Pause color="#FFF" size={20} /> : <Play color="#FFF" size={20} />}
+                      </TouchableOpacity>
+                      <Text style={styles.audioPreviewText} numberOfLines={1}>Voice Note</Text>
+                      <TouchableOpacity onPress={() => { setAudioUri(null); setVocalMetrics(null); }} style={styles.removeAudioBtn}>
+                        <X color={theme.colors.text.tertiary} size={16} />
+                      </TouchableOpacity>
+                    </View>
+                    
+                    {/* Voice Analysis Button / Result */}
+                    {!vocalMetrics ? (
+                      <TouchableOpacity 
+                        style={[styles.mediaBtn, { backgroundColor: theme.colors.plum + '20', padding: 10 }]} 
+                        onPress={handleAnalyzeVoice}
+                        disabled={isAnalyzingVoice}
+                      >
+                        {isAnalyzingVoice ? (
+                          <ActivityIndicator size="small" color={theme.colors.plum} />
+                        ) : (
+                          <>
+                            <Activity color={theme.colors.plum} size={18} />
+                            <Text style={[styles.mediaBtnText, { color: theme.colors.plum, fontSize: 13 }]}>Analyze Tone</Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    ) : (
+                      <View style={[styles.mediaBtn, { backgroundColor: 'rgba(52, 211, 153, 0.15)', padding: 10 }]}>
+                        <Check color="#34D399" size={18} />
+                        <Text style={[styles.mediaBtnText, { color: '#34D399', fontSize: 13 }]}>
+                          Tone: {vocalMetrics.voiceQuality}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                ) : (
                   <TouchableOpacity 
                     onPress={isRecording ? stopRecording : startRecording}
-                    style={[styles.micBtn, isRecording && styles.micBtnRecording]}
+                    style={[styles.mediaBtn, isRecording && styles.micBtnRecording]}
                   >
                     <Animated.View style={animatedMicStyle}>
-                      {isRecording ? <StopCircle color="#FFF" size={28} /> : <Mic color="#FFF" size={28} />}
+                      {isRecording ? <StopCircle color="#FFF" size={24} /> : <Mic color={theme.colors.text.secondary} size={24} />}
                     </Animated.View>
+                    <Text style={[styles.mediaBtnText, { color: isRecording ? '#FFF' : theme.colors.text.secondary }]}>
+                      {isRecording ? "Recording..." : "Voice"}
+                    </Text>
                   </TouchableOpacity>
-                  <Text style={styles.recordingLabel}>
-                    {isRecording ? "Recording... Tap to stop" : "Tap to add voice"}
-                  </Text>
-                </View>
-              )}
+                )}
+              </View>
+
+              <TouchableOpacity 
+                onPress={() => setShowVideoModal(true)}
+                style={[styles.mediaBtn, { flex: 1, backgroundColor: facialMetrics ? 'rgba(52, 211, 153, 0.15)' : (theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)') }]}
+              >
+                {facialMetrics ? <Check color="#34D399" size={24} /> : <Camera color={theme.colors.text.secondary} size={24} />}
+                <Text style={[styles.mediaBtnText, { color: facialMetrics ? "#34D399" : theme.colors.text.secondary }]}>
+                  {facialMetrics ? "Face Logged" : "Face Scan"}
+                </Text>
+              </TouchableOpacity>
             </View>
             </ScrollView>
           </KeyboardAvoidingView>
         </Animated.View>
       )}
-
+      {/* Video Check In Modal */}
+      <VideoCheckInModal
+        visible={showVideoModal}
+        theme={theme}
+        onClose={() => setShowVideoModal(false)}
+        onComplete={(metrics) => {
+          setFacialMetrics(metrics);
+          setShowVideoModal(false);
+        }}
+      />
     </View>
   );
 }
@@ -889,5 +973,23 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   removeAudioBtn: {
     padding: 4,
+  },
+  mediaRow: { 
+    flexDirection: 'row', 
+    width: '100%', 
+    gap: 12 
+  },
+  mediaBtn: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    gap: 8, 
+    padding: 14, 
+    borderRadius: 16, 
+    width: '100%' 
+  },
+  mediaBtnText: { 
+    fontSize: 14, 
+    fontFamily: theme.typography.fonts.header 
   }
 });

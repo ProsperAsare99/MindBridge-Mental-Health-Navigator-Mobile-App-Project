@@ -33,7 +33,9 @@ export const createMoodLog = async (req: Request, res: Response) => {
       location, 
       audioUrl, 
       note,
-      steps
+      steps,
+      facialMetrics,
+      vocalMetrics
     } = req.body;
     
     if (score === undefined || !emotions) {
@@ -55,6 +57,8 @@ export const createMoodLog = async (req: Request, res: Response) => {
         audioUrl,
         note,
         steps,
+        facialMetrics,
+        vocalMetrics
       },
     });
 

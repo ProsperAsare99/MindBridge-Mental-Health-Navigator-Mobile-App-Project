@@ -51,7 +51,8 @@ import {
   Smile,
   Zap,
   Users,
-  Brain
+  Brain,
+  Camera
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -60,6 +61,7 @@ import { useRouter } from 'expo-router';
 import api from '../../src/services/api';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useAudioRecorder, useAudioRecorderState, createAudioPlayer, AudioPlayer, requestRecordingPermissionsAsync, RecordingPresets, setAudioModeAsync } from 'expo-audio';
+import * as FileSystem from 'expo-file-system';
 import * as Location from 'expo-location';
 import { Pedometer } from 'expo-sensors';
 import {
@@ -68,6 +70,7 @@ import {
   SocialPicker,
   SymptomCloud
 } from '../../src/components/TrackingComponents';
+import { VideoCheckInModal } from '../../src/components/VideoCheckInModal';
 
 const { width } = Dimensions.get('window');
 const CHART_W = width - 96;
@@ -160,6 +163,14 @@ export default function WellnessTrackerScreen() {
   const [audioUri, setAudioUri] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [player, setPlayer] = useState<AudioPlayer | null>(null);
+
+  // Video Check-in
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [facialMetrics, setFacialMetrics] = useState<any>(null);
+
+  // Voice Analysis
+  const [isAnalyzingVoice, setIsAnalyzingVoice] = useState(false);
+  const [vocalMetrics, setVocalMetrics] = useState<any>(null);
 
   useEffect(() => {
     fetchData();
@@ -336,7 +347,30 @@ export default function WellnessTrackerScreen() {
       player.remove();
     }
     setAudioUri(null);
+    setVocalMetrics(null);
     setIsPlaying(false);
+  };
+
+  const handleAnalyzeVoice = async () => {
+    if (!audioUri) return;
+    try {
+      setIsAnalyzingVoice(true);
+      const base64Audio = await FileSystem.readAsStringAsync(audioUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const response = await api.post('/ai/analyze-voice', {
+        audioBase64: base64Audio,
+        mimeType: 'audio/m4a'
+      });
+
+      setVocalMetrics(response.data);
+    } catch (error) {
+      console.error('Error analyzing voice:', error);
+      Alert.alert("Analysis Failed", "Could not analyze voice tone at this time.");
+    } finally {
+      setIsAnalyzingVoice(false);
+    }
   };
 
   const handleLog = async () => {
@@ -371,6 +405,8 @@ export default function WellnessTrackerScreen() {
         note,
         audioUrl: audioUri,
         steps: currentSteps,
+        facialMetrics: facialMetrics,
+        vocalMetrics: vocalMetrics,
       });
       setStep(5);
       setTotalCount(prev => prev + 1);
@@ -571,35 +607,73 @@ export default function WellnessTrackerScreen() {
           {isRecording ? (
             <TouchableOpacity
               onPress={stopRecording}
-              style={[styles.mediaBtn, { backgroundColor: '#EF4444' }]}
+              style={[styles.mediaBtn, { backgroundColor: '#EF4444', flex: 1 }]}
             >
               <StopCircle size={20} color="#FFF" />
               <Text style={[styles.mediaBtnText, { color: '#FFF' }]}>Stop Recording</Text>
             </TouchableOpacity>
           ) : audioUri ? (
-            <View style={styles.playbackContainer}>
-              <TouchableOpacity
-                onPress={playSound}
-                style={[styles.mediaBtn, { backgroundColor: theme.colors.plum, flex: 1 }]}
-              >
-                <Activity size={20} color="#FFF" />
-                <Text style={[styles.mediaBtnText, { color: '#FFF' }]}>{isPlaying ? 'Pause Voice Note' : 'Play Voice Note'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={deleteSound}
-                style={styles.deleteAudioBtn}
-              >
-                <Text style={{ color: '#EF4444', fontWeight: '800' }}>Delete</Text>
-              </TouchableOpacity>
+            <View style={{ flex: 1, gap: 12 }}>
+              <View style={styles.playbackContainer}>
+                <TouchableOpacity
+                  onPress={playSound}
+                  style={[styles.mediaBtn, { backgroundColor: theme.colors.plum, flex: 1 }]}
+                >
+                  <Activity size={20} color="#FFF" />
+                  <Text style={[styles.mediaBtnText, { color: '#FFF' }]}>{isPlaying ? 'Pause' : 'Play'}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={deleteSound}
+                  style={styles.deleteAudioBtn}
+                >
+                  <Text style={{ color: '#EF4444', fontWeight: '800' }}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+
+              {!vocalMetrics ? (
+                <TouchableOpacity 
+                  style={[styles.mediaBtn, { backgroundColor: theme.colors.plum + '20', padding: 12 }]} 
+                  onPress={handleAnalyzeVoice}
+                  disabled={isAnalyzingVoice}
+                >
+                  {isAnalyzingVoice ? (
+                    <ActivityIndicator size="small" color={theme.colors.plum} />
+                  ) : (
+                    <>
+                      <Activity color={theme.colors.plum} size={18} />
+                      <Text style={[styles.mediaBtnText, { color: theme.colors.plum, fontSize: 13 }]}>Analyze Tone</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              ) : (
+                <View style={[styles.mediaBtn, { backgroundColor: 'rgba(52, 211, 153, 0.15)', padding: 12 }]}>
+                  <CheckCircle2 color="#34D399" size={18} />
+                  <Text style={[styles.mediaBtnText, { color: '#34D399', fontSize: 13 }]}>
+                    Tone: {vocalMetrics.voiceQuality}
+                  </Text>
+                </View>
+              )}
             </View>
           ) : (
-            <TouchableOpacity
-              onPress={startRecording}
-              style={[styles.mediaBtn, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }]}
-            >
-              <Mic size={20} color={theme.colors.text.secondary} />
-              <Text style={[styles.mediaBtnText, { color: theme.colors.text.secondary }]}>Record Voice</Text>
-            </TouchableOpacity>
+            <>
+              <TouchableOpacity
+                onPress={startRecording}
+                style={[styles.mediaBtn, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)', flex: 1 }]}
+              >
+                <Mic size={20} color={theme.colors.text.secondary} />
+                <Text style={[styles.mediaBtnText, { color: theme.colors.text.secondary }]}>Audio</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => setShowVideoModal(true)}
+                style={[styles.mediaBtn, { backgroundColor: facialMetrics ? 'rgba(52, 211, 153, 0.15)' : (theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'), flex: 1 }]}
+              >
+                {facialMetrics ? <CheckCircle2 size={20} color="#34D399" /> : <Camera size={20} color={theme.colors.text.secondary} />}
+                <Text style={[styles.mediaBtnText, { color: facialMetrics ? "#34D399" : theme.colors.text.secondary }]}>
+                  {facialMetrics ? 'Face Logged' : 'Face Scan'}
+                </Text>
+              </TouchableOpacity>
+            </>
           )}
         </View>
 
@@ -973,6 +1047,17 @@ export default function WellnessTrackerScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Video Check In Modal */}
+      <VideoCheckInModal
+        visible={showVideoModal}
+        theme={theme}
+        onClose={() => setShowVideoModal(false)}
+        onComplete={(metrics) => {
+          setFacialMetrics(metrics);
+          setShowVideoModal(false);
+        }}
+      />
     </View>
   );
 }

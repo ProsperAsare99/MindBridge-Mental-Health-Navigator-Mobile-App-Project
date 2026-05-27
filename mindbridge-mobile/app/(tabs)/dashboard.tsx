@@ -722,7 +722,7 @@ export default function DashboardScreen() {
               title="Crisis Support" 
               subtitle="24/7 Help"
               icon={ShieldAlert} 
-              color={theme.colors.accents.terracotta} 
+              color={theme.colors.semantic.danger} 
               delay={550}
               theme={theme} 
               styles={styles}

@@ -540,7 +540,7 @@ const CRISIS_RESOURCES = [
     subtitle: 'University of Ghana official counseling',
     detail: 'Mental health, academic, and career counseling',
     phone: '+233 (0) 245 945 752',
-    color: '#8B5CF6',
+    color: '#EF4444',
     icon: Users,
     available: 'Mon–Fri, 8am–5pm',
   },
@@ -550,7 +550,7 @@ const CRISIS_RESOURCES = [
     subtitle: 'Kwame Nkrumah University counseling',
     detail: 'Professional psychological support for students',
     phone: '+233 50 644 9747',
-    color: '#06B6D4',
+    color: '#EF4444',
     icon: Shield,
     available: 'Mon–Fri, 9am–4pm',
   },
@@ -560,7 +560,7 @@ const CRISIS_RESOURCES = [
     subtitle: 'National mental health regulatory body',
     detail: 'Referrals to mental health facilities nationwide',
     phone: '+233 302 664 646',
-    color: '#10B981',
+    color: '#EF4444',
     icon: Globe,
     available: 'Mon–Fri, 8am–5pm',
   },
@@ -1376,12 +1376,12 @@ export default function ResourcesScreen() {
               );
             })}
             <TouchableOpacity
-              style={[styles.viewCrisisAllBtn, { borderColor: theme.colors.plum + '40' }]}
+              style={[styles.viewCrisisAllBtn, { borderColor: '#EF4444', backgroundColor: '#EF4444' }]}
               onPress={() => router.push('/(tabs)/crisis')}
             >
-              <Shield color={theme.colors.plum} size={16} />
-              <Text style={[styles.viewCrisisAllText, { color: theme.colors.plum }]}>View Full Crisis Support Page</Text>
-              <ChevronRight color={theme.colors.plum} size={16} />
+              <Shield color="#FFF" size={16} />
+              <Text style={[styles.viewCrisisAllText, { color: '#FFF' }]}>View Full Crisis Support Page</Text>
+              <ChevronRight color="#FFF" size={16} />
             </TouchableOpacity>
           </Animated.View>
         )}

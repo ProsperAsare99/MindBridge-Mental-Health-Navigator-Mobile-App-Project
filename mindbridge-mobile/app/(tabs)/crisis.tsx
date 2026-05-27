@@ -314,21 +314,21 @@ export default function CrisisSupportScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(700).duration(500)} style={styles.section}>
-          <Text style={styles.sectionTitle}>National Crisis Fallbacks</Text>
+          <Text style={[styles.sectionTitle, { color: themeContext.colors.semantic.danger }]}>National Crisis Fallbacks</Text>
           
           <TouchableOpacity 
-            style={styles.fallbackCard}
+            style={[styles.fallbackCard, { backgroundColor: themeContext.colors.semantic.danger, borderColor: themeContext.colors.semantic.danger }]}
             onPress={() => handleCall('112')}
             activeOpacity={0.8}
           >
-            <View style={[styles.serviceIconWrap, { backgroundColor: themeContext.colors.semantic.danger + '20' }]}>
-              <Phone color={themeContext.colors.semantic.danger} size={22} />
+            <View style={[styles.serviceIconWrap, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+              <Phone color="#FFF" size={22} />
             </View>
             <View style={styles.serviceInfo}>
-              <Text style={styles.serviceTitle}>National Emergency (112)</Text>
-              <Text style={styles.serviceDesc}>Police, Fire, Ambulance (24/7)</Text>
+              <Text style={[styles.serviceTitle, { color: '#FFF' }]}>National Emergency (112)</Text>
+              <Text style={[styles.serviceDesc, { color: 'rgba(255,255,255,0.8)' }]}>Police, Fire, Ambulance (24/7)</Text>
             </View>
-            <PhoneForwarded color={themeContext.colors.text.disabled} size={20} />
+            <PhoneForwarded color="#FFF" size={20} />
           </TouchableOpacity>
 
         </Animated.View>

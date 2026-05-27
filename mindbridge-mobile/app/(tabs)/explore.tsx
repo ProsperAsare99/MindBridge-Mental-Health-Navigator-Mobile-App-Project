@@ -524,6 +524,7 @@ const VIDEO_RESOURCES = [
 ];
 
 const CRISIS_RESOURCES = [
+  // TODO: In a future update, fetch these resources dynamically based on the user's selected institution.
   {
     id: 'befrienders',
     title: 'Befrienders Ghana',
@@ -543,16 +544,6 @@ const CRISIS_RESOURCES = [
     color: '#E60000',
     icon: Users,
     available: 'Mon–Fri, 8am–5pm',
-  },
-  {
-    id: 'knust-counseling',
-    title: 'KNUST Counseling Centre',
-    subtitle: 'Kwame Nkrumah University counseling',
-    detail: 'Professional psychological support for students',
-    phone: '+233 50 644 9747',
-    color: '#E60000',
-    icon: Shield,
-    available: 'Mon–Fri, 9am–4pm',
   },
   {
     id: 'mental-health-authority',
@@ -670,14 +661,11 @@ const AudioPlayerModal = ({ meditation, visible, onClose, theme }: any) => {
 
         <View style={styles.playerBody}>
           {/* Album Art */}
-          <LinearGradient
-            colors={[meditation.color + '40', meditation.color + '15']}
-            style={styles.playerArtwork}
-          >
-            <View style={[styles.playerArtworkIcon, { backgroundColor: meditation.color + '30' }]}>
-              <IconComponent color={meditation.color} size={52} strokeWidth={1.5} />
+          <View style={[styles.playerArtwork, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
+            <View style={[styles.playerArtworkIcon, { backgroundColor: theme.colors.plum + '20' }]}>
+              <IconComponent color={theme.colors.plum} size={52} strokeWidth={1.5} />
             </View>
-          </LinearGradient>
+          </View>
 
           <Text style={[styles.playerTitle, { color: theme.colors.text.primary }]}>{meditation.title}</Text>
           <Text style={[styles.playerHost, { color: theme.colors.text.secondary }]}>{meditation.host}</Text>
@@ -685,11 +673,11 @@ const AudioPlayerModal = ({ meditation, visible, onClose, theme }: any) => {
           {/* Progress Bar */}
           <View style={styles.playerProgressWrap}>
             <View style={[styles.playerProgressTrack, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]}>
-              <View style={[styles.playerProgressFill, { width: `${progress * 100}%`, backgroundColor: meditation.color }]} />
+              <View style={[styles.playerProgressFill, { width: `${progress * 100}%`, backgroundColor: theme.colors.plum }]} />
               <TouchableOpacity
                 style={[styles.playerScrubHandle, {
                   left: `${Math.max(0, Math.min(100, progress * 100))}%`,
-                  backgroundColor: meditation.color,
+                  backgroundColor: theme.colors.plum,
                 }]}
                 onPressIn={() => setIsSeeking(true)}
               />
@@ -713,7 +701,7 @@ const AudioPlayerModal = ({ meditation, visible, onClose, theme }: any) => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.playerPlayBtn, { backgroundColor: meditation.color }]}
+              style={[styles.playerPlayBtn, { backgroundColor: theme.colors.plum }]}
               onPress={handlePlayPause}
               disabled={isLoading}
             >
@@ -790,14 +778,14 @@ const ArticleModal = ({ article, visible, onClose, theme }: any) => {
           <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
             <X color={theme.colors.text.secondary} size={22} />
           </TouchableOpacity>
-          <View style={[styles.modalCategoryBadge, { backgroundColor: article.color + '20' }]}>
-            <Text style={[styles.modalCategoryText, { color: article.color }]}>{article.category}</Text>
+          <View style={[styles.modalCategoryBadge, { backgroundColor: theme.colors.plum + '15' }]}>
+            <Text style={[styles.modalCategoryText, { color: theme.colors.plum }]}>{article.category}</Text>
           </View>
           <View style={{ width: 36 }} />
         </View>
         <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
-          <View style={[styles.modalIconWrap, { backgroundColor: article.color + '15' }]}>
-            <IconComponent color={article.color} size={32} />
+          <View style={[styles.modalIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
+            <IconComponent color={theme.colors.plum} size={32} />
           </View>
           <Text style={[styles.modalTitle, { color: theme.colors.text.primary }]}>{article.title}</Text>
           <View style={styles.modalMeta}>
@@ -827,14 +815,14 @@ const TechniqueModal = ({ technique, visible, onClose, theme, router }: any) => 
           <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
             <X color={theme.colors.text.secondary} size={22} />
           </TouchableOpacity>
-          <View style={[styles.modalCategoryBadge, { backgroundColor: technique.color + '20' }]}>
-            <Text style={[styles.modalCategoryText, { color: technique.color }]}>{technique.tag}</Text>
+          <View style={[styles.modalCategoryBadge, { backgroundColor: theme.colors.plum + '15' }]}>
+            <Text style={[styles.modalCategoryText, { color: theme.colors.plum }]}>{technique.tag}</Text>
           </View>
           <View style={{ width: 36 }} />
         </View>
         <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
-          <View style={[styles.modalIconWrap, { backgroundColor: technique.color + '15' }]}>
-            <IconComponent color={technique.color} size={32} />
+          <View style={[styles.modalIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
+            <IconComponent color={theme.colors.plum} size={32} />
           </View>
           <Text style={[styles.modalTitle, { color: theme.colors.text.primary }]}>{technique.title}</Text>
           <View style={styles.modalMeta}>
@@ -846,15 +834,15 @@ const TechniqueModal = ({ technique, visible, onClose, theme, router }: any) => 
           <Text style={[styles.stepsTitle, { color: theme.colors.text.primary }]}>How to do it</Text>
           {technique.steps.map((step: string, i: number) => (
             <View key={i} style={styles.stepRow}>
-              <View style={[styles.stepNum, { backgroundColor: technique.color + '20' }]}>
-                <Text style={[styles.stepNumText, { color: technique.color }]}>{i + 1}</Text>
+              <View style={[styles.stepNum, { backgroundColor: theme.colors.plum + '15' }]}>
+                <Text style={[styles.stepNumText, { color: theme.colors.plum }]}>{i + 1}</Text>
               </View>
               <Text style={[styles.stepText, { color: theme.colors.text.secondary }]}>{step}</Text>
             </View>
           ))}
           {technique.route && (
             <TouchableOpacity
-              style={[styles.practiceBtn, { backgroundColor: technique.color }]}
+              style={[styles.practiceBtn, { backgroundColor: theme.colors.plum }]}
               onPress={() => { onClose(); router.push(technique.route); }}
             >
               <Play color="#FFF" size={18} fill="#FFF" />
@@ -993,26 +981,26 @@ export default function ResourcesScreen() {
         {/* ── Featured Card (shown only on All) ── */}
         {activeCategory === 'all' && (
           <Animated.View entering={FadeInUp.delay(80).duration(600)} style={styles.featuredWrap}>
-            <LinearGradient colors={FEATURED.color} style={styles.featuredCard}>
-              <View style={styles.featuredBadge}>
-                <Star color="#FFD700" size={11} fill="#FFD700" />
-                <Text style={styles.featuredBadgeText}>{FEATURED.category}</Text>
+            <View style={[styles.featuredCard, { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]}>
+              <View style={[styles.featuredBadge, { backgroundColor: theme.colors.plum + '15' }]}>
+                <Star color={theme.colors.plum} size={11} fill={theme.colors.plum} />
+                <Text style={[styles.featuredBadgeText, { color: theme.colors.plum }]}>{FEATURED.category}</Text>
               </View>
-              <Text style={styles.featuredTitle}>{FEATURED.title}</Text>
-              <Text style={styles.featuredSubtitle} numberOfLines={featuredExpanded ? undefined : 2}>
+              <Text style={[styles.featuredTitle, { color: theme.colors.text.primary }]}>{FEATURED.title}</Text>
+              <Text style={[styles.featuredSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={featuredExpanded ? undefined : 2}>
                 {FEATURED.subtitle}
               </Text>
               <View style={styles.featuredRow}>
                 <View style={styles.featuredMeta}>
-                  <Clock color="rgba(255,255,255,0.7)" size={13} />
-                  <Text style={styles.featuredMetaText}>{FEATURED.readTime}</Text>
+                  <Clock color={theme.colors.text.tertiary} size={13} />
+                  <Text style={[styles.featuredMetaText, { color: theme.colors.text.tertiary }]}>{FEATURED.readTime}</Text>
                 </View>
                 <TouchableOpacity
-                  style={styles.featuredBtn}
+                  style={[styles.featuredBtn, { backgroundColor: theme.colors.plum + '15' }]}
                   onPress={() => setFeaturedExpanded(!featuredExpanded)}
                 >
-                  <Text style={styles.featuredBtnText}>{featuredExpanded ? 'Collapse' : 'Read Now'}</Text>
-                  <ChevronRight color={FEATURED.color[0]} size={16} />
+                  <Text style={[styles.featuredBtnText, { color: theme.colors.plum }]}>{featuredExpanded ? 'Collapse' : 'Read Now'}</Text>
+                  <ChevronRight color={theme.colors.plum} size={16} />
                 </TouchableOpacity>
               </View>
               {featuredExpanded && (
@@ -1029,9 +1017,9 @@ export default function ResourcesScreen() {
                     }
                     if (lastIndex < line.length) parts.push({ text: line.slice(lastIndex), bold: false });
                     return (
-                      <Text key={i} style={styles.featuredBodyText}>
+                      <Text key={i} style={[styles.featuredBodyText, { color: theme.colors.text.secondary }]}>
                         {parts.map((p, j) => (
-                          <Text key={j} style={p.bold ? styles.featuredBodyBold : {}}>
+                          <Text key={j} style={p.bold ? [styles.featuredBodyBold, { color: theme.colors.text.primary }] : {}}>
                             {p.text}
                           </Text>
                         ))}
@@ -1040,7 +1028,7 @@ export default function ResourcesScreen() {
                   })}
                 </View>
               )}
-            </LinearGradient>
+            </View>
           </Animated.View>
         )}
 
@@ -1067,22 +1055,16 @@ export default function ResourcesScreen() {
                 return (
                   <Animated.View key={t.id} entering={FadeInUp.delay(150 + i * 60).duration(450)}>
                     <TouchableOpacity
-                      style={[styles.techniqueCard, { borderColor: t.color + '30' }]}
+                      style={[styles.techniqueCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}
                       activeOpacity={0.82}
                       onPress={() => openTechnique(t)}
                     >
-                      <LinearGradient
-                        colors={[t.color + '15', 'transparent']}
-                        style={StyleSheet.absoluteFillObject}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                      />
                       <View style={styles.techniqueCardTop}>
-                        <View style={[styles.techniqueIconWrap, { backgroundColor: t.color + '20' }]}>
-                          <IconComponent color={t.color} size={22} strokeWidth={2} />
+                        <View style={[styles.techniqueIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
+                          <IconComponent color={theme.colors.plum} size={22} strokeWidth={2} />
                         </View>
-                        <View style={[styles.techniqueTagBadge, { backgroundColor: t.color + '20' }]}>
-                          <Text style={[styles.techniqueTagText, { color: t.color }]}>{t.tag}</Text>
+                        <View style={[styles.techniqueTagBadge, { backgroundColor: theme.colors.backgroundSecondary }]}>
+                          <Text style={[styles.techniqueTagText, { color: theme.colors.text.secondary }]}>{t.tag}</Text>
                         </View>
                       </View>
                       <Text style={[styles.techniqueCardTitle, { color: theme.colors.text.primary }]}>{t.title}</Text>
@@ -1092,9 +1074,9 @@ export default function ResourcesScreen() {
                           <Clock color={theme.colors.text.tertiary} size={12} />
                           <Text style={[styles.techDurationText, { color: theme.colors.text.tertiary }]}>{t.duration}</Text>
                         </View>
-                        <View style={[styles.techniqueReadMore, { backgroundColor: t.color + '20' }]}>
-                          <Text style={[styles.techniqueReadMoreText, { color: t.color }]}>Learn More</Text>
-                          <ChevronRight color={t.color} size={12} />
+                        <View style={[styles.techniqueReadMore, { backgroundColor: theme.colors.plum + '10' }]}>
+                          <Text style={[styles.techniqueReadMoreText, { color: theme.colors.plum }]}>Learn More</Text>
+                          <ChevronRight color={theme.colors.plum} size={12} />
                         </View>
                       </View>
                     </TouchableOpacity>
@@ -1111,34 +1093,34 @@ export default function ResourcesScreen() {
             <Text style={[styles.sectionTitle, { paddingHorizontal: 24, marginBottom: 12 }]}>Quick Relief Tools</Text>
             <View style={styles.quickToolsGrid}>
               <TouchableOpacity
-                style={[styles.quickToolCard, { borderColor: '#06B6D4' + '30', backgroundColor: '#06B6D4' + '10' }]}
+                style={[styles.quickToolCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', backgroundColor: theme.colors.surface }]}
                 onPress={() => router.push('/breathing')}
               >
-                <Wind color="#06B6D4" size={26} />
+                <Wind color={theme.colors.plum} size={26} />
                 <Text style={[styles.quickToolTitle, { color: theme.colors.text.primary }]}>Box Breathing</Text>
                 <Text style={[styles.quickToolSub, { color: theme.colors.text.secondary }]}>4 min guided</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.quickToolCard, { borderColor: '#10B981' + '30', backgroundColor: '#10B981' + '10' }]}
+                style={[styles.quickToolCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', backgroundColor: theme.colors.surface }]}
                 onPress={() => router.push('/grounding')}
               >
-                <Compass color="#10B981" size={26} />
+                <Compass color={theme.colors.plum} size={26} />
                 <Text style={[styles.quickToolTitle, { color: theme.colors.text.primary }]}>5-4-3-2-1 Grounding</Text>
                 <Text style={[styles.quickToolSub, { color: theme.colors.text.secondary }]}>5 min guided</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.quickToolCard, { borderColor: '#8B5CF6' + '30', backgroundColor: '#8B5CF6' + '10' }]}
+                style={[styles.quickToolCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', backgroundColor: theme.colors.surface }]}
                 onPress={() => router.push('/(tabs)/journal')}
               >
-                <BookOpen color="#8B5CF6" size={26} />
+                <BookOpen color={theme.colors.plum} size={26} />
                 <Text style={[styles.quickToolTitle, { color: theme.colors.text.primary }]}>Reflective Journal</Text>
                 <Text style={[styles.quickToolSub, { color: theme.colors.text.secondary }]}>Write it out</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.quickToolCard, { borderColor: '#F59E0B' + '30', backgroundColor: '#F59E0B' + '10' }]}
+                style={[styles.quickToolCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', backgroundColor: theme.colors.surface }]}
                 onPress={() => router.push('/(tabs)/assessments')}
               >
-                <Activity color="#F59E0B" size={26} />
+                <Activity color={theme.colors.plum} size={26} />
                 <Text style={[styles.quickToolTitle, { color: theme.colors.text.primary }]}>Self-Assessment</Text>
                 <Text style={[styles.quickToolSub, { color: theme.colors.text.secondary }]}>Check your mood</Text>
               </TouchableOpacity>
@@ -1161,16 +1143,16 @@ export default function ResourcesScreen() {
               return (
                 <Animated.View key={article.id} entering={FadeInUp.delay(300 + i * 50).duration(450)}>
                   <TouchableOpacity
-                    style={[styles.articleCard, { borderLeftColor: article.color, borderLeftWidth: 3 }]}
+                    style={[styles.articleCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', borderWidth: 1 }]}
                     onPress={() => openArticle(article)}
                     activeOpacity={0.8}
                   >
-                    <View style={[styles.articleIconWrap, { backgroundColor: article.color + '15' }]}>
-                      <IconComponent color={article.color} size={20} />
+                    <View style={[styles.articleIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
+                      <IconComponent color={theme.colors.plum} size={20} />
                     </View>
                     <View style={styles.articleText}>
                       <View style={styles.articleTopRow}>
-                        <Text style={[styles.articleCategory, { color: article.color }]}>{article.category.toUpperCase()}</Text>
+                        <Text style={[styles.articleCategory, { color: theme.colors.text.secondary }]}>{article.category.toUpperCase()}</Text>
                         <View style={styles.articleReadTime}>
                           <Clock color={theme.colors.text.tertiary} size={11} />
                           <Text style={[styles.articleReadTimeText, { color: theme.colors.text.tertiary }]}>{article.readTime}</Text>
@@ -1211,21 +1193,15 @@ export default function ResourcesScreen() {
                 return (
                   <Animated.View key={med.id} entering={FadeInUp.delay(350 + i * 50).duration(450)}>
                     <TouchableOpacity
-                      style={[styles.audioCard, { borderColor: med.color + '25' }]}
+                      style={[styles.audioCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}
                       activeOpacity={0.82}
                       onPress={() => openMeditation(med)}
                     >
-                      <LinearGradient
-                        colors={[med.color + '20', 'transparent']}
-                        style={StyleSheet.absoluteFillObject}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 0, y: 1 }}
-                      />
-                      <View style={[styles.audioIconWrap, { backgroundColor: med.color + '25' }]}>
-                        <IconComponent color={med.color} size={24} />
+                      <View style={[styles.audioIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
+                        <IconComponent color={theme.colors.plum} size={24} />
                       </View>
-                      <View style={[styles.audioTagBadge, { backgroundColor: med.color + '20' }]}>
-                        <Text style={[styles.audioTagText, { color: med.color }]}>{med.tag}</Text>
+                      <View style={[styles.audioTagBadge, { backgroundColor: theme.colors.backgroundSecondary }]}>
+                        <Text style={[styles.audioTagText, { color: theme.colors.text.secondary }]}>{med.tag}</Text>
                       </View>
                       <Text style={[styles.audioTitle, { color: theme.colors.text.primary }]} numberOfLines={2}>{med.title}</Text>
                       <Text style={[styles.audioHost, { color: theme.colors.text.secondary }]} numberOfLines={1}>{med.host}</Text>
@@ -1234,7 +1210,7 @@ export default function ResourcesScreen() {
                           <Clock color={theme.colors.text.tertiary} size={12} />
                           <Text style={[styles.audioDuration, { color: theme.colors.text.tertiary }]}>{med.durationLabel}</Text>
                         </View>
-                        <View style={[styles.audioPlayBtn, { backgroundColor: med.color }]}>
+                        <View style={[styles.audioPlayBtn, { backgroundColor: theme.colors.plum }]}>
                           <Play color="#FFF" size={14} fill="#FFF" />
                         </View>
                       </View>
@@ -1258,16 +1234,16 @@ export default function ResourcesScreen() {
                 return (
                   <Animated.View key={pod.id} entering={FadeInUp.delay(400 + i * 50).duration(450)}>
                     <TouchableOpacity
-                      style={[styles.articleCard, { borderLeftColor: pod.color, borderLeftWidth: 3 }]}
+                      style={[styles.articleCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', borderWidth: 1 }]}
                       onPress={() => openInBrowser(pod.url)}
                       activeOpacity={0.8}
                     >
-                      <View style={[styles.articleIconWrap, { backgroundColor: pod.color + '15' }]}>
-                        <IconComponent color={pod.color} size={20} />
+                      <View style={[styles.articleIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
+                        <IconComponent color={theme.colors.plum} size={20} />
                       </View>
                       <View style={styles.articleText}>
                         <View style={styles.articleTopRow}>
-                          <Text style={[styles.articleCategory, { color: pod.color }]}>{pod.tag.toUpperCase()}</Text>
+                          <Text style={[styles.articleCategory, { color: theme.colors.text.secondary }]}>{pod.tag.toUpperCase()}</Text>
                           <Text style={[styles.articleReadTimeText, { color: theme.colors.text.tertiary }]}>{pod.duration}</Text>
                         </View>
                         <Text style={[styles.articleTitle, { color: theme.colors.text.primary }]} numberOfLines={1}>{pod.title}</Text>
@@ -1298,14 +1274,13 @@ export default function ResourcesScreen() {
                 return (
                   <Animated.View key={vid.id} entering={FadeInUp.delay(350 + i * 50).duration(450)}>
                     <TouchableOpacity
-                      style={[styles.videoCard, { borderColor: vid.color + '20' }]}
+                      style={[styles.videoCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]}
                       onPress={() => openInBrowser(vid.url)}
                       activeOpacity={0.82}
                     >
                       {/* Thumbnail */}
-                      <LinearGradient
-                        colors={vid.thumbnailColor}
-                        style={styles.videoThumb}
+                      <View
+                        style={[styles.videoThumb, { backgroundColor: theme.colors.plum + '20' }]}
                       >
                         <View style={styles.videoPlayCircle}>
                           <Play color="#FFF" size={20} fill="#FFF" />
@@ -1316,7 +1291,7 @@ export default function ResourcesScreen() {
                         <View style={[styles.videoTagOnThumb, { backgroundColor: 'rgba(0,0,0,0.4)' }]}>
                           <Text style={styles.videoTagOnThumbText}>{vid.tag}</Text>
                         </View>
-                      </LinearGradient>
+                      </View>
                       {/* Info */}
                       <View style={styles.videoInfo}>
                         <Text style={[styles.videoTitle, { color: theme.colors.text.primary }]} numberOfLines={2}>{vid.title}</Text>
@@ -1337,7 +1312,7 @@ export default function ResourcesScreen() {
         {/* ── Crisis Resources Section ── */}
         {showCrisis && (
           <Animated.View entering={FadeInUp.delay(350).duration(500)} style={[styles.section, { marginTop: 8 }]}>
-            <View style={[styles.crisisHeader, { backgroundColor: '#EF4444' + '10', borderColor: '#EF4444' + '25' }]}>
+            <View style={[styles.crisisHeader, { backgroundColor: theme.colors.backgroundSecondary, borderColor: '#EF4444' + '40' }]}>
               <AlertCircle color="#EF4444" size={20} />
               <Text style={[styles.crisisHeaderText, { color: theme.colors.text.primary }]}>
                 In crisis? Immediate support is available
@@ -1348,27 +1323,27 @@ export default function ResourcesScreen() {
               return (
                 <Animated.View key={r.id} entering={FadeInUp.delay(400 + i * 60).duration(450)}>
                   <TouchableOpacity
-                    style={[styles.crisisCard, { borderColor: r.color + '20' }]}
+                    style={[styles.crisisCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]}
                     onPress={() => {
                       const { Linking } = require('react-native');
                       Linking.openURL(`tel:${r.phone.replace(/\s+/g, '')}`);
                     }}
                     activeOpacity={0.82}
                   >
-                    <View style={[styles.crisisIconWrap, { backgroundColor: r.color + '15' }]}>
-                      <IconComponent color={r.color} size={22} />
+                    <View style={[styles.crisisIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
+                      <IconComponent color={theme.colors.plum} size={22} />
                     </View>
                     <View style={styles.crisisInfo}>
                       <Text style={[styles.crisisName, { color: theme.colors.text.primary }]}>{r.title}</Text>
                       <Text style={[styles.crisisSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={1}>{r.subtitle}</Text>
                       <View style={styles.crisisMetaRow}>
-                        <View style={[styles.crisisAvailBadge, { backgroundColor: r.color + '15' }]}>
-                          <CheckCircle color={r.color} size={11} />
-                          <Text style={[styles.crisisAvailText, { color: r.color }]}>{r.available}</Text>
+                        <View style={[styles.crisisAvailBadge, { backgroundColor: theme.colors.plum + '10' }]}>
+                          <CheckCircle color={theme.colors.plum} size={11} />
+                          <Text style={[styles.crisisAvailText, { color: theme.colors.plum }]}>{r.available}</Text>
                         </View>
                       </View>
                     </View>
-                    <View style={[styles.crisisCallBtn, { backgroundColor: r.color }]}>
+                    <View style={[styles.crisisCallBtn, { backgroundColor: theme.colors.plum }]}>
                       <Text style={styles.crisisCallText}>Call</Text>
                     </View>
                   </TouchableOpacity>
@@ -1376,12 +1351,12 @@ export default function ResourcesScreen() {
               );
             })}
             <TouchableOpacity
-              style={[styles.viewCrisisAllBtn, { borderColor: '#E60000', backgroundColor: '#E60000' }]}
+              style={[styles.viewCrisisAllBtn, { borderColor: theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', backgroundColor: theme.colors.surface }]}
               onPress={() => router.push('/(tabs)/crisis')}
             >
-              <Shield color="#FFF" size={16} />
-              <Text style={[styles.viewCrisisAllText, { color: '#FFF' }]}>View Full Crisis Support Page</Text>
-              <ChevronRight color="#FFF" size={16} />
+              <Shield color={theme.colors.text.secondary} size={16} />
+              <Text style={[styles.viewCrisisAllText, { color: theme.colors.text.primary }]}>View Full Crisis Support Page</Text>
+              <ChevronRight color={theme.colors.text.disabled} size={16} />
             </TouchableOpacity>
           </Animated.View>
         )}

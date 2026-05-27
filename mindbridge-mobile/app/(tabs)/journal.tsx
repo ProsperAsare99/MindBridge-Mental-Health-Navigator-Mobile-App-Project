@@ -118,7 +118,7 @@ export default function JournalScreen() {
     try {
       setIsAnalyzingVoice(true);
       const base64Audio = await FileSystem.readAsStringAsync(audioUri, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: 'base64',
       });
 
       const response = await api.post('/ai/analyze-voice', {

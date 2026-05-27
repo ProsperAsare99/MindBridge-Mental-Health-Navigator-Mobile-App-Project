@@ -8,7 +8,8 @@ import { X, Compass as CompassIcon, CheckCircle2, Wind, Eye, Ear, Footprints } f
 import * as Haptics from 'expo-haptics';
 import Animated, { 
   useSharedValue, 
-  useAnimatedStyle, 
+  useAnimatedStyle,
+  useAnimatedProps,
   withTiming, 
   withSpring,
   Easing,
@@ -43,8 +44,8 @@ export default function CompassScreen() {
   const scale = useSharedValue(1);
 
   // Timers and refs
-  const holdTimer = useRef<NodeJS.Timeout | null>(null);
-  const noticeTimer = useRef<NodeJS.Timeout | null>(null);
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHapticTime = useRef<number>(0);
   const currentDiff = useRef<number>(180);
 
@@ -143,7 +144,7 @@ export default function CompassScreen() {
     };
   });
 
-  const animatedProgressStyle = useAnimatedStyle(() => {
+  const animatedProgressProps = useAnimatedProps(() => {
     const strokeDashoffset = 2 * Math.PI * 90 * (1 - progress.value);
     return { strokeDashoffset };
   });
@@ -194,7 +195,7 @@ export default function CompassScreen() {
                   strokeWidth="8"
                   fill="none"
                   strokeDasharray={`${2 * Math.PI * 90}`}
-                  style={animatedProgressStyle}
+                  animatedProps={animatedProgressProps}
                   strokeLinecap="round"
                   transform="rotate(-90 110 110)"
                 />

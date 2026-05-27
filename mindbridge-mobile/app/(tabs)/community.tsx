@@ -14,11 +14,12 @@ import {
   FlatList,
   RefreshControl,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  Image
 } from 'react-native';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInUp, FadeIn, useSharedValue, withSpring, useAnimatedStyle, withSequence } from 'react-native-reanimated';
+import Animated, { FadeInUp, useSharedValue, withSpring, useAnimatedStyle, withSequence } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { 
@@ -28,7 +29,9 @@ import {
   MoreHorizontal,
   PenSquare,
   Search,
-  X
+  X,
+  Star,
+  CheckCircle2
 } from 'lucide-react-native';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { SkeletonLoader } from '../../src/components/SkeletonLoader';
@@ -36,13 +39,20 @@ import api from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
 
+type TabType = 'discussions' | 'groups' | 'peers';
+
 export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { t } = theme;
   const styles = createStyles(theme);
   
+  const [activeTab, setActiveTab] = useState<TabType>('discussions');
+
   const [feed, setFeed] = useState<any[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
+  const [peers, setPeers] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [postContent, setPostContent] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('Final Year Stress');
@@ -51,33 +61,32 @@ export default function CommunityScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState<'recent' | 'popular'>('recent');
 
-  const GROUPS = [
-    { id: '1', title: 'Final Year Stress', members: '1.2k', color: theme.colors.accents.powderBlue },
-    { id: '2', title: 'Anxiety Support', members: '3.4k', color: theme.colors.accents.gentlePeach },
-    { id: '3', title: 'Meditation Group', members: '850', color: theme.colors.accents.softMint },
-  ];
-
-  const fetchFeed = async () => {
+  const fetchAllData = async () => {
     try {
-      const response = await api.get('/community');
-      setFeed(response.data);
+      const [feedRes, groupsRes, peersRes] = await Promise.all([
+        api.get('/community').catch(() => ({ data: [] })),
+        api.get('/groups').catch(() => ({ data: [] })),
+        api.get('/peers').catch(() => ({ data: [] }))
+      ]);
+      setFeed(feedRes.data);
+      setGroups(groupsRes.data);
+      setPeers(peersRes.data);
     } catch (error: any) {
-      console.warn('Network timeout when fetching community feed.');
-      setFeed([]);
+      console.warn('Network timeout fetching community data.');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
   const onRefresh = () => {
     setRefreshing(true);
-    fetchFeed();
+    fetchAllData();
   };
-
-  useEffect(() => {
-    fetchFeed();
-  }, []);
 
   const handleCreatePost = async () => {
     if (!postContent.trim()) {
@@ -133,10 +142,7 @@ export default function CommunityScreen() {
 
   const PostCard = ({ post, index }: { post: any, index: number }) => {
     const hugScale = useSharedValue(1);
-
-    const animatedHugStyle = useAnimatedStyle(() => ({
-      transform: [{ scale: hugScale.value }]
-    }));
+    const animatedHugStyle = useAnimatedStyle(() => ({ transform: [{ scale: hugScale.value }] }));
 
     const handleHugPress = () => {
       hugScale.value = withSequence(
@@ -147,7 +153,7 @@ export default function CommunityScreen() {
     };
 
     return (
-      <Animated.View entering={FadeInUp.delay(200 + (Math.min(index, 10) * 50)).duration(500)} style={[styles.postCard, { marginHorizontal: 24, marginBottom: 16 }]}>
+      <Animated.View entering={FadeInUp.delay(Math.min(index, 10) * 50).duration(500)} style={[styles.postCard, { marginHorizontal: 24, marginBottom: 16 }]}>
         <View style={styles.postHeader}>
           <View style={styles.postAuthorInfo}>
             <View style={[styles.postAvatar, { backgroundColor: theme.colors.accents.powderBlue }]} />
@@ -160,9 +166,7 @@ export default function CommunityScreen() {
             <MoreHorizontal color={theme.colors.text.tertiary} size={20} />
           </TouchableOpacity>
         </View>
-        
         <Text style={styles.postContent}>{post.content}</Text>
-        
         <View style={styles.postActions}>
           <TouchableOpacity style={styles.actionBtn} onPress={handleHugPress} activeOpacity={0.7}>
             <Animated.View style={animatedHugStyle}>
@@ -179,6 +183,128 @@ export default function CommunityScreen() {
     );
   };
 
+  const GroupCard = ({ group, index }: { group: any, index: number }) => (
+    <Animated.View entering={FadeInUp.delay(index * 50).duration(400)} style={styles.groupListCard}>
+      <View style={styles.groupListHeader}>
+        <View style={[styles.groupListIconWrap, { backgroundColor: (group.color || theme.colors.plum) + '15' }]}>
+          <Users color={group.color || theme.colors.plum} size={24} />
+        </View>
+        <View style={styles.groupListInfo}>
+          <Text style={styles.groupListTitle}>{group.name}</Text>
+          <Text style={styles.groupListMembers}>{group.members} Members</Text>
+        </View>
+        <TouchableOpacity style={[styles.joinBtn, { backgroundColor: theme.colors.plum }]}>
+          <Text style={styles.joinBtnText}>Join</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.groupListDesc} numberOfLines={2}>{group.description}</Text>
+    </Animated.View>
+  );
+
+  const PeerCard = ({ peer, index }: { peer: any, index: number }) => (
+    <Animated.View entering={FadeInUp.delay(index * 50).duration(400)} style={styles.peerCard}>
+      <View style={styles.peerHeader}>
+        <View style={styles.peerAvatarWrap}>
+          <View style={[styles.peerAvatarPlaceholder, { backgroundColor: theme.colors.accents.powderBlue }]} />
+          {peer.isAvailable && (
+            <View style={[styles.peerOnlineBadge, { backgroundColor: theme.colors.semantic.success }]} />
+          )}
+        </View>
+        <View style={styles.peerInfo}>
+          <View style={styles.peerNameRow}>
+            <Text style={styles.peerName}>{peer.user?.name || 'Anonymous Peer'}</Text>
+            <CheckCircle2 color={theme.colors.semantic.success} size={16} style={{ marginLeft: 4 }} />
+          </View>
+          <View style={styles.peerRatingRow}>
+            <Star color={theme.colors.accents.sunshineYellow} fill={theme.colors.accents.sunshineYellow} size={14} />
+            <Text style={styles.peerRating}>{peer.rating.toFixed(1)} Rating</Text>
+          </View>
+        </View>
+        <TouchableOpacity style={[styles.msgBtn, { backgroundColor: theme.colors.plum }]}>
+          <MessageCircle color="#FFF" size={16} />
+          <Text style={styles.msgBtnText}>Connect</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.peerBio}>{peer.bio}</Text>
+      <View style={styles.peerSpecialties}>
+        {peer.specialties?.map((spec: string, idx: number) => (
+          <View key={idx} style={[styles.specChip, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
+            <Text style={styles.specChipText}>{spec}</Text>
+          </View>
+        ))}
+      </View>
+    </Animated.View>
+  );
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.plum} />
+        </View>
+      );
+    }
+
+    if (activeTab === 'discussions') {
+      return (
+        <FlatList 
+          data={getSortedFeed()}
+          keyExtractor={post => post.id}
+          contentContainerStyle={[styles.listContent, { paddingBottom: 120 }]}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <View style={styles.feedHeaderRow}>
+              <Text style={styles.sectionTitle}>{t('community.recent_discussions')}</Text>
+              <View style={styles.filterToggle}>
+                <TouchableOpacity onPress={() => setSortBy('recent')} style={[styles.filterToggleBtn, sortBy === 'recent' && { backgroundColor: theme.colors.plum }]}>
+                  <Text style={[styles.filterToggleText, sortBy === 'recent' && { color: '#FFF' }]}>Recent</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setSortBy('popular')} style={[styles.filterToggleBtn, sortBy === 'popular' && { backgroundColor: theme.colors.plum }]}>
+                  <Text style={[styles.filterToggleText, sortBy === 'popular' && { color: '#FFF' }]}>Popular</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          }
+          renderItem={({ item, index }) => <PostCard post={item} index={index} />}
+        />
+      );
+    }
+
+    if (activeTab === 'groups') {
+      return (
+        <FlatList 
+          data={groups}
+          keyExtractor={g => g.id}
+          contentContainerStyle={[styles.listContent, { paddingBottom: 120, paddingHorizontal: 24 }]}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <View style={styles.feedHeaderRow}>
+              <Text style={styles.sectionTitle}>Explore Groups</Text>
+            </View>
+          }
+          renderItem={({ item, index }) => <GroupCard group={item} index={index} />}
+        />
+      );
+    }
+
+    if (activeTab === 'peers') {
+      return (
+        <FlatList 
+          data={peers}
+          keyExtractor={p => p.id}
+          contentContainerStyle={[styles.listContent, { paddingBottom: 120, paddingHorizontal: 24 }]}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <View style={styles.feedHeaderRow}>
+              <Text style={styles.sectionTitle}>Peer Supporters</Text>
+            </View>
+          }
+          renderItem={({ item, index }) => <PeerCard peer={item} index={index} />}
+        />
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle={theme.isDark ? "light-content" : "dark-content"} />
@@ -191,117 +317,54 @@ export default function CommunityScreen() {
         style={StyleSheet.absoluteFillObject} 
       />
 
-      <FlatList 
-        data={getSortedFeed()}
-        keyExtractor={post => post.id}
-        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
-            onRefresh={onRefresh} 
-            tintColor={theme.colors.plum}
-            colors={[theme.colors.plum]}
-          />
-        }
-        ListHeaderComponent={
-          <>
-            <ScreenHeader 
-              title={t('community.title')} 
-              subtitle={t('community.subtitle')}
-              rightAction={
-                <TouchableOpacity 
-                  style={styles.searchBtn}
-                  onPress={() => Alert.alert('Search', 'Community search will be available soon!')}
-                >
-                  <Search color={theme.colors.accents.gentlePeach} size={24} />
-                </TouchableOpacity>
-              }
-            />
+      <View style={{ paddingTop: insets.top + 20 }}>
+        <ScreenHeader 
+          title="Safe Space" 
+          subtitle="Connect, share, and find support"
+          rightAction={
+            <TouchableOpacity 
+              style={styles.searchBtn}
+              onPress={() => Alert.alert('Search', 'Community search will be available soon!')}
+            >
+              <Search color={theme.colors.accents.gentlePeach} size={24} />
+            </TouchableOpacity>
+          }
+        />
 
-            {/* My Groups */}
-            <Animated.View entering={FadeInUp.delay(50).duration(500)}>
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>{t('community.explore_groups')}</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.groupsScroll}>
-                  {GROUPS.map(group => (
-                    <TouchableOpacity key={group.id} style={[styles.groupCard, { borderColor: group.color + '30' }]}>
-                      <View style={[styles.groupIcon, { backgroundColor: group.color + '20' }]}>
-                        <Users color={group.color} size={20} />
-                      </View>
-                      <Text style={styles.groupTitle}>{group.title}</Text>
-                      <Text style={styles.groupMembers}>{group.members} {t('community.members')}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            </Animated.View>
+        {/* Segmented Control Tabs */}
+        <View style={styles.tabContainer}>
+          {[
+            { id: 'discussions', label: 'Discussions' },
+            { id: 'groups', label: 'Groups' },
+            { id: 'peers', label: 'Peers' }
+          ].map((tab) => (
+            <TouchableOpacity 
+              key={tab.id}
+              style={[styles.tabBtn, activeTab === tab.id && { backgroundColor: theme.colors.plum }]}
+              onPress={() => setActiveTab(tab.id as TabType)}
+            >
+              <Text style={[
+                styles.tabText, 
+                activeTab === tab.id ? { color: '#FFF' } : { color: theme.colors.text.secondary }
+              ]}>{tab.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
 
-            <Animated.View entering={FadeInUp.delay(150).duration(500)}>
-              <View style={styles.feedHeaderRow}>
-                <Text style={styles.sectionTitle}>{t('community.recent_discussions')}</Text>
-                <View style={styles.filterToggle}>
-                  <TouchableOpacity 
-                    onPress={() => setSortBy('recent')}
-                    style={[styles.filterToggleBtn, sortBy === 'recent' && { backgroundColor: theme.colors.plum }]}
-                  >
-                    <Text style={[styles.filterToggleText, sortBy === 'recent' && { color: '#FFF' }]}>Recent</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    onPress={() => setSortBy('popular')}
-                    style={[styles.filterToggleBtn, sortBy === 'popular' && { backgroundColor: theme.colors.plum }]}
-                  >
-                    <Text style={[styles.filterToggleText, sortBy === 'popular' && { color: '#FFF' }]}>Popular</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </Animated.View>
-          </>
-        }
-        ListEmptyComponent={
-          loading ? (
-            <View style={styles.feedContainer}>
-              {[1, 2, 3].map((_, i) => (
-                <View key={i} style={styles.postCard}>
-                  <View style={styles.postHeader}>
-                    <View style={styles.postAuthorInfo}>
-                      <SkeletonLoader width={40} height={40} borderRadius={20} style={{ marginRight: 12 }} />
-                      <View>
-                        <SkeletonLoader width={100} height={15} borderRadius={4} style={{ marginBottom: 6 }} />
-                        <SkeletonLoader width={80} height={13} borderRadius={4} />
-                      </View>
-                    </View>
-                    <SkeletonLoader width={24} height={24} borderRadius={12} />
-                  </View>
-                  <SkeletonLoader width="100%" height={16} borderRadius={4} style={{ marginBottom: 8 }} />
-                  <SkeletonLoader width="85%" height={16} borderRadius={4} style={{ marginBottom: 8 }} />
-                  <SkeletonLoader width="60%" height={16} borderRadius={4} style={{ marginBottom: 24 }} />
-                  <View style={styles.postActions}>
-                    <SkeletonLoader width={60} height={18} borderRadius={4} />
-                    <SkeletonLoader width={60} height={18} borderRadius={4} />
-                  </View>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <View style={styles.emptyContainer}>
-              <View style={[styles.emptyIconWrap, { backgroundColor: theme.colors.plum + '15' }]}>
-                <MessageCircle color={theme.colors.plum} size={32} />
-              </View>
-              <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>No discussions yet. Be the first to share!</Text>
-            </View>
-          )
-        }
-        renderItem={({ item, index }) => <PostCard post={item} index={index} />}
-      />
+      <View style={{ flex: 1 }}>
+        {renderContent()}
+      </View>
 
-      {/* FAB */}
-      <Animated.View entering={FadeInUp.delay(400).duration(500)} style={[styles.fabContainer, { bottom: insets.bottom + 20 }]}>
-        <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => setIsCreateVisible(true)}>
-          <PenSquare color={theme.colors.text.onPrimary || '#FFF'} size={24} />
-          <Text style={styles.fabText}>{t('community.share_thought') || 'Share Thought'}</Text>
-        </TouchableOpacity>
-      </Animated.View>
+      {/* FAB (Only for Discussions) */}
+      {activeTab === 'discussions' && (
+        <Animated.View entering={FadeInUp.delay(200).duration(500)} style={[styles.fabContainer, { bottom: insets.bottom + 20 }]}>
+          <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => setIsCreateVisible(true)}>
+            <PenSquare color={theme.colors.text.onPrimary || '#FFF'} size={24} />
+            <Text style={styles.fabText}>{t('community.share_thought') || 'Share Thought'}</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
 
       {/* Create Post Modal */}
       <Modal
@@ -324,20 +387,20 @@ export default function CommunityScreen() {
 
             <Text style={styles.modalLabel}>Support Group</Text>
             <View style={styles.pickerRow}>
-              {GROUPS.map(g => (
+              {groups.map(g => (
                 <TouchableOpacity
                   key={g.id}
                   style={[
                     styles.pickerChip,
-                    selectedGroup === g.title && { backgroundColor: theme.colors.plum, borderColor: theme.colors.plum }
+                    selectedGroup === g.name && { backgroundColor: theme.colors.plum, borderColor: theme.colors.plum }
                   ]}
-                  onPress={() => setSelectedGroup(g.title)}
+                  onPress={() => setSelectedGroup(g.name)}
                 >
                   <Text style={[
                     styles.pickerChipText,
-                    { color: selectedGroup === g.title ? '#FFF' : theme.colors.text.secondary }
+                    { color: selectedGroup === g.name ? '#FFF' : theme.colors.text.secondary }
                   ]}>
-                    {g.title}
+                    {g.name}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -382,217 +445,70 @@ export default function CommunityScreen() {
 }
 
 const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.backgroundSecondary,
-  },
-  scrollContent: {
-    paddingHorizontal: 0,
-    paddingBottom: 120,
-  },
-  searchBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  section: {
-    marginBottom: 32,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontFamily: theme.typography.fonts.header,
-    fontWeight: '700',
-    color: theme.colors.text.primary,
-    letterSpacing: -0.5,
-  },
-  seeAllText: {
-    fontSize: 15,
-    fontFamily: theme.typography.fonts.accent,
-    fontWeight: '600',
-    color: theme.colors.plum,
-  },
-  groupsScroll: {
-    paddingHorizontal: 24,
-    gap: 16,
-    paddingBottom: 24,
-  },
-  groupCard: {
-    width: width * 0.4,
-    height: 140,
-    borderRadius: 24,
-    padding: 20,
-    borderWidth: 1,
-    justifyContent: 'space-between',
-  },
-  groupIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  groupTitle: {
-    fontSize: 16,
-    fontFamily: theme.typography.fonts.header,
-    fontWeight: '700',
-    color: theme.colors.text.primary,
-  },
-  groupMembers: {
-    fontSize: 13,
-    fontFamily: theme.typography.fonts.body,
-    fontWeight: '500',
-    color: theme.colors.text.secondary,
-  },
-  feedContainer: {
-    paddingHorizontal: 24,
-    gap: 16,
-  },
-  feedHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    marginBottom: 16,
-  },
-  filterToggle: {
-    flexDirection: 'row',
-    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-    borderRadius: 20,
-    padding: 4,
-  },
-  filterToggleBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  filterToggleText: {
-    fontSize: 13,
-    fontFamily: theme.typography.fonts.accent,
-    fontWeight: '700',
-    color: theme.colors.text.secondary,
-  },
-  emptyContainer: {
-    padding: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyIconWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  emptyText: {
-    fontSize: 15,
-    fontFamily: theme.typography.fonts.body,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  postCard: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: 24,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: theme.isDark ? 0.2 : 0.03,
-    shadowRadius: 12,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
-  },
-  postHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
-  },
-  postAuthorInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  postAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-  },
-  postGroup: {
-    fontSize: 15,
-    fontFamily: theme.typography.fonts.header,
-    fontWeight: '700',
-    color: theme.colors.text.primary,
-    marginBottom: 2,
-  },
-  postTime: {
-    fontSize: 13,
-    fontFamily: theme.typography.fonts.body,
-    color: theme.colors.text.tertiary,
-  },
-  moreBtn: {
-    padding: 4,
-  },
-  postContent: {
-    fontSize: 16,
-    fontFamily: theme.typography.fonts.body,
-    color: theme.colors.text.secondary,
-    lineHeight: 24,
-    marginBottom: 20,
-  },
-  postActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-    paddingTop: 16,
-    gap: 24,
-  },
-  actionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  actionText: {
-    fontSize: 14,
-    fontFamily: theme.typography.fonts.accent,
-    fontWeight: '600',
-    color: theme.colors.text.secondary,
-  },
-  fabContainer: {
-    position: 'absolute',
-    right: 24,
-  },
-  fab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.plum,
-    paddingHorizontal: 20,
-    height: 56,
-    borderRadius: 28,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: theme.isDark ? 0.3 : 0.2,
-    shadowRadius: 16,
-    elevation: 8,
-    gap: 8,
-  },
-  fabText: {
-    fontSize: 16,
-    fontFamily: theme.typography.fonts.header,
-    fontWeight: '700',
-    color: theme.colors.text.onPrimary || '#FFF',
-  },
+  container: { flex: 1, backgroundColor: theme.colors.backgroundSecondary },
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  listContent: { paddingHorizontal: 0 },
+  searchBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', alignItems: 'center', justifyContent: 'center' },
+  
+  // Tab Segments
+  tabContainer: { flexDirection: 'row', backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', borderRadius: 20, marginHorizontal: 24, padding: 4, marginBottom: 24 },
+  tabBtn: { flex: 1, paddingVertical: 10, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  tabText: { fontSize: 14, fontFamily: theme.typography.fonts.header, fontWeight: '700' },
+  
+  feedHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, marginBottom: 16 },
+  sectionTitle: { fontSize: 20, fontFamily: theme.typography.fonts.header, fontWeight: '700', color: theme.colors.text.primary, letterSpacing: -0.5 },
+  filterToggle: { flexDirection: 'row', backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', borderRadius: 20, padding: 4 },
+  filterToggleBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
+  filterToggleText: { fontSize: 13, fontFamily: theme.typography.fonts.accent, fontWeight: '700', color: theme.colors.text.secondary },
+
+  // Posts
+  postCard: { backgroundColor: theme.colors.surface, borderRadius: 24, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: theme.isDark ? 0.2 : 0.03, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' },
+  postHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+  postAuthorInfo: { flexDirection: 'row', alignItems: 'center' },
+  postAvatar: { width: 40, height: 40, borderRadius: 20, marginRight: 12 },
+  postGroup: { fontSize: 15, fontFamily: theme.typography.fonts.header, fontWeight: '700', color: theme.colors.text.primary, marginBottom: 2 },
+  postTime: { fontSize: 13, fontFamily: theme.typography.fonts.body, color: theme.colors.text.tertiary },
+  moreBtn: { padding: 4 },
+  postContent: { fontSize: 16, fontFamily: theme.typography.fonts.body, color: theme.colors.text.secondary, lineHeight: 24, marginBottom: 20 },
+  postActions: { flexDirection: 'row', alignItems: 'center', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', paddingTop: 16, gap: 24 },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  actionText: { fontSize: 14, fontFamily: theme.typography.fonts.accent, fontWeight: '600', color: theme.colors.text.secondary },
+
+  // Groups
+  groupListCard: { backgroundColor: theme.colors.surface, borderRadius: 24, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+  groupListHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  groupListIconWrap: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  groupListInfo: { flex: 1 },
+  groupListTitle: { fontSize: 16, fontFamily: theme.typography.fonts.header, fontWeight: '700', color: theme.colors.text.primary, marginBottom: 4 },
+  groupListMembers: { fontSize: 13, fontFamily: theme.typography.fonts.body, color: theme.colors.text.secondary },
+  joinBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 16 },
+  joinBtnText: { color: '#FFF', fontSize: 13, fontFamily: theme.typography.fonts.header, fontWeight: '700' },
+  groupListDesc: { fontSize: 14, fontFamily: theme.typography.fonts.body, color: theme.colors.text.secondary, lineHeight: 20 },
+
+  // Peers
+  peerCard: { backgroundColor: theme.colors.surface, borderRadius: 24, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+  peerHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+  peerAvatarWrap: { position: 'relative', marginRight: 16 },
+  peerAvatarPlaceholder: { width: 56, height: 56, borderRadius: 28 },
+  peerOnlineBadge: { position: 'absolute', bottom: 0, right: 0, width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: theme.colors.surface },
+  peerInfo: { flex: 1 },
+  peerNameRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  peerName: { fontSize: 16, fontFamily: theme.typography.fonts.header, fontWeight: '700', color: theme.colors.text.primary },
+  peerRatingRow: { flexDirection: 'row', alignItems: 'center' },
+  peerRating: { fontSize: 13, fontFamily: theme.typography.fonts.body, color: theme.colors.text.secondary, marginLeft: 4 },
+  msgBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, gap: 6 },
+  msgBtnText: { color: '#FFF', fontSize: 13, fontFamily: theme.typography.fonts.header, fontWeight: '700' },
+  peerBio: { fontSize: 14, fontFamily: theme.typography.fonts.body, color: theme.colors.text.secondary, lineHeight: 22, marginBottom: 16 },
+  peerSpecialties: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  specChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
+  specChipText: { fontSize: 12, fontFamily: theme.typography.fonts.accent, fontWeight: '600', color: theme.colors.text.primary },
+
+  // FAB
+  fabContainer: { position: 'absolute', right: 24 },
+  fab: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.plum, paddingHorizontal: 20, height: 56, borderRadius: 28, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: theme.isDark ? 0.3 : 0.2, shadowRadius: 16, elevation: 8, gap: 8 },
+  fabText: { fontSize: 16, fontFamily: theme.typography.fonts.header, fontWeight: '700', color: theme.colors.text.onPrimary || '#FFF' },
+
+  // Modals
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   modalContainer: { height: '70%', borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: 'hidden', padding: 24 },
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', marginBottom: 20 },
@@ -605,17 +521,6 @@ const createStyles = (theme: any) => StyleSheet.create({
   modalInput: { borderWidth: 1, borderRadius: 16, padding: 14, fontSize: 15, fontFamily: theme.typography.fonts.body, lineHeight: 22, height: 120, textAlignVertical: 'top', marginBottom: 24, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' },
   publishBtn: { flexDirection: 'row', backgroundColor: '#7B61FF', paddingVertical: 16, borderRadius: 28, alignItems: 'center', justifyContent: 'center', gap: 8 },
   publishBtnText: { color: '#FFF', fontSize: 16, fontFamily: theme.typography.fonts.header, fontWeight: '800' },
-  composerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-    marginTop: 10,
-  },
-  charCount: {
-    fontSize: 12,
-    fontFamily: theme.typography.fonts.accent,
-    fontWeight: '600',
-    color: theme.colors.text.tertiary,
-  }
+  composerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, marginTop: 10 },
+  charCount: { fontSize: 12, fontFamily: theme.typography.fonts.accent, fontWeight: '600', color: theme.colors.text.tertiary }
 });

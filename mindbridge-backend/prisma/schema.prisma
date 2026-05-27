@@ -123,3 +123,23 @@ model ChatMessage {
   content   String
   createdAt DateTime @default(now())
 }
+
+model SupportGroup {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  color       String?
+  members     Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model PeerSupportProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio         String
+  specialties String[]
+  isAvailable Boolean  @default(true)
+  rating      Float    @default(5.0)
+  createdAt   DateTime @default(now())
+}

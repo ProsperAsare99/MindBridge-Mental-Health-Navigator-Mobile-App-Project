@@ -69,7 +69,7 @@ const FEATURED = {
   title: 'The 5-Minute Mind Reset',
   subtitle: 'A quick science-backed technique to interrupt anxiety spirals and recenter yourself anywhere, anytime.',
   category: 'FEATURED · TECHNIQUE',
-  color: ['#6366F1', '#8B5CF6'] as [string, string],
+  color: ['slate', 'softLilac'] as [string, string],
   readTime: '5 min read',
   content: `When anxiety or stress hits, your brain goes into "fight-or-flight" mode, flooding your body with cortisol. The 5-Minute Mind Reset uses three proven techniques to interrupt this cycle:
 
@@ -92,7 +92,7 @@ const TECHNIQUES = [
     subtitle: 'Calm your nervous system in 4 minutes',
     description: 'Used by Navy SEALs and elite athletes, box breathing (4-4-4-4) activates the parasympathetic nervous system to reduce acute stress and anxiety.',
     icon: Wind,
-    color: '#06B6D4',
+    color: 'powderBlue',
     tag: 'Anxiety Relief',
     duration: '4 min',
     steps: [
@@ -110,7 +110,7 @@ const TECHNIQUES = [
     subtitle: 'Interrupt anxiety with your senses',
     description: 'This mindfulness technique grounds you in the present moment by activating all five senses, pulling attention away from anxious thoughts.',
     icon: Compass,
-    color: '#10B981',
+    color: 'softMint',
     tag: 'Mindfulness',
     duration: '5 min',
     steps: [
@@ -128,7 +128,7 @@ const TECHNIQUES = [
     subtitle: 'Release physical tension from your body',
     description: 'Systematically tensing and releasing muscle groups trains your body to recognize and release tension — effective for anxiety, insomnia, and physical stress.',
     icon: Activity,
-    color: '#F59E0B',
+    color: 'sand',
     tag: 'Body & Mind',
     duration: '10 min',
     steps: [
@@ -146,7 +146,7 @@ const TECHNIQUES = [
     subtitle: 'Detach from unhelpful thoughts',
     description: 'An ACT (Acceptance & Commitment Therapy) technique that creates distance between you and your thoughts so you can respond rather than react.',
     icon: Brain,
-    color: '#8B5CF6',
+    color: 'softLilac',
     tag: 'CBT / ACT',
     duration: '5 min',
     steps: [
@@ -164,7 +164,7 @@ const TECHNIQUES = [
     subtitle: 'Science-backed habits for better rest',
     description: 'Poor sleep dramatically worsens anxiety, depression, and cognitive performance. This protocol uses circadian science to rebuild healthy sleep patterns.',
     icon: Moon,
-    color: '#6366F1',
+    color: 'slate',
     tag: 'Sleep',
     duration: '15 min read',
     steps: [
@@ -182,7 +182,7 @@ const TECHNIQUES = [
     subtitle: 'Break the depression cycle',
     description: 'A first-line CBT technique for depression that combats the "withdrawal-low mood-more withdrawal" cycle by scheduling small, meaningful activities.',
     icon: Sun,
-    color: '#F97316',
+    color: 'gentlePeach',
     tag: 'Depression',
     duration: '10 min',
     steps: [
@@ -202,7 +202,7 @@ const ARTICLES = [
     title: 'The 7 Warning Signs of Student Burnout',
     subtitle: 'Recognize it before it floors you',
     category: 'Burnout',
-    color: '#EF4444',
+    color: 'terracotta',
     icon: AlertCircle,
     readTime: '6 min',
     content: `Student burnout is more than being tired. It's a state of chronic stress that leads to physical and emotional exhaustion, cynicism, and feelings of ineffectiveness.
@@ -224,7 +224,7 @@ const ARTICLES = [
     title: 'Anxiety vs. Stress: Know the Difference',
     subtitle: 'They feel similar but require different approaches',
     category: 'Anxiety',
-    color: '#06B6D4',
+    color: 'powderBlue',
     icon: Waves,
     readTime: '4 min',
     content: `Many students use "stressed" and "anxious" interchangeably — but they're different, and treating one like the other can backfire.
@@ -251,7 +251,7 @@ const ARTICLES = [
     title: 'Social Media & Your Mental Health',
     subtitle: 'The science behind the scroll',
     category: 'Digital Wellbeing',
-    color: '#EC4899',
+    color: 'dustyRose',
     icon: Globe,
     readTime: '5 min',
     content: `Research from the University of Pennsylvania (Hunt et al., 2018) found that limiting social media to 30 minutes per day led to significant reductions in loneliness and depression in young adults.
@@ -273,7 +273,7 @@ const ARTICLES = [
     title: 'Why Self-Compassion Outperforms Self-Esteem',
     subtitle: 'The research is clear',
     category: 'Self-Care',
-    color: '#8B5CF6',
+    color: 'softLilac',
     icon: Heart,
     readTime: '7 min',
     content: `Dr. Kristin Neff's research shows that self-compassion — being kind to yourself when you fail — is more psychologically healthy than high self-esteem.
@@ -299,7 +299,7 @@ High self-esteem requires feeling special or above average. When you fail, self-
     title: 'How to Study Without Sacrificing Mental Health',
     subtitle: 'The Pomodoro method and beyond',
     category: 'Academic Stress',
-    color: '#10B981',
+    color: 'softMint',
     icon: BookOpen,
     readTime: '5 min',
     content: `Academic pressure is real — but your study habits can either protect or destroy your mental health. Here's what science says:
@@ -323,7 +323,7 @@ Reviewing material at increasing intervals (1 day → 3 days → 7 days) dramati
     title: 'Navigating Grief at University',
     subtitle: 'Loss doesn\'t pause for exam season',
     category: 'Grief',
-    color: '#F59E0B',
+    color: 'sand',
     icon: Smile,
     readTime: '6 min',
     content: `Grief is a natural response to loss — not just death, but breakups, moving away from home, losing a friendship, or even the gap between who you expected to be and who you are.
@@ -357,7 +357,7 @@ const GUIDED_MEDITATIONS = [
     durationLabel: '5 min',
     durationMs: 300000,
     icon: Wind,
-    color: '#06B6D4',
+    color: 'powderBlue',
     tag: 'Breathwork',
     audioUrl: 'https://d1cy5zxxhbcbkk.cloudfront.net/guided-meditations/01_Breathing_Meditation.mp3',
   },
@@ -369,7 +369,7 @@ const GUIDED_MEDITATIONS = [
     durationLabel: '13 min',
     durationMs: 780000,
     icon: Moon,
-    color: '#6366F1',
+    color: 'slate',
     tag: 'Sleep & Relaxation',
     audioUrl: 'https://d1cy5zxxhbcbkk.cloudfront.net/guided-meditations/Body-Scan-for-Sleep.mp3',
   },
@@ -381,7 +381,7 @@ const GUIDED_MEDITATIONS = [
     durationLabel: '9 min',
     durationMs: 540000,
     icon: Heart,
-    color: '#F59E0B',
+    color: 'sand',
     tag: 'Self-Compassion',
     audioUrl: 'https://d1cy5zxxhbcbkk.cloudfront.net/guided-meditations/05_Loving_Kindness_Meditation.mp3',
   },
@@ -393,7 +393,7 @@ const GUIDED_MEDITATIONS = [
     durationLabel: '12 min',
     durationMs: 720000,
     icon: Waves,
-    color: '#10B981',
+    color: 'softMint',
     tag: 'Mindfulness',
     audioUrl: 'https://d1cy5zxxhbcbkk.cloudfront.net/guided-meditations/02_Breath_Sound_Body_Meditation.mp3',
   },
@@ -408,7 +408,7 @@ const PODCAST_RESOURCES = [
     host: 'Emma McAdam, LMFT',
     duration: 'YouTube · Free',
     icon: Podcast,
-    color: '#EC4899',
+    color: 'dustyRose',
     tag: 'Psychology',
     url: 'https://www.youtube.com/@TherapyinaNutshell',
   },
@@ -419,7 +419,7 @@ const PODCAST_RESOURCES = [
     host: 'Dr. Andrew Huberman',
     duration: 'Spotify / Apple',
     icon: Brain,
-    color: '#06B6D4',
+    color: 'powderBlue',
     tag: 'Neuroscience',
     url: 'https://hubermanlab.com/podcast',
   },
@@ -430,7 +430,7 @@ const PODCAST_RESOURCES = [
     host: 'Dr. David Burns',
     duration: 'Free · 300+ episodes',
     icon: Smile,
-    color: '#F97316',
+    color: 'gentlePeach',
     tag: 'CBT',
     url: 'https://feelinggood.com/category/podcasts',
   },
@@ -441,7 +441,7 @@ const PODCAST_RESOURCES = [
     host: 'Krista Tippett',
     duration: 'All platforms',
     icon: Sun,
-    color: '#8B5CF6',
+    color: 'softLilac',
     tag: 'Meaning & Purpose',
     url: 'https://onbeing.org/series/podcast',
   },
@@ -456,9 +456,9 @@ const VIDEO_RESOURCES = [
     channel: 'TED · Kelly McGonigal',
     duration: '14:28',
     icon: Activity,
-    color: '#10B981',
+    color: 'softMint',
     tag: 'Stress',
-    thumbnailColor: ['#059669', '#047857'] as [string, string],
+    thumbnailColor: ['mossVelvet', 'mossVelvet'] as [string, string],
     url: 'https://www.youtube.com/watch?v=RcGyVTAoXEU',
   },
   {
@@ -468,9 +468,9 @@ const VIDEO_RESOURCES = [
     channel: 'TED · Matthew Walker',
     duration: '19:18',
     icon: Moon,
-    color: '#6366F1',
+    color: 'slate',
     tag: 'Sleep',
-    thumbnailColor: ['#4F46E5', '#4338CA'] as [string, string],
+    thumbnailColor: ['slate', 'slate'] as [string, string],
     url: 'https://www.youtube.com/watch?v=5MuIMqhT8pM',
   },
   {
@@ -480,9 +480,9 @@ const VIDEO_RESOURCES = [
     channel: 'World Health Organization',
     duration: '4:30',
     icon: Sun,
-    color: '#F59E0B',
+    color: 'sand',
     tag: 'Depression',
-    thumbnailColor: ['#D97706', '#B45309'] as [string, string],
+    thumbnailColor: ['sand', 'sand'] as [string, string],
     url: 'https://www.youtube.com/watch?v=XiCrniLQGYc',
   },
   {
@@ -492,9 +492,9 @@ const VIDEO_RESOURCES = [
     channel: 'Goodful',
     duration: '10:03',
     icon: Compass,
-    color: '#EC4899',
+    color: 'dustyRose',
     tag: 'Mindfulness',
-    thumbnailColor: ['#DB2777', '#BE185D'] as [string, string],
+    thumbnailColor: ['dustyRose', 'dustyRose'] as [string, string],
     url: 'https://www.youtube.com/watch?v=U9YKY7fdwyg',
   },
   {
@@ -504,9 +504,9 @@ const VIDEO_RESOURCES = [
     channel: 'TEDx · Mimi Gorman',
     duration: '13:01',
     icon: Zap,
-    color: '#F97316',
+    color: 'gentlePeach',
     tag: 'Burnout',
-    thumbnailColor: ['#EA580C', '#C2410C'] as [string, string],
+    thumbnailColor: ['terracotta', 'terracotta'] as [string, string],
     url: 'https://www.youtube.com/watch?v=ubNPfVo4sCc',
   },
   {
@@ -516,9 +516,9 @@ const VIDEO_RESOURCES = [
     channel: 'TED · Olivia Remes',
     duration: '13:29',
     icon: Brain,
-    color: '#8B5CF6',
+    color: 'softLilac',
     tag: 'Anxiety',
-    thumbnailColor: ['#7C3AED', '#6D28D9'] as [string, string],
+    thumbnailColor: ['softLilac', 'softLilac'] as [string, string],
     url: 'https://www.youtube.com/watch?v=WWloIAQpMcQ',
   },
 ];
@@ -653,8 +653,8 @@ const AudioPlayerModal = ({ meditation, visible, onClose, theme }: any) => {
           <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
             <X color={theme.colors.text.secondary} size={22} />
           </TouchableOpacity>
-          <View style={[styles.modalCategoryBadge, { backgroundColor: meditation.color + '20' }]}>
-            <Text style={[styles.modalCategoryText, { color: meditation.color }]}>{meditation.tag}</Text>
+          <View style={[styles.modalCategoryBadge, { backgroundColor: (theme.colors.accents[meditation.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '20' }]}>
+            <Text style={[styles.modalCategoryText, { color: theme.colors.accents[meditation.color as keyof typeof theme.colors.accents] || theme.colors.plum }]}>{meditation.tag}</Text>
           </View>
           <View style={{ width: 36 }} />
         </View>
@@ -662,8 +662,8 @@ const AudioPlayerModal = ({ meditation, visible, onClose, theme }: any) => {
         <View style={styles.playerBody}>
           {/* Album Art */}
           <View style={[styles.playerArtwork, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-            <View style={[styles.playerArtworkIcon, { backgroundColor: theme.colors.plum + '20' }]}>
-              <IconComponent color={theme.colors.plum} size={52} strokeWidth={1.5} />
+            <View style={[styles.playerArtworkIcon, { backgroundColor: (theme.colors.accents[meditation.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '20' }]}>
+              <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={52} strokeWidth={1.5} />
             </View>
           </View>
 
@@ -778,14 +778,14 @@ const ArticleModal = ({ article, visible, onClose, theme }: any) => {
           <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
             <X color={theme.colors.text.secondary} size={22} />
           </TouchableOpacity>
-          <View style={[styles.modalCategoryBadge, { backgroundColor: theme.colors.plum + '15' }]}>
+          <View style={[styles.modalCategoryBadge, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '15' }]}>
             <Text style={[styles.modalCategoryText, { color: theme.colors.plum }]}>{article.category}</Text>
           </View>
           <View style={{ width: 36 }} />
         </View>
         <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
-          <View style={[styles.modalIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
-            <IconComponent color={theme.colors.plum} size={32} />
+          <View style={[styles.modalIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+            <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={32} />
           </View>
           <Text style={[styles.modalTitle, { color: theme.colors.text.primary }]}>{article.title}</Text>
           <View style={styles.modalMeta}>
@@ -815,14 +815,14 @@ const TechniqueModal = ({ technique, visible, onClose, theme, router }: any) => 
           <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
             <X color={theme.colors.text.secondary} size={22} />
           </TouchableOpacity>
-          <View style={[styles.modalCategoryBadge, { backgroundColor: theme.colors.plum + '15' }]}>
+          <View style={[styles.modalCategoryBadge, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '15' }]}>
             <Text style={[styles.modalCategoryText, { color: theme.colors.plum }]}>{technique.tag}</Text>
           </View>
           <View style={{ width: 36 }} />
         </View>
         <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
-          <View style={[styles.modalIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
-            <IconComponent color={theme.colors.plum} size={32} />
+          <View style={[styles.modalIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+            <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={32} />
           </View>
           <Text style={[styles.modalTitle, { color: theme.colors.text.primary }]}>{technique.title}</Text>
           <View style={styles.modalMeta}>
@@ -834,7 +834,7 @@ const TechniqueModal = ({ technique, visible, onClose, theme, router }: any) => 
           <Text style={[styles.stepsTitle, { color: theme.colors.text.primary }]}>How to do it</Text>
           {technique.steps.map((step: string, i: number) => (
             <View key={i} style={styles.stepRow}>
-              <View style={[styles.stepNum, { backgroundColor: theme.colors.plum + '15' }]}>
+              <View style={[styles.stepNum, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '15' }]}>
                 <Text style={[styles.stepNumText, { color: theme.colors.plum }]}>{i + 1}</Text>
               </View>
               <Text style={[styles.stepText, { color: theme.colors.text.secondary }]}>{step}</Text>
@@ -982,7 +982,7 @@ export default function ResourcesScreen() {
         {activeCategory === 'all' && (
           <Animated.View entering={FadeInUp.delay(80).duration(600)} style={styles.featuredWrap}>
             <View style={[styles.featuredCard, { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]}>
-              <View style={[styles.featuredBadge, { backgroundColor: theme.colors.plum + '15' }]}>
+              <View style={[styles.featuredBadge, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '15' }]}>
                 <Star color={theme.colors.plum} size={11} fill={theme.colors.plum} />
                 <Text style={[styles.featuredBadgeText, { color: theme.colors.plum }]}>{FEATURED.category}</Text>
               </View>
@@ -996,7 +996,7 @@ export default function ResourcesScreen() {
                   <Text style={[styles.featuredMetaText, { color: theme.colors.text.tertiary }]}>{FEATURED.readTime}</Text>
                 </View>
                 <TouchableOpacity
-                  style={[styles.featuredBtn, { backgroundColor: theme.colors.plum + '15' }]}
+                  style={[styles.featuredBtn, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '15' }]}
                   onPress={() => setFeaturedExpanded(!featuredExpanded)}
                 >
                   <Text style={[styles.featuredBtnText, { color: theme.colors.plum }]}>{featuredExpanded ? 'Collapse' : 'Read Now'}</Text>
@@ -1060,8 +1060,8 @@ export default function ResourcesScreen() {
                       onPress={() => openTechnique(t)}
                     >
                       <View style={styles.techniqueCardTop}>
-                        <View style={[styles.techniqueIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
-                          <IconComponent color={theme.colors.plum} size={22} strokeWidth={2} />
+                        <View style={[styles.techniqueIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+                          <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={22} strokeWidth={2} />
                         </View>
                         <View style={[styles.techniqueTagBadge, { backgroundColor: theme.colors.backgroundSecondary }]}>
                           <Text style={[styles.techniqueTagText, { color: theme.colors.text.secondary }]}>{t.tag}</Text>
@@ -1074,8 +1074,8 @@ export default function ResourcesScreen() {
                           <Clock color={theme.colors.text.tertiary} size={12} />
                           <Text style={[styles.techDurationText, { color: theme.colors.text.tertiary }]}>{t.duration}</Text>
                         </View>
-                        <View style={[styles.techniqueReadMore, { backgroundColor: theme.colors.plum + '10' }]}>
-                          <Text style={[styles.techniqueReadMoreText, { color: theme.colors.plum }]}>Learn More</Text>
+                        <View style={[styles.techniqueReadMore, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+                          <Text style={[styles.techniqueReadMoreText, { color: theme.colors.accents[t.color as keyof typeof theme.colors.accents] || theme.colors.plum }]}>Learn More</Text>
                           <ChevronRight color={theme.colors.plum} size={12} />
                         </View>
                       </View>
@@ -1096,7 +1096,7 @@ export default function ResourcesScreen() {
                 style={[styles.quickToolCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', backgroundColor: theme.colors.surface }]}
                 onPress={() => router.push('/breathing')}
               >
-                <Wind color={theme.colors.plum} size={26} />
+                <Wind color={theme.colors.accents.powderBlue} size={26} />
                 <Text style={[styles.quickToolTitle, { color: theme.colors.text.primary }]}>Box Breathing</Text>
                 <Text style={[styles.quickToolSub, { color: theme.colors.text.secondary }]}>4 min guided</Text>
               </TouchableOpacity>
@@ -1104,7 +1104,7 @@ export default function ResourcesScreen() {
                 style={[styles.quickToolCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', backgroundColor: theme.colors.surface }]}
                 onPress={() => router.push('/grounding')}
               >
-                <Compass color={theme.colors.plum} size={26} />
+                <Compass color={theme.colors.accents.softMint} size={26} />
                 <Text style={[styles.quickToolTitle, { color: theme.colors.text.primary }]}>5-4-3-2-1 Grounding</Text>
                 <Text style={[styles.quickToolSub, { color: theme.colors.text.secondary }]}>5 min guided</Text>
               </TouchableOpacity>
@@ -1112,7 +1112,7 @@ export default function ResourcesScreen() {
                 style={[styles.quickToolCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', backgroundColor: theme.colors.surface }]}
                 onPress={() => router.push('/(tabs)/journal')}
               >
-                <BookOpen color={theme.colors.plum} size={26} />
+                <BookOpen color={theme.colors.accents.softLilac} size={26} />
                 <Text style={[styles.quickToolTitle, { color: theme.colors.text.primary }]}>Reflective Journal</Text>
                 <Text style={[styles.quickToolSub, { color: theme.colors.text.secondary }]}>Write it out</Text>
               </TouchableOpacity>
@@ -1120,7 +1120,7 @@ export default function ResourcesScreen() {
                 style={[styles.quickToolCard, { borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', backgroundColor: theme.colors.surface }]}
                 onPress={() => router.push('/(tabs)/assessments')}
               >
-                <Activity color={theme.colors.plum} size={26} />
+                <Activity color={theme.colors.accents.gentlePeach} size={26} />
                 <Text style={[styles.quickToolTitle, { color: theme.colors.text.primary }]}>Self-Assessment</Text>
                 <Text style={[styles.quickToolSub, { color: theme.colors.text.secondary }]}>Check your mood</Text>
               </TouchableOpacity>
@@ -1147,8 +1147,8 @@ export default function ResourcesScreen() {
                     onPress={() => openArticle(article)}
                     activeOpacity={0.8}
                   >
-                    <View style={[styles.articleIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
-                      <IconComponent color={theme.colors.plum} size={20} />
+                    <View style={[styles.articleIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+                      <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={20} />
                     </View>
                     <View style={styles.articleText}>
                       <View style={styles.articleTopRow}>
@@ -1197,8 +1197,8 @@ export default function ResourcesScreen() {
                       activeOpacity={0.82}
                       onPress={() => openMeditation(med)}
                     >
-                      <View style={[styles.audioIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
-                        <IconComponent color={theme.colors.plum} size={24} />
+                      <View style={[styles.audioIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+                        <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={24} />
                       </View>
                       <View style={[styles.audioTagBadge, { backgroundColor: theme.colors.backgroundSecondary }]}>
                         <Text style={[styles.audioTagText, { color: theme.colors.text.secondary }]}>{med.tag}</Text>
@@ -1238,8 +1238,8 @@ export default function ResourcesScreen() {
                       onPress={() => openInBrowser(pod.url)}
                       activeOpacity={0.8}
                     >
-                      <View style={[styles.articleIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
-                        <IconComponent color={theme.colors.plum} size={20} />
+                      <View style={[styles.articleIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+                        <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={20} />
                       </View>
                       <View style={styles.articleText}>
                         <View style={styles.articleTopRow}>
@@ -1280,7 +1280,7 @@ export default function ResourcesScreen() {
                     >
                       {/* Thumbnail */}
                       <View
-                        style={[styles.videoThumb, { backgroundColor: theme.colors.plum + '20' }]}
+                        style={[styles.videoThumb, { backgroundColor: (theme.colors.accents[meditation.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '20' }]}
                       >
                         <View style={styles.videoPlayCircle}>
                           <Play color="#FFF" size={20} fill="#FFF" />
@@ -1312,7 +1312,7 @@ export default function ResourcesScreen() {
         {/* ── Crisis Resources Section ── */}
         {showCrisis && (
           <Animated.View entering={FadeInUp.delay(350).duration(500)} style={[styles.section, { marginTop: 8 }]}>
-            <View style={[styles.crisisHeader, { backgroundColor: theme.colors.backgroundSecondary, borderColor: '#EF4444' + '40' }]}>
+            <View style={[styles.crisisHeader, { backgroundColor: theme.colors.backgroundSecondary, borderColor: 'terracotta' + '40' }]}>
               <AlertCircle color="#EF4444" size={20} />
               <Text style={[styles.crisisHeaderText, { color: theme.colors.text.primary }]}>
                 In crisis? Immediate support is available
@@ -1330,14 +1330,14 @@ export default function ResourcesScreen() {
                     }}
                     activeOpacity={0.82}
                   >
-                    <View style={[styles.crisisIconWrap, { backgroundColor: theme.colors.plum + '10' }]}>
-                      <IconComponent color={theme.colors.plum} size={22} />
+                    <View style={[styles.crisisIconWrap, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
+                      <IconComponent color={theme.colors.accents[meditation?.color as keyof typeof theme.colors.accents] || theme.colors.plum} size={22} />
                     </View>
                     <View style={styles.crisisInfo}>
                       <Text style={[styles.crisisName, { color: theme.colors.text.primary }]}>{r.title}</Text>
                       <Text style={[styles.crisisSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={1}>{r.subtitle}</Text>
                       <View style={styles.crisisMetaRow}>
-                        <View style={[styles.crisisAvailBadge, { backgroundColor: theme.colors.plum + '10' }]}>
+                        <View style={[styles.crisisAvailBadge, { backgroundColor: (theme.colors.accents[article.color as keyof typeof theme.colors.accents] || theme.colors.plum) + '10' }]}>
                           <CheckCircle color={theme.colors.plum} size={11} />
                           <Text style={[styles.crisisAvailText, { color: theme.colors.plum }]}>{r.available}</Text>
                         </View>
@@ -1428,7 +1428,7 @@ const createStyles = (theme: any) =>
       paddingVertical: 9,
       borderRadius: 12,
     },
-    featuredBtnText: { fontSize: 13, fontFamily: theme.typography.fonts.accent, fontWeight: '800', color: '#6366F1' },
+    featuredBtnText: { fontSize: 13, fontFamily: theme.typography.fonts.accent, fontWeight: '800', color: 'slate' },
     featuredExpandedContent: { marginTop: 20, gap: 6 },
     featuredBodyText: { fontSize: 14, color: 'rgba(255,255,255,0.85)', lineHeight: 22, fontFamily: theme.typography.fonts.body },
     featuredBodyBold: { fontWeight: '700', color: '#FFF' },

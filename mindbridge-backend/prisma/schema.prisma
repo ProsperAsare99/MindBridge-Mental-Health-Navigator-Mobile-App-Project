@@ -62,6 +62,7 @@ model MoodLog {
   location         String?
   audioUrl         String?
   note             String?
+  steps            Int?
   createdAt        DateTime @default(now())
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Dimensions, Scroll
 import { useTheme } from '../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X, Footprints, Target, Flame, Activity as ActivityIcon } from 'lucide-react-native';
+import { X, Footprints, Flame, Navigation, Activity as ActivityIcon } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { Pedometer } from 'expo-sensors';
 import Svg, { Circle } from 'react-native-svg';
@@ -11,8 +11,22 @@ import Animated, { FadeInUp, useSharedValue, useAnimatedProps, withTiming, Easin
 import { BarChart } from 'react-native-gifted-charts';
 
 const { width } = Dimensions.get('window');
-const CIRCLE_RADIUS = 90;
-const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
+
+// Fitness Rings Configuration
+const CENTER = 130;
+const STROKE_WIDTH = 22;
+const RADIUS_STEPS = 100;
+const RADIUS_CALORIES = 76;
+const RADIUS_DISTANCE = 52;
+
+const CIRCUMFERENCE_STEPS = 2 * Math.PI * RADIUS_STEPS;
+const CIRCUMFERENCE_CALORIES = 2 * Math.PI * RADIUS_CALORIES;
+const CIRCUMFERENCE_DISTANCE = 2 * Math.PI * RADIUS_DISTANCE;
+
+// Apple Fitness Style Colors
+const COLOR_STEPS = '#FA114F';    // Pink/Red
+const COLOR_CALORIES = '#A4FF28'; // Neon Green
+const COLOR_DISTANCE = '#1DB0F6'; // Bright Blue
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -24,9 +38,19 @@ export default function ActivityScreen() {
   const [steps, setSteps] = useState(0);
   const [isAvailable, setIsAvailable] = useState(true);
   const [weeklySteps, setWeeklySteps] = useState<any[]>([]);
-  const goal = 10000;
   
-  const animatedProgress = useSharedValue(0);
+  // Goals
+  const goalSteps = 10000;
+  const goalCalories = 400;
+  const goalDistance = 7.62; // roughly 10k steps in km
+  
+  const progressSteps = useSharedValue(0);
+  const progressCalories = useSharedValue(0);
+  const progressDistance = useSharedValue(0);
+
+  // Derived metrics
+  const calories = Math.round(steps * 0.04);
+  const distanceKm = (steps * 0.000762).toFixed(2);
 
   useEffect(() => {
     const fetchRealData = async () => {
@@ -44,17 +68,16 @@ export default function ActivityScreen() {
           const todaySteps = todayRes ? todayRes.steps : 0;
           setSteps(todaySteps);
           
-          // Animate the progress ring
-          const progress = Math.min(todaySteps / goal, 1);
-          animatedProgress.value = withDelay(300, withTiming(progress, {
-            duration: 1500,
-            easing: Easing.out(Easing.cubic)
-          }));
+          const calculatedCals = Math.round(todaySteps * 0.04);
+          const calculatedDist = todaySteps * 0.000762;
 
-          // 2. Fetch Last 7 Days of Real Steps
+          // Animate the 3 rings
+          progressSteps.value = withDelay(300, withTiming(Math.min(todaySteps / goalSteps, 1), { duration: 1500, easing: Easing.out(Easing.cubic) }));
+          progressCalories.value = withDelay(400, withTiming(Math.min(calculatedCals / goalCalories, 1), { duration: 1500, easing: Easing.out(Easing.cubic) }));
+          progressDistance.value = withDelay(500, withTiming(Math.min(calculatedDist / goalDistance, 1), { duration: 1500, easing: Easing.out(Easing.cubic) }));
+
+          // 2. Fetch Last 7 Days of Real Steps for Chart
           const weekData = [];
-          let maxSteps = 1000; // default for scaling
-          
           for (let i = 6; i >= 0; i--) {
             const dStart = new Date();
             dStart.setDate(dStart.getDate() - i);
@@ -67,12 +90,11 @@ export default function ActivityScreen() {
             try {
               const res = await Pedometer.getStepCountAsync(dStart, dEnd);
               const dailySteps = res ? res.steps : 0;
-              if (dailySteps > maxSteps) maxSteps = dailySteps;
               
               weekData.push({
                 value: dailySteps,
                 label: dStart.toLocaleDateString('en-US', { weekday: 'narrow' }),
-                frontColor: dailySteps >= goal ? theme.colors.plum : theme.colors.plum + '60',
+                frontColor: dailySteps >= goalSteps ? COLOR_STEPS : COLOR_STEPS + '50',
                 topLabelComponent: () => (
                   <Text style={{ color: theme.colors.text.tertiary, fontSize: 10, marginBottom: 4, fontWeight: '600' }}>
                     {dailySteps > 0 ? (dailySteps > 999 ? (dailySteps/1000).toFixed(1)+'k' : dailySteps) : ''}
@@ -80,11 +102,10 @@ export default function ActivityScreen() {
                 )
               });
             } catch (e) {
-              // Fallback if that specific day fails
               weekData.push({
                 value: 0,
                 label: dStart.toLocaleDateString('en-US', { weekday: 'narrow' }),
-                frontColor: theme.colors.plum + '40'
+                frontColor: COLOR_STEPS + '40'
               });
             }
           }
@@ -99,17 +120,11 @@ export default function ActivityScreen() {
     fetchRealData();
   }, []);
 
-  const animatedProps = useAnimatedProps(() => {
-    const strokeDashoffset = CIRCLE_CIRCUMFERENCE - (CIRCLE_CIRCUMFERENCE * animatedProgress.value);
-    return {
-      strokeDashoffset,
-    };
-  });
+  const animatedPropsSteps = useAnimatedProps(() => ({ strokeDashoffset: CIRCUMFERENCE_STEPS - (CIRCUMFERENCE_STEPS * progressSteps.value) }));
+  const animatedPropsCalories = useAnimatedProps(() => ({ strokeDashoffset: CIRCUMFERENCE_CALORIES - (CIRCUMFERENCE_CALORIES * progressCalories.value) }));
+  const animatedPropsDistance = useAnimatedProps(() => ({ strokeDashoffset: CIRCUMFERENCE_DISTANCE - (CIRCUMFERENCE_DISTANCE * progressDistance.value) }));
 
   const styles = createStyles(theme);
-
-  // Calorie calculation: roughly 0.04 calories per step
-  const calories = Math.round(steps * 0.04);
 
   return (
     <View style={styles.container}>
@@ -132,57 +147,63 @@ export default function ActivityScreen() {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.ringContainer}>
-          <Svg width={CIRCLE_RADIUS * 2 + 40} height={CIRCLE_RADIUS * 2 + 40} style={styles.svg}>
-            {/* Background Circle */}
-            <Circle
-              cx={(CIRCLE_RADIUS * 2 + 40) / 2}
-              cy={(CIRCLE_RADIUS * 2 + 40) / 2}
-              r={CIRCLE_RADIUS}
-              stroke={theme.colors.plum + '15'}
-              strokeWidth={18}
-              fill="none"
-            />
-            {/* Progress Circle */}
+          <Svg width={CENTER * 2} height={CENTER * 2} style={styles.svg}>
+            {/* Background Rings */}
+            <Circle cx={CENTER} cy={CENTER} r={RADIUS_STEPS} stroke={COLOR_STEPS + '20'} strokeWidth={STROKE_WIDTH} fill="none" />
+            <Circle cx={CENTER} cy={CENTER} r={RADIUS_CALORIES} stroke={COLOR_CALORIES + '20'} strokeWidth={STROKE_WIDTH} fill="none" />
+            <Circle cx={CENTER} cy={CENTER} r={RADIUS_DISTANCE} stroke={COLOR_DISTANCE + '20'} strokeWidth={STROKE_WIDTH} fill="none" />
+
+            {/* Foreground Animated Rings */}
             <AnimatedCircle
-              cx={(CIRCLE_RADIUS * 2 + 40) / 2}
-              cy={(CIRCLE_RADIUS * 2 + 40) / 2}
-              r={CIRCLE_RADIUS}
-              stroke={theme.colors.plum}
-              strokeWidth={18}
-              fill="none"
-              strokeDasharray={CIRCLE_CIRCUMFERENCE}
-              animatedProps={animatedProps}
-              strokeLinecap="round"
-              transform={`rotate(-90 ${(CIRCLE_RADIUS * 2 + 40) / 2} ${(CIRCLE_RADIUS * 2 + 40) / 2})`}
+              cx={CENTER} cy={CENTER} r={RADIUS_STEPS}
+              stroke={COLOR_STEPS} strokeWidth={STROKE_WIDTH} fill="none"
+              strokeDasharray={CIRCUMFERENCE_STEPS} animatedProps={animatedPropsSteps}
+              strokeLinecap="round" transform={`rotate(-90 ${CENTER} ${CENTER})`}
+            />
+            <AnimatedCircle
+              cx={CENTER} cy={CENTER} r={RADIUS_CALORIES}
+              stroke={COLOR_CALORIES} strokeWidth={STROKE_WIDTH} fill="none"
+              strokeDasharray={CIRCUMFERENCE_CALORIES} animatedProps={animatedPropsCalories}
+              strokeLinecap="round" transform={`rotate(-90 ${CENTER} ${CENTER})`}
+            />
+            <AnimatedCircle
+              cx={CENTER} cy={CENTER} r={RADIUS_DISTANCE}
+              stroke={COLOR_DISTANCE} strokeWidth={STROKE_WIDTH} fill="none"
+              strokeDasharray={CIRCUMFERENCE_DISTANCE} animatedProps={animatedPropsDistance}
+              strokeLinecap="round" transform={`rotate(-90 ${CENTER} ${CENTER})`}
             />
           </Svg>
-
-          <View style={styles.ringContent}>
-            <Footprints color={theme.colors.plum} size={28} style={{ marginBottom: 4 }} />
-            <Text style={[styles.stepsText, { color: theme.colors.text.primary }]}>
-              {steps.toLocaleString()}
-            </Text>
-            <Text style={[styles.stepsLabel, { color: theme.colors.text.secondary }]}>
-              Steps Today
-            </Text>
-          </View>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(300).duration(800)} style={styles.statsContainer}>
+          {/* Steps */}
           <View style={[styles.statBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)' }]}>
-            <View style={[styles.statIconWrap, { backgroundColor: theme.colors.accents.powderBlue + '20' }]}>
-              <Target color={theme.colors.accents.powderBlue} size={20} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <Footprints color={COLOR_STEPS} size={18} style={{ marginRight: 6 }} />
+              <Text style={[styles.statLabel, { color: COLOR_STEPS }]}>Steps</Text>
             </View>
-            <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>{goal.toLocaleString()}</Text>
-            <Text style={[styles.statLabel, { color: theme.colors.text.tertiary }]}>Daily Goal</Text>
+            <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>{steps.toLocaleString()}</Text>
+            <Text style={[styles.statSub, { color: theme.colors.text.tertiary }]}>Goal: {goalSteps}</Text>
           </View>
           
+          {/* Calories */}
           <View style={[styles.statBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)' }]}>
-            <View style={[styles.statIconWrap, { backgroundColor: theme.colors.accents.terracotta + '20' }]}>
-              <Flame color={theme.colors.accents.terracotta} size={20} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <Flame color={COLOR_CALORIES} size={18} style={{ marginRight: 6 }} />
+              <Text style={[styles.statLabel, { color: COLOR_CALORIES }]}>Calories</Text>
             </View>
             <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>{calories}</Text>
-            <Text style={[styles.statLabel, { color: theme.colors.text.tertiary }]}>Calories (kcal)</Text>
+            <Text style={[styles.statSub, { color: theme.colors.text.tertiary }]}>Goal: {goalCalories} kcal</Text>
+          </View>
+
+          {/* Distance */}
+          <View style={[styles.statBox, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)' }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <Navigation color={COLOR_DISTANCE} size={18} style={{ marginRight: 6 }} />
+              <Text style={[styles.statLabel, { color: COLOR_DISTANCE }]}>Distance</Text>
+            </View>
+            <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>{distanceKm} <Text style={{fontSize: 16}}>km</Text></Text>
+            <Text style={[styles.statSub, { color: theme.colors.text.tertiary }]}>Goal: {goalDistance} km</Text>
           </View>
         </Animated.View>
 
@@ -191,10 +212,10 @@ export default function ActivityScreen() {
           <Animated.View entering={FadeInUp.delay(400).duration(800)} style={[styles.chartCard, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)' }]}>
             <View style={styles.chartHeader}>
               <View>
-                <Text style={[styles.chartTitle, { color: theme.colors.text.primary }]}>Weekly Activity</Text>
-                <Text style={[styles.chartSubtitle, { color: theme.colors.text.tertiary }]}>Last 7 days of real steps</Text>
+                <Text style={[styles.chartTitle, { color: theme.colors.text.primary }]}>Weekly Steps</Text>
+                <Text style={[styles.chartSubtitle, { color: theme.colors.text.tertiary }]}>Your past 7 days</Text>
               </View>
-              <ActivityIcon color={theme.colors.plum} size={20} />
+              <ActivityIcon color={COLOR_STEPS} size={20} />
             </View>
             
             <View style={{ marginTop: 24, marginLeft: -10 }}>
@@ -281,58 +302,38 @@ const createStyles = (theme: any) => StyleSheet.create({
   svg: {
     transform: [{ rotate: '0deg' }],
   },
-  ringContent: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepsText: {
-    fontSize: 38,
-    fontFamily: theme.typography.fonts.header,
-    fontWeight: '800',
-  },
-  stepsLabel: {
-    fontSize: 12,
-    fontFamily: theme.typography.fonts.ui,
-    fontWeight: '600',
-    marginTop: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    gap: 16,
+    gap: 12,
     marginBottom: 24,
   },
   statBox: {
     flex: 1,
     borderRadius: 24,
     padding: 16,
-    alignItems: 'center',
+    alignItems: 'flex-start',
     borderWidth: 1,
     borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
   },
-  statIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
   statValue: {
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: theme.typography.fonts.header,
-    fontWeight: '700',
+    fontWeight: '800',
     marginBottom: 2,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: theme.typography.fonts.ui,
+    fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  statSub: {
+    fontSize: 11,
+    fontFamily: theme.typography.fonts.ui,
+    marginTop: 4,
   },
   chartCard: {
     width: '100%',

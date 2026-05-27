@@ -32,7 +32,8 @@ export const createMoodLog = async (req: Request, res: Response) => {
       weather, 
       location, 
       audioUrl, 
-      note 
+      note,
+      steps
     } = req.body;
     
     if (score === undefined || !emotions) {
@@ -53,6 +54,7 @@ export const createMoodLog = async (req: Request, res: Response) => {
         location,
         audioUrl,
         note,
+        steps,
       },
     });
 

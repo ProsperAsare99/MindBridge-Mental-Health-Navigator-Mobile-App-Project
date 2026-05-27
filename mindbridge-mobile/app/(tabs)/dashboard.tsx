@@ -537,7 +537,7 @@ export default function DashboardScreen() {
     }, [checkStatus])
   );
 
-  const getContextualPrompt = (t: any, moodHistory: any[], streak: number) => {
+  const getContextualPrompt = (t: any, moodHistory: any[], streak: number, steps: number | null) => {
     const hour = new Date().getHours();
     let prompt = "";
     let greeting = "";
@@ -547,7 +547,11 @@ export default function DashboardScreen() {
     else greeting = t('dashboard.greetingEvening') || 'Good Evening';
 
     // Contextual logic
-    if (streak >= 3) {
+    if (steps !== null && steps > 8000) {
+      prompt = "Amazing physical activity today! Notice how your body feels right now.";
+    } else if (steps !== null && steps < 500 && hour >= 15) {
+      prompt = "You've been quite still today. A brief 10-minute walk can clear your mind.";
+    } else if (streak >= 3) {
       prompt = `You're on a ${streak}-day streak! Keep the amazing momentum going.`;
     } else if (moodHistory.length > 0 && moodHistory[0].score <= 4) {
       prompt = "We noticed yesterday was a bit tough. Take it easy today, you're doing great.";
@@ -562,7 +566,7 @@ export default function DashboardScreen() {
     return { greeting, prompt };
   };
 
-  const { greeting, prompt: contextualPrompt } = getContextualPrompt(t, moodHistory, userData.streak);
+  const { greeting, prompt: contextualPrompt } = getContextualPrompt(t, moodHistory, userData.streak, stepCount);
 
   return (
     <View style={styles.container}>

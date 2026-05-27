@@ -179,6 +179,7 @@ export const chatWithOracle = async (req: Request, res: Response) => {
       social: latestMood?.socialSetting,
       symptoms: latestMood?.physicalSymptoms,
       weather: latestMood?.weather,
+      steps: latestMood?.steps,
     }, userId);
 
     // 5. Save AI Response

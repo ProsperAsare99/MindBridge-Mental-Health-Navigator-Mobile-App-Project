@@ -58,6 +58,7 @@ import api from '../../src/services/api';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useAudioRecorder, useAudioRecorderState, createAudioPlayer, AudioPlayer, requestRecordingPermissionsAsync, RecordingPresets, setAudioModeAsync } from 'expo-audio';
 import * as Location from 'expo-location';
+import { Pedometer } from 'expo-sensors';
 import {
   EnergySelector,
   SleepTracker,
@@ -293,6 +294,21 @@ export default function WellnessTrackerScreen() {
   const handleLog = async () => {
     setLoading(true);
     try {
+      // 1. Fetch current steps from Pedometer (if available)
+      let currentSteps = 0;
+      try {
+        const isAvailable = await Pedometer.isAvailableAsync();
+        if (isAvailable) {
+          const end = new Date();
+          const start = new Date();
+          start.setHours(0, 0, 0, 0);
+          const pedoRes = await Pedometer.getStepCountAsync(start, end);
+          currentSteps = pedoRes ? pedoRes.steps : 0;
+        }
+      } catch (err) {
+        console.log('Failed to fetch steps for mood log', err);
+      }
+
       const score = mood ? mood * 2 : 6;
       await api.post('/mood', {
         score,
@@ -306,6 +322,7 @@ export default function WellnessTrackerScreen() {
         location,
         note,
         audioUrl: audioUri,
+        steps: currentSteps,
       });
       setStep(5);
       setTotalCount(prev => prev + 1);

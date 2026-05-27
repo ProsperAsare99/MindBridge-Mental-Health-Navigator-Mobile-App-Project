@@ -71,6 +71,7 @@ import {
   SymptomCloud
 } from '../../src/components/TrackingComponents';
 import { VideoCheckInModal } from '../../src/components/VideoCheckInModal';
+import { StreakManager } from '../../src/utils/StreakManager';
 
 const { width } = Dimensions.get('window');
 const CHART_W = width - 96;
@@ -408,6 +409,10 @@ export default function WellnessTrackerScreen() {
         facialMetrics: facialMetrics,
         vocalMetrics: vocalMetrics,
       });
+
+      await StreakManager.logCheckIn();
+      if (note) await StreakManager.logJournal();
+
       setStep(5);
       setTotalCount(prev => prev + 1);
       fetchData();

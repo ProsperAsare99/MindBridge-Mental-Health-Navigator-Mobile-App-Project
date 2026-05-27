@@ -53,6 +53,7 @@ import {
 
 import { AuthContext } from '../../src/context/AuthContext';
 import { useRouter } from 'expo-router';
+import { StreakManager, UserStats, BADGE_DEFINITIONS } from '../../src/utils/StreakManager';
 
 const springConfig = { damping: 15, stiffness: 150, mass: 0.8 };
 
@@ -250,6 +251,7 @@ export default function ProfileScreen() {
   const [showUniPicker, setShowUniPicker] = useState(false);
   const [uniSearch, setUniSearch] = useState('');
   const [showHelp, setShowHelp] = useState(false);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
 
   const fetchProfile = async () => {
     try {
@@ -301,7 +303,17 @@ export default function ProfileScreen() {
   useEffect(() => {
     fetchProfile();
     fetchInsights();
+    loadGamificationStats();
   }, []);
+
+  const loadGamificationStats = async () => {
+    let stats = await StreakManager.getStats();
+    if (stats.totalCheckIns === 0) {
+      // Seed mock data for demonstration if empty
+      stats = await StreakManager.seedMockData();
+    }
+    setUserStats(stats);
+  };
 
   const fetchInsights = async () => {
     try {
@@ -425,11 +437,45 @@ export default function ProfileScreen() {
 
         {/* Stats Grid */}
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.statsGrid}>
-          <StatsCard theme={theme} icon={Flame} value={String(profile?.stats?.streak ?? 0)} label={t('profile.stats_streak')} color={theme.colors.accents.gentlePeach} />
-          <StatsCard theme={theme} icon={Trophy} value={String(profile?.stats?.points ?? 0)} label={t('profile.stats_points')} color={theme.colors.accents.powderBlue} />
-          <StatsCard theme={theme} icon={CheckCircle2} value={String(profile?.stats?.seeds ?? 0)} label={t('profile.stats_seeds')} color={theme.colors.accents.eucalyptus} />
-          <StatsCard theme={theme} icon={Award} value={String(profile?.stats?.badges ?? 0)} label={t('profile.stats_badges')} color={theme.colors.plum} />
+          <StatsCard theme={theme} icon={Flame} value={String(userStats?.currentStreak ?? profile?.stats?.streak ?? 0)} label={t('profile.stats_streak')} color={theme.colors.accents.gentlePeach} />
+          <StatsCard theme={theme} icon={Trophy} value={String(userStats?.points ?? profile?.stats?.points ?? 0)} label={t('profile.stats_points')} color={theme.colors.accents.powderBlue} />
+          <StatsCard theme={theme} icon={CheckCircle2} value={String(userStats?.totalCheckIns ?? profile?.stats?.seeds ?? 0)} label={"Check-ins"} color={theme.colors.accents.eucalyptus} />
+          <StatsCard theme={theme} icon={Award} value={String(userStats?.badges?.length ?? profile?.stats?.badges ?? 0)} label={t('profile.stats_badges')} color={theme.colors.plum} />
         </Animated.View>
+
+        {/* Badges Section */}
+        {userStats && userStats.badges.length > 0 && (
+          <Animated.View entering={FadeInUp.delay(150).duration(800)} style={styles.badgesSection}>
+            <View style={styles.sectionLabelRow}>
+              <Award size={14} color={theme.colors.text.tertiary} />
+              <Text style={styles.sectionLabel}>Achievements</Text>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badgesScroll}>
+              {userStats.badges.map((badgeId, idx) => {
+                const badge = BADGE_DEFINITIONS[badgeId];
+                if (!badge) return null;
+                // Just map icons safely, using a default if string lookup fails
+                const BadgeIcon = {
+                  'Flame': Flame,
+                  'BookOpen': ClipboardEdit,
+                  'Shield': Shield,
+                  'Heart': Heart,
+                  'Footprints': CheckCircle2
+                }[badge.icon] || Award;
+                
+                return (
+                  <View key={idx} style={[styles.badgeCard, { backgroundColor: theme.colors.surface, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
+                    <View style={[styles.badgeIconWrap, { backgroundColor: badge.color + '15' }]}>
+                      <BadgeIcon color={badge.color} size={24} />
+                    </View>
+                    <Text style={[styles.badgeName, { color: theme.colors.text.primary }]}>{badge.name}</Text>
+                    <Text style={[styles.badgeDesc, { color: theme.colors.text.tertiary }]} numberOfLines={2}>{badge.description}</Text>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </Animated.View>
+        )}
 
         {/* Mood Visualization */}
         <Animated.View entering={FadeInUp.delay(200).duration(800)} style={styles.insightsCard}>
@@ -470,6 +516,14 @@ export default function ProfileScreen() {
               </View>
             </View>
           )}
+          
+          <TouchableOpacity 
+            style={[styles.detailedInsightsBtn, { backgroundColor: theme.colors.plum + '10' }]}
+            onPress={() => router.push('/(tabs)/insights')}
+          >
+            <Text style={[styles.detailedInsightsText, { color: theme.colors.plum }]}>View Detailed Analytics</Text>
+            <ChevronRight color={theme.colors.plum} size={16} />
+          </TouchableOpacity>
         </Animated.View>
 
         <ProfileListGroup delay={400} theme={theme}>
@@ -797,6 +851,14 @@ const createStyles = (theme: any) => StyleSheet.create({
   avgBadge: { alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14 },
   avgBadgeNum: { fontSize: 20, fontFamily: theme.typography.fonts.header, lineHeight: 22 },
   avgBadgeLabel: { fontSize: 9, fontFamily: theme.typography.fonts.accent, textTransform: 'uppercase', letterSpacing: 0.5 },
+  badgesSection: { marginBottom: 24 },
+  badgesScroll: { paddingHorizontal: 20, gap: 12 },
+  badgeCard: { width: 110, padding: 12, borderRadius: 20, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  badgeIconWrap: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  badgeName: { fontSize: 13, fontFamily: theme.typography.fonts.header, textAlign: 'center', marginBottom: 2 },
+  badgeDesc: { fontSize: 10, fontFamily: theme.typography.fonts.body, textAlign: 'center' },
+  detailedInsightsBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: 16, marginTop: 16, gap: 6 },
+  detailedInsightsText: { fontSize: 14, fontFamily: theme.typography.fonts.header },
   // Chart styles
   emptyChart: { paddingVertical: 32, alignItems: 'center' },
   emptyChartText: { fontSize: 14, fontFamily: theme.typography.fonts.body, color: theme.colors.text.tertiary, textAlign: 'center', lineHeight: 22, maxWidth: 240 },

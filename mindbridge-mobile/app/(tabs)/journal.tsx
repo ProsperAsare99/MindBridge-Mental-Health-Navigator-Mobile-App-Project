@@ -49,6 +49,9 @@ import {
 import * as FileSystem from 'expo-file-system';
 
 import api from '../../src/services/api';
+import * as ImagePicker from 'expo-image-picker';
+import { BlurView } from 'expo-blur';
+import { StreakManager } from '../../src/utils/StreakManager';
 import { VideoCheckInModal } from '../../src/components/VideoCheckInModal';
 
 const { width } = Dimensions.get('window');
@@ -249,6 +252,8 @@ export default function JournalScreen() {
         vocalMetrics: vocalMetrics,
       });
       
+      await StreakManager.logJournal();
+
       setEntries([response.data, ...entries]);
       setIsWriting(false);
       setNewTitle('');

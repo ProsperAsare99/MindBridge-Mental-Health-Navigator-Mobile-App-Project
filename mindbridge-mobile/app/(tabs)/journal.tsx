@@ -18,6 +18,7 @@ import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, FadeIn, SlideInDown, SlideOutDown, withRepeat, withSequence, withTiming, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { useAudioRecorder, useAudioRecorderState, createAudioPlayer, AudioPlayer, requestRecordingPermissionsAsync, RecordingPresets, setAudioModeAsync } from 'expo-audio';
+import { LightSensor } from 'expo-sensors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { SkeletonLoader } from '../../src/components/SkeletonLoader';
@@ -40,7 +41,8 @@ import {
   Smile,
   Meh,
   Heart,
-  Frown
+  Frown,
+  Moon
 } from 'lucide-react-native';
 
 import api from '../../src/services/api';
@@ -61,6 +63,7 @@ export default function JournalScreen() {
   const [newContent, setNewContent] = useState('');
   const [selectedMood, setSelectedMood] = useState('calm');
   const [filterMood, setFilterMood] = useState('all');
+  const [showSleepWarning, setShowSleepWarning] = useState(false);
   
   // Audio State
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
@@ -129,6 +132,38 @@ export default function JournalScreen() {
       if (player) player.remove();
     };
   }, [player]);
+
+  // Sleep Hygiene Tracking (Phase 2 Sensor Integration)
+  useEffect(() => {
+    let subscription: any;
+    
+    const checkSleepHygiene = async () => {
+      // Check if it's late night (10 PM to 5 AM)
+      const hour = new Date().getHours();
+      const isLateNight = hour >= 22 || hour < 5;
+      
+      if (isLateNight) {
+        await LightSensor.setUpdateInterval(2000);
+        subscription = LightSensor.addListener(({ illuminance }) => {
+          // If the ambient light is extremely low (pitch black)
+          if (illuminance < 10) {
+            setShowSleepWarning(true);
+            // Once we detect it, we can stop listening to save battery
+            if (subscription) {
+              subscription.remove();
+              subscription = null;
+            }
+          }
+        });
+      }
+    };
+    
+    checkSleepHygiene();
+    
+    return () => {
+      if (subscription) subscription.remove();
+    };
+  }, []);
 
   const startRecording = async () => {
     try {
@@ -255,6 +290,23 @@ export default function JournalScreen() {
                     </TouchableOpacity>
                   }
                 />
+
+                {showSleepWarning && (
+                  <Animated.View entering={FadeIn.duration(600)} style={styles.sleepWarning}>
+                    <View style={{ backgroundColor: theme.colors.plum + '20', padding: 8, borderRadius: 12 }}>
+                      <Moon color={theme.colors.plum} size={20} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.sleepWarningTitle, { color: theme.colors.text.primary }]}>Journaling in the dark?</Text>
+                      <Text style={[styles.sleepWarningText, { color: theme.colors.text.secondary }]}>
+                        Late-night screen time can disrupt your sleep cycle. Try turning on night mode.
+                      </Text>
+                    </View>
+                    <TouchableOpacity onPress={() => setShowSleepWarning(false)} style={{ padding: 4 }}>
+                      <X color={theme.colors.text.tertiary} size={16} />
+                    </TouchableOpacity>
+                  </Animated.View>
+                )}
 
                 <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
                   {/* Filter Pills */}
@@ -478,6 +530,29 @@ const createStyles = (theme: any) => StyleSheet.create({
   header: { 
     marginBottom: 32,
     paddingHorizontal: 24,
+  },
+  sleepWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(123,97,255,0.05)',
+    padding: 16,
+    marginHorizontal: 24,
+    borderRadius: 16,
+    marginBottom: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(123,97,255,0.1)',
+  },
+  sleepWarningTitle: {
+    fontSize: 14,
+    fontFamily: theme.typography.fonts.header,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  sleepWarningText: {
+    fontSize: 12,
+    fontFamily: theme.typography.fonts.body,
+    lineHeight: 16,
   },
   newBtn: {
     width: 48,

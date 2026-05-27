@@ -582,7 +582,7 @@ export default function DashboardScreen() {
             <View style={styles.sectionHeader}>
               <View>
                 <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.yourJourney')}</Text>
-                <Text style={styles.headerSubtitle}>{contextualPrompt}</Text>
+                <Text style={styles.sectionSubtitleText}>{contextualPrompt}</Text>
               </View>
               <View style={styles.streakBadge}>
                 <Flame size={14} color="#FF9800" />
@@ -844,7 +844,7 @@ export default function DashboardScreen() {
                 <TouchableOpacity 
                   key={idx}
                   style={[styles.resourceCardWide, { backgroundColor: theme.colors.surface, marginRight: 16 }]}
-                  onPress={() => router.push('/(tabs)/resources')}
+                  onPress={() => router.push('/(tabs)/explore')}
                 >
                   <View style={styles.resourceInfo}>
                     <View style={styles.resourceTag}><Text style={styles.resourceTagText}>{res.category}</Text></View>
@@ -884,7 +884,7 @@ export default function DashboardScreen() {
         visible={showIntervention} 
         onClose={() => setShowIntervention(false)} 
         onConnectPeer={() => { setShowIntervention(false); router.push('/(tabs)/community'); }}
-        onViewResources={() => { setShowIntervention(false); router.push('/(tabs)/resources'); }}
+        onViewResources={() => { setShowIntervention(false); router.push('/(tabs)/explore'); }}
       />
 
       <CelebrationModal

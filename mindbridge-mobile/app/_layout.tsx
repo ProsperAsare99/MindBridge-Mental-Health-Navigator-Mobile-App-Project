@@ -72,13 +72,14 @@ const InitialLayout = () => {
     let subscription: any;
     
     const subscribe = async () => {
-      await Accelerometer.setUpdateInterval(400);
+      // 100ms update interval to catch quick shake spikes
+      await Accelerometer.setUpdateInterval(100);
       subscription = Accelerometer.addListener(accelerometerData => {
         const { x, y, z } = accelerometerData;
         const acceleration = Math.sqrt(x * x + y * y + z * z);
         
-        // 1g is resting gravity. A vigorous shake is typically > 2.8g
-        if (acceleration > 2.8) {
+        // 1g is resting gravity. 1.8g is a moderate shake.
+        if (acceleration > 1.8) {
           // Prevent multiple pushes if already on crisis screen
           if (segments[segments.length - 1] !== 'crisis') {
             router.push('/(tabs)/crisis');

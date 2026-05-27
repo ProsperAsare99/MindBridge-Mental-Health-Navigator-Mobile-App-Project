@@ -627,7 +627,7 @@ export default function AssessmentsScreen() {
             <Text style={styles.severityTitle}>Severity Level</Text>
             <View style={[
               styles.severityBadge, 
-              { backgroundColor: isSevere ? 'rgba(239, 68, 68, 0.15)' : 'rgba(90, 138, 112, 0.15)' }
+              { backgroundColor: isSevere ? 'rgba(230, 0, 0, 0.15)' : 'rgba(90, 138, 112, 0.15)' }
             ]}>
               <Text style={[
                 styles.severityText, 
@@ -644,7 +644,7 @@ export default function AssessmentsScreen() {
           <View style={[
             styles.actionCard, 
             { 
-              backgroundColor: theme.isDark ? 'rgba(239, 68, 68, 0.08)' : 'rgba(239, 68, 68, 0.04)',
+              backgroundColor: theme.isDark ? 'rgba(230, 0, 0, 0.08)' : 'rgba(230, 0, 0, 0.04)',
               borderColor: theme.colors.semantic.danger 
             }
           ]}>

@@ -530,7 +530,7 @@ const CRISIS_RESOURCES = [
     subtitle: 'Crisis listening service — you are not alone',
     detail: 'Free, confidential emotional support for anyone in distress',
     phone: '+233 50 165 6789',
-    color: '#EF4444',
+    color: '#E60000',
     icon: Heart,
     available: '24/7',
   },
@@ -540,7 +540,7 @@ const CRISIS_RESOURCES = [
     subtitle: 'University of Ghana official counseling',
     detail: 'Mental health, academic, and career counseling',
     phone: '+233 (0) 245 945 752',
-    color: '#EF4444',
+    color: '#E60000',
     icon: Users,
     available: 'Mon–Fri, 8am–5pm',
   },
@@ -550,7 +550,7 @@ const CRISIS_RESOURCES = [
     subtitle: 'Kwame Nkrumah University counseling',
     detail: 'Professional psychological support for students',
     phone: '+233 50 644 9747',
-    color: '#EF4444',
+    color: '#E60000',
     icon: Shield,
     available: 'Mon–Fri, 9am–4pm',
   },
@@ -560,7 +560,7 @@ const CRISIS_RESOURCES = [
     subtitle: 'National mental health regulatory body',
     detail: 'Referrals to mental health facilities nationwide',
     phone: '+233 302 664 646',
-    color: '#EF4444',
+    color: '#E60000',
     icon: Globe,
     available: 'Mon–Fri, 8am–5pm',
   },
@@ -1376,7 +1376,7 @@ export default function ResourcesScreen() {
               );
             })}
             <TouchableOpacity
-              style={[styles.viewCrisisAllBtn, { borderColor: '#EF4444', backgroundColor: '#EF4444' }]}
+              style={[styles.viewCrisisAllBtn, { borderColor: '#E60000', backgroundColor: '#E60000' }]}
               onPress={() => router.push('/(tabs)/crisis')}
             >
               <Shield color="#FFF" size={16} />

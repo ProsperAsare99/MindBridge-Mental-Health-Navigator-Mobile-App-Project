@@ -96,7 +96,7 @@ export const lightColors = {
 
   semantic: {
     success: P.mossVelvet,          // Moss Velvet
-    danger:  '#B87060',             // Terracotta — warm red
+    danger:  '#E60000',             // Bold Red
     warning: P.amberSmoke,          // Amber Smoke — muted warning
     info:    P.ocean,               // Ocean — informational
   },
@@ -167,7 +167,7 @@ export const darkColors = {
 
   semantic: {
     success: '#5A8A70',             // Moss Velvet lightened
-    danger:  '#C07858',             // Terracotta muted
+    danger:  '#E60000',             // Bold Red
     warning: '#8A7050',             // Amber Smoke muted
     info:    '#0080A8',             // Ocean muted
   },

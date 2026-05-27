@@ -100,7 +100,7 @@ const MessageItem = ({ item, theme, router, t }: any) => {
           {item.suggestCrisis ? (
             <View style={msgStyles.crisisBubble}>
               <View style={msgStyles.crisisTop}>
-                <AlertTriangle color="#EF4444" size={13} />
+                <AlertTriangle color="#E60000" size={13} />
                 <Text style={msgStyles.crisisLabel}>IMMEDIATE SUPPORT AVAILABLE</Text>
               </View>
               <Text style={[msgStyles.textAi, { color: theme.colors.text.primary }]}>{item.text}</Text>
@@ -163,10 +163,10 @@ const createMsgStyles = (theme: any) => StyleSheet.create({
   textUser: { fontSize: 15.5, lineHeight: 23, color: '#FFF', fontFamily: theme.typography.fonts.body },
   time: { fontSize: 11, fontWeight: '500', marginTop: 5, marginLeft: 2, fontFamily: theme.typography.fonts.accent },
   timeUser: { fontSize: 11, fontWeight: '500', marginTop: 5, fontFamily: theme.typography.fonts.accent },
-  crisisBubble: { maxWidth: width * 0.78, borderWidth: 1.5, borderColor: '#EF4444', borderRadius: 20, borderBottomLeftRadius: 4, padding: 16, backgroundColor: 'rgba(239,68,68,0.06)' },
+  crisisBubble: { maxWidth: width * 0.78, borderWidth: 1.5, borderColor: '#E60000', borderRadius: 20, borderBottomLeftRadius: 4, padding: 16, backgroundColor: 'rgba(230,0,0,0.06)' },
   crisisTop: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 10 },
-  crisisLabel: { fontSize: 10, fontWeight: '800', color: '#EF4444', letterSpacing: 0.8, fontFamily: theme.typography.fonts.accent },
-  crisisBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#EF4444', paddingVertical: 11, borderRadius: 12, marginTop: 12, gap: 8 },
+  crisisLabel: { fontSize: 10, fontWeight: '800', color: '#E60000', letterSpacing: 0.8, fontFamily: theme.typography.fonts.accent },
+  crisisBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#E60000', paddingVertical: 11, borderRadius: 12, marginTop: 12, gap: 8 },
   crisisBtnText: { color: '#FFF', fontWeight: '800', fontSize: 14, fontFamily: theme.typography.fonts.header },
 });
 

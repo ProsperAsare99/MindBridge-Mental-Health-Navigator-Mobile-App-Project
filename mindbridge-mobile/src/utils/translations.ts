@@ -371,7 +371,7 @@ export const translations: Record<Language, TranslationSchema> = {
       just_now: 'Just now',
       hours_ago: 'h ago',
       days_ago: 'd ago',
-      share_thought: 'Share a thought...',
+      share_thought: 'Start a Discussion',
     },
     assessments: {
       title: 'Assessments',

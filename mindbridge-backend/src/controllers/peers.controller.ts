@@ -25,12 +25,12 @@ export const getPeers = async (req: Request, res: Response) => {
       {
         id: 'p1',
         userId: 'u1',
-        bio: 'Hi, I am a trained peer listener specializing in academic stress and time management. Feel free to reach out!',
-        specialties: ['Academic Stress', 'Time Management', 'General Anxiety'],
+        bio: 'Hi, I am Ama. I am a final year psychology student. I know how overwhelming balancing academics with family obligations can be. I am here if you need someone to vent to.',
+        specialties: ['Academic Stress', 'Family Obligations', 'Time Management'],
         isAvailable: true,
         rating: 4.9,
         user: {
-          name: 'Sarah J.',
+          name: 'Ama Osei',
           profileImage: null,
           studentId: '1092XXXX'
         }
@@ -38,12 +38,12 @@ export const getPeers = async (req: Request, res: Response) => {
       {
         id: 'p2',
         userId: 'u2',
-        bio: 'I went through severe burnout last year and learned a lot about setting boundaries. Happy to chat and share my experience.',
-        specialties: ['Burnout', 'Work-Life Balance', 'Depression'],
+        bio: 'Hello! I am Emmanuel. I navigated severe burnout during my second year when I was trying to run a side-hustle while studying. I can help you build better boundaries and routines.',
+        specialties: ['Burnout', 'Work-Life Balance', 'Student Entrepreneurship'],
         isAvailable: true,
         rating: 5.0,
         user: {
-          name: 'Michael T.',
+          name: 'Emmanuel Boakye',
           profileImage: null,
           studentId: '1088XXXX'
         }
@@ -51,14 +51,27 @@ export const getPeers = async (req: Request, res: Response) => {
       {
         id: 'p3',
         userId: 'u3',
-        bio: 'Safe space for LGBTQ+ students. I am here to listen without judgment.',
-        specialties: ['LGBTQ+ Issues', 'Identity', 'Family Conflict'],
+        bio: 'I understand the intense pressure of family expectations and navigating financial stress on campus. I am a trained peer listener, here to offer practical advice and a listening ear.',
+        specialties: ['Financial Stress', 'Family Expectations', 'Faith Crisis'],
         isAvailable: false,
         rating: 4.8,
         user: {
-          name: 'Alex R.',
+          name: 'Kwame A.',
           profileImage: null,
           studentId: '1095XXXX'
+        }
+      },
+      {
+        id: 'p4',
+        userId: 'u4',
+        bio: 'Hey, I am Abena. Moving from the village to a big university in the city was a huge culture shock for me. If you are feeling homesick or struggling to fit in, let us talk.',
+        specialties: ['Homesickness', 'Culture Shock', 'Social Anxiety'],
+        isAvailable: true,
+        rating: 4.9,
+        user: {
+          name: 'Abena Appiah',
+          profileImage: null,
+          studentId: '1098XXXX'
         }
       }
     ];

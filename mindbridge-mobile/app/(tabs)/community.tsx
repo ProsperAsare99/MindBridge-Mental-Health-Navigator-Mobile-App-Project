@@ -183,23 +183,59 @@ export default function CommunityScreen() {
     );
   };
 
-  const GroupCard = ({ group, index }: { group: any, index: number }) => (
-    <Animated.View entering={FadeInUp.delay(index * 50).duration(400)} style={styles.groupListCard}>
-      <View style={styles.groupListHeader}>
-        <View style={[styles.groupListIconWrap, { backgroundColor: (group.color || theme.colors.plum) + '15' }]}>
-          <Users color={group.color || theme.colors.plum} size={24} />
+  const formatMembers = (num: number) => {
+    if (!num) return '0';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+    return num.toString();
+  };
+
+  const GroupCard = ({ group, index }: { group: any, index: number }) => {
+    const [isJoined, setIsJoined] = useState(false);
+    const [memberCount, setMemberCount] = useState(group.members || 0);
+
+    const handleJoin = () => {
+      if (isJoined) {
+        setIsJoined(false);
+        setMemberCount((prev: number) => prev - 1);
+      } else {
+        setIsJoined(true);
+        setMemberCount((prev: number) => prev + 1);
+      }
+    };
+
+    return (
+      <Animated.View entering={FadeInUp.delay(index * 50).duration(400)} style={styles.groupListCard}>
+        <View style={styles.groupListHeader}>
+          <View style={[styles.groupListIconWrap, { backgroundColor: (group.color || theme.colors.plum) + '15' }]}>
+            <Users color={group.color || theme.colors.plum} size={24} />
+          </View>
+          <View style={styles.groupListInfo}>
+            <Text style={styles.groupListTitle}>{group.name}</Text>
+            <Text style={styles.groupListMembers}>{formatMembers(memberCount)} Members</Text>
+          </View>
+          <TouchableOpacity 
+            style={[
+              styles.joinBtn, 
+              { 
+                backgroundColor: isJoined ? 'transparent' : theme.colors.plum,
+                borderWidth: isJoined ? 1 : 0,
+                borderColor: theme.colors.plum
+              }
+            ]}
+            onPress={handleJoin}
+          >
+            <Text style={[
+              styles.joinBtnText, 
+              { color: isJoined ? theme.colors.plum : '#FFF' }
+            ]}>
+              {isJoined ? 'Joined' : 'Join'}
+            </Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.groupListInfo}>
-          <Text style={styles.groupListTitle}>{group.name}</Text>
-          <Text style={styles.groupListMembers}>{group.members} Members</Text>
-        </View>
-        <TouchableOpacity style={[styles.joinBtn, { backgroundColor: theme.colors.plum }]}>
-          <Text style={styles.joinBtnText}>Join</Text>
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.groupListDesc} numberOfLines={2}>{group.description}</Text>
-    </Animated.View>
-  );
+        <Text style={styles.groupListDesc} numberOfLines={2}>{group.description}</Text>
+      </Animated.View>
+    );
+  };
 
   const PeerCard = ({ peer, index }: { peer: any, index: number }) => (
     <Animated.View entering={FadeInUp.delay(index * 50).duration(400)} style={styles.peerCard}>
@@ -216,7 +252,7 @@ export default function CommunityScreen() {
             <CheckCircle2 color={theme.colors.semantic.success} size={16} style={{ marginLeft: 4 }} />
           </View>
           <View style={styles.peerRatingRow}>
-            <Star color={theme.colors.accents.sunshineYellow} fill={theme.colors.accents.sunshineYellow} size={14} />
+            <Star color="#F5A623" fill="#F5A623" size={14} />
             <Text style={styles.peerRating}>{peer.rating.toFixed(1)} Rating</Text>
           </View>
         </View>
@@ -358,10 +394,10 @@ export default function CommunityScreen() {
 
       {/* FAB (Only for Discussions) */}
       {activeTab === 'discussions' && (
-        <Animated.View entering={FadeInUp.delay(200).duration(500)} style={[styles.fabContainer, { bottom: insets.bottom + 20 }]}>
+        <Animated.View entering={FadeInUp.delay(200).duration(500)} style={[styles.fabContainer, { bottom: insets.bottom + 100 }]}>
           <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => setIsCreateVisible(true)}>
             <PenSquare color={theme.colors.text.onPrimary || '#FFF'} size={24} />
-            <Text style={styles.fabText}>{t('community.share_thought') || 'Share Thought'}</Text>
+            <Text style={styles.fabText}>{t('community.share_thought') || 'Start a Discussion'}</Text>
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -379,7 +415,7 @@ export default function CommunityScreen() {
         >
           <BlurView intensity={100} tint={theme.isDark ? 'dark' : 'light'} style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('community.share_thought') || 'Share Anonymously'}</Text>
+              <Text style={styles.modalTitle}>{t('community.share_thought') || 'Start a Discussion'}</Text>
               <TouchableOpacity onPress={() => setIsCreateVisible(false)} style={styles.closeBtn}>
                 <X color={theme.colors.plum} size={18} />
               </TouchableOpacity>

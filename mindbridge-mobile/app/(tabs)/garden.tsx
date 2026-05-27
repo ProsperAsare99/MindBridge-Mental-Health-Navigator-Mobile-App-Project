@@ -476,14 +476,14 @@ export default function WellnessTrackerScreen() {
 
   const renderStep2 = () => {
     const emotionsList = [
-      { label: 'Radiant', desc: 'Joy', color: '#FBBF24', angle: 0 },
-      { label: 'Serene', desc: 'Calm', color: '#10B981', angle: 45 },
-      { label: 'Melancholy', desc: 'Sad', color: '#6366F1', angle: 90 },
-      { label: 'Anxious', desc: 'Fear', color: '#F97316', angle: 135 },
-      { label: 'Frustrated', desc: 'Anger', color: '#EF4444', angle: 180 },
-      { label: 'Grateful', desc: 'Love', color: '#EC4899', angle: 225 },
-      { label: 'Empty', desc: 'Apathy', color: '#64748B', angle: 270 },
-      { label: 'Empowered', desc: 'Power', color: '#8B5CF6', angle: 315 },
+      { label: 'Radiant', desc: 'Joy', color: theme.colors.accents?.gentlePeach || '#E8B49A', angle: 0 },
+      { label: 'Serene', desc: 'Calm', color: theme.colors.accents?.softMint || '#C2D8C4', angle: 45 },
+      { label: 'Melancholy', desc: 'Sad', color: theme.colors.accents?.powderBlue || '#9EB4CC', angle: 90 },
+      { label: 'Anxious', desc: 'Fear', color: theme.colors.accents?.dustyRose || '#C49E9E', angle: 135 },
+      { label: 'Frustrated', desc: 'Anger', color: theme.colors.accents?.terracotta || '#B87060', angle: 180 },
+      { label: 'Grateful', desc: 'Love', color: theme.colors.accents?.paleCoral || '#D09080', angle: 225 },
+      { label: 'Empty', desc: 'Apathy', color: theme.colors.accents?.softGray || '#B0BEC5', angle: 270 },
+      { label: 'Empowered', desc: 'Power', color: theme.colors.accents?.slate || '#6E88B0', angle: 315 },
     ];
 
     const R = 85; 

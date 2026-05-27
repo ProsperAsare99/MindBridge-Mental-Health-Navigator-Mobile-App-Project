@@ -551,9 +551,9 @@ export default function JournalScreen() {
                         )}
                       </TouchableOpacity>
                     ) : (
-                      <View style={[styles.mediaBtn, { backgroundColor: 'rgba(52, 211, 153, 0.15)', padding: 10 }]}>
-                        <Check color="#34D399" size={18} />
-                        <Text style={[styles.mediaBtnText, { color: '#34D399', fontSize: 13 }]}>
+                      <View style={[styles.mediaBtn, { backgroundColor: theme.colors.semantic.success + '20', padding: 10 }]}>
+                        <Check color={theme.colors.semantic.success} size={18} />
+                        <Text style={[styles.mediaBtnText, { color: theme.colors.semantic.success, fontSize: 13 }]}>
                           Tone: {vocalMetrics.voiceQuality}
                         </Text>
                       </View>
@@ -576,10 +576,10 @@ export default function JournalScreen() {
 
               <TouchableOpacity 
                 onPress={() => setShowVideoModal(true)}
-                style={[styles.mediaBtn, { flex: 1, backgroundColor: facialMetrics ? 'rgba(52, 211, 153, 0.15)' : (theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)') }]}
+                style={[styles.mediaBtn, { flex: 1, backgroundColor: facialMetrics ? theme.colors.semantic.success + '20' : (theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)') }]}
               >
-                {facialMetrics ? <Check color="#34D399" size={24} /> : <Camera color={theme.colors.text.secondary} size={24} />}
-                <Text style={[styles.mediaBtnText, { color: facialMetrics ? "#34D399" : theme.colors.text.secondary }]}>
+                {facialMetrics ? <Check color={theme.colors.semantic.success} size={24} /> : <Camera color={theme.colors.text.secondary} size={24} />}
+                <Text style={[styles.mediaBtnText, { color: facialMetrics ? theme.colors.semantic.success : theme.colors.text.secondary }]}>
                   {facialMetrics ? "Face Logged" : "Face Scan"}
                 </Text>
               </TouchableOpacity>

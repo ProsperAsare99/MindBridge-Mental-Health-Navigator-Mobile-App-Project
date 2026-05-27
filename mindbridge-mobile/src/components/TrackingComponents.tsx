@@ -31,7 +31,7 @@ export const EnergySelector = ({ value, onChange, theme }: any) => {
     { val: 4, icon: Meh, label: 'Low', color: theme.colors.accents?.powderBlue || '#0EA5E9' },
     { val: 6, icon: Smile, label: 'Neutral', color: theme.colors.accents?.eucalyptus || '#10B981' },
     { val: 8, icon: Zap, label: 'Active', color: theme.colors.accents?.softMint || '#34D399' },
-    { val: 10, icon: Flame, label: 'Peak', color: '#EF4444' },
+    { val: 10, icon: Flame, label: 'Peak', color: theme.colors.accents?.terracotta || '#B87060' },
   ];
 
   return (
@@ -74,10 +74,10 @@ export const EnergySelector = ({ value, onChange, theme }: any) => {
 // ─── Sleep Quality Selector ──────────────────────────────────────────────────
 export const SleepTracker = ({ quality, hours, onQualityChange, onHoursChange, theme }: any) => {
   const qualities = [
-    { id: 'poor', icon: CloudRain, label: 'Poor', color: '#EF4444' },
-    { id: 'fair', icon: Moon, label: 'Fair', color: '#FBBF24' },
-    { id: 'good', icon: Sun, label: 'Good', color: '#34D399' },
-    { id: 'perfect', icon: Zap, label: 'Perfect', color: '#8B5CF6' },
+    { id: 'poor', icon: CloudRain, label: 'Poor', color: theme.colors.accents?.terracotta || '#B87060' },
+    { id: 'fair', icon: Moon, label: 'Fair', color: theme.colors.accents?.gentlePeach || '#E8B49A' },
+    { id: 'good', icon: Sun, label: 'Good', color: theme.colors.accents?.softMint || '#C2D8C4' },
+    { id: 'perfect', icon: Zap, label: 'Perfect', color: theme.colors.accents?.powderBlue || '#9EB4CC' },
   ];
 
   return (

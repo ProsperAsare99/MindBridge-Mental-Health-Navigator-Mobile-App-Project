@@ -1,6 +1,16 @@
 export type Language = 'English' | 'French' | 'Twi' | 'Ga' | 'Ewe' | 'Hausa';
 
 export interface TranslationSchema {
+
+    journey: {
+      title: string;
+      subtitle: string;
+      streak: string;
+      points: string;
+      done: string;
+      progress_label: string;
+      daily_plan: string;
+    };
   common: {
     takeYourTime: string;
     loadingSafeSpace: string;
@@ -237,6 +247,16 @@ export interface TranslationSchema {
 
 export const translations: Record<Language, TranslationSchema> = {
   English: {
+
+    journey: {
+      title: 'My Journey',
+      subtitle: 'Today',
+      streak: 'Streak',
+      points: 'Points',
+      done: 'Done',
+      progress_label: 'Completed',
+      daily_plan: 'Daily Plan',
+    },
     common: {
       takeYourTime: 'Take your time',
       loadingSafeSpace: 'Creating your safe space...',
@@ -247,7 +267,7 @@ export const translations: Record<Language, TranslationSchema> = {
       cancel: 'Cancel',
     },
     tabs: {
-      today: 'Today',
+      today: 'Overview',
       explore: 'Explore',
       tracker: 'Tracker',
       oracle: 'Oracle',
@@ -482,6 +502,16 @@ export const translations: Record<Language, TranslationSchema> = {
     },
   },
   Twi: {
+
+    journey: {
+      title: 'My Journey',
+      subtitle: 'Today',
+      streak: 'Streak',
+      points: 'Points',
+      done: 'Done',
+      progress_label: 'Completed',
+      daily_plan: 'Daily Plan',
+    },
     common: {
       takeYourTime: 'Gye wo bere',
       loadingSafeSpace: 'Yɛreyɛ wo banbɔbea...',
@@ -727,6 +757,16 @@ export const translations: Record<Language, TranslationSchema> = {
     },
   },
   French: {
+
+    journey: {
+      title: 'My Journey',
+      subtitle: 'Today',
+      streak: 'Streak',
+      points: 'Points',
+      done: 'Done',
+      progress_label: 'Completed',
+      daily_plan: 'Daily Plan',
+    },
     common: {
       takeYourTime: 'Prenez votre temps',
       loadingSafeSpace: 'Création de votre espace sécurisé...',
@@ -972,6 +1012,16 @@ export const translations: Record<Language, TranslationSchema> = {
     },
   },
   Ga: {
+
+    journey: {
+      title: 'My Journey',
+      subtitle: 'Today',
+      streak: 'Streak',
+      points: 'Points',
+      done: 'Done',
+      progress_label: 'Completed',
+      daily_plan: 'Daily Plan',
+    },
     common: {
       takeYourTime: 'Heo be',
       loadingSafeSpace: 'Wofee ohewulaa he lɛ...',
@@ -1217,6 +1267,16 @@ export const translations: Record<Language, TranslationSchema> = {
     },
   },
   Ewe: {
+
+    journey: {
+      title: 'My Journey',
+      subtitle: 'Today',
+      streak: 'Streak',
+      points: 'Points',
+      done: 'Done',
+      progress_label: 'Completed',
+      daily_plan: 'Daily Plan',
+    },
     common: {
       takeYourTime: 'Gbɔ ɖe eme',
       loadingSafeSpace: 'Wole wò teƒe nyuie la wɔm...',
@@ -1462,6 +1522,16 @@ export const translations: Record<Language, TranslationSchema> = {
     },
   },
   Hausa: {
+
+    journey: {
+      title: 'My Journey',
+      subtitle: 'Today',
+      streak: 'Streak',
+      points: 'Points',
+      done: 'Done',
+      progress_label: 'Completed',
+      daily_plan: 'Daily Plan',
+    },
     common: {
       takeYourTime: 'Dauki lokacinka',
       loadingSafeSpace: 'Kirkirar wurin amincin ku...',

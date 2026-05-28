@@ -951,27 +951,36 @@ export default function WellnessTrackerScreen() {
               moodLogs.forEach((l: any) => { (l.emotions || []).forEach((e: string) => { freq[e] = (freq[e] || 0) + 1; }); });
               const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5);
               const max = sorted[0]?.[1] || 1;
+              const totalFreq = Object.values(freq).reduce((a: any, b: any) => a + b, 0);
               const moodColors: Record<string, string> = { elated: '#EAB308', joyful: '#EC4899', calm: '#10B981', okay: '#14B8A6', neutral: '#64748B', tired: '#8B5CF6', anxious: '#475569', sad: '#3B82F6', stressed: '#EF4444' };
               if (sorted.length === 0) return null;
               return (
                 <View style={[styles.analysisCard, { backgroundColor: theme.colors.surface }]}>
                   <Text style={[styles.analysisCardTitle, { color: theme.colors.text.primary }]}>Emotion Frequency</Text>
                   <Text style={[styles.analysisCardSub, { color: theme.colors.text.tertiary }]}>Your most common emotional states</Text>
-                  <View style={{ marginTop: 20, gap: 14 }}>
-                    {sorted.map(([emotion, count]) => (
-                      <View key={emotion}>
-                        <View style={styles.freqRow}>
-                          <View style={{ marginRight: 6 }}>
-                            {getMoodIcon(emotion, 18, moodColors[emotion] || theme.colors.plum)}
+                  <View style={{ marginTop: 24, gap: 16 }}>
+                    {sorted.map(([emotion, count], idx) => {
+                      const color = moodColors[emotion] || theme.colors.plum;
+                      const percentage = ((count as number) / (totalFreq as number) * 100).toFixed(0);
+                      return (
+                      <Animated.View key={emotion} entering={FadeInUp.delay(idx * 150).springify().mass(0.8)} style={{ backgroundColor: color + '08', padding: 18, borderRadius: 24, borderWidth: 1, borderColor: color + '15' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+                          <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: color + '15', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+                            {getMoodIcon(emotion, 22, color)}
                           </View>
-                          <Text style={[styles.freqLabel, { color: theme.colors.text.primary }]}>{emotion.charAt(0).toUpperCase() + emotion.slice(1)}</Text>
-                          <Text style={[styles.freqCount, { color: theme.colors.text.tertiary }]}>{count}x</Text>
+                          <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 17, fontFamily: theme.typography.fonts.header, color: theme.colors.text.primary, marginBottom: 3 }}>{emotion.charAt(0).toUpperCase() + emotion.slice(1)}</Text>
+                            <Text style={{ fontSize: 13, fontFamily: theme.typography.fonts.body, color: theme.colors.text.tertiary }}>{count} {count === 1 ? 'log' : 'logs'}</Text>
+                          </View>
+                          <View style={{ backgroundColor: color + '15', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
+                            <Text style={{ color: color, fontFamily: theme.typography.fonts.header, fontSize: 13, fontWeight: '700' }}>{percentage}%</Text>
+                          </View>
                         </View>
-                        <View style={styles.freqBarBg}>
-                          <View style={[styles.freqBarFill, { width: `${(count / max) * 100}%`, backgroundColor: moodColors[emotion] || theme.colors.plum }]} />
+                        <View style={{ height: 8, borderRadius: 4, backgroundColor: color + '1A', overflow: 'hidden' }}>
+                          <Animated.View style={{ height: '100%', borderRadius: 4, backgroundColor: color, width: `${((count as number) / (max as number)) * 100}%` }} />
                         </View>
-                      </View>
-                    ))}
+                      </Animated.View>
+                    )})}
                   </View>
                 </View>
               );

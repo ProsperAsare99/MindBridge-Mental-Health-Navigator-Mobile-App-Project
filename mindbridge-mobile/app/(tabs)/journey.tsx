@@ -67,24 +67,24 @@ export default function JourneyScreen() {
               <View style={[styles.statIconWrap, { backgroundColor: theme.colors.accents.gentlePeach + '30' }]}>
                 <Flame color={theme.colors.accents.gentlePeach} size={20} />
               </View>
-              <Text style={styles.statVal}>4 Day</Text>
-              <Text style={styles.statLabel}>{t('journey.streak')}</Text>
+              <Text style={styles.statVal} numberOfLines={1} adjustsFontSizeToFit>4 Day</Text>
+              <Text style={styles.statLabel} numberOfLines={1} adjustsFontSizeToFit>{t('journey.streak')}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <View style={[styles.statIconWrap, { backgroundColor: theme.colors.accents.powderBlue + '30' }]}>
                 <Trophy color={theme.colors.accents.powderBlue} size={20} />
               </View>
-              <Text style={styles.statVal}>{totalPoints}</Text>
-              <Text style={styles.statLabel}>{t('journey.points')}</Text>
+              <Text style={styles.statVal} numberOfLines={1} adjustsFontSizeToFit>{totalPoints}</Text>
+              <Text style={styles.statLabel} numberOfLines={1} adjustsFontSizeToFit>{t('journey.points')}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <View style={[styles.statIconWrap, { backgroundColor: theme.colors.accents.eucalyptus + '30' }]}>
                 <CheckCircle2 color={theme.colors.accents.eucalyptus} size={20} />
               </View>
-              <Text style={styles.statVal}>{completedCount}/{tasks.length}</Text>
-              <Text style={styles.statLabel}>{t('journey.done')}</Text>
+              <Text style={styles.statVal} numberOfLines={1} adjustsFontSizeToFit>{completedCount}/{tasks.length}</Text>
+              <Text style={styles.statLabel} numberOfLines={1} adjustsFontSizeToFit>{t('journey.done')}</Text>
             </View>
           </View>
           

@@ -246,9 +246,10 @@ INSTRUCTIONS:
       let result = await chat.sendMessage(userMessage);
       let response = result.response;
 
-      // Handle Function Calls (Tools)
-      const call = response.functionCalls()?.[0];
-      if (call) {
+      // Handle Function Calls (Tools) in a loop
+      let call = response.functionCalls()?.[0];
+      let iteration = 0;
+      while (call && iteration < 5) {
         console.log(`[Oracle Tool] Calling: ${call.name} with model: ${modelName}`, call.args);
         let toolResponse: any;
 
@@ -276,9 +277,22 @@ INSTRUCTIONS:
           }
         }]);
         response = result.response;
+        call = response.functionCalls()?.[0];
+        iteration++;
       }
 
-      return response.text();
+      let finalText = "";
+      try {
+        finalText = response.text() || "";
+      } catch (e) {
+        finalText = "";
+      }
+
+      if (!finalText || finalText.trim() === '') {
+        finalText = "I've checked some details for you, but I'm having trouble putting it into words. Can you tell me more about what's on your mind?";
+      }
+
+      return finalText;
     } catch (error: any) {
       console.error(`[BACKEND] Error in Oracle service with model ${modelName}:`, error);
       lastError = error;

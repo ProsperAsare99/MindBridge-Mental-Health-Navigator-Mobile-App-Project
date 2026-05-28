@@ -605,12 +605,19 @@ export default function DashboardScreen() {
       </View>
 
       <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]} showsVerticalScrollIndicator={false}>
+        <View style={styles.headerRow}>
+          <View style={{ flex: 1 }}>
+            <ScreenHeader title={`${getGreeting()}, ${userData.name}`} subtitle={t('dashboard.nurturePeaceToday')} noPadding />
+          </View>
+          <ProgressRings completed={completedCount} total={3} theme={theme} styles={styles} t={t} />
+        </View>
+
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.section}>
           <View style={styles.premiumJourneyCard}>
             <View style={styles.sectionHeader}>
               <View>
                 <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.yourJourney')}</Text>
-                <Text style={styles.sectionSubtitleText}>{aiPrompt || contextualPrompt}</Text>
+                <Text style={styles.sectionSubtitleText}>{t('dashboard.nurturePeaceToday')}</Text>
               </View>
               <View style={styles.streakBadge}>
                 <Flame size={14} color="#FF9800" />
@@ -620,13 +627,6 @@ export default function DashboardScreen() {
             <StreakJourney streak={userData.streak} theme={theme} styles={styles} completedCount={completedCount} />
           </View>
         </Animated.View>
-
-        <View style={styles.headerRow}>
-          <View style={{ flex: 1 }}>
-            <ScreenHeader title={`${getGreeting()}, ${userData.name}`} subtitle={t('dashboard.nurturePeaceToday')} noPadding />
-          </View>
-          <ProgressRings completed={completedCount} total={3} theme={theme} styles={styles} t={t} />
-        </View>
 
         <View style={styles.section}>
           <CalendarStrip theme={theme} styles={styles} />
@@ -692,7 +692,7 @@ export default function DashboardScreen() {
               title={t('dashboard.breathe')} 
               subtitle={t('dashboard.completeBreathing')} 
               done={rituals.breathing} 
-              onPress={() => router.push('/(tabs)/tools')}
+              onPress={() => router.push('/breathing')}
               isLast
               styles={styles}
             />
@@ -851,7 +851,6 @@ export default function DashboardScreen() {
             <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.wellnessToolkit')}</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll} snapToInterval={154} decelerationRate="fast">
-            <AppleWidget title={t('dashboard.tools')} subtitle={t('dashboard.therapeutic')} icon={Activity} color={theme.colors.plum} size="fixed" delay={600} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/tools')} />
             <AppleWidget title={t('dashboard.journal')} subtitle={t('dashboard.reflections')} icon={BookOpen} color={theme.colors.accents.powderBlue} size="fixed" delay={650} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/journal')} />
             <AppleWidget title={t('dashboard.community')} subtitle={t('dashboard.connect')} icon={Users} color={theme.colors.accents.dustyRose} size="fixed" delay={700} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/community')} />
           </ScrollView>

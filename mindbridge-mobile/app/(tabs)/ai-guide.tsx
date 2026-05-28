@@ -12,7 +12,6 @@ import {
   Dimensions,
   StatusBar,
   Alert,
-  Clipboard,
   Keyboard,
   Modal,
   ScrollView,
@@ -23,6 +22,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeInUp, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import * as Clipboard from 'expo-clipboard';
 import {
   Bot,
   MessageCircle,
@@ -83,8 +83,8 @@ const typingStyles = StyleSheet.create({
 // ─── Individual Message ────────────────────────────────────────────────────────
 const MessageItem = ({ item, theme, router, t }: any) => {
   const msgStyles = createMsgStyles(theme);
-  const onLongPress = () => {
-    Clipboard.setString(item.text);
+  const onLongPress = async () => {
+    await Clipboard.setStringAsync(item.text);
     Alert.alert('Copied', 'Message copied to clipboard.');
   };
 
@@ -134,28 +134,22 @@ const MessageItem = ({ item, theme, router, t }: any) => {
   }
 
   return (
-    <Animated.View entering={FadeInDown.duration(250).springify()} style={msgStyles.rowUser}>
+    <View style={msgStyles.rowUser}>
       <TouchableOpacity
         activeOpacity={0.9}
         onLongPress={onLongPress}
+        style={[msgStyles.bubbleUser, { backgroundColor: '#7B61FF' }]}
       >
-        <LinearGradient
-          colors={theme.isDark ? ['#8E6BE6', '#6941C6'] : ['#7F56D9', '#5B37B3']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={msgStyles.bubbleUser}
-        >
-          <Text style={msgStyles.textUser}>{item.text}</Text>
-        </LinearGradient>
+        <Text style={msgStyles.textUser}>{item.text}</Text>
       </TouchableOpacity>
       <Text style={[msgStyles.timeUser, { color: theme.colors.text.tertiary }]}>{item.time}</Text>
-    </Animated.View>
+    </View>
   );
 };
 
 const createMsgStyles = (theme: any) => StyleSheet.create({
   rowAi: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 20, paddingBottom: 16 },
-  rowUser: { alignItems: 'flex-end', paddingHorizontal: 20, paddingBottom: 16 },
+  rowUser: { width: '100%', alignItems: 'flex-end', paddingHorizontal: 20, paddingBottom: 16 },
   avatarSmall: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 10, flexShrink: 0 },
   bubbleAi: { maxWidth: width * 0.74, paddingHorizontal: 16, paddingVertical: 13, borderRadius: 20, borderBottomLeftRadius: 4, borderWidth: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 },
   bubbleUser: { maxWidth: width * 0.74, paddingHorizontal: 16, paddingVertical: 13, borderRadius: 20, borderBottomRightRadius: 4 },
@@ -467,6 +461,7 @@ export default function AIGuideScreen() {
 
         <FlatList
           ref={flatListRef}
+          style={{ flex: 1 }}
           data={listData}
           keyExtractor={item => item.id}
           renderItem={({ item }) => <MessageItem item={item} theme={theme} router={router} t={t} />}

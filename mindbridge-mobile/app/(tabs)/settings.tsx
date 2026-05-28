@@ -11,7 +11,8 @@ import {
   Globe, 
   Lock, 
   ShieldCheck, 
-  HelpCircle, 
+  Shield,
+  HelpCircle,
   MessageSquare, 
   LogOut,
   ChevronRight,
@@ -254,6 +255,12 @@ export default function SettingsScreen() {
               type="switch" 
               value={biometrics} 
               onPress={toggleBiometrics} 
+            />
+            <SettingRow 
+              icon={Shield} 
+              color={colors.accents.slate} 
+              label={"Data & Privacy"} 
+              onPress={() => router.push('/(tabs)/privacy')}
               isLast 
             />
           </View>

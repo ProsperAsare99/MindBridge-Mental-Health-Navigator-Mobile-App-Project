@@ -191,6 +191,7 @@ export default function AIGuideScreen() {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+  const [chatMode, setChatMode] = useState<'therapy'|'social'>('therapy');
 
   useEffect(() => {
     const showSub = Keyboard.addListener(
@@ -284,7 +285,7 @@ export default function AIGuideScreen() {
     setLoading(true);
 
     try {
-      const res = await api.post('/ai/chat', { message: textToSend });
+      const res = await api.post('/ai/chat', { message: textToSend, mode: chatMode });
       const aiMsg = {
         id: (Date.now() + 1).toString(),
         text: res.data.response,
@@ -446,6 +447,21 @@ export default function AIGuideScreen() {
         <View style={[S.disclaimer, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : 'rgba(123,97,255,0.06)', borderColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(123,97,255,0.14)' }]}>
           <Info color={theme.isDark ? theme.colors.accents.powderBlue : theme.colors.plum} size={13} />
           <Text style={[S.disclaimerText, { color: theme.isDark ? theme.colors.text.secondary : theme.colors.text.tertiary }]}>{t('ai.disclaimer')}</Text>
+        </View>
+
+        <View style={[S.modeToggle, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }]}>
+          <TouchableOpacity 
+            style={[S.modeBtn, chatMode === 'therapy' && { backgroundColor: theme.colors.plum }]}
+            onPress={() => setChatMode('therapy')}
+          >
+            <Text style={[S.modeText, { color: chatMode === 'therapy' ? '#FFF' : theme.colors.text.secondary }]}>Therapy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[S.modeBtn, chatMode === 'social' && { backgroundColor: theme.colors.plum }]}
+            onPress={() => setChatMode('social')}
+          >
+            <Text style={[S.modeText, { color: chatMode === 'social' ? '#FFF' : theme.colors.text.secondary }]}>Social</Text>
+          </TouchableOpacity>
         </View>
 
         {showPrompts && (
@@ -637,6 +653,9 @@ const createStyles = (theme: any) => StyleSheet.create({
   headerBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   disclaimer: { flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: 20, marginTop: 14, marginBottom: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, borderWidth: 1 },
   disclaimerText: { flex: 1, fontSize: 12, lineHeight: 17, fontFamily: theme.typography.fonts.body, fontWeight: '500' },
+  modeToggle: { flexDirection: 'row', marginHorizontal: 20, marginBottom: 12, borderRadius: 20, padding: 4 },
+  modeBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 16 },
+  modeText: { fontSize: 13, fontFamily: theme.typography.fonts.header, fontWeight: '700' },
   prompts: { paddingHorizontal: 20, marginVertical: 12 },
   promptsHeader: { marginBottom: 10 },
   promptsLabel: { fontSize: 11, fontFamily: theme.typography.fonts.accent, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },

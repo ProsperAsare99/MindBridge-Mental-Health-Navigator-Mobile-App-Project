@@ -83,15 +83,15 @@ export default function InsightsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]} showsVerticalScrollIndicator={false}>
-        <ScreenHeader 
-          title="Detailed Analytics" 
-          subtitle="Visualize your progress over time"
-          leftAction={
-            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-              <ChevronLeft color={theme.colors.text.primary} size={24} />
-            </TouchableOpacity>
-          }
-        />
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <ChevronLeft color={theme.colors.text.primary} size={24} />
+          </TouchableOpacity>
+          <ScreenHeader 
+            title="Detailed Analytics" 
+            subtitle="Visualize your progress over time"
+          />
+        </View>
 
         {/* Sleep Chart */}
         <Animated.View entering={FadeInUp.delay(100).duration(800)} style={styles.chartCard}>
@@ -204,7 +204,8 @@ const createStyles = (theme: any) => StyleSheet.create({
   container: { flex: 1 },
   bgBlob: { position: 'absolute', width: 400, height: 400, borderRadius: 200, opacity: 0.8 },
   scrollContent: { paddingBottom: 100 },
-  backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', alignItems: 'center', justifyContent: 'center' },
+  headerRow: { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 20 },
+  backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', alignItems: 'center', justifyContent: 'center', marginTop: 10, marginRight: 10 },
   chartCard: { backgroundColor: theme.colors.surface, marginHorizontal: 20, marginBottom: 20, padding: 20, borderRadius: 28, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)', overflow: 'hidden' },
   chartHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },
   chartIconWrap: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },

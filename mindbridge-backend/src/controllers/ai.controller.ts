@@ -4,6 +4,7 @@ import { generateOracleResponse, generateProactiveInsights, analyzeVoiceAudio } 
 import { AiRepository } from '../repositories/ai.repository.js';
 
 const prisma = new PrismaClient();
+const proactiveInsightsCache = new Map<string, { time: number, data: any }>();
 
 // High-risk keywords for safety screening
 const CRISIS_KEYWORDS = [
@@ -15,14 +16,12 @@ export const getOracleContext = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
 
-    // Get latest mood log & total count
-    const [latestMood, moodCount] = await Promise.all([
-      prisma.moodLog.findFirst({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.moodLog.count({ where: { userId } })
-    ]);
+    // Get latest mood log & total count sequentially to reduce concurrent DB connections
+    const latestMood = await prisma.moodLog.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+    const moodCount = await prisma.moodLog.count({ where: { userId } });
 
     // Get user name for fallback personalization
     const user = await prisma.user.findUnique({
@@ -30,21 +29,19 @@ export const getOracleContext = async (req: Request, res: Response) => {
       select: { name: true }
     });
 
-    // Get 3 most recent journal entries & total count
-    const [recentJournal, journalCount] = await Promise.all([
-      prisma.journal.findMany({
-        where: { userId },
-        take: 3,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          title: true,
-          content: true,
-          mood: true,
-          createdAt: true,
-        }
-      }),
-      prisma.journal.count({ where: { userId } })
-    ]);
+    // Get 3 most recent journal entries & total count sequentially
+    const recentJournal = await prisma.journal.findMany({
+      where: { userId },
+      take: 3,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        title: true,
+        content: true,
+        mood: true,
+        createdAt: true,
+      }
+    });
+    const journalCount = await prisma.journal.count({ where: { userId } });
 
     // Get onboarding data for personality matching
     const onboarding = await prisma.onboarding.findUnique({
@@ -274,6 +271,15 @@ export const saveAssessmentResult = async (req: Request, res: Response) => {
 export const getProactiveInsights = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
+    const now = Date.now();
+    
+    // Check if we have valid cached insights (less than 1 hour old) to prevent Gemini API quota exhaustion
+    if (proactiveInsightsCache.has(userId)) {
+      const cached = proactiveInsightsCache.get(userId)!;
+      if (now - cached.time < 3600000) {
+        return res.json(cached.data);
+      }
+    }
 
     const onboarding = await prisma.onboarding.findUnique({
       where: { userId }
@@ -286,6 +292,7 @@ export const getProactiveInsights = async (req: Request, res: Response) => {
     });
 
     const insights = await generateProactiveInsights(userId, { onboarding, recentMoods });
+    proactiveInsightsCache.set(userId, { time: now, data: insights });
     res.json(insights);
   } catch (error) {
     console.error('Error fetching proactive insights:', error);

@@ -191,7 +191,6 @@ export default function AIGuideScreen() {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
-  const [chatMode, setChatMode] = useState<'support'|'social'>('support');
 
   useEffect(() => {
     const showSub = Keyboard.addListener(
@@ -285,7 +284,7 @@ export default function AIGuideScreen() {
     setLoading(true);
 
     try {
-      const res = await api.post('/ai/chat', { message: textToSend, mode: chatMode });
+      const res = await api.post('/ai/chat', { message: textToSend });
       const aiMsg = {
         id: (Date.now() + 1).toString(),
         text: res.data.response,
@@ -449,20 +448,7 @@ export default function AIGuideScreen() {
           <Text style={[S.disclaimerText, { color: theme.isDark ? theme.colors.text.secondary : theme.colors.text.tertiary }]}>{t('ai.disclaimer')}</Text>
         </View>
 
-        <View style={[S.modeToggle, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }]}>
-          <TouchableOpacity 
-            style={[S.modeBtn, chatMode === 'support' && { backgroundColor: theme.colors.plum }]}
-            onPress={() => setChatMode('support')}
-          >
-            <Text style={[S.modeText, { color: chatMode === 'support' ? '#FFF' : theme.colors.text.secondary }]}>Support</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[S.modeBtn, chatMode === 'social' && { backgroundColor: theme.colors.plum }]}
-            onPress={() => setChatMode('social')}
-          >
-            <Text style={[S.modeText, { color: chatMode === 'social' ? '#FFF' : theme.colors.text.secondary }]}>Social</Text>
-          </TouchableOpacity>
-        </View>
+
 
         {showPrompts && (
           <Animated.View entering={FadeInUp.delay(300).duration(500)} style={S.prompts}>

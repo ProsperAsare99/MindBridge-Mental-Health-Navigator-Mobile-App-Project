@@ -149,7 +149,7 @@ const MessageItem = ({ item, theme, router, t }: any) => {
 
 const createMsgStyles = (theme: any) => StyleSheet.create({
   rowAi: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 20, paddingBottom: 16 },
-  rowUser: { width: '100%', alignItems: 'flex-end', paddingHorizontal: 20, paddingBottom: 16 },
+  rowUser: { alignSelf: 'flex-end', paddingHorizontal: 20, paddingBottom: 16 },
   avatarSmall: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 10, flexShrink: 0 },
   bubbleAi: { maxWidth: width * 0.74, paddingHorizontal: 16, paddingVertical: 13, borderRadius: 20, borderBottomLeftRadius: 4, borderWidth: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 },
   bubbleUser: { maxWidth: width * 0.74, paddingHorizontal: 16, paddingVertical: 13, borderRadius: 20, borderBottomRightRadius: 4 },
@@ -272,7 +272,7 @@ export default function AIGuideScreen() {
     const textToSend = textOverride || message;
     if (!textToSend.trim()) return;
     
-    const userMsg = { id: Date.now().toString(), text: textToSend, isAi: false, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+    const userMsg = { id: 'user_' + Date.now() + '_' + Math.random(), text: textToSend, isAi: false, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
     setMessages(prev => [...prev, userMsg]);
     if (!textOverride) setMessage('');
     setLoading(true);
@@ -280,7 +280,7 @@ export default function AIGuideScreen() {
     try {
       const res = await api.post('/ai/chat', { message: textToSend });
       const aiMsg = {
-        id: (Date.now() + 1).toString(),
+        id: 'ai_' + Date.now() + '_' + Math.random(),
         text: res.data.response,
         isAi: true,
         suggestCrisis: res.data.suggestCrisis,

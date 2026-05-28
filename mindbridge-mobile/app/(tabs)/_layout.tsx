@@ -51,9 +51,16 @@ export default function TabLayout() {
         }} 
       />
       <Tabs.Screen 
+        name="ai-guide" 
+        options={{ 
+          title: t('tabs.oracle') || 'Oracle',
+          tabBarIcon: ({ color }) => <MessageCircle color={color} size={24} strokeWidth={2} />
+        }} 
+      />
+      <Tabs.Screen 
         name="garden" 
         options={{ 
-          title: t('tabs.tracker'),
+          title: t('tabs.tracker') || 'Tracker',
           tabBarIcon: ({ color }) => <Activity color={color} size={24} strokeWidth={2} />
         }} 
       />
@@ -72,8 +79,9 @@ export default function TabLayout() {
       <Tabs.Screen name="journal" options={{ href: null }} />
       <Tabs.Screen name="assessments" options={{ href: null }} />
       <Tabs.Screen name="community" options={{ href: null }} />
-      <Tabs.Screen name="ai-guide" options={{ href: null }} />
       <Tabs.Screen name="tools" options={{ href: null }} />
+      <Tabs.Screen name="privacy" options={{ href: null }} />
+      <Tabs.Screen name="journey" options={{ href: null }} />
     </Tabs>
   );
 }

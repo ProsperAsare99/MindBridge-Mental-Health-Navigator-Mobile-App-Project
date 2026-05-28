@@ -191,7 +191,7 @@ export default function AIGuideScreen() {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
-  const [chatMode, setChatMode] = useState<'therapy'|'social'>('therapy');
+  const [chatMode, setChatMode] = useState<'support'|'social'>('support');
 
   useEffect(() => {
     const showSub = Keyboard.addListener(
@@ -451,10 +451,10 @@ export default function AIGuideScreen() {
 
         <View style={[S.modeToggle, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }]}>
           <TouchableOpacity 
-            style={[S.modeBtn, chatMode === 'therapy' && { backgroundColor: theme.colors.plum }]}
-            onPress={() => setChatMode('therapy')}
+            style={[S.modeBtn, chatMode === 'support' && { backgroundColor: theme.colors.plum }]}
+            onPress={() => setChatMode('support')}
           >
-            <Text style={[S.modeText, { color: chatMode === 'therapy' ? '#FFF' : theme.colors.text.secondary }]}>Therapy</Text>
+            <Text style={[S.modeText, { color: chatMode === 'support' ? '#FFF' : theme.colors.text.secondary }]}>Support</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[S.modeBtn, chatMode === 'social' && { backgroundColor: theme.colors.plum }]}

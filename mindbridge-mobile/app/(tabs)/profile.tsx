@@ -613,6 +613,20 @@ export default function ProfileScreen() {
         <ProfileListGroup delay={700} theme={theme}>
           <ProfileListItem
             theme={theme}
+            icon={TrendingUp}
+            title={t('journey.title') || "My Journey"}
+            color={theme.colors.accents.powderBlue}
+            onPress={() => router.push('/(tabs)/journey')}
+          />
+          <ProfileListItem
+            theme={theme}
+            icon={Shield}
+            title={t('onboarding.privacyTitle') || "Privacy & Security"}
+            color={theme.colors.plum}
+            onPress={() => router.push('/(tabs)/privacy')}
+          />
+          <ProfileListItem
+            theme={theme}
             icon={Bell}
             title={t('settings.notifications') || "Reminders"}
             color={theme.colors.accents.softMint}

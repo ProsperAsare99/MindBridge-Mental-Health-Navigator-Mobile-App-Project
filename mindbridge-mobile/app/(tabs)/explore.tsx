@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import {
   View,
   Text,
@@ -51,6 +51,9 @@ import {
   Pause,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { AuthContext } from '../../src/context/AuthContext';
+import { LanguageContext } from '../../src/context/LanguageContext';
+import { UNIVERSITY_COUNSELING_CENTERS } from './crisis';
 
 const { width } = Dimensions.get('window');
 
@@ -523,39 +526,57 @@ const VIDEO_RESOURCES = [
   },
 ];
 
-const CRISIS_RESOURCES = [
-  // TODO: In a future update, fetch these resources dynamically based on the user's selected institution.
-  {
-    id: 'befrienders',
-    title: 'Befrienders Ghana',
-    subtitle: 'Crisis listening service — you are not alone',
-    detail: 'Free, confidential emotional support for anyone in distress',
-    phone: '+233 50 165 6789',
-    color: '#E60000',
-    icon: Heart,
-    available: '24/7',
-  },
-  {
-    id: 'ug-counseling',
-    title: 'UG Careers & Counselling Services',
-    subtitle: 'University of Ghana official counseling',
-    detail: 'Mental health, academic, and career counseling',
-    phone: '+233 (0) 245 945 752',
-    color: '#E60000',
-    icon: Users,
-    available: 'Mon–Fri, 8am–5pm',
-  },
-  {
-    id: 'mental-health-authority',
-    title: 'Mental Health Authority Ghana',
-    subtitle: 'National mental health regulatory body',
-    detail: 'Referrals to mental health facilities nationwide',
-    phone: '+233 302 664 646',
-    color: '#E60000',
-    icon: Globe,
-    available: 'Mon–Fri, 8am–5pm',
-  },
-];
+const getCrisisResources = (institution: string) => {
+  const baseResources = [
+    {
+      id: 'befrienders',
+      title: 'Befrienders Ghana',
+      subtitle: 'Crisis listening service — you are not alone',
+      detail: 'Free, confidential emotional support for anyone in distress',
+      phone: '+233 50 165 6789',
+      color: '#E60000',
+      icon: Heart,
+      available: '24/7',
+    },
+    {
+      id: 'mental-health-authority',
+      title: 'Mental Health Authority Ghana',
+      subtitle: 'National mental health regulatory body',
+      detail: 'Referrals to mental health facilities nationwide',
+      phone: '+233 302 664 646',
+      color: '#E60000',
+      icon: Globe,
+      available: 'Mon–Fri, 8am–5pm',
+    }
+  ];
+
+  if (institution && institution !== 'Other' && UNIVERSITY_COUNSELING_CENTERS[institution]) {
+    const uniData = UNIVERSITY_COUNSELING_CENTERS[institution];
+    baseResources.splice(1, 0, {
+      id: 'campus-counseling',
+      title: uniData.name,
+      subtitle: 'Official campus counseling services',
+      detail: uniData.description,
+      phone: uniData.number,
+      color: '#E60000',
+      icon: Users,
+      available: 'Campus Hours',
+    });
+  } else if (institution && institution !== 'Other') {
+    baseResources.splice(1, 0, {
+      id: 'campus-counseling',
+      title: `${institution.split('(')[0].trim()} Counseling`,
+      subtitle: 'Official campus counseling services',
+      detail: 'Mental health and academic support',
+      phone: '0800 678 678', // Fallback
+      color: '#E60000',
+      icon: Users,
+      available: 'Campus Hours',
+    });
+  }
+  
+  return baseResources;
+};
 
 // ─── AUDIO PLAYER MODAL ────────────────────────────────────────────────────────
 const AudioPlayerModal = ({ meditation, visible, onClose, theme }: any) => {
@@ -858,9 +879,11 @@ const TechniqueModal = ({ technique, visible, onClose, theme, router }: any) => 
 
 // ─── MAIN SCREEN ──────────────────────────────────────────────────────────────
 export default function ResourcesScreen() {
-  const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { userData } = useContext(AuthContext);
+  const { t } = useContext(LanguageContext);
   const styles = createStyles(theme);
 
   const [activeCategory, setActiveCategory] = useState('all');
@@ -902,6 +925,16 @@ export default function ResourcesScreen() {
   const showVideos = activeCategory === 'all' || activeCategory === 'videos';
   const showCrisis = activeCategory === 'all' || activeCategory === 'crisis';
 
+  const stressSource = userData?.preferences?.stressSource?.toLowerCase() || '';
+  const recommendedTech = stressSource.includes('academic') || stressSource.includes('thesis')
+    ? TECHNIQUES.find(t => t.id === 'box-breathing')
+    : stressSource.includes('loneli') || stressSource.includes('social')
+    ? TECHNIQUES.find(t => t.id === 'thought-defusion')
+    : TECHNIQUES.find(t => t.id === 'grounding');
+
+  const userInstitution = userData?.academic?.institution || '';
+  const CRISIS_RESOURCES = getCrisisResources(userInstitution);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle={theme.isDark ? 'light-content' : 'dark-content'} />
@@ -941,10 +974,15 @@ export default function ResourcesScreen() {
         removeClippedSubviews={true}
       >
         <ScreenHeader
-          title="Resource Hub"
-          subtitle="Evidence-based tools and knowledge for your mental wellness"
+          title={t('resources.title')}
+          subtitle={t('resources.subtitle')}
           rightAction={
-            <TouchableOpacity style={styles.searchBtn}>
+            <TouchableOpacity 
+              style={styles.searchBtn}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Search Resources"
+            >
               <Library color={theme.colors.plum} size={22} />
             </TouchableOpacity>
           }
@@ -977,6 +1015,47 @@ export default function ResourcesScreen() {
             );
           })}
         </ScrollView>
+
+        {/* ── Personalized Recommendation ── */}
+        {activeCategory === 'all' && recommendedTech && (
+          <Animated.View entering={FadeInUp.delay(80).duration(600)} style={[styles.section, { marginBottom: 16 }]}>
+            <View style={[styles.sectionHeader, { marginBottom: 12 }]}>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>Recommended For You</Text>
+              <View style={[styles.featuredBadge, { backgroundColor: (theme.colors.plum) + '15', alignSelf: 'center', marginTop: 2 }]}>
+                <Star color={theme.colors.plum} size={11} fill={theme.colors.plum} />
+                <Text style={[styles.featuredBadgeText, { color: theme.colors.plum }]}>Based on your stress profile</Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={[styles.techCard, { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]}
+              onPress={() => {
+                if (recommendedTech.route) {
+                  router.push(recommendedTech.route as any);
+                } else {
+                  setSelectedTechnique(recommendedTech);
+                  setTechniqueModalVisible(true);
+                }
+              }}
+              activeOpacity={0.8}
+            >
+              <View style={styles.techIconWrap}>
+                {React.createElement(recommendedTech.icon, { color: theme.colors.accents[recommendedTech.color as keyof typeof theme.colors.accents], size: 28 })}
+              </View>
+              <View style={styles.techInfo}>
+                <Text style={[styles.techTitle, { color: theme.colors.text.primary }]}>{recommendedTech.title}</Text>
+                <Text style={[styles.techSubtitle, { color: theme.colors.text.secondary }]} numberOfLines={2}>
+                  {recommendedTech.subtitle}
+                </Text>
+                <View style={styles.techMeta}>
+                  <View style={[styles.techTag, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}>
+                    <Text style={[styles.techTagText, { color: theme.colors.text.tertiary }]}>{recommendedTech.tag}</Text>
+                  </View>
+                  <Text style={[styles.techDuration, { color: theme.colors.text.tertiary }]}>{recommendedTech.duration}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
 
         {/* ── Featured Card (shown only on All) ── */}
         {activeCategory === 'all' && (
@@ -1398,6 +1477,17 @@ const createStyles = (theme: any) =>
     catPillActive: { backgroundColor: theme.colors.plum, borderColor: theme.colors.plum },
     catText: { fontSize: 13, fontFamily: theme.typography.fonts.accent, fontWeight: '700', color: theme.colors.text.secondary },
     catTextActive: { color: '#FFF' },
+
+    // Tech Card (Recommended)
+    techCard: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 20, marginBottom: 16 },
+    techIconWrap: { width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', marginRight: 16 },
+    techInfo: { flex: 1 },
+    techTitle: { fontSize: 16, fontFamily: theme.typography.fonts.header, fontWeight: '700', marginBottom: 4 },
+    techSubtitle: { fontSize: 13, fontFamily: theme.typography.fonts.body, lineHeight: 18, marginBottom: 8 },
+    techMeta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    techTag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+    techTagText: { fontSize: 11, fontFamily: theme.typography.fonts.accent, fontWeight: '700', textTransform: 'uppercase' },
+    techDuration: { fontSize: 12, fontFamily: theme.typography.fonts.accent, fontWeight: '600' },
 
     // Featured card
     featuredWrap: { paddingHorizontal: 24, marginBottom: 32 },

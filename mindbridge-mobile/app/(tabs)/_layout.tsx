@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useTheme } from '../../src/context/ThemeContext';
-import { LayoutDashboard, User, Activity, MessageCircle, Settings, Compass, LayoutGrid } from 'lucide-react-native';
+import { LayoutDashboard, User, Activity, MessageCircle, Settings, Compass, LayoutGrid, Users } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { StyleSheet, Platform, View } from 'react-native';
@@ -78,7 +78,13 @@ export default function TabLayout() {
       <Tabs.Screen name="crisis" options={{ href: null }} />
       <Tabs.Screen name="journal" options={{ href: null }} />
       <Tabs.Screen name="assessments" options={{ href: null }} />
-      <Tabs.Screen name="community" options={{ href: null }} />
+      <Tabs.Screen 
+        name="community" 
+        options={{ 
+          title: 'Community',
+          tabBarIcon: ({ color }) => <Users color={color} size={24} strokeWidth={2} />
+        }} 
+      />
       <Tabs.Screen name="explore" options={{ href: null }} />
     </Tabs>
   );

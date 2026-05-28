@@ -29,17 +29,18 @@ import {
   Globe
 } from 'lucide-react-native';
 
-const UNIVERSITY_COUNSELING_CENTERS: Record<string, any> = {
+export const UNIVERSITY_COUNSELING_CENTERS: Record<string, any> = {
   'Kwame Nkrumah University of Science and Technology (KNUST)': {
-    name: 'KNUST Counseling Center',
+    name: 'KNUST Counselling Center',
     number: '+233 50 644 9747',
-    email: 'counsellingcentre@knust.edu.gh',
+    secondaryNumber: '+233 59 439 9777',
+    email: 'counsellingcentre@gmail.com',
     description: 'Professional support for students & staff',
-    address: 'Dean of Students Office, Campus',
+    address: 'J. Harper Building, Room 7B, Campus',
     services: ['Mental Health Support', 'Academic Counselling', 'Career Development']
   },
   'University of Ghana (UG)': {
-    name: 'UG Careers & Counselling Services',
+    name: 'UG Careers & Counselling Centre',
     number: '+233 24 594 5752',
     secondaryNumber: '+233 20 499 9221',
     email: 'careers@st.ug.edu.gh',
@@ -56,14 +57,33 @@ const UNIVERSITY_COUNSELING_CENTERS: Record<string, any> = {
   'University of Cape Coast (UCC)': {
     name: 'UCC Counselling Centre',
     number: '+233 33 213 2440',
-    email: 'registrar@ucc.edu.gh',
+    email: 'focansey@ucc.edu.gh',
     description: 'Mental health and career guidance services',
     address: 'North Campus, Cape Coast',
     services: ['Mental Health Support', 'Academic Guidance', 'Career Counselling']
   },
+  'University of Education, Winneba (UEW)': {
+    name: 'UEW Counselling Centre',
+    number: '+233 24 317 0085',
+    secondaryNumber: '+233 24 768 6494',
+    email: 'counselling@uew.edu.gh',
+    description: 'Holistic counselling for the university community',
+    address: 'Student Centre, First Floor, North Campus',
+    services: ['Personal Counselling', 'Academic Support']
+  },
+  'University for Development Studies (UDS)': {
+    name: 'UDS Career Mentorship & Support',
+    number: '+233 37 209 3697',
+    secondaryNumber: '+233 54 544 7445',
+    email: 'registrar@uds.edu.gh',
+    description: 'Student support and career guidance',
+    address: 'Tamale Campus',
+    services: ['Career Counselling', 'General Support']
+  },
   'Ashesi University': {
     name: 'Ashesi Counselling and Coaching Center',
     number: '+233 30 261 0330',
+    secondaryNumber: '+233 24 880 7992',
     email: 'ddavis@ashesi.edu.gh',
     website: 'ashesicounsellingandcoachingcenter.simplybook.me',
     description: 'Holistic support for Ashesi students',
@@ -98,8 +118,8 @@ const UNIVERSITY_COUNSELING_CENTERS: Record<string, any> = {
     name: 'National Counseling Center',
     number: '0800 678 678',
     description: 'General institutional support',
-    address: 'Head Office, Accra',
-    services: ['24/7 Crisis Support', 'Mental Health Referrals']
+    address: 'Nationwide',
+    services: ['General Support', 'Mental Health Referrals']
   }
 };
 

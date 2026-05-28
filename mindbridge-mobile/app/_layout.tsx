@@ -1,6 +1,7 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect, useContext } from 'react';
 import { AuthProvider, AuthContext } from '../src/context/AuthContext';
+import { LanguageProvider } from '../src/context/LanguageContext';
 import { View } from 'react-native';
 import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 import { ThemeProvider as NavigationProvider, DefaultTheme, DarkTheme } from '@react-navigation/native';
@@ -16,6 +17,8 @@ import {
 import * as SplashScreen from 'expo-splash-screen';
 import { NotificationService } from '../src/services/NotificationService';
 import { Accelerometer } from 'expo-sensors';
+import { initDatabase } from '../src/utils/database';
+import SyncEngine from '../src/services/SyncEngine';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,6 +41,11 @@ const InitialLayout = () => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
       NotificationService.init().catch(console.warn);
+      
+      // Initialize Offline-First SQLite & Sync Engine
+      initDatabase().then(() => {
+        SyncEngine.init();
+      });
     }
   }, [fontsLoaded]);
 
@@ -131,9 +139,11 @@ const InitialLayout = () => {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <InitialLayout />
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <InitialLayout />
+        </AuthProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

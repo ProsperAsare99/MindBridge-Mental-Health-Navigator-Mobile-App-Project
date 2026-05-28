@@ -14,7 +14,9 @@ import {
   ActivityIndicator
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StreakManager } from '../../src/utils/StreakManager';
 import { AuthContext } from '../../src/context/AuthContext';
+import { LanguageContext } from '../../src/context/LanguageContext';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Pedometer } from 'expo-sensors';
@@ -140,7 +142,7 @@ const CalendarStrip = ({ theme, styles }: any) => {
   );
 };
 
-const ProgressRings = ({ completed, total, theme, styles }: any) => {
+const ProgressRings = ({ completed, total, theme, styles, t }: any) => {
   const size = 52;
   const strokeWidth = 5;
   const progress = completed / total;
@@ -166,7 +168,7 @@ const ProgressRings = ({ completed, total, theme, styles }: any) => {
       </View>
       <View style={{ marginRight: 4 }}>
         <Text style={[styles.ringsCount, { color: theme.colors.text.primary }]}>{completed}/{total}</Text>
-        <Text style={[styles.ringsLabel, { color: theme.colors.text.secondary }]}>{theme.t('streak')}</Text>
+        <Text style={[styles.ringsLabel, { color: theme.colors.text.secondary }]}>{t('streak')}</Text>
       </View>
     </View>
   );
@@ -174,7 +176,7 @@ const ProgressRings = ({ completed, total, theme, styles }: any) => {
 
 // ─── Weekly Pulse Widget ─────────────────────────────────────────────────────
 
-const WeeklyPulse = ({ theme, styles, data }: any) => {
+const WeeklyPulse = ({ theme, styles, data, t }: any) => {
   const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   const pulseData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -188,8 +190,8 @@ const WeeklyPulse = ({ theme, styles, data }: any) => {
       <BlurView intensity={theme.isDark ? 40 : 80} tint={theme.isDark ? 'dark' : 'light'} style={[styles.pulseGlass, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)', borderColor: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.8)' }]}>
         <View style={styles.pulseHeader}>
           <View>
-            <Text style={[styles.pulseTitle, { color: theme.colors.text.primary }]}>Weekly Pulse</Text>
-            <Text style={[styles.pulseSubtitle, { color: theme.colors.text.tertiary }]}>Emotional rhythm this week</Text>
+            <Text style={[styles.pulseTitle, { color: theme.colors.text.primary }]}>{t('dashboard.weeklyPulse')}</Text>
+            <Text style={[styles.pulseSubtitle, { color: theme.colors.text.tertiary }]}>{t('dashboard.emotionalRhythm')}</Text>
           </View>
           <Activity color={theme.colors.plum} size={20} />
         </View>
@@ -217,9 +219,9 @@ const WeeklyPulse = ({ theme, styles, data }: any) => {
 
 // QUOTES are now fetched from theme translations
 
-const QuoteSlideshow = ({ theme, styles }: any) => {
+const QuoteSlideshow = ({ theme, styles, t }: any) => {
   const [index, setIndex] = useState(0);
-  const quotes = theme.t('dashboard.motivations') as any[];
+  const quotes = t('dashboard.motivations') as any[];
   
   useEffect(() => {
     const timer = setInterval(() => { 
@@ -407,11 +409,11 @@ const StreakJourney = ({ streak, theme, styles, completedCount }: any) => {
 };
 
 export default function DashboardScreen() {
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const theme = useTheme();
-  const { t } = theme;
   const { userData: authData } = useContext(AuthContext) as any;
+  const { t } = useContext(LanguageContext);
   const styles = createStyles(theme);
   
   const [rituals, setRituals] = useState({
@@ -550,44 +552,45 @@ export default function DashboardScreen() {
     }, [checkStatus])
   );
 
-  const getContextualPrompt = (t: any, moodHistory: any[], streak: number, steps: number | null, location: string | null) => {
+  const getGreeting = () => {
     const hour = new Date().getHours();
-    let prompt = "";
-    let greeting = "";
+    if (hour < 12) return t('dashboard.greetingMorning');
+    if (hour < 18) return t('dashboard.greetingAfternoon');
+    return t('dashboard.greetingEvening');
+  };
 
-    if (hour >= 5 && hour < 12) greeting = t('dashboard.greetingMorning') || 'Good Morning';
-    else if (hour >= 12 && hour < 17) greeting = t('dashboard.greetingAfternoon') || 'Good Afternoon';
-    else greeting = t('dashboard.greetingEvening') || 'Good Evening';
+  const getContextualPrompt = (t: any, moodHistory: any[], streak: number, steps: number | null, location: string | null) => {
+    let prompt = "";
 
     // Contextual logic
     if (location === 'COUNSELING_CENTER') {
       prompt = "You're near the Counseling Center. Walk-in hours are open until 5 PM if you need to talk.";
-    } else if (location === 'LIBRARY' && hour > 10) {
+    } else if (location === 'LIBRARY' && new Date().getHours() > 10) {
       prompt = "Studying hard? Remember to take a 5-minute mental break.";
-    } else if (location === 'DORM' && hour >= 10 && hour <= 18 && (steps === null || steps < 2000)) {
+    } else if (location === 'DORM' && new Date().getHours() >= 10 && new Date().getHours() <= 18 && (steps === null || steps < 2000)) {
       prompt = "You've been in your room for a while. A quick walk around campus can boost your mood!";
     } else if (location === 'SOCIAL_SPACE') {
       prompt = "Enjoying the campus energy? Social connections are great for your wellness.";
     } else if (steps !== null && steps > 8000) {
       prompt = "Amazing physical activity today! Notice how your body feels right now.";
-    } else if (steps !== null && steps < 500 && hour >= 15) {
+    } else if (steps !== null && steps < 500 && new Date().getHours() >= 15) {
       prompt = "You've been quite still today. A brief 10-minute walk can clear your mind.";
     } else if (streak >= 3) {
       prompt = `You're on a ${streak}-day streak! Keep the amazing momentum going.`;
     } else if (moodHistory.length > 0 && moodHistory[0].score <= 4) {
       prompt = "We noticed yesterday was a bit tough. Take it easy today, you're doing great.";
-    } else if (hour >= 5 && hour < 12) {
+    } else if (new Date().getHours() >= 5 && new Date().getHours() < 12) {
       prompt = t('dashboard.startWithIntention') || "Start your day with intention.";
-    } else if (hour >= 17 && hour < 21) {
+    } else if (new Date().getHours() >= 17 && new Date().getHours() < 21) {
       prompt = t('dashboard.windDownAndReflect') || "Wind down and reflect on your day.";
     } else {
       prompt = t('dashboard.howWasYourDay') || "How are you feeling right now?";
     }
 
-    return { greeting, prompt };
+    return prompt;
   };
 
-  const { greeting, prompt: contextualPrompt } = getContextualPrompt(t, moodHistory, userData.streak, stepCount, recentLocation);
+  const contextualPrompt = getContextualPrompt(t, moodHistory, userData.streak, stepCount, recentLocation);
 
   return (
     <View style={styles.container}>
@@ -620,30 +623,30 @@ export default function DashboardScreen() {
 
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
-            <ScreenHeader title={`${greeting}, ${userData.name}`} subtitle={t('dashboard.nurturePeaceToday')} noPadding />
+            <ScreenHeader title={`${getGreeting()}, ${userData.name}`} subtitle={t('dashboard.nurturePeaceToday')} noPadding />
           </View>
-          <ProgressRings completed={completedCount} total={3} theme={theme} styles={styles} />
+          <ProgressRings completed={completedCount} total={3} theme={theme} styles={styles} t={t} />
         </View>
 
         <View style={styles.section}>
           <CalendarStrip theme={theme} styles={styles} />
         </View>
 
-        <View style={styles.section}><QuoteSlideshow theme={theme} styles={styles} /></View>
-        <View style={styles.section}><WeeklyPulse theme={theme} styles={styles} data={moodHistory} /></View>
+        <View style={styles.section}><QuoteSlideshow theme={theme} styles={styles} t={t} /></View>
+        <View style={styles.section}><WeeklyPulse theme={theme} styles={styles} data={moodHistory} t={t} /></View>
 
         <Animated.View entering={FadeInUp.delay(300)} style={[styles.ritualsContainer, { backgroundColor: theme.isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.6)', borderColor: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)' }]}>
           <View style={styles.ritualHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <Leaf color={theme.colors.plum} size={20} strokeWidth={2.5} />
-              <Text style={[styles.ritualTitle, { color: theme.colors.text.primary }]}>Daily Rituals</Text>
+              <Text style={[styles.ritualTitle, { color: theme.colors.text.primary }]}>{t('dashboard.dailyRituals')}</Text>
             </View>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/journey')}><Text style={{ color: theme.colors.plum, fontSize: 13, fontWeight: '700' }}>View Journey</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/journey')}><Text style={{ color: theme.colors.plum, fontSize: 13, fontWeight: '700' }}>{t('dashboard.viewJourney')}</Text></TouchableOpacity>
           </View>
           <View style={styles.ritualRow}>
-            <RitualItem label="Mood Seed" done={rituals.garden} icon={Leaf} color={theme.colors.accents.eucalyptus} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/garden')} />
-            <RitualItem label="Reflect" done={rituals.journal} icon={BookOpen} color={theme.colors.accents.powderBlue} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/journal')} />
-            <RitualItem label="Breathe" done={rituals.breathing} icon={Wind} color={theme.colors.accents.softLilac} theme={theme} styles={styles} onPress={() => router.push('/breathing')} />
+            <RitualItem label={t('dashboard.moodSeed')} done={rituals.garden} icon={Leaf} color={theme.colors.accents.eucalyptus} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/garden')} />
+            <RitualItem label={t('dashboard.reflect')} done={rituals.journal} icon={BookOpen} color={theme.colors.accents.powderBlue} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/journal')} />
+            <RitualItem label={t('dashboard.breathe')} done={rituals.breathing} icon={Wind} color={theme.colors.accents.softLilac} theme={theme} styles={styles} onPress={() => router.push('/breathing')} />
           </View>
         </Animated.View>
 
@@ -668,8 +671,8 @@ export default function DashboardScreen() {
             <QuestItem 
               theme={theme} 
               icon={Leaf} 
-              title="Plant a Seed" 
-              subtitle="Check-in your mood" 
+              title={t('dashboard.plantSeed')} 
+              subtitle={t('dashboard.checkInMood')} 
               done={rituals.garden} 
               onPress={() => router.push('/(tabs)/garden')}
               styles={styles}
@@ -677,8 +680,8 @@ export default function DashboardScreen() {
             <QuestItem 
               theme={theme} 
               icon={BookOpen} 
-              title="Daily Reflection" 
-              subtitle="Write a journal entry" 
+              title={t('dashboard.dailyReflection')} 
+              subtitle={t('dashboard.writeJournalEntry')} 
               done={rituals.journal} 
               onPress={() => router.push('/(tabs)/journal')}
               styles={styles}
@@ -686,8 +689,8 @@ export default function DashboardScreen() {
             <QuestItem 
               theme={theme} 
               icon={Wind} 
-              title="Breathe" 
-              subtitle="Complete 2m breathing" 
+              title={t('dashboard.breathe')} 
+              subtitle={t('dashboard.completeBreathing')} 
               done={rituals.breathing} 
               onPress={() => router.push('/(tabs)/tools')}
               isLast
@@ -700,8 +703,8 @@ export default function DashboardScreen() {
         {journalHistory.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Latest Reflection</Text>
-              <TouchableOpacity onPress={() => router.push('/(tabs)/journal')}><Text style={{ color: theme.colors.plum, fontSize: 13, fontWeight: '700' }}>View All</Text></TouchableOpacity>
+              <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.latestReflection')}</Text>
+              <TouchableOpacity onPress={() => router.push('/(tabs)/journal')}><Text style={{ color: theme.colors.plum, fontSize: 13, fontWeight: '700' }}>{t('dashboard.viewAll')}</Text></TouchableOpacity>
             </View>
             <TouchableOpacity 
               activeOpacity={0.9} 
@@ -741,8 +744,8 @@ export default function DashboardScreen() {
         {chatHistory.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Oracle Insights</Text>
-              <TouchableOpacity onPress={() => router.push('/(tabs)/ai-guide')}><Text style={{ color: theme.colors.plum, fontSize: 13, fontWeight: '700' }}>Chat Now</Text></TouchableOpacity>
+              <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.oracleInsights')}</Text>
+              <TouchableOpacity onPress={() => router.push('/(tabs)/ai-guide')}><Text style={{ color: theme.colors.plum, fontSize: 13, fontWeight: '700' }}>{t('dashboard.chatNow')}</Text></TouchableOpacity>
             </View>
             <TouchableOpacity 
               activeOpacity={0.9} 
@@ -756,9 +759,9 @@ export default function DashboardScreen() {
                 <View style={{ flex: 1, marginLeft: 4 }}>
                   <View style={styles.reflectionTag}>
                     <MessageCircle size={10} color={theme.colors.plum} />
-                    <Text style={styles.reflectionTagText}>RECENT CONVERSATION</Text>
+                    <Text style={styles.reflectionTagText}>{t('dashboard.recentConversation').toUpperCase()}</Text>
                   </View>
-                  <Text style={[styles.reflectionTitle, { color: theme.colors.text.primary }]} numberOfLines={1}>Latest Guidance</Text>
+                  <Text style={[styles.reflectionTitle, { color: theme.colors.text.primary }]} numberOfLines={1}>{t('dashboard.latestGuidance')}</Text>
                 </View>
                 <View style={[styles.reflectionArrow, { backgroundColor: theme.colors.plum + '08' }]}>
                   <ChevronRight color={theme.colors.plum} size={18} />
@@ -782,10 +785,10 @@ export default function DashboardScreen() {
           </View>
           <View style={styles.hubGrid}>
             <AppleWidget 
-              title="Mood Garden" 
+              title={t('dashboard.moodGarden')} 
               subtitle={gardenStats.stage}
               value={gardenStats.count}
-              label="Seeds"
+              label={t('dashboard.seeds')}
               icon={Leaf} 
               color={theme.colors.accents.eucalyptus} 
               delay={400}
@@ -795,10 +798,10 @@ export default function DashboardScreen() {
             />
             {stepCount !== null ? (
               <AppleWidget 
-                title="Activity" 
-                subtitle="Today's Steps"
+                title={t('dashboard.activity')} 
+                subtitle={t('dashboard.todaysSteps')}
                 value={stepCount}
-                label="Steps"
+                label={t('dashboard.steps')}
                 icon={Footprints} 
                 color={theme.colors.accents.slate} 
                 delay={450}
@@ -808,10 +811,10 @@ export default function DashboardScreen() {
               />
             ) : (
               <AppleWidget 
-                title="Assessments" 
-                subtitle={assessments.length > 0 ? assessments[0].type : "Ready"}
+                title={t('dashboard.assessments')} 
+                subtitle={assessments.length > 0 ? assessments[0].type : t('dashboard.ready')}
                 value={assessments.length}
-                label="Done"
+                label={t('dashboard.done')}
                 icon={ClipboardList} 
                 color={theme.colors.accents.slate} 
                 delay={450}
@@ -821,8 +824,8 @@ export default function DashboardScreen() {
               />
             )}
             <AppleWidget 
-              title="Resources" 
-              subtitle="Discovery Hub"
+              title={t('dashboard.resources')} 
+              subtitle={t('dashboard.discoveryHub')}
               icon={Library} 
               color={theme.colors.accents.forestGreen} 
               delay={500}
@@ -831,8 +834,8 @@ export default function DashboardScreen() {
               onPress={() => router.push('/(tabs)/explore')}
             />
             <AppleWidget 
-              title="Crisis Support" 
-              subtitle="24/7 Help"
+              title={t('dashboard.crisisSupport')} 
+              subtitle={t('dashboard.247Help')}
               icon={ShieldAlert} 
               color={theme.colors.semantic.danger} 
               delay={550}
@@ -848,9 +851,9 @@ export default function DashboardScreen() {
             <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.wellnessToolkit')}</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll} snapToInterval={154} decelerationRate="fast">
-            <AppleWidget title="Tools" subtitle="Therapeutic" icon={Activity} color={theme.colors.plum} size="fixed" delay={600} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/tools')} />
-            <AppleWidget title="Journal" subtitle="Reflections" icon={BookOpen} color={theme.colors.accents.powderBlue} size="fixed" delay={650} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/journal')} />
-            <AppleWidget title="Community" subtitle="Connect" icon={Users} color={theme.colors.accents.dustyRose} size="fixed" delay={700} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/community')} />
+            <AppleWidget title={t('dashboard.tools')} subtitle={t('dashboard.therapeutic')} icon={Activity} color={theme.colors.plum} size="fixed" delay={600} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/tools')} />
+            <AppleWidget title={t('dashboard.journal')} subtitle={t('dashboard.reflections')} icon={BookOpen} color={theme.colors.accents.powderBlue} size="fixed" delay={650} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/journal')} />
+            <AppleWidget title={t('dashboard.community')} subtitle={t('dashboard.connect')} icon={Users} color={theme.colors.accents.dustyRose} size="fixed" delay={700} theme={theme} styles={styles} onPress={() => router.push('/(tabs)/community')} />
           </ScrollView>
         </View>
 
@@ -859,8 +862,8 @@ export default function DashboardScreen() {
           <View style={styles.sectionCompact}>
             <View style={[styles.sectionHeader, { paddingHorizontal: 24 }]}>
               <View>
-                <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>Recommended for You</Text>
-                <Text style={styles.sectionSubtitleText}>Based on your recent reflections</Text>
+                <Text style={[styles.sectionTitleText, { color: theme.colors.text.primary }]}>{t('dashboard.recommendedForYou')}</Text>
+                <Text style={styles.sectionSubtitleText}>{t('dashboard.basedOnReflections')}</Text>
               </View>
               <Library size={20} color={theme.colors.plum} />
             </View>

@@ -116,12 +116,6 @@ export default function ActivityScreen() {
           const todayRes = await Pedometer.getStepCountAsync(start, end);
           let todaySteps = todayRes ? todayRes.steps : 0;
           
-          // Fallback to DB for today if 0
-          if (todaySteps === 0) {
-            const logsToday = moodHistory.filter(l => new Date(l.createdAt).toDateString() === start.toDateString());
-            if (logsToday.length > 0) todaySteps = Math.max(...logsToday.map(l => l.steps || 0));
-          }
-          
           setSteps(todaySteps);
           
           const calculatedCals = Math.round(todaySteps * 0.04);
@@ -149,15 +143,6 @@ export default function ActivityScreen() {
               const res = await Pedometer.getStepCountAsync(dStart, dEnd);
               if (res && res.steps > 0) dailySteps = res.steps;
             } catch (e) {}
-
-            // Fallback to DB
-            if (dailySteps === 0) {
-               const dayStr = dStart.toDateString();
-               const logsForDay = moodHistory.filter(l => new Date(l.createdAt).toDateString() === dayStr);
-               if (logsForDay.length > 0) {
-                  dailySteps = Math.max(...logsForDay.map(l => l.steps || 0));
-               }
-            }
 
             weekData.push({
               value: dailySteps,

@@ -124,7 +124,7 @@ const tools = [
 ];
 
 export const generateOracleResponse = async (userMessage: string, context: any, userId: string) => {
-  const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.5-flash", "gemini-flash-latest"];
+  const modelsToTry = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-1.5-flash"];
   let lastError: any = null;
 
   for (const modelName of modelsToTry) {
@@ -291,7 +291,7 @@ INSTRUCTIONS:
 
 export const generateProactiveInsights = async (userId: string, context: any) => {
   let lastError = null;
-  const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.5-flash", "gemini-flash-latest"];
+  const modelsToTry = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-1.5-flash"];
   for (const modelName of modelsToTry) {
     try {
       console.log(`[BACKEND] Attempting to generate insights using model: ${modelName}`);

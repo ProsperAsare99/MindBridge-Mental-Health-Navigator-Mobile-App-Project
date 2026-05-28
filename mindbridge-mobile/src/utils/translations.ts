@@ -267,7 +267,7 @@ export const translations: Record<Language, TranslationSchema> = {
       cancel: 'Cancel',
     },
     tabs: {
-      today: 'Overview',
+      today: 'Home',
       explore: 'Explore',
       tracker: 'Tracker',
       oracle: 'Oracle',

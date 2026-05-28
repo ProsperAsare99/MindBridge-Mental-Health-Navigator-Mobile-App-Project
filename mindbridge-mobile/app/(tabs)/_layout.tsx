@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useTheme } from '../../src/context/ThemeContext';
-import { LayoutDashboard, User, Activity, MessageCircle, Settings, Compass, LayoutGrid, Users, PieChart } from 'lucide-react-native';
+import { LayoutDashboard, User, Activity, MessageCircle, Settings, Compass, LayoutGrid, Users, Home } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { StyleSheet, Platform, View } from 'react-native';
@@ -40,7 +40,7 @@ export default function TabLayout() {
         name="dashboard" 
         options={{ 
           title: t('tabs.today'),
-          tabBarIcon: ({ color }) => <PieChart color={color} size={24} strokeWidth={2.2} />
+          tabBarIcon: ({ color }) => <Home color={color} size={24} strokeWidth={2.2} />
         }} 
       />
       <Tabs.Screen 

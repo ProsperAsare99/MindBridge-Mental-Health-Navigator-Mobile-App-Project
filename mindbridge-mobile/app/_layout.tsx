@@ -17,8 +17,7 @@ import {
 import * as SplashScreen from 'expo-splash-screen';
 import { NotificationService } from '../src/services/NotificationService';
 import { Accelerometer } from 'expo-sensors';
-import { initDatabase } from '../src/utils/database';
-import SyncEngine from '../src/services/SyncEngine';
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -42,10 +41,7 @@ const InitialLayout = () => {
       SplashScreen.hideAsync();
       NotificationService.init().catch(console.warn);
       
-      // Initialize Offline-First SQLite & Sync Engine
-      initDatabase().then(() => {
-        SyncEngine.init();
-      });
+
     }
   }, [fontsLoaded]);
 

@@ -44,17 +44,10 @@ export default function TabLayout() {
         }} 
       />
       <Tabs.Screen 
-        name="tools" 
+        name="explore" 
         options={{ 
           title: t('tools.title') || 'Explore',
           tabBarIcon: ({ color, focused }) => <LayoutGrid color={color} size={24} strokeWidth={focused ? 2.2 : 1.8} />
-        }} 
-      />
-      <Tabs.Screen 
-        name="ai-guide" 
-        options={{ 
-          title: t('tabs.oracle'),
-          tabBarIcon: ({ color }) => <MessageCircle color={color} size={24} strokeWidth={2} />
         }} 
       />
       <Tabs.Screen 
@@ -67,7 +60,7 @@ export default function TabLayout() {
       <Tabs.Screen 
         name="profile" 
         options={{ 
-          title: t('tabs.profile'),
+          title: t('tabs.profile') || 'Profile',
           tabBarIcon: ({ color }) => <User color={color} size={24} strokeWidth={2} />
         }} 
       />
@@ -78,14 +71,9 @@ export default function TabLayout() {
       <Tabs.Screen name="crisis" options={{ href: null }} />
       <Tabs.Screen name="journal" options={{ href: null }} />
       <Tabs.Screen name="assessments" options={{ href: null }} />
-      <Tabs.Screen 
-        name="community" 
-        options={{ 
-          title: 'Community',
-          tabBarIcon: ({ color }) => <Users color={color} size={24} strokeWidth={2} />
-        }} 
-      />
-      <Tabs.Screen name="explore" options={{ href: null }} />
+      <Tabs.Screen name="community" options={{ href: null }} />
+      <Tabs.Screen name="ai-guide" options={{ href: null }} />
+      <Tabs.Screen name="tools" options={{ href: null }} />
     </Tabs>
   );
 }

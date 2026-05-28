@@ -79,7 +79,7 @@ export default function TabLayout() {
       <Tabs.Screen name="journal" options={{ href: null }} />
       <Tabs.Screen name="assessments" options={{ href: null }} />
       <Tabs.Screen name="community" options={{ href: null }} />
-      <Tabs.Screen name="tools" options={{ href: null }} />
+      <Tabs.Screen name="knowledge-hub" options={{ href: null }} />
       <Tabs.Screen name="privacy" options={{ href: null }} />
       <Tabs.Screen name="journey" options={{ href: null }} />
     </Tabs>
